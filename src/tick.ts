@@ -1,7 +1,18 @@
 import { addChatMessageToChatter } from "./chatMessageHandler.js";
 import { localStorageStoreChatters } from "./main.js";
-import { State, Chatter } from "./mainModels.js";
-import { FUNCTIONS_GAME_TIC_TAC_TOE, GameTicTacToe } from "./ticTacToe.js";
+import { State, Chatter, Game } from "./mainModels.js";
+
+type GameFunctions = {
+    handleStartMessage: (chatter: Chatter, state: State) => void,
+    /**
+     * @returns return true if it is valid game command
+     */
+    handleChatCommand: (game: Game, chatter: Chatter, message: string, state: State) => boolean,
+    tick: (game: Game, state: State) => void,
+    draw: (ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number, state: State) => void,
+}
+
+export const GAME_FUNCTIONS: { [key: string]: GameFunctions } = {};
 
 export function tick(state: State) {
     deleteInactiveAvatars(state);
@@ -30,7 +41,7 @@ export function tick(state: State) {
 function tickGames(state: State) {
     deleteFinishedGames(state);
     for (let game of state.gamesData.games) {
-        FUNCTIONS_GAME_TIC_TAC_TOE.tick(game as GameTicTacToe, state);
+        GAME_FUNCTIONS[game.name].tick(game, state);
     }
 }
 

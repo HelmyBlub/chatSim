@@ -1,19 +1,23 @@
 import { drawTextWithBackgroundAndOutline } from "./draw.js";
 import { Game, Chatter, State } from "./mainModels.js";
+import { GAME_FUNCTIONS } from "./tick.js";
 
+
+export const GAME_TIC_TAC_TOE = "TicTacToe"
 export type GameTicTacToe = Game & {
-    name: "TicTacToe",
     field: number[][],
     currentPlayersTurnIndex: number,
     turnTimer: number,
     turnTime: number,
 }
 
-export const FUNCTIONS_GAME_TIC_TAC_TOE = {
-    handleStartMessage,
-    handleChatCommand,
-    tick,
-    draw,
+export function addGameFunctionsTicTacToe() {
+    GAME_FUNCTIONS[GAME_TIC_TAC_TOE] = {
+        handleStartMessage: handleStartMessage,
+        handleChatCommand: handleChatCommand,
+        tick: tick,
+        draw: draw,
+    }
 }
 
 function handleStartMessage(chatter: Chatter, state: State) {
@@ -23,7 +27,7 @@ function handleStartMessage(chatter: Chatter, state: State) {
         chatter.playingGameIdRef = undefined;
     }
     for (let game of state.gamesData.games) {
-        if (game.name === "TicTacToe") {
+        if (game.name === GAME_TIC_TAC_TOE) {
             const ticTacToeGame = game as GameTicTacToe;
             if (ticTacToeGame.finishedTime === undefined && ticTacToeGame.players.length < 2) {
                 ticTacToeGame.players.push(chatter);
@@ -42,14 +46,13 @@ function handleStartMessage(chatter: Chatter, state: State) {
 /**
  * @returns return true if it is a ticTacToe command
  */
-function handleChatCommand(chatter: Chatter, message: string, state: State): boolean {
+function handleChatCommand(game: Game, chatter: Chatter, message: string, state: State): boolean {
     if (chatter.playingGameIdRef === undefined) return false;
-    const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
-    if (!chattersGame || chattersGame.name !== "TicTacToe") {
+    if (game.name !== GAME_TIC_TAC_TOE) {
         chatter.playingGameIdRef = undefined;
         return false;
     }
-    const ticTacToeGame = chattersGame as GameTicTacToe;
+    const ticTacToeGame = game as GameTicTacToe;
     if (ticTacToeGame.winner) return false;
     if (ticTacToeGame.players[ticTacToeGame.currentPlayersTurnIndex] !== chatter) return false;
     let validTurn = false;
@@ -67,30 +70,31 @@ function handleChatCommand(chatter: Chatter, message: string, state: State): boo
     return true;
 }
 
-function tick(game: GameTicTacToe, state: State) {
+function tick(game: Game, state: State) {
+    const ticTacToe = game as GameTicTacToe;
     //check turn timer
-    if (game.finishedTime !== undefined) return;
-    if (game.players.length === 2 && game.turnTimer - performance.now() + game.turnTime < 0) {
-        game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
-        game.finishedTime = performance.now();
+    if (ticTacToe.finishedTime !== undefined) return;
+    if (ticTacToe.players.length === 2 && ticTacToe.turnTimer - performance.now() + ticTacToe.turnTime < 0) {
+        ticTacToe.winner = ticTacToe.players[(ticTacToe.currentPlayersTurnIndex + 1) % 2];
+        ticTacToe.finishedTime = performance.now();
         return;
     }
     // check if player still exists
-    for (let player of game.players) {
+    for (let player of ticTacToe.players) {
         const chatter = state.chatters.find(c => c === player);
         if (!chatter) {
-            if (game.players.length === 2) {
-                game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
-                game.finishedTime = performance.now();
+            if (ticTacToe.players.length === 2) {
+                ticTacToe.winner = ticTacToe.players[(ticTacToe.currentPlayersTurnIndex + 1) % 2];
+                ticTacToe.finishedTime = performance.now();
             } else {
-                game.finishedTime = performance.now();
+                ticTacToe.finishedTime = performance.now();
             }
         }
     }
 }
 
 function draw(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number) {
-    if (game.name !== "TicTacToe") return;
+    if (game.name !== GAME_TIC_TAC_TOE) return;
     const ticTacToeGame = game as GameTicTacToe;
     const fontSize = 26;
     ctx.font = `bold ${fontSize}px Arial`;
@@ -101,7 +105,7 @@ function draw(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: nu
     } else {
         if (ticTacToeGame.players.length < 2) {
             const text = `${ticTacToeGame.players[0].name} is waiting for an apponent.`;
-            const text2 = `Write "TicTacToe" to join`;
+            const text2 = `Write "${GAME_TIC_TAC_TOE}" to join`;
             drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize * 2, aplha);
             drawTextWithBackgroundAndOutline(ctx, text2, leftX, topY - fontSize, aplha);
         } else {
@@ -160,7 +164,7 @@ function createGameTicTacToe(player1: Chatter, id: number): GameTicTacToe {
         ],
         players: [player1],
         id: id,
-        name: "TicTacToe",
+        name: GAME_TIC_TAC_TOE,
         currentPlayersTurnIndex: 0,
         turnTimer: 0,
         turnTime: 60000,

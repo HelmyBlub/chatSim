@@ -1,9 +1,5 @@
 Next Tasks:
 - baking game:
-        - shape dough into balls and put in oven until full
-            - can be faster with more chatters
-        - fills oven with cookies
-        - if oven is full, it automatically starts baking
     - take cookies out on time with command
         - anyone can do it
         - to late -> cookies are black 
@@ -32,6 +28,11 @@ Big Idea:
 
 
 Tasks done today:
+- baking game:
+        - shape dough into balls and put in oven until full
+            - can be faster with more chatters
+        - fills oven with cookies
+        - if oven is full, it automatically starts baking
 - filter out ! or other for commands
     - why does "!" not end up in my chats?
 -baking game

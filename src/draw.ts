@@ -1,14 +1,20 @@
 import { drawChatterDogAndMessages, loadChatterDogImages } from "./drawChatterDog.js";
 import { State } from "./mainModels.js";
-import { FUNCTIONS_GAME_TIC_TAC_TOE } from "./ticTacToe.js";
+import { GAME_FUNCTIONS } from "./tick.js";
+import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 
 export const IMAGE_PATH_COOKIE = "images/cookie.png";
+export const IMAGE_PATH_OVEN = "images/oven.png";
+export const IMAGE_PATH_UNBAKED_COOKIE = "images/unbakedCookie.png";
 const IMAGE_PATH_UNLABLED_JAR = "images/unlabledJar.png";
+
 
 export function loadImages(state: State) {
     loadChatterDogImages(state);
     state.images[IMAGE_PATH_COOKIE] = loadImage(IMAGE_PATH_COOKIE);
     state.images[IMAGE_PATH_UNLABLED_JAR] = loadImage(IMAGE_PATH_UNLABLED_JAR);
+    state.images[IMAGE_PATH_OVEN] = loadImage(IMAGE_PATH_OVEN);
+    state.images[IMAGE_PATH_UNBAKED_COOKIE] = loadImage(IMAGE_PATH_UNBAKED_COOKIE);
 }
 
 export function loadImage(path: string) {
@@ -88,7 +94,7 @@ function drawCookieJar(ctx: CanvasRenderingContext2D, state: State) {
 function drawGames(ctx: CanvasRenderingContext2D, state: State) {
     for (let i = 0; i < state.gamesData.games.length; i++) {
         const game = state.gamesData.games[i];
-        FUNCTIONS_GAME_TIC_TAC_TOE.draw(ctx, game, 20 + i * 400, 120);
+        GAME_FUNCTIONS[game.name].draw(ctx, game, 20 + i * 400, 120, state);
     }
 }
 
@@ -110,7 +116,7 @@ function drawCommandInfo(ctx: CanvasRenderingContext2D) {
         "NotLikeThis",
         "Kappa",
         "HeyGuys",
-        "TicTacToe",
+        GAME_TIC_TAC_TOE,
         "eatCookie"
     ];
 

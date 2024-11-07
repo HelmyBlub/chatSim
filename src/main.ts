@@ -1,5 +1,7 @@
 import { addChatMessage } from "./chatMessageHandler.js"
 import { draw } from "./draw.js"
+import { addGameFunctionsCookieOven } from "./gameCookieOven.js";
+import { addGameFunctionsTicTacToe } from "./gameTicTacToe.js";
 import { State, stateInit } from "./mainModels.js";
 import { tick } from "./tick.js"
 
@@ -89,6 +91,8 @@ async function sleep(milliseconds: number) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    addGameFunctionsTicTacToe();
+    addGameFunctionsCookieOven();
     initMyApp();
 });
 

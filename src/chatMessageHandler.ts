@@ -1,7 +1,8 @@
 import { CHATTER_IMAGE_WIDTH } from "./drawChatterDog.js";
 import { localStorageStoreChatters } from "./main.js";
 import { State, Chatter } from "./mainModels.js";
-import { FUNCTIONS_GAME_TIC_TAC_TOE } from "./ticTacToe.js";
+import { GAME_FUNCTIONS } from "./tick.js";
+import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 
 export function addChatMessage(userName: string, message: string, state: State) {
     if (state.streamerName === userName) {
@@ -24,7 +25,7 @@ export function addChatMessageToChatter(chatter: Chatter, message: string, state
     if (chatter.state == "sleeping") chatter.state = "sitting";
     chatter.lastMessageTime = performance.now();
     let stillDoChatMessage = chatterCommands(chatter, messageCapSized, state);
-    if (stillDoChatMessage) stillDoChatMessage = !FUNCTIONS_GAME_TIC_TAC_TOE.handleChatCommand(chatter, message, state);
+    if (stillDoChatMessage) stillDoChatMessage = !handleGameCommand(chatter, messageCapSized, state);
     if (stillDoChatMessage) {
         if (messageCapSized.length > maxMessageLength) messageCapSized = messageCapSized.substring(0, maxMessageLength);
         chatter.chatMessages.push({ message: messageCapSized, receiveTime: performance.now() });
@@ -32,6 +33,16 @@ export function addChatMessageToChatter(chatter: Chatter, message: string, state
             chatter.chatMessages.shift();
         }
     }
+}
+
+function handleGameCommand(chatter: Chatter, message: string, state: State): boolean {
+    if (chatter.playingGameIdRef === undefined) return false;
+    const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
+    if (!chattersGame) {
+        chatter.playingGameIdRef = undefined;
+        return false;
+    }
+    return GAME_FUNCTIONS[chattersGame.name].handleChatCommand(chattersGame, chatter, message, state);
 }
 
 function chatterCommands(chatter: Chatter, message: string, state: State): boolean {
@@ -75,8 +86,8 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
             chatter.draw.pawAnimation = "bake cookies";
             state.gamesData.cookieGame.cookieCounter++;
             return false;
-        case "TicTacToe":
-            FUNCTIONS_GAME_TIC_TAC_TOE.handleStartMessage(chatter, state);
+        case GAME_TIC_TAC_TOE:
+            GAME_FUNCTIONS[GAME_TIC_TAC_TOE].handleStartMessage(chatter, state);
             return false;
     }
     return true;

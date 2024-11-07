@@ -1,4 +1,5 @@
-import { drawTextWithOutline, IMAGE_PATH_COOKIE, loadImage } from "./draw.js";
+import { drawTextWithOutline, IMAGE_PATH_COOKIE, IMAGE_PATH_UNBAKED_COOKIE, loadImage } from "./draw.js";
+import { addCookieToOvenGame } from "./gameCookieOven.js";
 import { AUDIO_HEYGUYS, playSoundRandomClapping, localStorageStoreChatters } from "./main.js";
 import { Chatter, State } from "./mainModels.js";
 
@@ -6,7 +7,7 @@ export const CHATTER_IMAGE_WIDTH = 200;
 const CHATTER_IMAGE_HEIGHT = 200;
 const BLINK_DURATION = 250;
 const IMAGE_PATH_CHATTER = "images/chatter.png";
-const IMAGE_PATH_CHATTER_HEAD_ = "images/chatterDogHead.png";
+const IMAGE_PATH_CHATTER_HEAD = "images/chatterDogHead.png";
 const IMAGE_PATH_CHATTER_BODY = "images/chatterDogBody.png";
 const IMAGE_PATH_EYES = "images/eyes.png";
 const IMAGE_PATH_PUPILS = "images/pupils.png";
@@ -17,10 +18,23 @@ const IMAGE_PATH_BAG = "images/bag.png";
 const IMAGE_PATH_BUTTER = "images/butter.png";
 const IMAGE_PATH_CHOCOLATE_CHIPS = "images/chocolateChips.png";
 const IMAGE_PATH_EGG = "images/egg.png";
+const IMAGE_PATH_OVEN = "images/oven.png";
+
+type ChatterDogPaintValues = {
+    pawDogOffsetX: number;
+    pawDogOffsetY: number;
+    pawsTopY: number;
+    pawsMiddleX: number;
+    pawOffsetX: number;
+    pawWidth: number;
+    rotatePawRightX: number;
+    rotatePawLeftX: number;
+    rotatePawY: number,
+}
 
 export function loadChatterDogImages(state: State) {
     state.images[IMAGE_PATH_CHATTER] = loadImage(IMAGE_PATH_CHATTER);
-    state.images[IMAGE_PATH_CHATTER_HEAD_] = loadImage(IMAGE_PATH_CHATTER_HEAD_);
+    state.images[IMAGE_PATH_CHATTER_HEAD] = loadImage(IMAGE_PATH_CHATTER_HEAD);
     state.images[IMAGE_PATH_CHATTER_BODY] = loadImage(IMAGE_PATH_CHATTER_BODY);
     state.images[IMAGE_PATH_EYES] = loadImage(IMAGE_PATH_EYES);
     state.images[IMAGE_PATH_PUPILS] = loadImage(IMAGE_PATH_PUPILS);
@@ -31,6 +45,7 @@ export function loadChatterDogImages(state: State) {
     state.images[IMAGE_PATH_BUTTER] = loadImage(IMAGE_PATH_BUTTER);
     state.images[IMAGE_PATH_CHOCOLATE_CHIPS] = loadImage(IMAGE_PATH_CHOCOLATE_CHIPS);
     state.images[IMAGE_PATH_EGG] = loadImage(IMAGE_PATH_EGG);
+    state.images[IMAGE_PATH_OVEN] = loadImage(IMAGE_PATH_OVEN);
 }
 
 export function drawChatterDogAndMessages(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State) {
@@ -89,14 +104,14 @@ function drawChatBubble(ctx: CanvasRenderingContext2D, chatter: Chatter, state: 
 }
 
 function drawChatterDog(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State) {
-    const chatterDogHead = state.images[IMAGE_PATH_CHATTER_HEAD_];
+    const chatterDogHead = state.images[IMAGE_PATH_CHATTER_HEAD];
     const chatterDogBody = state.images[IMAGE_PATH_CHATTER_BODY];
     if (!chatterDogHead?.complete || !chatterDogBody?.complete) return;
     let walkingCycle = Math.floor(performance.now() / 250) % 4;
     if (walkingCycle === 3) walkingCycle = 1;
     switch (chatter.state) {
         case "sitting":
-            ctx.drawImage(chatterDogBody, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT + 40, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
+            ctx.drawImage(chatterDogBody, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_HEIGHT + chatter.posY + 40, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
             ctx.drawImage(chatterDogHead, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX + 5, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT - 10, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
             drawEyes(ctx, chatter, state);
             if (chatter.draw.pawAnimation === "bake cookies") {
@@ -134,8 +149,7 @@ function drawChatterDog(ctx: CanvasRenderingContext2D, chatter: Chatter, state: 
     }
 }
 
-function drawPaws(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State) {
-    const chatterDogPaws = state.images[IMAGE_PATH_DOG_PAWS];
+function calcPaintValues(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State): ChatterDogPaintValues {
     const pawDogOffsetX = 86;
     const pawDogOffsetY = 60;
     const pawsTopY = ctx.canvas.height + chatter.posY - pawDogOffsetY;
@@ -145,9 +159,17 @@ function drawPaws(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State)
     const rotatePawRightX = pawsMiddleX + 21;
     const rotatePawLeftX = pawsMiddleX - 3;
     const rotatePawY = pawsTopY + 8;
+    return {
+        pawDogOffsetX, pawDogOffsetY, pawsTopY, pawsMiddleX, pawOffsetX, pawWidth, rotatePawRightX, rotatePawLeftX, rotatePawY
+    };
+}
+
+function drawPaws(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State) {
+    const chatterDogPaws = state.images[IMAGE_PATH_DOG_PAWS];
+    const paintValues = calcPaintValues(ctx, chatter, state);
     if (chatter.draw.pawAnimation === "sit") {
-        ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60);
-        ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60);
+        ctx.drawImage(chatterDogPaws, 0, 0, paintValues.pawWidth, 60, paintValues.pawsMiddleX - paintValues.pawOffsetX, paintValues.pawsTopY, paintValues.pawWidth, 60);
+        ctx.drawImage(chatterDogPaws, paintValues.pawWidth, 0, paintValues.pawWidth, 60, paintValues.pawsMiddleX + paintValues.pawOffsetX, paintValues.pawsTopY, paintValues.pawWidth, 60);
     } else {
         if (chatter.draw.pawAnimationStart === undefined) {
             chatter.draw.pawAnimationStart = performance.now();
@@ -158,241 +180,247 @@ function drawPaws(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State)
             return;
         }
         if (chatter.draw.pawAnimation === "wave") {
-            if (!chatter.draw.pawAnimationSoundPlayed) {
-                chatter.draw.pawAnimationSoundPlayed = true;
-                state.sounds[AUDIO_HEYGUYS].play();
-            }
-            ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60);
-            let rotationValue = 0;
-            const waveToPositionTime = 500;
-            const wavingDuration = 2200;
-            if (timePassed < waveToPositionTime) {
-                rotationValue = -(timePassed / 200);
-            } else if (timePassed < waveToPositionTime + wavingDuration) {
-                const waveMiddleAngle = -2.5;
-                rotationValue = waveMiddleAngle - Math.sin((timePassed - waveToPositionTime) / 100);
-            } else if (timePassed < waveToPositionTime * 2 + wavingDuration) {
-                rotationValue = -2.5 + (timePassed - waveToPositionTime - wavingDuration) / 200;
-            } else {
-                rotationValue = 0;
-                resetToSitting(chatter, state);
-            }
-            ctx.save();
-            ctx.translate(rotatePawRightX, rotatePawY);
-            ctx.rotate(rotationValue);
-            ctx.translate(-rotatePawRightX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60);
-            ctx.restore();
+            drawWave(ctx, chatter, state, paintValues, timePassed);
         } else if (chatter.draw.pawAnimation === "clap" || chatter.draw.pawAnimation === "slowClap") {
-            let rotationValue = 0;
-            const clapToPositionTime = 500;
-            let clappingDuration = 4400;
-            let clapInterval = 50;
-            if (chatter.draw.pawAnimation === "slowClap") {
-                clapInterval = 400;
-                clappingDuration = 6200;
-            }
-            if (timePassed < clapToPositionTime) {
-                rotationValue = (timePassed / 250);
-            } else if (timePassed < clapToPositionTime + clappingDuration) {
-                const clapMiddleAngle = 2.5;
-                const sin = Math.sin((timePassed - clapToPositionTime) / clapInterval);
-                rotationValue = clapMiddleAngle + sin;
-                if (sin > 0.8 && !chatter.draw.pawAnimationSoundPlayed) {
-                    chatter.draw.pawAnimationSoundPlayed = true;
-                    chatter.sound.lastClapIndex = playSoundRandomClapping(state, chatter.sound.lastClapIndex);
-                } else if (sin < 0.2) {
-                    chatter.draw.pawAnimationSoundPlayed = undefined;
-                }
-
-            } else if (timePassed < clapToPositionTime * 2 + clappingDuration) {
-                rotationValue = 2.5 - (timePassed - clapToPositionTime - clappingDuration) / 250;
-            } else {
-                rotationValue = 0;
-                resetToSitting(chatter, state);
-            }
-            ctx.save();
-            ctx.translate(rotatePawLeftX, rotatePawY);
-            ctx.rotate(rotationValue);
-            ctx.translate(-rotatePawLeftX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60);
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(rotatePawRightX, rotatePawY);
-            ctx.rotate(-rotationValue);
-            ctx.translate(-rotatePawRightX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60);
-            ctx.restore();
+            drawClap(ctx, chatter, state, paintValues, timePassed);
         } else if (chatter.draw.pawAnimation === "notLikeThis") {
-            const targetValue = Math.PI;
-            let rotationValue = 0;
-            const emoteToPositionTime = 500;
-            const emoteDuration = 4000;
-            let pawLengthScaling = 1;
-            const targetPawLengthScaling = 1.7;
-            if (timePassed < emoteToPositionTime) {
-                rotationValue = (timePassed / emoteToPositionTime) * targetValue;
-                pawLengthScaling = 1 + (timePassed / emoteToPositionTime) * (targetPawLengthScaling - 1);
-            } else if (timePassed < emoteToPositionTime + emoteDuration) {
-                rotationValue = targetValue;
-                pawLengthScaling = targetPawLengthScaling;
-            } else if (timePassed < emoteToPositionTime * 2 + emoteDuration) {
-                rotationValue = targetValue - ((timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * targetValue;
-                pawLengthScaling = 1 + (1 - (timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * (targetPawLengthScaling - 1);
-            } else {
-                rotationValue = 0;
-                resetToSitting(chatter, state);
-            }
-            ctx.save();
-            ctx.translate(rotatePawLeftX, rotatePawY);
-            ctx.rotate(rotationValue * 0.98);
-            ctx.translate(-rotatePawLeftX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(rotatePawRightX, rotatePawY);
-            ctx.rotate(-rotationValue * 0.94);
-            ctx.translate(-rotatePawRightX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
-            ctx.restore();
+            drawNotLikeThis(ctx, chatter, state, paintValues, timePassed);
         } else if (chatter.draw.pawAnimation === "eatCookie") {
-            const targetValue = Math.PI / 2;
-            let rotationValue = 0;
-            const emoteToPositionTime = 500;
-            const emoteDuration = 5000;
-            let pawLengthScaling = 1;
-            let cookieYOffset = 0;
-            let cookieTargetYOffset = -40;
-            const targetPawLengthScaling = 0.3;
-            let cookieFrame = 0;
-            if (timePassed < emoteToPositionTime) {
-                rotationValue = (timePassed / emoteToPositionTime) * targetValue;
-                pawLengthScaling = 1 + (timePassed / emoteToPositionTime) * (targetPawLengthScaling - 1);
-                cookieYOffset = (timePassed / emoteToPositionTime) * cookieTargetYOffset;
-            } else if (timePassed < emoteToPositionTime + emoteDuration) {
-                rotationValue = targetValue;
-                pawLengthScaling = targetPawLengthScaling;
-                cookieFrame = Math.floor((timePassed - emoteToPositionTime) / emoteDuration * 3);
-                cookieYOffset = cookieTargetYOffset;
-                chatter.draw.mouthAnimation = "eating";
-            } else if (timePassed < emoteToPositionTime * 2 + emoteDuration) {
-                cookieFrame = 3;
-                rotationValue = targetValue - ((timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * targetValue;
-                pawLengthScaling = 1 + (1 - (timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * (targetPawLengthScaling - 1);
-            } else {
-                cookieFrame = 3;
-                rotationValue = 0;
-                chatter.draw.mouthAnimation = "closed";
-                resetToSitting(chatter, state);
-            }
-            ctx.save();
-            ctx.translate(rotatePawLeftX, rotatePawY);
-            ctx.rotate(rotationValue * 0.98);
-            ctx.translate(-rotatePawLeftX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(rotatePawRightX, rotatePawY);
-            ctx.rotate(-rotationValue * 0.94);
-            ctx.translate(-rotatePawRightX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
-            ctx.restore();
-
-            const cookieImage = state.images[IMAGE_PATH_COOKIE];
-            const cookieSize = 60;
-            if (cookieFrame < 3) ctx.drawImage(cookieImage, 0 + cookieFrame * 80, 0, 80, 80, pawsMiddleX - cookieSize / 2, pawsTopY + cookieYOffset, cookieSize, cookieSize);
+            drawEatCookie(ctx, chatter, state, paintValues, timePassed);
         } else if (chatter.draw.pawAnimation === "bake cookies") {
-            const targetRotationValue = Math.PI / 4 * 3;
-            let rotationValue = 0;
-            const ingredientList: { image: string, name?: string, paw: string, offsetX: number, yOffset: number }[] = [
-                { image: IMAGE_PATH_BUTTER, paw: "left", offsetX: -10, yOffset: 0 },
-                { image: IMAGE_PATH_EGG, paw: "right", offsetX: 60, yOffset: 0 },
-                { name: "Sugar", image: IMAGE_PATH_BAG, paw: "both", offsetX: 0, yOffset: -50 },
-                { name: "Flour", image: IMAGE_PATH_BAG, paw: "both", offsetX: 0, yOffset: -50 },
-                { image: IMAGE_PATH_CHOCOLATE_CHIPS, paw: "left", offsetX: -10, yOffset: 0 }
-            ];
-            const pawMoveUpTime = 500;
-            let currentIngredientIndex = -1;
-            let pawLengthScaling = 1;
-            const oneCycleTime = pawMoveUpTime * 2;
-            if (timePassed < pawMoveUpTime * ingredientList.length * 2) {
-                const rotationFactor = Math.abs(Math.cos(Math.PI * 2 / (oneCycleTime) * timePassed) - 1) / 2;
-                currentIngredientIndex = Math.floor(timePassed / oneCycleTime);
-                rotationValue = targetRotationValue * rotationFactor;
-                //pawLengthScaling = 1 + (timePassed / pawMoveUpTime) * (targetPawLengthScaling - 1);
-            } else {
-                rotationValue = 0;
-                resetToSitting(chatter, state);
-                //chatter.draw.pawAnimationStart = undefined;
-            }
-            let rotationValueLeft = rotationValue * 0.98;
-            let rotationValueRight = rotationValue * 0.94;
-            if (currentIngredientIndex > -1 && currentIngredientIndex < ingredientList.length) {
-                const currentIngredient = ingredientList[currentIngredientIndex];
-                if (currentIngredient.paw === "left") {
-                    rotationValueRight = 0;
-                } else if (currentIngredient.paw === "right") {
-                    rotationValueLeft = 0;
-                }
-            }
-            ctx.save();
-            ctx.translate(rotatePawLeftX, rotatePawY);
-            ctx.rotate(rotationValueLeft);
-            ctx.translate(-rotatePawLeftX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(rotatePawRightX, rotatePawY);
-            ctx.rotate(-rotationValueRight);
-            ctx.translate(-rotatePawRightX, -rotatePawY);
-            ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
-            ctx.restore();
-
-            if (currentIngredientIndex > -1 && currentIngredientIndex < ingredientList.length) {
-                const currentIngredient = ingredientList[currentIngredientIndex];
-                const ingredientOffsetY = -(rotationValue / targetRotationValue) * 50 + 40 + currentIngredient.yOffset;
-                const currentCyclePerCent = (timePassed % oneCycleTime) / oneCycleTime;
-                let ingredientOffsetX = currentIngredient.offsetX;
-                ctx.save();
-                if (currentCyclePerCent > 0.5) {
-                    const imageBowl = state.images[IMAGE_PATH_BOWL];
-                    ctx.drawImage(imageBowl, 0, 0, 100, 100, pawsMiddleX - 38, pawsTopY - 40, 100, 100);
-                    ingredientOffsetX *= 1 - (currentCyclePerCent - 0.5) * 2;
-                    let bowlPath = new Path2D();
-                    bowlPath.moveTo(pawsMiddleX - 38 - 50, pawsTopY - 40);
-                    bowlPath.lineTo(pawsMiddleX - 38 + 2, pawsTopY - 40 + 47);
-                    bowlPath.quadraticCurveTo(pawsMiddleX - 38 + 51, pawsTopY - 40 + 76, pawsMiddleX - 38 + 98, pawsTopY - 40 + 50);
-                    bowlPath.lineTo(pawsMiddleX - 38 + 150, pawsTopY - 40 + 50);
-                    bowlPath.lineTo(pawsMiddleX - 38 + 150, pawsTopY - 40 - 100);
-                    bowlPath.lineTo(pawsMiddleX - 38 - 50, pawsTopY - 40 - 100);
-                    bowlPath.lineTo(pawsMiddleX - 38 - 50, pawsTopY - 40);
-                    ctx.clip(bowlPath);
-                }
-                if (currentIngredient.name === undefined) {
-                    const image = state.images[currentIngredient.image];
-                    ctx.drawImage(image, 0, 0, 100, 100, pawsMiddleX - 38 + ingredientOffsetX, pawsTopY - 40 + ingredientOffsetY, 100, 100);
-                } else {
-                    const image = state.images[currentIngredient.image];
-                    ctx.font = "18px Arial";
-                    const textWidth = ctx.measureText(currentIngredient.name).width;
-                    ctx.drawImage(image, 0, 0, 100, 100, pawsMiddleX - 38 + ingredientOffsetX, pawsTopY - 40 + ingredientOffsetY, 100, 100);
-                    drawTextWithOutline(ctx, currentIngredient.name, pawsMiddleX + 10 - Math.floor(textWidth / 2) + ingredientOffsetX, pawsTopY + 30 + ingredientOffsetY);
-                }
-                ctx.restore();
-                if (currentCyclePerCent <= 0.5) {
-                    const imageBowl = state.images[IMAGE_PATH_BOWL];
-                    ctx.drawImage(imageBowl, 0, 0, 100, 100, pawsMiddleX - 38, pawsTopY - 40, 100, 100);
-                }
-            } else {
-                const imageBowl = state.images[IMAGE_PATH_BOWL];
-                ctx.drawImage(imageBowl, 0, 0, 100, 100, pawsMiddleX - 38, pawsTopY - 40, 100, 100);
-            }
+            drawBakeCookies(ctx, chatter, state, paintValues, timePassed);
         }
     }
+}
+
+function drawWave(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State, paintValues: ChatterDogPaintValues, timePassed: number) {
+    if (!chatter.draw.pawAnimationSoundPlayed) {
+        chatter.draw.pawAnimationSoundPlayed = true;
+        state.sounds[AUDIO_HEYGUYS].play();
+    }
+    let rotationValue = 0;
+    const waveToPositionTime = 500;
+    const wavingDuration = 2200;
+    if (timePassed < waveToPositionTime) {
+        rotationValue = -(timePassed / 200);
+    } else if (timePassed < waveToPositionTime + wavingDuration) {
+        const waveMiddleAngle = -2.5;
+        rotationValue = waveMiddleAngle - Math.sin((timePassed - waveToPositionTime) / 100);
+    } else if (timePassed < waveToPositionTime * 2 + wavingDuration) {
+        rotationValue = -2.5 + (timePassed - waveToPositionTime - wavingDuration) / 200;
+    } else {
+        rotationValue = 0;
+        resetToSitting(chatter, state);
+    }
+    drawPawsWithAngles(ctx, paintValues, 0, rotationValue, 1, state);
+}
+
+function drawClap(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State, paintValues: ChatterDogPaintValues, timePassed: number) {
+    let rotationValue = 0;
+    const clapToPositionTime = 500;
+    let clappingDuration = 4400;
+    let clapInterval = 50;
+    if (chatter.draw.pawAnimation === "slowClap") {
+        clapInterval = 400;
+        clappingDuration = 6200;
+    }
+    if (timePassed < clapToPositionTime) {
+        rotationValue = (timePassed / 250);
+    } else if (timePassed < clapToPositionTime + clappingDuration) {
+        const clapMiddleAngle = 2.5;
+        const sin = Math.sin((timePassed - clapToPositionTime) / clapInterval);
+        rotationValue = clapMiddleAngle + sin;
+        if (sin > 0.8 && !chatter.draw.pawAnimationSoundPlayed) {
+            chatter.draw.pawAnimationSoundPlayed = true;
+            chatter.sound.lastClapIndex = playSoundRandomClapping(state, chatter.sound.lastClapIndex);
+        } else if (sin < 0.2) {
+            chatter.draw.pawAnimationSoundPlayed = undefined;
+        }
+
+    } else if (timePassed < clapToPositionTime * 2 + clappingDuration) {
+        rotationValue = 2.5 - (timePassed - clapToPositionTime - clappingDuration) / 250;
+    } else {
+        rotationValue = 0;
+        resetToSitting(chatter, state);
+    }
+    drawPawsWithAngles(ctx, paintValues, rotationValue, -rotationValue, 1, state);
+}
+
+function drawNotLikeThis(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State, paintValues: ChatterDogPaintValues, timePassed: number) {
+    const targetValue = Math.PI;
+    let rotationValue = 0;
+    const emoteToPositionTime = 500;
+    const emoteDuration = 4000;
+    let pawLengthScaling = 1;
+    const targetPawLengthScaling = 1.7;
+    if (timePassed < emoteToPositionTime) {
+        rotationValue = (timePassed / emoteToPositionTime) * targetValue;
+        pawLengthScaling = 1 + (timePassed / emoteToPositionTime) * (targetPawLengthScaling - 1);
+    } else if (timePassed < emoteToPositionTime + emoteDuration) {
+        rotationValue = targetValue;
+        pawLengthScaling = targetPawLengthScaling;
+    } else if (timePassed < emoteToPositionTime * 2 + emoteDuration) {
+        rotationValue = targetValue - ((timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * targetValue;
+        pawLengthScaling = 1 + (1 - (timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * (targetPawLengthScaling - 1);
+    } else {
+        rotationValue = 0;
+        resetToSitting(chatter, state);
+    }
+    drawPawsWithAngles(ctx, paintValues, rotationValue * 0.98, -rotationValue * 0.94, pawLengthScaling, state);
+}
+
+function drawEatCookie(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State, paintValues: ChatterDogPaintValues, timePassed: number) {
+    const targetValue = Math.PI / 2;
+    let rotationValue = 0;
+    const emoteToPositionTime = 500;
+    const emoteDuration = 5000;
+    let pawLengthScaling = 1;
+    let cookieYOffset = 0;
+    let cookieTargetYOffset = -40;
+    const targetPawLengthScaling = 0.3;
+    let cookieFrame = 0;
+    if (timePassed < emoteToPositionTime) {
+        rotationValue = (timePassed / emoteToPositionTime) * targetValue;
+        pawLengthScaling = 1 + (timePassed / emoteToPositionTime) * (targetPawLengthScaling - 1);
+        cookieYOffset = (timePassed / emoteToPositionTime) * cookieTargetYOffset;
+    } else if (timePassed < emoteToPositionTime + emoteDuration) {
+        rotationValue = targetValue;
+        pawLengthScaling = targetPawLengthScaling;
+        cookieFrame = Math.floor((timePassed - emoteToPositionTime) / emoteDuration * 3);
+        cookieYOffset = cookieTargetYOffset;
+        chatter.draw.mouthAnimation = "eating";
+    } else if (timePassed < emoteToPositionTime * 2 + emoteDuration) {
+        cookieFrame = 3;
+        rotationValue = targetValue - ((timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * targetValue;
+        pawLengthScaling = 1 + (1 - (timePassed - emoteDuration - emoteToPositionTime) / emoteToPositionTime) * (targetPawLengthScaling - 1);
+    } else {
+        cookieFrame = 3;
+        rotationValue = 0;
+        chatter.draw.mouthAnimation = "closed";
+        resetToSitting(chatter, state);
+    }
+    drawPawsWithAngles(ctx, paintValues, rotationValue * 0.98, -rotationValue * 0.94, pawLengthScaling, state);
+    const cookieImage = state.images[IMAGE_PATH_COOKIE];
+    const cookieSize = 60;
+    if (cookieFrame < 3) ctx.drawImage(cookieImage, 0 + cookieFrame * 80, 0, 80, 80, paintValues.pawsMiddleX - cookieSize / 2, paintValues.pawsTopY + cookieYOffset, cookieSize, cookieSize);
+}
+
+function drawBakeCookies(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State, paintValues: ChatterDogPaintValues, timePassed: number) {
+    const imageBowl = state.images[IMAGE_PATH_BOWL];
+    const targetRotationValue = Math.PI / 4 * 3;
+    let rotationValue = 0;
+    const pawMoveUpTime = 500;
+    const cookieShapingTime = 200;
+    let pawLengthScaling = 1;
+    let rotationValueLeft = 0;
+    let rotationValueRight = 0;
+    const ingredientList: { image: string, name?: string, paw: string, offsetX: number, yOffset: number }[] = [
+        { image: IMAGE_PATH_BUTTER, paw: "left", offsetX: -10, yOffset: 0 },
+        { image: IMAGE_PATH_EGG, paw: "right", offsetX: 60, yOffset: 0 },
+        { name: "Sugar", image: IMAGE_PATH_BAG, paw: "both", offsetX: 0, yOffset: -50 },
+        { name: "Flour", image: IMAGE_PATH_BAG, paw: "both", offsetX: 0, yOffset: -50 },
+        { image: IMAGE_PATH_CHOCOLATE_CHIPS, paw: "left", offsetX: -10, yOffset: 0 }
+    ];
+    let currentIngredientIndex = -1;
+
+    const oneCycleTime = pawMoveUpTime * 2;
+    if (timePassed < pawMoveUpTime * ingredientList.length * 2) {
+        const rotationFactor = Math.abs(Math.cos(Math.PI * 2 / (oneCycleTime) * timePassed) - 1) / 2;
+        currentIngredientIndex = Math.floor(timePassed / oneCycleTime);
+        rotationValue = targetRotationValue * rotationFactor;
+        rotationValueLeft = rotationValue * 0.98;
+        rotationValueRight = rotationValue * 0.94;
+        //pawLengthScaling = 1 + (timePassed / pawMoveUpTime) * (targetPawLengthScaling - 1);
+        if (currentIngredientIndex > -1 && currentIngredientIndex < ingredientList.length) {
+            const currentIngredient = ingredientList[currentIngredientIndex];
+            if (currentIngredient.paw === "left") {
+                rotationValueRight = 0;
+            } else if (currentIngredient.paw === "right") {
+                rotationValueLeft = 0;
+            }
+        }
+        drawPawsWithAngles(ctx, paintValues, rotationValueLeft, -rotationValueRight, pawLengthScaling, state);
+        if (currentIngredientIndex > -1 && currentIngredientIndex < ingredientList.length) {
+            const currentIngredient = ingredientList[currentIngredientIndex];
+            const ingredientOffsetY = -(rotationValue / targetRotationValue) * 50 + 40 + currentIngredient.yOffset;
+            const currentCyclePerCent = (timePassed % oneCycleTime) / oneCycleTime;
+            let ingredientOffsetX = currentIngredient.offsetX;
+            ctx.save();
+            if (currentCyclePerCent > 0.5) {
+                ctx.drawImage(imageBowl, 0, 0, 100, 100, paintValues.pawsMiddleX - 38, paintValues.pawsTopY - 40, 100, 100);
+                ingredientOffsetX *= 1 - (currentCyclePerCent - 0.5) * 2;
+                ctx.clip(getBowlClipPath(paintValues));
+            }
+            if (currentIngredient.name === undefined) {
+                const image = state.images[currentIngredient.image];
+                ctx.drawImage(image, 0, 0, 100, 100, paintValues.pawsMiddleX - 38 + ingredientOffsetX, paintValues.pawsTopY - 40 + ingredientOffsetY, 100, 100);
+            } else {
+                const image = state.images[currentIngredient.image];
+                ctx.font = "18px Arial";
+                const textWidth = ctx.measureText(currentIngredient.name).width;
+                ctx.drawImage(image, 0, 0, 100, 100, paintValues.pawsMiddleX - 38 + ingredientOffsetX, paintValues.pawsTopY - 40 + ingredientOffsetY, 100, 100);
+                drawTextWithOutline(ctx, currentIngredient.name, paintValues.pawsMiddleX + 10 - Math.floor(textWidth / 2) + ingredientOffsetX, paintValues.pawsTopY + 30 + ingredientOffsetY);
+            }
+            ctx.restore();
+            if (currentCyclePerCent <= 0.5) {
+                const imageBowl = state.images[IMAGE_PATH_BOWL];
+                ctx.drawImage(imageBowl, 0, 0, 100, 100, paintValues.pawsMiddleX - 38, paintValues.pawsTopY - 40, 100, 100);
+            }
+        } else {
+            const imageBowl = state.images[IMAGE_PATH_BOWL];
+            ctx.drawImage(imageBowl, 0, 0, 100, 100, paintValues.pawsMiddleX - 38, paintValues.pawsTopY - 40, 100, 100);
+        }
+    } else if (timePassed < pawMoveUpTime * ingredientList.length * 2 + cookieShapingTime) {
+        const rotationFactor = Math.abs(Math.cos(Math.PI * 2 / (oneCycleTime) * timePassed) - 1) / 2;
+        rotationValue = targetRotationValue * rotationFactor;
+
+        ctx.save();
+        ctx.drawImage(imageBowl, 0, 0, 100, 100, paintValues.pawsMiddleX - 38, paintValues.pawsTopY - 40, 100, 100);
+        ctx.clip(getBowlClipPath(paintValues));
+        drawPawsWithAngles(ctx, paintValues, rotationValueLeft, -rotationValueRight, pawLengthScaling, state);
+        ctx.drawImage(state.images[IMAGE_PATH_UNBAKED_COOKIE], 0, 0, 80, 80, paintValues.pawsMiddleX - 18, paintValues.pawsTopY + 10, 60, 60);
+        ctx.restore();
+    } else {
+        const cookieOvenGame = addCookieToOvenGame(state);
+        if (cookieOvenGame.bakingStartedTime === undefined && chatter.draw.pawAnimationStart !== undefined) {
+            chatter.draw.pawAnimationStart += cookieShapingTime;
+            ctx.drawImage(imageBowl, 0, 0, 100, 100, paintValues.pawsMiddleX - 38, paintValues.pawsTopY - 40, 100, 100);
+        } else {
+            rotationValue = 0;
+            //resetToSitting(chatter, state);
+            chatter.draw.pawAnimationStart = undefined;
+        }
+    }
+}
+
+function getBowlClipPath(paintValues: ChatterDogPaintValues): Path2D {
+    let bowlPath = new Path2D();
+    bowlPath.moveTo(paintValues.pawsMiddleX - 38 - 50, paintValues.pawsTopY - 40);
+    bowlPath.lineTo(paintValues.pawsMiddleX - 38 + 2, paintValues.pawsTopY - 40 + 47);
+    bowlPath.quadraticCurveTo(paintValues.pawsMiddleX - 38 + 51, paintValues.pawsTopY - 40 + 76, paintValues.pawsMiddleX - 38 + 98, paintValues.pawsTopY - 40 + 50);
+    bowlPath.lineTo(paintValues.pawsMiddleX - 38 + 150, paintValues.pawsTopY - 40 + 50);
+    bowlPath.lineTo(paintValues.pawsMiddleX - 38 + 150, paintValues.pawsTopY - 40 - 100);
+    bowlPath.lineTo(paintValues.pawsMiddleX - 38 - 50, paintValues.pawsTopY - 40 - 100);
+    bowlPath.lineTo(paintValues.pawsMiddleX - 38 - 50, paintValues.pawsTopY - 40);
+    return bowlPath;
+}
+
+function drawPawsWithAngles(ctx: CanvasRenderingContext2D, paintValues: ChatterDogPaintValues, rotationValueLeft: number, rotationValueRight: number, pawLengthScaling: number, state: State) {
+    const chatterDogPaws = state.images[IMAGE_PATH_DOG_PAWS];
+    ctx.save();
+    ctx.translate(paintValues.rotatePawLeftX, paintValues.rotatePawY);
+    ctx.rotate(rotationValueLeft);
+    ctx.translate(-paintValues.rotatePawLeftX, -paintValues.rotatePawY);
+    ctx.drawImage(chatterDogPaws, 0, 0, paintValues.pawWidth, 60, paintValues.pawsMiddleX - paintValues.pawOffsetX, paintValues.pawsTopY, paintValues.pawWidth, 60 * pawLengthScaling);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(paintValues.rotatePawRightX, paintValues.rotatePawY);
+    ctx.rotate(rotationValueRight);
+    ctx.translate(-paintValues.rotatePawRightX, -paintValues.rotatePawY);
+    ctx.drawImage(chatterDogPaws, paintValues.pawWidth, 0, paintValues.pawWidth, 60, paintValues.pawsMiddleX + paintValues.pawOffsetX, paintValues.pawsTopY, paintValues.pawWidth, 60 * pawLengthScaling);
+    ctx.restore();
+
 }
 
 function drawChatterDogMouth(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State) {
