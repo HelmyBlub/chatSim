@@ -14,7 +14,7 @@ Next Tasks:
             - 
             
     - eat cooking (only possible if cookies left).
-    - bake cookie (takes some effort)
+    - bake cookie (takes some effort) 
         - mini game where the ingredients have to be put in?
         - baked cookies are for every chatter
 - outfits. Dogs can wear clothing. Store choices for chatters even when leaving
