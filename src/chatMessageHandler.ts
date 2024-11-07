@@ -1,6 +1,7 @@
-import { CHATTER_IMAGE_WIDTH } from "./draw.js";
-import { State, localStorageStoreChatters, Chatter } from "./main.js";
-import { handleGameTicTacToeChatCommand, handleTicTacToeMessage } from "./ticTacToe.js";
+import { CHATTER_IMAGE_WIDTH } from "./drawChatterDog.js";
+import { localStorageStoreChatters } from "./main.js";
+import { State, Chatter } from "./mainModels.js";
+import { FUNCTIONS_GAME_TIC_TAC_TOE } from "./ticTacToe.js";
 
 export function addChatMessage(userName: string, message: string, state: State) {
     if (state.streamerName === userName) {
@@ -23,7 +24,7 @@ export function addChatMessageToChatter(chatter: Chatter, message: string, state
     if (chatter.state == "sleeping") chatter.state = "sitting";
     chatter.lastMessageTime = performance.now();
     let stillDoChatMessage = chatterCommands(chatter, messageCapSized, state);
-    if (stillDoChatMessage) stillDoChatMessage = !handleGameTicTacToeChatCommand(chatter, message, state);
+    if (stillDoChatMessage) stillDoChatMessage = !FUNCTIONS_GAME_TIC_TAC_TOE.handleChatCommand(chatter, message, state);
     if (stillDoChatMessage) {
         if (messageCapSized.length > maxMessageLength) messageCapSized = messageCapSized.substring(0, maxMessageLength);
         chatter.chatMessages.push({ message: messageCapSized, receiveTime: performance.now() });
@@ -72,7 +73,7 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
             state.gamesData.cookieGame.cookieCounter++;
             return false;
         case "TicTacToe":
-            handleTicTacToeMessage(chatter, state);
+            FUNCTIONS_GAME_TIC_TAC_TOE.handleStartMessage(chatter, state);
             return false;
     }
     return true;

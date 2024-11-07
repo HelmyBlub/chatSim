@@ -1,5 +1,5 @@
 import { drawTextWithBackgroundAndOutline } from "./draw.js";
-import { Chatter, Game, State } from "./main.js";
+import { Game, Chatter, State } from "./mainModels.js";
 
 export type GameTicTacToe = Game & {
     name: "TicTacToe",
@@ -9,23 +9,14 @@ export type GameTicTacToe = Game & {
     turnTime: number,
 }
 
-function createGameTicTacToe(player1: Chatter, id: number): GameTicTacToe {
-    return {
-        field: [
-            [-1, -1, -1],
-            [-1, -1, -1],
-            [-1, -1, -1],
-        ],
-        players: [player1],
-        id: id,
-        name: "TicTacToe",
-        currentPlayersTurnIndex: 0,
-        turnTimer: 0,
-        turnTime: 60000,
-    }
+export const FUNCTIONS_GAME_TIC_TAC_TOE = {
+    handleStartMessage,
+    handleChatCommand,
+    tick,
+    draw,
 }
 
-export function handleTicTacToeMessage(chatter: Chatter, state: State) {
+function handleStartMessage(chatter: Chatter, state: State) {
     if (chatter.playingGameIdRef !== undefined) {
         const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
         if (chatter.name !== state.streamerName && chattersGame && chattersGame.players.find(p => p === chatter)) return;
@@ -51,7 +42,7 @@ export function handleTicTacToeMessage(chatter: Chatter, state: State) {
 /**
  * @returns return true if it is a ticTacToe command
  */
-export function handleGameTicTacToeChatCommand(chatter: Chatter, message: string, state: State): boolean {
+function handleChatCommand(chatter: Chatter, message: string, state: State): boolean {
     if (chatter.playingGameIdRef === undefined) return false;
     const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
     if (!chattersGame || chattersGame.name !== "TicTacToe") {
@@ -74,6 +65,106 @@ export function handleGameTicTacToeChatCommand(chatter: Chatter, message: string
     ticTacToeGame.turnTimer = performance.now();
     ticTacToeGame.currentPlayersTurnIndex = (ticTacToeGame.currentPlayersTurnIndex + 1) % 2;
     return true;
+}
+
+function tick(game: GameTicTacToe, state: State) {
+    //check turn timer
+    if (game.finishedTime !== undefined) return;
+    if (game.players.length === 2 && game.turnTimer - performance.now() + game.turnTime < 0) {
+        game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
+        game.finishedTime = performance.now();
+        return;
+    }
+    // check if player still exists
+    for (let player of game.players) {
+        const chatter = state.chatters.find(c => c === player);
+        if (!chatter) {
+            if (game.players.length === 2) {
+                game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
+                game.finishedTime = performance.now();
+            } else {
+                game.finishedTime = performance.now();
+            }
+        }
+    }
+}
+
+function draw(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number) {
+    if (game.name !== "TicTacToe") return;
+    const ticTacToeGame = game as GameTicTacToe;
+    const fontSize = 26;
+    ctx.font = `bold ${fontSize}px Arial`;
+    const aplha = 0.7;
+    if (ticTacToeGame.winner) {
+        const text = `Winner: ${ticTacToeGame.winner.name}`;
+        drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize, aplha);
+    } else {
+        if (ticTacToeGame.players.length < 2) {
+            const text = `${ticTacToeGame.players[0].name} is waiting for an apponent.`;
+            const text2 = `Write "TicTacToe" to join`;
+            drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize * 2, aplha);
+            drawTextWithBackgroundAndOutline(ctx, text2, leftX, topY - fontSize, aplha);
+        } else {
+            const text = `${ticTacToeGame.players[0].name} vs ${ticTacToeGame.players[1].name}`;
+            const timer = Math.floor((ticTacToeGame.turnTimer - performance.now() + ticTacToeGame.turnTime) / 1000);
+            const text2 = `${ticTacToeGame.players[ticTacToeGame.currentPlayersTurnIndex].name} turn. ${timer}s left`;
+            drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize * 2, aplha);
+            drawTextWithBackgroundAndOutline(ctx, text2, leftX, topY - fontSize, aplha);
+        }
+    }
+
+    const size = 200;
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = "white";
+    ctx.fillRect(leftX, topY, size, size);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 3;
+    const cellSize = Math.floor(size / 3);
+    //horizontal lines
+    for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(leftX, topY + cellSize * i);
+        ctx.lineTo(leftX + size, topY + cellSize * i);
+        ctx.stroke();
+    }
+    //vertical lines
+    for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(leftX + cellSize * i, topY);
+        ctx.lineTo(leftX + cellSize * i, topY + size);
+        ctx.stroke();
+    }
+
+    const makerSize = Math.floor(cellSize * 0.75);
+    const markerCellOffset = Math.floor(cellSize * 0.12);
+    for (let x = 0; x < 3; x++) {
+        for (let y = 0; y < 3; y++) {
+            ctx.beginPath();
+            if (ticTacToeGame.field[x][y] === 0) {
+                ctx.rect(leftX + cellSize * x + markerCellOffset, topY + cellSize * y + markerCellOffset, makerSize, makerSize);
+            } else if (ticTacToeGame.field[x][y] === 1) {
+                ctx.arc(leftX + cellSize * x + Math.floor(cellSize / 2), topY + cellSize * y + Math.floor(cellSize / 2), makerSize / 2, 0, Math.PI * 2);
+            }
+            ctx.stroke();
+        }
+    }
+}
+
+function createGameTicTacToe(player1: Chatter, id: number): GameTicTacToe {
+    return {
+        field: [
+            [-1, -1, -1],
+            [-1, -1, -1],
+            [-1, -1, -1],
+        ],
+        players: [player1],
+        id: id,
+        name: "TicTacToe",
+        currentPlayersTurnIndex: 0,
+        turnTimer: 0,
+        turnTime: 60000,
+    }
 }
 
 function guessChatterPlayPosition(message: string): { x: number, y: number } | undefined {
@@ -142,87 +233,5 @@ function checkWinCondition(game: GameTicTacToe) {
         game.players[0].playingGameIdRef = undefined;
         game.players[1].playingGameIdRef = undefined;
         game.players = [];
-    }
-}
-
-export function ticTacToeCheckTurnTimerAndIfPlayersStillExist(game: GameTicTacToe, state: State) {
-    if (game.finishedTime !== undefined) return;
-    if (game.players.length === 2 && game.turnTimer - performance.now() + game.turnTime < 0) {
-        game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
-        game.finishedTime = performance.now();
-        return;
-    }
-    for (let player of game.players) {
-        const chatter = state.chatters.find(c => c === player);
-        if (!chatter) {
-            if (game.players.length === 2) {
-                game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
-                game.finishedTime = performance.now();
-            } else {
-                game.finishedTime = performance.now();
-            }
-        }
-    }
-}
-
-export function drawTicTacToeBoard(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number) {
-    if (game.name !== "TicTacToe") return;
-    const ticTacToeGame = game as GameTicTacToe;
-    const fontSize = 26;
-    ctx.font = `bold ${fontSize}px Arial`;
-    const aplha = 0.7;
-    if (ticTacToeGame.winner) {
-        const text = `Winner: ${ticTacToeGame.winner.name}`;
-        drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize, aplha);
-    } else {
-        if (ticTacToeGame.players.length < 2) {
-            const text = `${ticTacToeGame.players[0].name} is waiting for an apponent.`;
-            const text2 = `Write "TicTacToe" to join`;
-            drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize * 2, aplha);
-            drawTextWithBackgroundAndOutline(ctx, text2, leftX, topY - fontSize, aplha);
-        } else {
-            const text = `${ticTacToeGame.players[0].name} vs ${ticTacToeGame.players[1].name}`;
-            const timer = Math.floor((ticTacToeGame.turnTimer - performance.now() + ticTacToeGame.turnTime) / 1000);
-            const text2 = `${ticTacToeGame.players[ticTacToeGame.currentPlayersTurnIndex].name} turn. ${timer}s left`;
-            drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize * 2, aplha);
-            drawTextWithBackgroundAndOutline(ctx, text2, leftX, topY - fontSize, aplha);
-        }
-    }
-
-    const size = 200;
-    ctx.globalAlpha = 0.7;
-    ctx.fillStyle = "white";
-    ctx.fillRect(leftX, topY, size, size);
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
-    const cellSize = Math.floor(size / 3);
-    //horizontal lines
-    for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(leftX, topY + cellSize * i);
-        ctx.lineTo(leftX + size, topY + cellSize * i);
-        ctx.stroke();
-    }
-    //vertical lines
-    for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(leftX + cellSize * i, topY);
-        ctx.lineTo(leftX + cellSize * i, topY + size);
-        ctx.stroke();
-    }
-
-    const makerSize = Math.floor(cellSize * 0.75);
-    const markerCellOffset = Math.floor(cellSize * 0.12);
-    for (let x = 0; x < 3; x++) {
-        for (let y = 0; y < 3; y++) {
-            ctx.beginPath();
-            if (ticTacToeGame.field[x][y] === 0) {
-                ctx.rect(leftX + cellSize * x + markerCellOffset, topY + cellSize * y + markerCellOffset, makerSize, makerSize);
-            } else if (ticTacToeGame.field[x][y] === 1) {
-                ctx.arc(leftX + cellSize * x + Math.floor(cellSize / 2), topY + cellSize * y + Math.floor(cellSize / 2), makerSize / 2, 0, Math.PI * 2);
-            }
-            ctx.stroke();
-        }
     }
 }

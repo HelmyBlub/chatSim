@@ -1,6 +1,7 @@
 import { addChatMessageToChatter } from "./chatMessageHandler.js";
-import { Chatter, localStorageStoreChatters, State } from "./main.js";
-import { GameTicTacToe, ticTacToeCheckTurnTimerAndIfPlayersStillExist } from "./ticTacToe.js";
+import { localStorageStoreChatters } from "./main.js";
+import { State, Chatter } from "./mainModels.js";
+import { FUNCTIONS_GAME_TIC_TAC_TOE, GameTicTacToe } from "./ticTacToe.js";
 
 export function tick(state: State) {
     deleteInactiveAvatars(state);
@@ -29,7 +30,7 @@ export function tick(state: State) {
 function tickGames(state: State) {
     deleteFinishedGames(state);
     for (let game of state.gamesData.games) {
-        ticTacToeCheckTurnTimerAndIfPlayersStillExist(game as GameTicTacToe, state);
+        FUNCTIONS_GAME_TIC_TAC_TOE.tick(game as GameTicTacToe, state);
     }
 }
 
