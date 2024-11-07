@@ -45,6 +45,10 @@ function initMyApp() {
         addChatMessage(user, message, state);
     }
     //@ts-ignore
+    ComfyJS.onCommand = (user, message, flags, self, extra) => {
+        addChatMessage(user, message, state);
+    }
+    //@ts-ignore
     ComfyJS.Init("HelmiBlub");
 
     loadLocalStorage(state);

@@ -35,7 +35,10 @@ export function addChatMessageToChatter(chatter: Chatter, message: string, state
 }
 
 function chatterCommands(chatter: Chatter, message: string, state: State): boolean {
-    switch (message) {
+    let modifierMessage = message;
+    const match = modifierMessage.match(/^[^a-zA-Z]*/);
+    if (match) modifierMessage = modifierMessage.substring(match[0].length, modifierMessage.length);
+    switch (modifierMessage) {
         case "sleep":
             if (chatter.state === "sitting") {
                 chatter.state = "sleeping";
