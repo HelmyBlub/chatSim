@@ -1,4 +1,7 @@
-type GameTicTacToe = Game & {
+import { drawTextWithBackgroundAndOutline } from "./draw.js";
+import { Chatter, Game, State } from "./main.js";
+
+export type GameTicTacToe = Game & {
     name: "TicTacToe",
     field: number[][],
     currentPlayersTurnIndex: number,
@@ -22,7 +25,7 @@ function createGameTicTacToe(player1: Chatter, id: number): GameTicTacToe {
     }
 }
 
-function handleTicTacToeMessage(chatter: Chatter, state: State) {
+export function handleTicTacToeMessage(chatter: Chatter, state: State) {
     if (chatter.playingGameIdRef !== undefined) {
         const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
         if (chatter.name !== state.streamerName && chattersGame && chattersGame.players.find(p => p === chatter)) return;
@@ -48,7 +51,7 @@ function handleTicTacToeMessage(chatter: Chatter, state: State) {
 /**
  * @returns return true if it is a ticTacToe command
  */
-function handleGameTicTacToeChatCommand(chatter: Chatter, message: string, state: State): boolean {
+export function handleGameTicTacToeChatCommand(chatter: Chatter, message: string, state: State): boolean {
     if (chatter.playingGameIdRef === undefined) return false;
     const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
     if (!chattersGame || chattersGame.name !== "TicTacToe") {
@@ -142,7 +145,7 @@ function checkWinCondition(game: GameTicTacToe) {
     }
 }
 
-function ticTacToeCheckTurnTimerAndIfPlayersStillExist(game: GameTicTacToe, state: State) {
+export function ticTacToeCheckTurnTimerAndIfPlayersStillExist(game: GameTicTacToe, state: State) {
     if (game.finishedTime !== undefined) return;
     if (game.players.length === 2 && game.turnTimer - performance.now() + game.turnTime < 0) {
         game.winner = game.players[(game.currentPlayersTurnIndex + 1) % 2];
@@ -162,7 +165,7 @@ function ticTacToeCheckTurnTimerAndIfPlayersStillExist(game: GameTicTacToe, stat
     }
 }
 
-function drawTicTacToeBoard(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number) {
+export function drawTicTacToeBoard(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number) {
     if (game.name !== "TicTacToe") return;
     const ticTacToeGame = game as GameTicTacToe;
     const fontSize = 26;

@@ -1,10 +1,13 @@
+import { addChatMessage } from "./chatMessageHandler.js"
+import { draw, loadImages } from "./draw.js"
+import { tick } from "./tick.js"
 
-type ChatMessage = {
+export type ChatMessage = {
     receiveTime: number,
     message: string,
 }
 
-type Chatter = {
+export type Chatter = {
     chatMessages: ChatMessage[],
     lastMessageTime: number,
     state: "joining" | "sitting" | "sleeping" | "leaving",
@@ -33,7 +36,7 @@ type Chatter = {
     }
 }
 
-type Game = {
+export type Game = {
     name: string,
     id: number,
     players: Chatter[],
@@ -41,7 +44,7 @@ type Game = {
     finishedTime?: number,
 }
 
-type State = {
+export type State = {
     canvas?: HTMLCanvasElement,
     streamerName: string,
     chatters: Chatter[],
@@ -66,7 +69,7 @@ type State = {
     }
 }
 
-type Configuration = {
+export type Configuration = {
     fontSize: number,
     maxChatters: number,
     maxChattersPerRow: number,
@@ -78,7 +81,6 @@ type Configuration = {
 }
 
 const LOCAL_STORAGE_NAME = "TestStorage";
-let STATE: State;
 function stateInit(): State {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth - 10;
@@ -118,14 +120,14 @@ function stateInit(): State {
     return state;
 }
 
-const AUDIO_HEYGUYS = "sounds/HeyGuys.mp3";
+export const AUDIO_HEYGUYS = "sounds/HeyGuys.mp3";
 const AUDIO_CLAP_1 = "sounds/clap1.mp3";
 const AUDIO_CLAP_2 = "sounds/clap2.mp3";
 const AUDIO_CLAP_3 = "sounds/clap3.mp3";
 const AUDIO_CLAP_4 = "sounds/clap4.mp3";
 const AUDIO_CLAP_5 = "sounds/clap5.mp3";
 
-function playSoundRandomClapping(state: State, notThisIndex: number | undefined) {
+export function playSoundRandomClapping(state: State, notThisIndex: number | undefined) {
     let randomIndex = Math.floor(Math.random() * 5) + 1;
     if (randomIndex === notThisIndex) randomIndex = (randomIndex % 5) + 1;
     const path = `sounds/clap${randomIndex}.mp3`;
@@ -148,13 +150,12 @@ function loadSounds(state: State) {
 }
 
 
-function localStorageStoreChatters(state: State) {
+export function localStorageStoreChatters(state: State) {
     localStorage.setItem(LOCAL_STORAGE_NAME, JSON.stringify(state.chatters));
 }
 
 function initMyApp() {
     const state = stateInit();
-    STATE = state;
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         addChatMessage(user, message, state);

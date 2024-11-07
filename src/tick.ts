@@ -1,4 +1,8 @@
-function tick(state: State) {
+import { addChatMessageToChatter } from "./chatMessageHandler.js";
+import { Chatter, localStorageStoreChatters, State } from "./main.js";
+import { GameTicTacToe, ticTacToeCheckTurnTimerAndIfPlayersStillExist } from "./ticTacToe.js";
+
+export function tick(state: State) {
     deleteInactiveAvatars(state);
     doFrameRateCounterTick(state.frameRateCounter);
     doChatterDogAutoChat(state);

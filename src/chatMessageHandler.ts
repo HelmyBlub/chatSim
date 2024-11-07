@@ -1,5 +1,8 @@
+import { CHATTER_IMAGE_WIDTH } from "./draw.js";
+import { State, localStorageStoreChatters, Chatter } from "./main.js";
+import { handleGameTicTacToeChatCommand, handleTicTacToeMessage } from "./ticTacToe.js";
 
-function addChatMessage(userName: string, message: string, state: State) {
+export function addChatMessage(userName: string, message: string, state: State) {
     if (state.streamerName === userName) {
         const continueChatHandler = streamerCommands(message, state);
         if (!continueChatHandler) {
@@ -14,7 +17,7 @@ function addChatMessage(userName: string, message: string, state: State) {
     localStorageStoreChatters(state);
 }
 
-function addChatMessageToChatter(chatter: Chatter, message: string, state: State) {
+export function addChatMessageToChatter(chatter: Chatter, message: string, state: State) {
     const maxMessageLength = state.config.maxMessageLength;
     let messageCapSized = message;
     if (chatter.state == "sleeping") chatter.state = "sitting";

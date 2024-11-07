@@ -1,4 +1,7 @@
-const CHATTER_IMAGE_WIDTH = 200;
+import { AUDIO_HEYGUYS, Chatter, localStorageStoreChatters, playSoundRandomClapping, State } from "./main.js";
+import { drawTicTacToeBoard } from "./ticTacToe.js";
+
+export const CHATTER_IMAGE_WIDTH = 200;
 const CHATTER_IMAGE_HEIGHT = 200;
 const BLINK_DURATION = 250;
 const IMAGE_PATH_CHATTER = "images/chatter.png";
@@ -17,7 +20,7 @@ const IMAGE_PATH_BUTTER = "images/butter.png";
 const IMAGE_PATH_CHOCOLATE_CHIPS = "images/chocolateChips.png";
 const IMAGE_PATH_EGG = "images/egg.png";
 
-function loadImages(state: State) {
+export function loadImages(state: State) {
     state.images[IMAGE_PATH_CHATTER] = loadImage(IMAGE_PATH_CHATTER);
     state.images[IMAGE_PATH_CHATTER_HEAD_] = loadImage(IMAGE_PATH_CHATTER_HEAD_);
     state.images[IMAGE_PATH_CHATTER_BODY] = loadImage(IMAGE_PATH_CHATTER_BODY);
@@ -40,7 +43,7 @@ function loadImage(path: string) {
     return imageChatter;
 }
 
-function draw(state: State) {
+export function draw(state: State) {
     let canvas = state.canvas!;
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -575,7 +578,7 @@ function drawEyes(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State)
     }
 }
 
-function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, outlineColor: string = "white", fillColor: string = "black") {
+export function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, outlineColor: string = "white", fillColor: string = "black") {
     ctx.fillStyle = fillColor;
     ctx.strokeStyle = outlineColor;
     ctx.lineWidth = 2;
@@ -585,7 +588,7 @@ function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: num
     ctx.fillText(text, x, y);
 }
 
-function drawTextWithBackgroundAndOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, alpha: number) {
+export function drawTextWithBackgroundAndOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, alpha: number) {
     ctx.fillStyle = "white";
     ctx.globalAlpha = alpha;
     const metrics = ctx.measureText(text);
