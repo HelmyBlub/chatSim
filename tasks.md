@@ -1,22 +1,33 @@
 Next Tasks:
-- check github access. Need git repo
-- add simple game involving everyone
-    - steps:
-        - add cookie baking game
-            - perparing cookies
-            - put cookies in oven
-            - take cookies out on time
-                - to late -> cookies are black 
-                - far to late, oven begins burning
-                - to soon -> don't taste well
-            - put into cookie jar
+    - baking game:
+        - perparing cookies
+            - command "bake cookies" starts chatterDog perparing cookies animation
+            - put on chef/cook head
+            - bowl throw in stuff 
+                - bowl
+                - butter
+                - sugar
+                - egg
+                - flour
+                - chocolate chips
+
+            - shape dough into balls and put in oven until full
+                - can be faster with more chatters
+            - fills oven with cookies
+            - if oven is full, it automatically starts baking
+        - take cookies out on time with command
+            - anyone can do it
+            - to late -> cookies are black 
+            - to soon -> don't taste well
+        - put into cookie jar, throw away, or put back to oven
+        - cookies jars cookie need property to store if undercooked/overcooked(black)
         - cookie eating command needs to take out a random cookie
-            - 
             
     - eat cooking (only possible if cookies left).
-    - bake cookie (takes some effort) 
+    - bake cookie (takes some effort)
         - mini game where the ingredients have to be put in?
         - baked cookies are for every chatter
+- change to modules?
 - outfits. Dogs can wear clothing. Store choices for chatters even when leaving
 
 Big Idea:
@@ -32,29 +43,4 @@ Big Idea:
 
 
 Tasks done today:
-- make bake cookie command and cookie counter. No game required yet
-    - voisualization of available cookies: cookie jar, 
-        - should display correct amount of cookies?
-- start with eating cookie command and animation. No cookies baking required yet
-    - cookie image
-        - cookie eating frames. Cookies eaten 0%, 33%, 66%
-    - command
-    - add animation
-        - dog mouth animation
-- add my app to OBS end screen
-- tictactoe
-    - add to displayed chat commands
-    - don't delete players who play 
-    - bug: if player leaves without taking his turn, game can not finish
-        - if player does not play in a certain amount of time, he should lose the game
-- game: tic tac toe
-    - command1 "TicTacToe"
-    - second chatter to write "TicTacToe" will join
-    - how to place "top", "bottom", "left", "right", "middle"
-    - will be displaye somewhere
-    - possibility for multiple to play at the same time
-    - each chatter can only play one thing at a time
-- multiple chatterDogs row
-- OBS overlay performance checks
-    - framerate checks
-    - add alot of chatterDogs who randomly chat and see performance
+- check github access. setup git repo

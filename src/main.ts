@@ -20,7 +20,7 @@ type Chatter = {
         lastClapIndex?: number,
     },
     draw: {
-        pawAnimation: "sit" | "wave" | "clap" | "slowClap" | 'notLikeThis' | 'eatCookie',
+        pawAnimation: "sit" | "wave" | "clap" | "slowClap" | "notLikeThis" | "eatCookie" | "bake cookies",
         pawAnimationStart?: number,
         pawAnimationSoundPlayed?: boolean,
         nextPupilMoveTime: number,

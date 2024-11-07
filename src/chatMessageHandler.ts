@@ -43,24 +43,29 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
             return false;
         case "HeyGuys":
             chatter.draw.pawAnimation = "wave";
+            chatter.draw.pawAnimationStart = undefined;
             return false;
         case "clap":
             chatter.draw.pawAnimation = "clap";
+            chatter.draw.pawAnimationStart = undefined;
             return false;
-        case "Kappa":
-        case "slow clap":
+        case "Kappa": case "slow clap":
             chatter.draw.pawAnimation = "slowClap";
+            chatter.draw.pawAnimationStart = undefined;
             return false;
         case "NotLikeThis":
             chatter.draw.pawAnimation = "notLikeThis";
+            chatter.draw.pawAnimationStart = undefined;
             return false;
-        case "eat cookie":
+        case "eat cookie": case "eatCookie":
             if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
                 chatter.draw.pawAnimation = "eatCookie";
                 state.gamesData.cookieGame.cookieCounter--;
             }
             return false;
         case "bake cookie": case "bake cookies":
+            if (chatter.draw.pawAnimation !== "bake cookies") chatter.draw.pawAnimationStart = undefined;
+            chatter.draw.pawAnimation = "bake cookies";
             state.gamesData.cookieGame.cookieCounter++;
             return false;
         case "TicTacToe":

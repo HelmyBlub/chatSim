@@ -9,6 +9,13 @@ const IMAGE_PATH_PUPILS = "images/pupils.png";
 const IMAGE_PATH_DOG_PAWS = "images/dogPaws.png";
 const IMAGE_PATH_COOKIE = "images/cookie.png";
 const IMAGE_PATH_UNLABLED_JAR = "images/unlabledJar.png";
+const IMAGE_PATH_CHEF_HEAD = "images/chefHead.png";
+
+const IMAGE_PATH_BOWL = "images/bowl.png";
+const IMAGE_PATH_BAG = "images/bag.png";
+const IMAGE_PATH_BUTTER = "images/butter.png";
+const IMAGE_PATH_CHOCOLATE_CHIPS = "images/chocolateChips.png";
+const IMAGE_PATH_EGG = "images/egg.png";
 
 function loadImages(state: State) {
     state.images[IMAGE_PATH_CHATTER] = loadImage(IMAGE_PATH_CHATTER);
@@ -19,6 +26,12 @@ function loadImages(state: State) {
     state.images[IMAGE_PATH_DOG_PAWS] = loadImage(IMAGE_PATH_DOG_PAWS);
     state.images[IMAGE_PATH_COOKIE] = loadImage(IMAGE_PATH_COOKIE);
     state.images[IMAGE_PATH_UNLABLED_JAR] = loadImage(IMAGE_PATH_UNLABLED_JAR);
+    state.images[IMAGE_PATH_CHEF_HEAD] = loadImage(IMAGE_PATH_CHEF_HEAD);
+    state.images[IMAGE_PATH_BOWL] = loadImage(IMAGE_PATH_BOWL);
+    state.images[IMAGE_PATH_BAG] = loadImage(IMAGE_PATH_BAG);
+    state.images[IMAGE_PATH_BUTTER] = loadImage(IMAGE_PATH_BUTTER);
+    state.images[IMAGE_PATH_CHOCOLATE_CHIPS] = loadImage(IMAGE_PATH_CHOCOLATE_CHIPS);
+    state.images[IMAGE_PATH_EGG] = loadImage(IMAGE_PATH_EGG);
 }
 
 function loadImage(path: string) {
@@ -38,11 +51,11 @@ function draw(state: State) {
         drawDogChatMessages(ctx, chatter, state);
     }
     drawGames(ctx, state);
-    drawCookieCounter(ctx, state);
+    drawCookieJar(ctx, state);
     drawFrameRate(ctx, state);
 }
 
-function drawCookieCounter(ctx: CanvasRenderingContext2D, state: State) {
+function drawCookieJar(ctx: CanvasRenderingContext2D, state: State) {
     const jarImage = state.images[IMAGE_PATH_UNLABLED_JAR];
     const cookieImage = state.images[IMAGE_PATH_COOKIE];
     ctx.font = `bold ${state.config.fontSize}px Arial`;
@@ -189,6 +202,10 @@ function drawChatterDog(ctx: CanvasRenderingContext2D, chatter: Chatter, state: 
             ctx.drawImage(chatterDogBody, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT + 40, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
             ctx.drawImage(chatterDogHead, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX + 5, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT - 10, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
             drawEyes(ctx, chatter, state);
+            if (chatter.draw.pawAnimation === "bake cookies") {
+                const chefHeadImage = state.images[IMAGE_PATH_CHEF_HEAD];
+                ctx.drawImage(chefHeadImage, 0, 0, 100, 100, chatter.posX + 50, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT - 25, 100, 100);
+            }
             drawChatterDogMouth(ctx, chatter, state);
             drawPaws(ctx, chatter, state);
             break;
@@ -390,6 +407,93 @@ function drawPaws(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State)
             const cookieImage = state.images[IMAGE_PATH_COOKIE];
             const cookieSize = 60;
             if (cookieFrame < 3) ctx.drawImage(cookieImage, 0 + cookieFrame * 80, 0, 80, 80, pawsMiddleX - cookieSize / 2, pawsTopY + cookieYOffset, cookieSize, cookieSize);
+        } else if (chatter.draw.pawAnimation === "bake cookies") {
+            const targetRotationValue = Math.PI / 4 * 3;
+            let rotationValue = 0;
+            const ingredientList: { image: string, name?: string, paw: string, offsetX: number, yOffset: number }[] = [
+                { image: IMAGE_PATH_BUTTER, paw: "left", offsetX: -10, yOffset: 0 },
+                { image: IMAGE_PATH_EGG, paw: "right", offsetX: 60, yOffset: 0 },
+                { name: "Sugar", image: IMAGE_PATH_BAG, paw: "both", offsetX: 0, yOffset: -50 },
+                { name: "Flour", image: IMAGE_PATH_BAG, paw: "both", offsetX: 0, yOffset: -50 },
+                { image: IMAGE_PATH_CHOCOLATE_CHIPS, paw: "left", offsetX: -10, yOffset: 0 }
+            ];
+            const pawMoveUpTime = 500;
+            let currentIngredientIndex = -1;
+            let pawLengthScaling = 1;
+            const oneCycleTime = pawMoveUpTime * 2;
+            if (timePassed < pawMoveUpTime * ingredientList.length * 2) {
+                const rotationFactor = Math.abs(Math.cos(Math.PI * 2 / (oneCycleTime) * timePassed) - 1) / 2;
+                currentIngredientIndex = Math.floor(timePassed / oneCycleTime);
+                rotationValue = targetRotationValue * rotationFactor;
+                //pawLengthScaling = 1 + (timePassed / pawMoveUpTime) * (targetPawLengthScaling - 1);
+            } else {
+                rotationValue = 0;
+                resetToSitting(chatter, state);
+                //chatter.draw.pawAnimationStart = undefined;
+            }
+            let rotationValueLeft = rotationValue * 0.98;
+            let rotationValueRight = rotationValue * 0.94;
+            if (currentIngredientIndex > -1 && currentIngredientIndex < ingredientList.length) {
+                const currentIngredient = ingredientList[currentIngredientIndex];
+                if (currentIngredient.paw === "left") {
+                    rotationValueRight = 0;
+                } else if (currentIngredient.paw === "right") {
+                    rotationValueLeft = 0;
+                }
+            }
+            ctx.save();
+            ctx.translate(rotatePawLeftX, rotatePawY);
+            ctx.rotate(rotationValueLeft);
+            ctx.translate(-rotatePawLeftX, -rotatePawY);
+            ctx.drawImage(chatterDogPaws, 0, 0, pawWidth, 60, pawsMiddleX - pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(rotatePawRightX, rotatePawY);
+            ctx.rotate(-rotationValueRight);
+            ctx.translate(-rotatePawRightX, -rotatePawY);
+            ctx.drawImage(chatterDogPaws, pawWidth, 0, pawWidth, 60, pawsMiddleX + pawOffsetX, pawsTopY, pawWidth, 60 * pawLengthScaling);
+            ctx.restore();
+
+            if (currentIngredientIndex > -1 && currentIngredientIndex < ingredientList.length) {
+                const currentIngredient = ingredientList[currentIngredientIndex];
+                const ingredientOffsetY = -(rotationValue / targetRotationValue) * 50 + 40 + currentIngredient.yOffset;
+                const currentCyclePerCent = (timePassed % oneCycleTime) / oneCycleTime;
+                let ingredientOffsetX = currentIngredient.offsetX;
+                ctx.save();
+                if (currentCyclePerCent > 0.5) {
+                    const imageBowl = state.images[IMAGE_PATH_BOWL];
+                    ctx.drawImage(imageBowl, 0, 0, 100, 100, pawsMiddleX - 38, pawsTopY - 40, 100, 100);
+                    ingredientOffsetX *= 1 - (currentCyclePerCent - 0.5) * 2;
+                    let bowlPath = new Path2D();
+                    bowlPath.moveTo(pawsMiddleX - 38 - 50, pawsTopY - 40);
+                    bowlPath.lineTo(pawsMiddleX - 38 + 2, pawsTopY - 40 + 47);
+                    bowlPath.quadraticCurveTo(pawsMiddleX - 38 + 51, pawsTopY - 40 + 76, pawsMiddleX - 38 + 98, pawsTopY - 40 + 50);
+                    bowlPath.lineTo(pawsMiddleX - 38 + 150, pawsTopY - 40 + 50);
+                    bowlPath.lineTo(pawsMiddleX - 38 + 150, pawsTopY - 40 - 100);
+                    bowlPath.lineTo(pawsMiddleX - 38 - 50, pawsTopY - 40 - 100);
+                    bowlPath.lineTo(pawsMiddleX - 38 - 50, pawsTopY - 40);
+                    ctx.clip(bowlPath);
+                }
+                if (currentIngredient.name === undefined) {
+                    const image = state.images[currentIngredient.image];
+                    ctx.drawImage(image, 0, 0, 100, 100, pawsMiddleX - 38 + ingredientOffsetX, pawsTopY - 40 + ingredientOffsetY, 100, 100);
+                } else {
+                    const image = state.images[currentIngredient.image];
+                    ctx.font = "18px Arial";
+                    const textWidth = ctx.measureText(currentIngredient.name).width;
+                    ctx.drawImage(image, 0, 0, 100, 100, pawsMiddleX - 38 + ingredientOffsetX, pawsTopY - 40 + ingredientOffsetY, 100, 100);
+                    drawTextWithOutline(ctx, currentIngredient.name, pawsMiddleX + 10 - Math.floor(textWidth / 2) + ingredientOffsetX, pawsTopY + 30 + ingredientOffsetY);
+                }
+                ctx.restore();
+                if (currentCyclePerCent <= 0.5) {
+                    const imageBowl = state.images[IMAGE_PATH_BOWL];
+                    ctx.drawImage(imageBowl, 0, 0, 100, 100, pawsMiddleX - 38, pawsTopY - 40, 100, 100);
+                }
+            } else {
+                const imageBowl = state.images[IMAGE_PATH_BOWL];
+                ctx.drawImage(imageBowl, 0, 0, 100, 100, pawsMiddleX - 38, pawsTopY - 40, 100, 100);
+            }
         }
     }
 }
