@@ -310,7 +310,7 @@ function drawBakeCookies(ctx: CanvasRenderingContext2D, chatter: Chatter, state:
     const targetRotationValue = Math.PI / 4 * 3;
     let rotationValue = 0;
     const pawMoveUpTime = 500;
-    const cookieShapingTime = 200;
+    const cookieShapingTime = 2000;
     let pawLengthScaling = 1;
     let rotationValueLeft = 0;
     let rotationValueRight = 0;
@@ -387,8 +387,8 @@ function drawBakeCookies(ctx: CanvasRenderingContext2D, chatter: Chatter, state:
             ctx.drawImage(imageBowl, 0, 0, 100, 100, paintValues.pawsMiddleX - 38, paintValues.pawsTopY - 40, 100, 100);
         } else {
             rotationValue = 0;
-            //resetToSitting(chatter, state);
-            chatter.draw.pawAnimationStart = undefined;
+            resetToSitting(chatter, state);
+            //chatter.draw.pawAnimationStart = undefined;
         }
     }
 }

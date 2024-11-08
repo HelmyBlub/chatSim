@@ -38,7 +38,7 @@ export type Chatter = {
 export type Game = {
     name: string,
     id: number,
-    players: Chatter[],
+    players?: Chatter[],
     winner?: Chatter,
     finishedTime?: number,
 }

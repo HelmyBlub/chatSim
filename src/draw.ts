@@ -117,7 +117,8 @@ function drawCommandInfo(ctx: CanvasRenderingContext2D) {
         "Kappa",
         "HeyGuys",
         GAME_TIC_TAC_TOE,
-        "eatCookie"
+        "eatCookie",
+        "bake cookies",
     ];
 
     ctx.font = `bold ${fontSize}px Arial`;

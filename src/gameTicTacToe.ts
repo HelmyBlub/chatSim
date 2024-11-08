@@ -7,6 +7,7 @@ export const GAME_TIC_TAC_TOE = "TicTacToe"
 export type GameTicTacToe = Game & {
     field: number[][],
     currentPlayersTurnIndex: number,
+    players: Chatter[],
     turnTimer: number,
     turnTime: number,
 }
@@ -23,7 +24,7 @@ export function addGameFunctionsTicTacToe() {
 function handleStartMessage(chatter: Chatter, state: State) {
     if (chatter.playingGameIdRef !== undefined) {
         const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
-        if (chatter.name !== state.streamerName && chattersGame && chattersGame.players.find(p => p === chatter)) return;
+        if (chatter.name !== state.streamerName && chattersGame && chattersGame.players && chattersGame.players.find(p => p === chatter)) return;
         chatter.playingGameIdRef = undefined;
     }
     for (let game of state.gamesData.games) {

@@ -36,6 +36,11 @@ export function addChatMessageToChatter(chatter: Chatter, message: string, state
 }
 
 function handleGameCommand(chatter: Chatter, message: string, state: State): boolean {
+    for (let game of state.gamesData.games) {
+        if (game.players === undefined) {
+            GAME_FUNCTIONS[game.name].handleChatCommand(game, chatter, message, state);
+        }
+    }
     if (chatter.playingGameIdRef === undefined) return false;
     const chattersGame = state.gamesData.games.find((g) => g.id === chatter.playingGameIdRef);
     if (!chattersGame) {

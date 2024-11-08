@@ -10,6 +10,8 @@ export type GameCookieOven = Game & {
     maxCookies: number,
     bakingStartedTime?: number,
     bakeDuration: number,
+    cookiesPutIntoJar?: boolean,
+    delayPutIntoJarWhenFinished: number,
 }
 
 export function addGameFunctionsCookieOven() {
@@ -40,11 +42,11 @@ export function addCookieToOvenGame(state: State): GameCookieOven {
 function createGameCookieOven(id: number): GameCookieOven {
     return {
         name: GAME_COOKIE_OVEN,
-        players: [],
         id,
         cookieAmount: 0,
-        bakeDuration: 6000,
+        bakeDuration: 60000,
         maxCookies: 24,
+        delayPutIntoJarWhenFinished: 5000,
     }
 }
 
@@ -58,13 +60,20 @@ function handleChatCommand(game: Game, chatter: Chatter, message: string, state:
 
 function tick(game: Game, state: State) {
     const ovenGame = game as GameCookieOven;
+    if (ovenGame.bakingStartedTime !== undefined && ovenGame.bakeDuration + ovenGame.bakingStartedTime + 3000 < performance.now() && ovenGame.finishedTime === undefined) {
+        ovenGame.finishedTime = performance.now();
+    }
+    if (!ovenGame.cookiesPutIntoJar && ovenGame.finishedTime !== undefined && ovenGame.finishedTime + ovenGame.delayPutIntoJarWhenFinished < performance.now()) {
+        state.gamesData.cookieGame.cookieCounter += ovenGame.cookieAmount;
+        ovenGame.cookiesPutIntoJar = true;
+    }
 }
 
 function draw(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: number, state: State) {
     const ovenGame = game as GameCookieOven;
     const ovenImage = state.images[IMAGE_PATH_OVEN];
     let clipPath: Path2D;
-    if (ovenGame.bakingStartedTime !== undefined) {
+    if (ovenGame.bakingStartedTime !== undefined && ovenGame.finishedTime === undefined) {
         ctx.drawImage(ovenImage, 0, 0, 200, 200, leftX, topY, 200, 200);
         clipPath = getClosedOvenClipPath(leftX, topY);
     } else {
@@ -74,22 +83,37 @@ function draw(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: nu
     const cookiesPerRowInOven = 6;
 
     let cookieImage = state.images[IMAGE_PATH_UNBAKED_COOKIE];
+    let srcOffsetY = 0;
     if (ovenGame.bakingStartedTime !== undefined) {
         const cookingTimer = Math.floor((ovenGame.bakeDuration + ovenGame.bakingStartedTime - performance.now()) / 1000);
         ctx.font = "20px Arial";
         drawTextWithOutline(ctx, cookingTimer.toString(), leftX, topY - 26);
-        if (cookingTimer <= 0) {
-            cookieImage = state.images[IMAGE_PATH_COOKIE];
+        if (cookingTimer <= 0) cookieImage = state.images[IMAGE_PATH_COOKIE];
+        if (cookingTimer <= -ovenGame.bakeDuration / 2000) srcOffsetY = 80;
+    }
+    if (ovenGame.finishedTime === undefined) {
+        ctx.save()
+        ctx.clip(clipPath);
+        for (let i = 0; i < ovenGame.cookieAmount; i++) {
+            const offsetX = (i % cookiesPerRowInOven) * 20 + 30;
+            const offsetY = -(Math.floor(i / cookiesPerRowInOven)) * 20 + 120;
+            ctx.drawImage(cookieImage, 0, 0 + srcOffsetY, 80, 80, leftX + offsetX, topY + offsetY, 40, 40);
+        }
+        ctx.restore();
+    } else if (state.gamesData.cookieGame.cookieJarX && state.gamesData.cookieGame.cookieJarY) {
+        const targetX = state.gamesData.cookieGame.cookieJarX + 80;
+        const targetY = state.gamesData.cookieGame.cookieJarY + 20;
+        const timeFactor = (ovenGame.finishedTime + ovenGame.delayPutIntoJarWhenFinished - performance.now()) / ovenGame.delayPutIntoJarWhenFinished;
+        if (timeFactor > 0) {
+            for (let i = 0; i < ovenGame.cookieAmount; i++) {
+                const offsetX = (i % cookiesPerRowInOven) * 20 + 30;
+                const offsetY = -(Math.floor(i / cookiesPerRowInOven)) * 20 + 120;
+                const cookieX = (leftX + offsetX) * timeFactor + targetX * (1 - timeFactor);
+                const cookieY = (topY + offsetY) * timeFactor + targetY * (1 - timeFactor);
+                ctx.drawImage(cookieImage, 0, 0, 80, 80, cookieX, cookieY, 40, 40);
+            }
         }
     }
-    ctx.save()
-    ctx.clip(clipPath);
-    for (let i = 0; i < ovenGame.cookieAmount; i++) {
-        const offsetX = (i % cookiesPerRowInOven) * 20 + 30;
-        const offsetY = -(Math.floor(i / cookiesPerRowInOven)) * 20 + 120;
-        ctx.drawImage(cookieImage, 0, 0, 80, 80, leftX + offsetX, topY + offsetY, 40, 40);
-    }
-    ctx.restore();
 }
 
 function getOpenOvenClipPath(leftX: number, topY: number): Path2D {
