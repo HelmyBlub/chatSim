@@ -2,6 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_COOKIE, IMAGE_PATH_UNBAKED_COOKIE, load
 import { addCookieToOvenGame } from "./gameCookieOven.js";
 import { AUDIO_HEYGUYS, playSoundRandomClapping, localStorageStoreChatters } from "./main.js";
 import { Chatter, State } from "./mainModels.js";
+import { drawOutfit } from "./outfits.js";
 
 export const CHATTER_IMAGE_WIDTH = 200;
 const CHATTER_IMAGE_HEIGHT = 200;
@@ -111,8 +112,10 @@ function drawChatterDog(ctx: CanvasRenderingContext2D, chatter: Chatter, state: 
     if (walkingCycle === 3) walkingCycle = 1;
     switch (chatter.state) {
         case "sitting":
+            const headX = chatter.posX + 5;
+            const headY = ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT - 10;
             ctx.drawImage(chatterDogBody, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_HEIGHT + chatter.posY + 40, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
-            ctx.drawImage(chatterDogHead, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX + 5, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT - 10, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
+            ctx.drawImage(chatterDogHead, 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, headX, headY, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
             drawEyes(ctx, chatter, state);
             if (chatter.draw.pawAnimation === "bake cookies") {
                 const chefHeadImage = state.images[IMAGE_PATH_CHEF_HEAD];
@@ -120,6 +123,7 @@ function drawChatterDog(ctx: CanvasRenderingContext2D, chatter: Chatter, state: 
             }
             drawChatterDogMouth(ctx, chatter, state);
             drawPaws(ctx, chatter, state);
+            drawOutfit(ctx, chatter, state, headX, headY);
             break;
         case "joining":
             ctx.drawImage(chatterDogBody, CHATTER_IMAGE_WIDTH * (1 + walkingCycle), 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT + 40, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
@@ -388,7 +392,6 @@ function drawBakeCookies(ctx: CanvasRenderingContext2D, chatter: Chatter, state:
         } else {
             rotationValue = 0;
             resetToSitting(chatter, state);
-            //chatter.draw.pawAnimationStart = undefined;
         }
     }
 }

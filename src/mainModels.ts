@@ -21,6 +21,9 @@ export type Chatter = {
     sound: {
         lastClapIndex?: number,
     },
+    outfit?: {
+        glasses?: number,
+    }
     draw: {
         pawAnimation: "sit" | "wave" | "clap" | "slowClap" | "notLikeThis" | "eatCookie" | "bake cookies",
         pawAnimationStart?: number,
@@ -47,6 +50,7 @@ export type State = {
     canvas?: HTMLCanvasElement,
     streamerName: string,
     chatters: Chatter[],
+    inactiveChatters: Chatter[],
     images: { [key: string]: HTMLImageElement },
     sounds: { [key: string]: HTMLAudioElement },
     frameRateCounter?: number[];
@@ -101,6 +105,7 @@ export function stateInit(): State {
             testDogName: "testDog",
         },
         chatters: [],
+        inactiveChatters: [],
         streamerName: "HelmiBlub",
         frameRateCounter: [],
         config: {

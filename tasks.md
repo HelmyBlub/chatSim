@@ -1,5 +1,10 @@
 Next Tasks:
 - outfits. Dogs can wear clothing. Store choices for chatters even when leaving
+    - outfits only for sitting?
+    - command: 
+        - glasses 1, sunglasses
+            - no glasses
+        - hair 1, hair x
 
 Big Idea:
 - do some game for chatters.

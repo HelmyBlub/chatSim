@@ -3,6 +3,7 @@ import { localStorageStoreChatters } from "./main.js";
 import { State, Chatter } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
+import { handleOutfitMessage } from "./outfits.js";
 
 export function addChatMessage(userName: string, message: string, state: State) {
     if (state.streamerName === userName) {
@@ -26,6 +27,7 @@ export function addChatMessageToChatter(chatter: Chatter, message: string, state
     chatter.lastMessageTime = performance.now();
     let stillDoChatMessage = chatterCommands(chatter, messageCapSized, state);
     if (stillDoChatMessage) stillDoChatMessage = !handleGameCommand(chatter, messageCapSized, state);
+    if (stillDoChatMessage) stillDoChatMessage = !handleOutfitMessage(chatter, message, state);
     if (stillDoChatMessage) {
         if (messageCapSized.length > maxMessageLength) messageCapSized = messageCapSized.substring(0, maxMessageLength);
         chatter.chatMessages.push({ message: messageCapSized, receiveTime: performance.now() });
@@ -83,6 +85,7 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
         case "eat cookie": case "eatCookie":
             if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
                 chatter.draw.pawAnimation = "eatCookie";
+                chatter.draw.pawAnimationStart = undefined;
                 state.gamesData.cookieGame.cookieCounter--;
             }
             return false;
@@ -131,22 +134,29 @@ function streamerCommands(message: string, state: State): boolean {
 
 function addChatterAndRemoveMostInactive(userName: string, state: State) {
     let chatterSpacing = 10;
-    const chatter: Chatter = {
-        state: "joining",
-        speed: 2,
-        name: userName, chatMessages: [],
-        posX: -CHATTER_IMAGE_WIDTH,
-        posY: 0,
-        lastMessageTime: performance.now(),
-        sound: {},
-        draw: {
-            pawAnimation: "sit",
-            mouthAnimation: "closed",
-            nextPupilMoveTime: 0,
-            pupilX: 0,
-            pupilY: 0,
-        }
-    };
+    let chatterIndex: number = state.inactiveChatters.findIndex(c => c.name === userName);
+    let chatter: Chatter;
+    if (chatterIndex === -1) {
+        chatter = {
+            state: "joining",
+            speed: 2,
+            name: userName, chatMessages: [],
+            posX: -CHATTER_IMAGE_WIDTH,
+            posY: 0,
+            lastMessageTime: performance.now(),
+            sound: {},
+            draw: {
+                pawAnimation: "sit",
+                mouthAnimation: "closed",
+                nextPupilMoveTime: 0,
+                pupilX: 0,
+                pupilY: 0,
+            }
+        };
+    } else {
+        chatter = state.inactiveChatters.splice(chatterIndex, 1)[0];
+        chatter.state = "joining";
+    }
     state.chatters.push(chatter);
     if (state.chatters.length > state.config.maxChatters) {
         let mostInactiveIndex = -1;

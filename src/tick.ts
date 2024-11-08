@@ -133,7 +133,8 @@ function deleteInactiveAvatars(state: State) {
             }
         }
         if (chatter.state === "leaving" && chatter.posX < -200 + chatter.speed) {
-            state.chatters.splice(i, 1);
+            const inactiveChatter = state.chatters.splice(i, 1);
+            state.inactiveChatters.push(inactiveChatter[0]);
             localStorageStoreChatters(state);
         }
     }

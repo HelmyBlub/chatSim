@@ -2,6 +2,7 @@ import { drawChatterDogAndMessages, loadChatterDogImages } from "./drawChatterDo
 import { State } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
+import { loadOutfitImages } from "./outfits.js";
 
 export const IMAGE_PATH_COOKIE = "images/cookie.png";
 export const IMAGE_PATH_OVEN = "images/oven.png";
@@ -11,6 +12,7 @@ const IMAGE_PATH_UNLABLED_JAR = "images/unlabledJar.png";
 
 export function loadImages(state: State) {
     loadChatterDogImages(state);
+    loadOutfitImages(state);
     state.images[IMAGE_PATH_COOKIE] = loadImage(IMAGE_PATH_COOKIE);
     state.images[IMAGE_PATH_UNLABLED_JAR] = loadImage(IMAGE_PATH_UNLABLED_JAR);
     state.images[IMAGE_PATH_OVEN] = loadImage(IMAGE_PATH_OVEN);
