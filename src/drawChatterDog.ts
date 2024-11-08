@@ -122,8 +122,8 @@ function drawChatterDog(ctx: CanvasRenderingContext2D, chatter: Chatter, state: 
                 ctx.drawImage(chefHeadImage, 0, 0, 100, 100, chatter.posX + 50, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT - 25, 100, 100);
             }
             drawChatterDogMouth(ctx, chatter, state);
-            drawPaws(ctx, chatter, state);
             drawOutfit(ctx, chatter, state, headX, headY);
+            drawPaws(ctx, chatter, state);
             break;
         case "joining":
             ctx.drawImage(chatterDogBody, CHATTER_IMAGE_WIDTH * (1 + walkingCycle), 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT, chatter.posX, ctx.canvas.height + chatter.posY - CHATTER_IMAGE_HEIGHT + 40, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_HEIGHT);
