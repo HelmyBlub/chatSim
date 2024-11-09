@@ -6,12 +6,15 @@ type Position = {
 }
 
 type Citizen = {
+    job?: "food gatherer" | "food market",
     name: string,
-    state: "idle" | "searchingFood" | "eating",
+    state: "idle" | "gatherFood" | "sellingToMarket" | "buyFoodFromMarket" | "stationary",
     speed: number,
     position: Position,
     moveTo?: Position,
     foodPerCent: number,
+    carryStuff: Mushroom[],
+    maxCarry: number,
 }
 
 type Mushroom = {
@@ -42,9 +45,9 @@ function chatSimStateInit(): ChatSimState {
         canvas,
         time: 0,
         map: {
-            paintOffset: { x: 150, y: 150 },
-            mapHeight: 200,
-            mapWidth: 200,
+            paintOffset: { x: 0, y: 0 },
+            mapHeight: 400,
+            mapWidth: 400,
             citizens: [],
             mushrooms: [],
         }
@@ -55,10 +58,12 @@ function addCitizen(user: string, state: ChatSimState) {
     if (state.map.citizens.find(c => c.name === user)) return;
     state.map.citizens.push({
         name: user,
-        speed: 1,
+        speed: 2,
         foodPerCent: 1,
         position: { x: 0, y: 0 },
-        state: "idle"
+        state: "idle",
+        carryStuff: [],
+        maxCarry: 10,
     })
 }
 
@@ -124,8 +129,8 @@ function calculateDistance(position1: Position, position2: Position): number {
 function tick(state: ChatSimState) {
     state.time += 16;
     for (let citizen of state.map.citizens) {
-        citizen.foodPerCent -= 0.0015;
-        if (citizen.foodPerCent < 0.5) citizen.state = "searchingFood";
+        citizen.foodPerCent -= 0.0010;
+        if (citizen.foodPerCent < 0.5) citizen.state = "gatherFood";
         if (citizen.state === "idle") {
             if (!citizen.moveTo) {
                 citizen.moveTo = {
@@ -133,7 +138,7 @@ function tick(state: ChatSimState) {
                     y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
                 }
             }
-        } else if (citizen.state === "searchingFood") {
+        } else if (citizen.state === "gatherFood") {
             if (!citizen.moveTo && state.map.mushrooms.length > 0) {
                 const mushroomIndex = Math.floor(Math.random() * state.map.mushrooms.length);
                 citizen.moveTo = {
@@ -188,7 +193,9 @@ function tick(state: ChatSimState) {
 async function runner(state: ChatSimState) {
     try {
         while (true) {
-            tick(state);
+            for (let i = 0; i < 1; i++) {
+                tick(state);
+            }
             paint(state);
             await sleep(16);
         }

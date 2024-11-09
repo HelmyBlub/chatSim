@@ -3,9 +3,18 @@ Tasks:
     - gathers mushrooms all the time
     - can carry up to 10 mushrooms
     - if reach max carry, sell to food seller
+    - try to sell for highest price
+    - i can eat my own mushrooms
 - job "food market"
     - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
-- citizen can decide to go buy mushrooms from box
+    - if many mushrooms on stock, buy them for less
+    - if low on mushrooms, sell for more
+    - can eat their own mushrooms
+- chatter can fix their prices?
+- citizen can decide to go buy mushrooms from food market
+- streamer can set limits which citizen are not allowed to break
+    - only allowed to break if they flag themselfes as criminal
+
 - use images
     - citizen image with move 8 directions
         - make top view image and rotate image => than just need some walking frames
