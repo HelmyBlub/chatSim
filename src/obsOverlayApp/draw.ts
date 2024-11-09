@@ -3,6 +3,7 @@ import { State } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { loadOutfitImages } from "./outfits.js";
+import { drawTextWithOutline, drawTextWithBackgroundAndOutline } from "../drawHelper.js";
 
 export const IMAGE_PATH_COOKIE = "images/cookie.png";
 export const IMAGE_PATH_OVEN = "images/oven.png";
@@ -23,27 +24,6 @@ export function loadImage(path: string) {
     const imageChatter = new Image();
     imageChatter.src = path;
     return imageChatter;
-}
-
-export function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, outlineColor: string = "white", fillColor: string = "black") {
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = outlineColor;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.strokeText(text, x, y);
-    ctx.stroke();
-    ctx.fillText(text, x, y);
-}
-
-export function drawTextWithBackgroundAndOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, alpha: number) {
-    ctx.fillStyle = "white";
-    ctx.globalAlpha = alpha;
-    const metrics = ctx.measureText(text);
-    const fontSize = metrics.fontBoundingBoxAscent;
-
-    ctx.fillRect(x, y - fontSize, metrics.width, fontSize);
-    ctx.globalAlpha = 1;
-    drawTextWithOutline(ctx, text, x, y);
 }
 
 export function draw(state: State) {

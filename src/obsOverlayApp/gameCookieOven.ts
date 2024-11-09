@@ -1,4 +1,4 @@
-import { drawTextWithOutline, IMAGE_PATH_COOKIE, IMAGE_PATH_OVEN, IMAGE_PATH_UNBAKED_COOKIE } from "./draw.js";
+import { IMAGE_PATH_COOKIE, IMAGE_PATH_OVEN, IMAGE_PATH_UNBAKED_COOKIE } from "./draw.js";
 import { Chatter, Game, State } from "./mainModels.js"
 import { GAME_FUNCTIONS } from "./tick.js";
 
@@ -135,3 +135,7 @@ function getClosedOvenClipPath(leftX: number, topY: number): Path2D {
     path.lineTo(leftX + 37, topY + 90);
     return path;
 }
+function drawTextWithOutline(ctx: CanvasRenderingContext2D, arg1: string, leftX: number, arg3: number) {
+    throw new Error("Function not implemented.");
+}
+

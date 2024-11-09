@@ -1,5 +1,12 @@
 Tasks:
-- thinking about bigger game idea and what could be first step towards it
+- separater from overlay app
+    - move stuff
+- have a "world map", finite size
+- mushrooms grow randomly
+- when someone writes a chat message, a character with his name joins the world
+- characters have hunger stat
+    - when hungry search for food
+    - can starve to death
 
 Big Idea:
 - do some game for chatters.

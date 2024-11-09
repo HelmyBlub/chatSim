@@ -1,4 +1,4 @@
-import { drawTextWithBackgroundAndOutline } from "./draw.js";
+import { drawTextWithBackgroundAndOutline } from "../drawHelper.js";
 import { Game, Chatter, State } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 
