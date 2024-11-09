@@ -1,8 +1,17 @@
 Tasks:
-- mushrooms grow randomly
-- characters have hunger stat
-    - when hungry search for food
-    - can starve to death
+- job "food gatherer"
+    - gathers mushrooms all the time
+    - can carry up to 10 mushrooms
+    - if reach max carry, sell to food seller
+- job "food market"
+    - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
+- citizen can decide to go buy mushrooms from box
+- use images
+    - citizen image with move 8 directions
+        - make top view image and rotate image => than just need some walking frames
+    - hungry citizen visualized
+    - starving citizen visualization
+    - mushroom image
 
 Big Idea:
 - do some game for chatters.
@@ -62,6 +71,10 @@ Big Idea:
 
 
 Tasks done today:
+- mushrooms grow randomly
+- characters have hunger stat
+    - when hungry search for food
+    - can starve to death
 - when someone writes a chat message, a character with his name joins the world
 - have a "world map", finite size
 - separater from overlay app

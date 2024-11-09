@@ -124,7 +124,7 @@ function calculateDistance(position1: Position, position2: Position): number {
 function tick(state: ChatSimState) {
     state.time += 16;
     for (let citizen of state.map.citizens) {
-        citizen.foodPerCent -= 0.001;
+        citizen.foodPerCent -= 0.0015;
         if (citizen.foodPerCent < 0.5) citizen.state = "searchingFood";
         if (citizen.state === "idle") {
             if (!citizen.moveTo) {
