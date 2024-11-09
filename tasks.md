@@ -1,9 +1,5 @@
 Tasks:
-- separater from overlay app
-    - move stuff
-- have a "world map", finite size
 - mushrooms grow randomly
-- when someone writes a chat message, a character with his name joins the world
 - characters have hunger stat
     - when hungry search for food
     - can starve to death
@@ -66,16 +62,7 @@ Big Idea:
 
 
 Tasks done today:
-- outfits. Dogs can wear clothing. Store choices for chatters even when leaving
-    - outfits only for sitting?
-    - command: 
-        - glasses 1, sunglasses
-            - no glasses
-- baking game:
-    - take cookies out on time with command
-        - anyone can do it
-    - put into cookie jar
-            
-    - eat cooking (only possible if cookies left).
-    - bake cookie
-        - baked cookies are for every chatter
+- when someone writes a chat message, a character with his name joins the world
+- have a "world map", finite size
+- separater from overlay app
+    - move stuff
