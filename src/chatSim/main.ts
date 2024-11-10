@@ -1,11 +1,12 @@
 import { drawTextWithOutline } from "../drawHelper.js";
+import { chatSimTick } from "./tick.js";
 
-type Position = {
+export type Position = {
     x: number,
     y: number,
 }
 
-type Citizen = {
+export type Citizen = {
     job?: "food gatherer" | "food market",
     name: string,
     state: "idle" | "gatherFood" | "sellingToMarket" | "buyFoodFromMarket" | "stationary",
@@ -15,25 +16,34 @@ type Citizen = {
     foodPerCent: number,
     carryStuff: Mushroom[],
     maxCarry: number,
+    skill: { [key: string]: number },
 }
 
-type Mushroom = {
+export type Mushroom = {
     foodValue: 1,
     position: Position,
 }
 
-type ChatSimMap = {
+export type ChatSimMap = {
     paintOffset: Position,
     mapHeight: number,
     mapWidth: number,
     citizens: Citizen[],
     mushrooms: Mushroom[],
+    maxMushrooms: number,
 }
 
-type ChatSimState = {
+export type ChatSimState = {
     canvas: HTMLCanvasElement,
     time: number,
+    gameSpeed: number,
     map: ChatSimMap,
+}
+
+export function calculateDistance(position1: Position, position2: Position): number {
+    const diffX = position1.x - position2.x;
+    const diffY = position1.y - position2.y;
+    return Math.sqrt(diffX * diffX + diffY * diffY);
 }
 
 function chatSimStateInit(): ChatSimState {
@@ -44,12 +54,14 @@ function chatSimStateInit(): ChatSimState {
     return {
         canvas,
         time: 0,
+        gameSpeed: 1,
         map: {
             paintOffset: { x: 0, y: 0 },
             mapHeight: 400,
             mapWidth: 400,
             citizens: [],
             mushrooms: [],
+            maxMushrooms: 2,
         }
     }
 }
@@ -64,6 +76,7 @@ function addCitizen(user: string, state: ChatSimState) {
         state: "idle",
         carryStuff: [],
         maxCarry: 10,
+        skill: {},
     })
 }
 
@@ -86,8 +99,23 @@ function initMyApp() {
     }
     //@ts-ignore
     ComfyJS.Init("HelmiBlub");
+    document.addEventListener('keyup', (e) => keyUp(e, state));
 
     runner(state);
+}
+
+function keyUp(event: KeyboardEvent, state: ChatSimState) {
+    switch (event.code) {
+        case "Period":
+            state.gameSpeed++;
+            break;
+        case "Comma":
+            if (state.gameSpeed > 0) state.gameSpeed--;
+            break
+        default:
+            console.log(event.key, event.code);
+            break;
+    }
 }
 
 function paint(state: ChatSimState) {
@@ -118,83 +146,29 @@ function paint(state: ChatSimState) {
         ctx.fillStyle = "red";
         ctx.fillRect(mapPaintMiddle.x + mushroom.position.x - mushroomSize / 2, mapPaintMiddle.y + mushroom.position.y - mushroomSize / 2, mushroomSize, mushroomSize);
     }
+    paintData(ctx, state);
 }
 
-function calculateDistance(position1: Position, position2: Position): number {
-    const diffX = position1.x - position2.x;
-    const diffY = position1.y - position2.y;
-    return Math.sqrt(diffX * diffX + diffY * diffY);
-}
-
-function tick(state: ChatSimState) {
-    state.time += 16;
-    for (let citizen of state.map.citizens) {
-        citizen.foodPerCent -= 0.0010;
-        if (citizen.foodPerCent < 0.5) citizen.state = "gatherFood";
-        if (citizen.state === "idle") {
-            if (!citizen.moveTo) {
-                citizen.moveTo = {
-                    x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
-                    y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
-                }
-            }
-        } else if (citizen.state === "gatherFood") {
-            if (!citizen.moveTo && state.map.mushrooms.length > 0) {
-                const mushroomIndex = Math.floor(Math.random() * state.map.mushrooms.length);
-                citizen.moveTo = {
-                    x: state.map.mushrooms[mushroomIndex].position.x,
-                    y: state.map.mushrooms[mushroomIndex].position.y,
-                }
-            }
-            for (let i = state.map.mushrooms.length - 1; i >= 0; i--) {
-                const mushroom = state.map.mushrooms[i];
-                const distance = calculateDistance(mushroom.position, citizen.position);
-                if (distance < 10) {
-                    state.map.mushrooms.splice(i, 1);
-                    citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroom.foodValue, 1);
-                    citizen.state = "idle";
-                    break;
-                }
-            }
+function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "black";
+    const offsetX = state.map.mapWidth + 100;
+    ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
+    for (let i = 0; i < state.map.citizens.length; i++) {
+        const citizen = state.map.citizens[i];
+        let text = `${citizen.name}: ${citizen.carryStuff.length} Mushrooms`;
+        if (citizen.job && citizen.skill[citizen.job] !== undefined) {
+            text += `, Job: ${citizen.job} ${citizen.skill[citizen.job]}`;
         }
-        if (citizen.moveTo) {
-            const diffX = citizen.moveTo.x - citizen.position.x;
-            const diffY = citizen.moveTo.y - citizen.position.y;
-            const distance = Math.sqrt(diffX * diffX + diffY * diffY);
-            if (citizen.speed - distance > 0) {
-                citizen.position.x = citizen.moveTo.x;
-                citizen.position.y = citizen.moveTo.y;
-                citizen.moveTo = undefined;
-            } else {
-                const factor = citizen.speed / distance;
-                citizen.position.x += diffX * factor;
-                citizen.position.y += diffY * factor;
-            }
-        }
-    }
-    if (state.map.mushrooms.length === 0) {
-        const newMushrooms: Mushroom = {
-            foodValue: 1,
-            position: {
-                x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
-                y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
-            }
-        }
-        state.map.mushrooms.push(newMushrooms);
-    }
-    for (let i = state.map.citizens.length - 1; i >= 0; i--) {
-        if (state.map.citizens[i].foodPerCent < 0) {
-            state.map.citizens.splice(i, 1);
-        }
+        ctx.fillText(text, offsetX, 50 + i * 26);
     }
 }
-
 
 async function runner(state: ChatSimState) {
     try {
         while (true) {
-            for (let i = 0; i < 1; i++) {
-                tick(state);
+            for (let i = 0; i < state.gameSpeed; i++) {
+                chatSimTick(state);
             }
             paint(state);
             await sleep(16);

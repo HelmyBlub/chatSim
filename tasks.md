@@ -1,15 +1,13 @@
 Tasks:
-- job "food gatherer"
-    - gathers mushrooms all the time
-    - can carry up to 10 mushrooms
-    - if reach max carry, sell to food seller
-    - try to sell for highest price
-    - i can eat my own mushrooms
+- store chatter names in localStorage, but not test names, use them
 - job "food market"
     - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
     - can eat their own mushrooms
+- job "food gatherer"
+    - if reach max carry, sell to food seller
+    - try to sell for highest price
 - chatter can fix their prices?
 - citizen can decide to go buy mushrooms from food market
 - streamer can set limits which citizen are not allowed to break
@@ -21,6 +19,17 @@ Tasks:
     - hungry citizen visualized
     - starving citizen visualization
     - mushroom image
+
+
+Tasks done today:
+- job "food gatherer"
+    - gathers mushrooms all the time
+    - can carry up to 10 mushrooms
+    - i can eat my own mushrooms
+    - job skill. The more food i gather, the more i gain. so 0%skill 1Munshroom per pickup. 100% skill 2Mushrooms per pickup
+        - skill double efficiency
+        - skill increases with every pickup
+
 
 Big Idea:
 - do some game for chatters.
@@ -79,12 +88,3 @@ Big Idea:
                     - each inhabitant can have job
 
 
-Tasks done today:
-- mushrooms grow randomly
-- characters have hunger stat
-    - when hungry search for food
-    - can starve to death
-- when someone writes a chat message, a character with his name joins the world
-- have a "world map", finite size
-- separater from overlay app
-    - move stuff
