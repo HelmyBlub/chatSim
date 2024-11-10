@@ -38,7 +38,10 @@ export type ChatSimState = {
     time: number,
     gameSpeed: number,
     map: ChatSimMap,
+    chatterNames: string[],
 }
+
+const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
 
 export function calculateDistance(position1: Position, position2: Position): number {
     const diffX = position1.x - position2.x;
@@ -55,6 +58,7 @@ function chatSimStateInit(): ChatSimState {
         canvas,
         time: 0,
         gameSpeed: 1,
+        chatterNames: [],
         map: {
             paintOffset: { x: 0, y: 0 },
             mapHeight: 400,
@@ -82,6 +86,7 @@ function addCitizen(user: string, state: ChatSimState) {
 
 function initMyApp() {
     const state = chatSimStateInit();
+    loadLocalStorageChatters(state);
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === "HelmiBlub") {
@@ -92,10 +97,12 @@ function initMyApp() {
             }
         }
         addCitizen(user, state);
+        addChatter(user, state);
     }
     //@ts-ignore
     ComfyJS.onCommand = (user, message, flags, self, extra) => {
         addCitizen(user, state);
+        addChatter(user, state);
     }
     //@ts-ignore
     ComfyJS.Init("HelmiBlub");
@@ -103,6 +110,27 @@ function initMyApp() {
 
     runner(state);
 }
+
+function addChatter(user: string, state: ChatSimState) {
+    if (state.chatterNames.find(c => c === user)) return;
+    state.chatterNames.push(user);
+    saveLoaclStorageChatter(state);
+}
+
+function saveLoaclStorageChatter(state: ChatSimState) {
+    localStorage.setItem(LOCAL_STORAGE_CHATTER_KEY, JSON.stringify(state.chatterNames));
+}
+
+function loadLocalStorageChatters(state: ChatSimState) {
+    const testData = localStorage.getItem(LOCAL_STORAGE_CHATTER_KEY);
+    if (testData) {
+        state.chatterNames = JSON.parse(testData);
+        for (let chatter of state.chatterNames) {
+            addCitizen(chatter, state);
+        }
+    }
+}
+
 
 function keyUp(event: KeyboardEvent, state: ChatSimState) {
     switch (event.code) {

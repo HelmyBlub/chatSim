@@ -1,6 +1,6 @@
 Tasks:
-- store chatter names in localStorage, but not test names, use them
 - job "food market"
+    - add money
     - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -22,6 +22,7 @@ Tasks:
 
 
 Tasks done today:
+- store chatter names in localStorage, but not test names, use them
 - job "food gatherer"
     - gathers mushrooms all the time
     - can carry up to 10 mushrooms
