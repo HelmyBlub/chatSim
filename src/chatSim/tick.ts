@@ -11,8 +11,43 @@ export function chatSimTick(state: ChatSimState) {
 
 function searchJob(citizen: Citizen, state: ChatSimState) {
     if (citizen.job) return;
-    citizen.job = "food gatherer";
-    citizen.state = "gatherFood";
+    if (state.map.citizens[0] === citizen) {
+        citizen.job = "food gatherer";
+        citizen.state = "gatherFood";
+        return;
+    }
+    if (Math.random() < 0.7) {
+        citizen.job = "food gatherer";
+        citizen.state = "gatherFood";
+    } else {
+        citizen.job = "food market";
+        citizen.state = "stationary";
+        citizen.maxCarry = 100;
+        citizen.moveTo = {
+            x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
+            y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
+        }
+    }
+}
+
+function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
+    let closest: Citizen | undefined;
+    let distance = 0;
+    for (let citizen of citizens) {
+        if (citizen.job === "food market" && (!shouldHaveFood || citizen.carryStuff.length > 0)) {
+            if (closest === undefined) {
+                closest = citizen;
+                distance = calculateDistance(citizen.position, searcher.position);
+            } else {
+                const tempDistance = calculateDistance(citizen.position, searcher.position);
+                if (tempDistance < distance) {
+                    closest = citizen;
+                    distance = tempDistance;
+                }
+            }
+        }
+    }
+    return closest;
 }
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
@@ -48,21 +83,99 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
                         });
                     }
                     if (citizen.skill[citizen.job] < 100) citizen.skill[citizen.job] += 1;
+                } else if (citizen.job === "food market") {
+                    citizen.state = "stationary";
+                    citizen.moveTo = {
+                        x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
+                        y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
+                    }
                 }
-                if (citizen.carryStuff.length >= citizen.maxCarry) citizen.state = "idle";
-                //citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroom.foodValue, 1);
+                if (citizen.carryStuff.length >= citizen.maxCarry) {
+                    citizen.state = "sellingToMarket";
+                    const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, false);
+                    if (foodMarket) {
+                        citizen.moveTo = {
+                            x: foodMarket.position.x,
+                            y: foodMarket.position.y,
+                        }
+                    } else {
+                        citizen.state = "idle";
+                    }
+                };
                 break;
+            }
+        }
+    } else if (citizen.state === "buyFoodFromMarket") {
+        if (citizen.moveTo === undefined) {
+            const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
+            if (foodMarket) {
+                const distance = calculateDistance(foodMarket.position, citizen.position);
+                if (distance <= citizen.speed) {
+                    const mushroom = foodMarket.carryStuff.shift();
+                    if (mushroom) {
+                        citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroom.foodValue, 1);
+                        const mushroomCost = 2;
+                        citizen.money -= mushroomCost;
+                        foodMarket.money += mushroomCost;
+                        if (citizen.job === "food market") citizen.state = "stationary";
+                        if (citizen.job === "food gatherer") citizen.state = "gatherFood";
+                    }
+                }
+            }
+        }
+    } else if (citizen.state === "sellingToMarket") {
+        if (citizen.moveTo === undefined) {
+            const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, false);
+            if (foodMarket) {
+                const distance = calculateDistance(foodMarket.position, citizen.position);
+                if (distance <= citizen.speed) {
+                    const sellerAmount = citizen.carryStuff.length;
+                    const marketMaxBuyAmount = Math.min(foodMarket.money, foodMarket.maxCarry - foodMarket.carryStuff.length);
+                    const toSell = Math.min(sellerAmount, marketMaxBuyAmount);
+                    const mushroomCost = 1;
+                    for (let i = 0; i < toSell; i++) {
+                        const mushroom = citizen.carryStuff.shift();
+                        if (mushroom) {
+                            foodMarket.carryStuff.push(mushroom);
+                            foodMarket.money -= mushroomCost;
+                            citizen.money += mushroomCost;
+                        }
+                    }
+                    if (citizen.job === "food gatherer") citizen.state = "gatherFood";
+                } else {
+                    citizen.moveTo = {
+                        x: foodMarket.position.x,
+                        y: foodMarket.position.y,
+                    }
+                }
+            } else {
+                citizen.state = "idle";
             }
         }
     }
     if (citizen.foodPerCent < 0.5) {
-        if (citizen.carryStuff.length > 0) {
+        let foodFound = false;
+        if (citizen.money >= 2) {
+            citizen.state = "buyFoodFromMarket";
+            const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
+            if (foodMarket) {
+                citizen.moveTo = {
+                    x: foodMarket.position.x,
+                    y: foodMarket.position.y,
+                }
+                foodFound = true;
+            }
+        }
+        if (!foodFound && citizen.carryStuff.length > 0) {
             const mushroomToEat: Mushroom = citizen.carryStuff.shift()!;
             citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomToEat.foodValue, 1);
-            if (citizen.job === "food gatherer" && citizen.carryStuff.length < citizen.maxCarry) citizen.state = "gatherFood";
-        } else {
-            if (citizen.state !== "gatherFood") citizen.state = "gatherFood";
+            foodFound = true;
+            if (citizen.job === "food gatherer") {
+                citizen.state = "idle";
+                if (citizen.carryStuff.length < citizen.maxCarry) citizen.state = "gatherFood";
+            }
         }
+        if (!foodFound && citizen.state !== "gatherFood") citizen.state = "gatherFood";
     }
     citizenMoveToTick(citizen);
 }

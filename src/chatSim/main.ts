@@ -9,13 +9,14 @@ export type Position = {
 export type Citizen = {
     job?: "food gatherer" | "food market",
     name: string,
-    state: "idle" | "gatherFood" | "sellingToMarket" | "buyFoodFromMarket" | "stationary",
+    state: "idle" | "gatherFood" | "sellingToMarket" | "buyFoodFromMarket" | "stationary" | "eat",
     speed: number,
     position: Position,
     moveTo?: Position,
     foodPerCent: number,
     carryStuff: Mushroom[],
     maxCarry: number,
+    money: number,
     skill: { [key: string]: number },
 }
 
@@ -81,6 +82,7 @@ function addCitizen(user: string, state: ChatSimState) {
         carryStuff: [],
         maxCarry: 10,
         skill: {},
+        money: 10,
     })
 }
 
@@ -140,6 +142,9 @@ function keyUp(event: KeyboardEvent, state: ChatSimState) {
         case "Comma":
             if (state.gameSpeed > 0) state.gameSpeed--;
             break
+        case "KeyM":
+            addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
+            break
         default:
             console.log(event.key, event.code);
             break;
@@ -184,9 +189,12 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];
-        let text = `${citizen.name}: ${citizen.carryStuff.length} Mushrooms`;
-        if (citizen.job && citizen.skill[citizen.job] !== undefined) {
-            text += `, Job: ${citizen.job} ${citizen.skill[citizen.job]}`;
+        let text = `${citizen.name}: ${citizen.carryStuff.length} Mushrooms, state: ${citizen.state}, $${citizen.money}`;
+        if (citizen.job) {
+            text += `, Job: ${citizen.job}`;
+            if (citizen.skill[citizen.job] !== undefined) {
+                text += ` ${citizen.skill[citizen.job]}`;
+            }
         }
         ctx.fillText(text, offsetX, 50 + i * 26);
     }

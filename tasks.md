@@ -8,6 +8,7 @@ Tasks:
 - job "food gatherer"
     - if reach max carry, sell to food seller
     - try to sell for highest price
+- refactor job code
 - chatter can fix their prices?
 - citizen can decide to go buy mushrooms from food market
 - streamer can set limits which citizen are not allowed to break
