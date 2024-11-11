@@ -1,6 +1,10 @@
 import { createJob, tickCitizenJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
+import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
+import { CITIZEN_JOB_HOUSE_MARKET } from "./jobHouseMarket.js";
+import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
+import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { calculateDistance, ChatSimState, Citizen, INVENTORY_MUSHROOM, Mushroom, Tree } from "./main.js";
 
 export function chatSimTick(state: ChatSimState) {
@@ -29,7 +33,8 @@ function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHav
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && (!shouldHaveFood || citizen.inventory.length > 0)) {
+        const ivnentoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);
@@ -44,6 +49,27 @@ function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHav
     }
     return closest;
 }
+
+function findClosestHouseMarket(searcher: Citizen, citizens: Citizen[]): Citizen | undefined {
+    let closest: Citizen | undefined;
+    let distance = 0;
+    for (let citizen of citizens) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_HOUSE_MARKET) {
+            if (closest === undefined) {
+                closest = citizen;
+                distance = calculateDistance(citizen.position, searcher.position);
+            } else {
+                const tempDistance = calculateDistance(citizen.position, searcher.position);
+                if (tempDistance < distance) {
+                    closest = citizen;
+                    distance = tempDistance;
+                }
+            }
+        }
+    }
+    return closest;
+}
+
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
     citizen.foodPerCent -= 0.0010;
@@ -97,8 +123,24 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
             citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
             citizen.state = "workingJob";
         }
+    } else if (!citizen.home && citizen.money >= 10) {
+        const houseMarket = findClosestHouseMarket(citizen, state.map.citizens);
+        if (houseMarket) {
+            //TODO
+        } else if (!isInHouseBuildingBusiness(citizen)) {
+            citizen.job = createJob(CITIZEN_JOB_HOUSE_MARKET, state);
+            citizen.state = "workingJob";
+        }
     }
     citizenMoveToTick(citizen);
+}
+
+function isInHouseBuildingBusiness(citizen: Citizen) {
+    return (citizen.job.name === CITIZEN_JOB_HOUSE_MARKET
+        || citizen.job.name === CITIZEN_JOB_HOUSE_CONSTRUCTION
+        || citizen.job.name === CITIZEN_JOB_LUMBERJACK
+        || citizen.job.name === CITIZEN_JOB_WOOD_MARKET
+    )
 }
 
 function deleteStarvedCitizens(state: ChatSimState) {

@@ -1,6 +1,5 @@
 Tasks:
 - need a new job so food market become usefull
-    - job: wood market
     - job: house construction
         - buys wood, if has no wood
         - build houses
@@ -8,14 +7,14 @@ Tasks:
         - rent or sells houses
         - if a citizen wants to order a new house
     - job: house market
-        - if citizen wants to rent or buy a house, he goes here
+        - if citizen wants to rent or buy a house, he goes here first
     - citizen:
         - want a house
             - to store stuff
             - to rest and sleep well
                 - boost performance. 
                     - move faster ? 
-
+- houses break down over time
 - make simple images
 - job "food market"
     - if many mushrooms on stock, buy them for less
@@ -38,6 +37,7 @@ Tasks:
 
 
 Tasks done today:
+- job: wood market
 - job: lumberjack
     - cut down trees for wood
     - sell wood to wood market

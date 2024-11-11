@@ -5,9 +5,11 @@ import { canCitizenCarryMore } from "./tick.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     state: "gathering" | "selling",
+    lastTreeCutTime: number,
 }
 
 export const CITIZEN_JOB_LUMBERJACK = "Lumberjack";
+const CUT_INTERVAL = 500;
 
 export function loadCitizenJobLumberjack(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_LUMBERJACK] = {
@@ -20,17 +22,23 @@ function create(state: ChatSimState): CitizenJobLuberjack {
     return {
         name: CITIZEN_JOB_LUMBERJACK,
         state: "gathering",
+        lastTreeCutTime: 0,
     }
 }
 
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     if (job.state === "gathering") {
-        if (canCitizenCarryMore(citizen)) {
+        if (job.lastTreeCutTime === undefined) job.lastTreeCutTime = 0;
+        let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+        if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
             moveToTree(citizen, state);
             const isCloseToTreeIndex = isCloseToTree(citizen, state);
             if (isCloseToTreeIndex !== undefined) {
-                cutTreeForWood(citizen, state, isCloseToTreeIndex);
+                if (job.lastTreeCutTime + CUT_INTERVAL < performance.now()) {
+                    cutTreeForWood(citizen, state, isCloseToTreeIndex);
+                    job.lastTreeCutTime = performance.now();
+                }
             }
         } else {
             job.state = "selling";

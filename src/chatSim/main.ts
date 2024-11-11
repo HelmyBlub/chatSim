@@ -18,6 +18,7 @@ export type Citizen = {
     foodPerCent: number,
     inventory: InventoryStuff[],
     maxInventory: number,
+    home?: House,
     money: number,
     skills: { [key: string]: number },
 }
@@ -36,6 +37,13 @@ export type Tree = {
     position: Position,
 }
 
+export type House = {
+    owner: Citizen,
+    available?: boolean,
+    position: Position,
+    buildProgress?: number,
+}
+
 export type ChatSimMap = {
     paintOffset: Position,
     mapHeight: number,
@@ -44,6 +52,7 @@ export type ChatSimMap = {
     mushrooms: Mushroom[],
     maxMushrooms: number,
     trees: Tree[],
+    houses: House[],
     maxTrees: number,
 }
 
@@ -87,6 +96,7 @@ function chatSimStateInit(): ChatSimState {
             maxMushrooms: 2,
             maxTrees: 2,
             trees: [],
+            houses: [],
         }
     }
 }
@@ -218,6 +228,19 @@ function paint(state: ChatSimState) {
         ctx.fillStyle = "brown";
         ctx.fillRect(mapPaintMiddle.x + tree.position.x - mushroomSize / 2, mapPaintMiddle.y + tree.position.y - mushroomSize / 2, treeSizeWidth, treeSizeHeight);
     }
+    const houseSize = 20;
+    for (let house of state.map.houses) {
+        ctx.fillStyle = "blue";
+        ctx.strokeStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillRect(mapPaintMiddle.x + house.position.x - houseSize / 2, mapPaintMiddle.y + house.position.y - houseSize / 2, houseSize, houseSize * (house.buildProgress !== undefined ? house.buildProgress : 1));
+        ctx.beginPath();
+        ctx.rect(mapPaintMiddle.x + house.position.x - houseSize / 2, mapPaintMiddle.y + house.position.y - houseSize / 2, houseSize, houseSize);
+        ctx.stroke();
+        const nameOffsetX = Math.floor(ctx.measureText(house.owner.name).width / 2);
+        drawTextWithOutline(ctx, house.owner.name, mapPaintMiddle.x + house.position.x - nameOffsetX, mapPaintMiddle.y + house.position.y - houseSize / 2);
+    }
+
     paintData(ctx, state);
 }
 
@@ -228,10 +251,7 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];
-        let text = `${citizen.name}: ${citizen.inventory.length} Mushrooms, state: ${citizen.state}, $${citizen.money}`;
-        if (citizen.job) {
-            text += `, Job: ${citizen.job.name}`;
-        }
+        let text = `${citizen.name}, state: ${citizen.state}, $${citizen.money}, Job: ${citizen.job.name}`;
         ctx.fillText(text, offsetX, 50 + i * 26);
     }
 }

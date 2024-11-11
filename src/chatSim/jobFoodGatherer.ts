@@ -75,22 +75,6 @@ function findAFoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
     return closest;
 }
 
-
-function sellMushrooms(citizen: Citizen, foodMarket: Citizen) {
-    const sellerAmount = citizen.inventory.length;
-    const marketMaxBuyAmount = Math.min(foodMarket.money, foodMarket.maxInventory - foodMarket.inventory.length);
-    const toSell = Math.min(sellerAmount, marketMaxBuyAmount);
-    const mushroomCost = 1;
-    for (let i = 0; i < toSell; i++) {
-        const mushroom = citizen.inventory.shift();
-        if (mushroom) {
-            foodMarket.inventory.push(mushroom);
-            foodMarket.money -= mushroomCost;
-            citizen.money += mushroomCost;
-        }
-    }
-}
-
 function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: number) {
     state.map.mushrooms.splice(mushroomIndex, 1)[0];
     let inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
