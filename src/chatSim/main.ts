@@ -16,14 +16,23 @@ export type Citizen = {
     position: Position,
     moveTo?: Position,
     foodPerCent: number,
-    carryStuff: Mushroom[],
-    maxCarry: number,
+    inventory: InventoryStuff[],
+    maxInventory: number,
     money: number,
     skills: { [key: string]: number },
 }
 
+export type InventoryStuff = {
+    name: string,
+    counter: number,
+}
+
 export type Mushroom = {
-    foodValue: 1,
+    position: Position,
+}
+
+export type Tree = {
+    woodValue: 10,
     position: Position,
 }
 
@@ -34,6 +43,8 @@ export type ChatSimMap = {
     citizens: Citizen[],
     mushrooms: Mushroom[],
     maxMushrooms: number,
+    trees: Tree[],
+    maxTrees: number,
 }
 
 export type ChatSimState = {
@@ -46,6 +57,8 @@ export type ChatSimState = {
 }
 
 export const SKILL_GATHERING = "Gathering";
+export const INVENTORY_MUSHROOM = "Mushroom";
+export const INVENTORY_WOOD = "Wood";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
 
 export function calculateDistance(position1: Position, position2: Position): number {
@@ -72,6 +85,8 @@ function chatSimStateInit(): ChatSimState {
             citizens: [],
             mushrooms: [],
             maxMushrooms: 2,
+            maxTrees: 2,
+            trees: [],
         }
     }
 }
@@ -84,8 +99,8 @@ function addCitizen(user: string, state: ChatSimState) {
         foodPerCent: 1,
         position: { x: 0, y: 0 },
         state: "workingJob",
-        carryStuff: [],
-        maxCarry: 10,
+        inventory: [],
+        maxInventory: 10,
         money: 10,
         skills: {},
         job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
@@ -197,6 +212,12 @@ function paint(state: ChatSimState) {
         ctx.fillStyle = "red";
         ctx.fillRect(mapPaintMiddle.x + mushroom.position.x - mushroomSize / 2, mapPaintMiddle.y + mushroom.position.y - mushroomSize / 2, mushroomSize, mushroomSize);
     }
+    const treeSizeHeight = 20;
+    const treeSizeWidth = 5;
+    for (let tree of state.map.trees) {
+        ctx.fillStyle = "brown";
+        ctx.fillRect(mapPaintMiddle.x + tree.position.x - mushroomSize / 2, mapPaintMiddle.y + tree.position.y - mushroomSize / 2, treeSizeWidth, treeSizeHeight);
+    }
     paintData(ctx, state);
 }
 
@@ -207,7 +228,7 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];
-        let text = `${citizen.name}: ${citizen.carryStuff.length} Mushrooms, state: ${citizen.state}, $${citizen.money}`;
+        let text = `${citizen.name}: ${citizen.inventory.length} Mushrooms, state: ${citizen.state}, $${citizen.money}`;
         if (citizen.job) {
             text += `, Job: ${citizen.job.name}`;
         }

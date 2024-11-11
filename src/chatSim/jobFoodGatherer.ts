@@ -1,6 +1,7 @@
-import { CitizenJob, createJob } from "./job.js";
+import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
-import { calculateDistance, ChatSimState, Citizen, SKILL_GATHERING } from "./main.js";
+import { calculateDistance, ChatSimState, Citizen, INVENTORY_MUSHROOM, SKILL_GATHERING } from "./main.js";
+import { canCitizenCarryMore } from "./tick.js";
 
 export type CitizenJobFoodGatherer = CitizenJob & {
     state: "gathering" | "selling",
@@ -25,22 +26,22 @@ function create(state: ChatSimState): CitizenJobFoodGatherer {
 
 function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState) {
     if (job.state === "gathering") {
-        const reachedMaxCarryingCapacity = citizen.carryStuff.length >= citizen.maxCarry;
-        if (reachedMaxCarryingCapacity) {
-            job.state = "selling";
-        } else {
+        if (canCitizenCarryMore(citizen)) {
             moveToMushroom(citizen, state);
             const isCloseToMushroomIndex = isCloseToMushroom(citizen, state);
             if (isCloseToMushroomIndex !== undefined) {
                 pickUpMushroom(citizen, state, isCloseToMushroomIndex);
             }
+        } else {
+            job.state = "selling";
         }
     }
     if (job.state === "selling") {
         const foodMarket = findAFoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
         if (foodMarket) {
-            if (isFoodMarketInSellDistance(foodMarket, citizen)) {
-                sellMushrooms(citizen, foodMarket);
+            if (isCitizenInInteractDistance(foodMarket, citizen)) {
+                const mushroomPrice = 1;
+                sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice);
                 job.state = "gathering";
             } else {
                 citizen.moveTo = {
@@ -58,7 +59,7 @@ function findAFoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.money > 2 && citizen.carryStuff.length - 1 < citizen.maxCarry) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.money > 2 && canCitizenCarryMore(citizen)) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);
@@ -76,35 +77,32 @@ function findAFoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
 
 
 function sellMushrooms(citizen: Citizen, foodMarket: Citizen) {
-    const sellerAmount = citizen.carryStuff.length;
-    const marketMaxBuyAmount = Math.min(foodMarket.money, foodMarket.maxCarry - foodMarket.carryStuff.length);
+    const sellerAmount = citizen.inventory.length;
+    const marketMaxBuyAmount = Math.min(foodMarket.money, foodMarket.maxInventory - foodMarket.inventory.length);
     const toSell = Math.min(sellerAmount, marketMaxBuyAmount);
     const mushroomCost = 1;
     for (let i = 0; i < toSell; i++) {
-        const mushroom = citizen.carryStuff.shift();
+        const mushroom = citizen.inventory.shift();
         if (mushroom) {
-            foodMarket.carryStuff.push(mushroom);
+            foodMarket.inventory.push(mushroom);
             foodMarket.money -= mushroomCost;
             citizen.money += mushroomCost;
         }
     }
 }
 
-function isFoodMarketInSellDistance(foodMarket: Citizen, seller: Citizen) {
-    const distance = calculateDistance(foodMarket.position, seller.position);
-    return distance <= seller.speed;
-}
-
 function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: number) {
-    const gatheredMushroom = state.map.mushrooms.splice(mushroomIndex, 1)[0];
-    citizen.carryStuff.push(gatheredMushroom);
+    state.map.mushrooms.splice(mushroomIndex, 1)[0];
+    let inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    if (inventoryMushroom === undefined) {
+        inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0 };
+        citizen.inventory.push(inventoryMushroom);
+    }
+    inventoryMushroom.counter++;
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
     if (Math.random() < skillGathering / 100) {
-        citizen.carryStuff.push({
-            foodValue: gatheredMushroom.foodValue,
-            position: { x: 0, y: 0 },
-        });
+        inventoryMushroom.counter++;
     }
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
 }

@@ -1,7 +1,7 @@
 import { createJob, tickCitizenJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
-import { calculateDistance, ChatSimState, Citizen, Mushroom } from "./main.js";
+import { calculateDistance, ChatSimState, Citizen, INVENTORY_MUSHROOM, Mushroom, Tree } from "./main.js";
 
 export function chatSimTick(state: ChatSimState) {
     state.time += 16;
@@ -9,14 +9,27 @@ export function chatSimTick(state: ChatSimState) {
         tickCitizen(citizen, state);
     }
     mushroomSpawnTick(state);
+    treeSpawnTick(state);
     deleteStarvedCitizens(state);
+}
+
+export function canCitizenCarryMore(citizen: Citizen): boolean {
+    return getCitizenUsedInventoryCapacity(citizen) < citizen.maxInventory;
+}
+
+export function getCitizenUsedInventoryCapacity(citizen: Citizen): number {
+    let counter = 0;
+    for (let item of citizen.inventory) {
+        counter += item.counter;
+    }
+    return counter;
 }
 
 function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && (!shouldHaveFood || citizen.carryStuff.length > 0)) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && (!shouldHaveFood || citizen.inventory.length > 0)) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);
@@ -49,9 +62,10 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
             if (foodMarket) {
                 const distance = calculateDistance(foodMarket.position, citizen.position);
                 if (distance <= citizen.speed) {
-                    const mushroom = foodMarket.carryStuff.shift();
+                    const mushroom = foodMarket.inventory.shift();
                     if (mushroom) {
-                        citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroom.foodValue, 1);
+                        const mushroomFoodValue = 0.5;
+                        citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomFoodValue, 1);
                         const mushroomCost = 2;
                         citizen.money -= mushroomCost;
                         foodMarket.money += mushroomCost;
@@ -63,9 +77,10 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     }
     if (citizen.foodPerCent < 0.5) {
         let foundFood = false;
-        if (citizen.carryStuff.length > 0) {
-            const mushroomToEat: Mushroom = citizen.carryStuff.shift()!;
-            citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomToEat.foodValue, 1);
+        let mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        if (mushrooms && mushrooms.counter > 0) {
+            citizen.foodPerCent = Math.min(citizen.foodPerCent + 0.5, 1);
+            mushrooms.counter--;
             foundFood = true;
         } else if (citizen.money >= 2) {
             const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
@@ -111,10 +126,22 @@ function citizenMoveToTick(citizen: Citizen) {
     }
 }
 
+function treeSpawnTick(state: ChatSimState) {
+    if (state.map.trees.length < state.map.maxTrees) {
+        const newTree: Tree = {
+            woodValue: 10,
+            position: {
+                x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
+                y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
+            }
+        }
+        state.map.trees.push(newTree);
+    }
+}
+
 function mushroomSpawnTick(state: ChatSimState) {
     if (state.map.mushrooms.length < state.map.maxMushrooms) {
         const newMushrooms: Mushroom = {
-            foodValue: 1,
             position: {
                 x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
                 y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,

@@ -1,4 +1,22 @@
 Tasks:
+- need a new job so food market become usefull
+    - job: wood market
+    - job: house construction
+        - buys wood, if has no wood
+        - build houses
+            - if house.length < citizen.length * 1.2
+        - rent or sells houses
+        - if a citizen wants to order a new house
+    - job: house market
+        - if citizen wants to rent or buy a house, he goes here
+    - citizen:
+        - want a house
+            - to store stuff
+            - to rest and sleep well
+                - boost performance. 
+                    - move faster ? 
+
+- make simple images
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -20,6 +38,10 @@ Tasks:
 
 
 Tasks done today:
+- job: lumberjack
+    - cut down trees for wood
+    - sell wood to wood market
+    - skill: gathering => more wood per tree
 - refactor job code
 - job "food gatherer"
     - if reach max carry, sell to food seller
