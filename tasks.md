@@ -14,6 +14,7 @@ Tasks:
             - to rest and sleep well
                 - boost performance. 
                     - move faster ? 
+- what happens with houses of deceased citizens?
 - houses break down over time
 - make simple images
 - job "food market"

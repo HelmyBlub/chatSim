@@ -49,12 +49,12 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Citizen) {
 }
 
 export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number) {
-    const sellerItem = seller.inventory.find(i => i.name = itemName);
+    const sellerItem = seller.inventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
     const buyerAmount = Math.min(buyer.maxInventory - getCitizenUsedInventoryCapacity(buyer), Math.floor(buyer.money / itemPrice));
     const tradeAmount = Math.min(sellerAmount, buyerAmount);
-    let buyerItem = seller.inventory.find(i => i.name = itemName);
+    let buyerItem = buyer.inventory.find(i => i.name === itemName);
     if (!buyerItem) {
         buyerItem = { name: itemName, counter: 0 };
         buyer.inventory.push(buyerItem);

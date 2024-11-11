@@ -88,10 +88,11 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
             if (foodMarket) {
                 const distance = calculateDistance(foodMarket.position, citizen.position);
                 if (distance <= citizen.speed) {
-                    const mushroom = foodMarket.inventory.shift();
+                    const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                     if (mushroom) {
                         const mushroomFoodValue = 0.5;
                         citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomFoodValue, 1);
+                        mushroom.counter--;
                         const mushroomCost = 2;
                         citizen.money -= mushroomCost;
                         foodMarket.money += mushroomCost;
