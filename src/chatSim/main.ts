@@ -1,4 +1,6 @@
 import { drawTextWithOutline } from "../drawHelper.js";
+import { CitizenJob, createJob, FunctionsCitizenJobs, loadCitizenJobs } from "./job.js";
+import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { chatSimTick } from "./tick.js";
 
 export type Position = {
@@ -7,9 +9,9 @@ export type Position = {
 }
 
 export type Citizen = {
-    job?: "food gatherer" | "food market",
+    job: CitizenJob,
     name: string,
-    state: "idle" | "gatherFood" | "sellingToMarket" | "buyFoodFromMarket" | "stationary" | "eat",
+    state: "idle" | "buyFoodFromMarket" | "workingJob",
     speed: number,
     position: Position,
     moveTo?: Position,
@@ -17,7 +19,7 @@ export type Citizen = {
     carryStuff: Mushroom[],
     maxCarry: number,
     money: number,
-    skill: { [key: string]: number },
+    skills: { [key: string]: number },
 }
 
 export type Mushroom = {
@@ -39,9 +41,11 @@ export type ChatSimState = {
     time: number,
     gameSpeed: number,
     map: ChatSimMap,
+    functionsCitizenJobs: FunctionsCitizenJobs,
     chatterNames: string[],
 }
 
+export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
 
 export function calculateDistance(position1: Position, position2: Position): number {
@@ -60,6 +64,7 @@ function chatSimStateInit(): ChatSimState {
         time: 0,
         gameSpeed: 1,
         chatterNames: [],
+        functionsCitizenJobs: {},
         map: {
             paintOffset: { x: 0, y: 0 },
             mapHeight: 400,
@@ -78,16 +83,18 @@ function addCitizen(user: string, state: ChatSimState) {
         speed: 2,
         foodPerCent: 1,
         position: { x: 0, y: 0 },
-        state: "idle",
+        state: "workingJob",
         carryStuff: [],
         maxCarry: 10,
-        skill: {},
         money: 10,
+        skills: {},
+        job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
     })
 }
 
 function initMyApp() {
     const state = chatSimStateInit();
+    loadCitizenJobs(state);
     loadLocalStorageChatters(state);
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
@@ -191,10 +198,7 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         const citizen = state.map.citizens[i];
         let text = `${citizen.name}: ${citizen.carryStuff.length} Mushrooms, state: ${citizen.state}, $${citizen.money}`;
         if (citizen.job) {
-            text += `, Job: ${citizen.job}`;
-            if (citizen.skill[citizen.job] !== undefined) {
-                text += ` ${citizen.skill[citizen.job]}`;
-            }
+            text += `, Job: ${citizen.job.name}`;
         }
         ctx.fillText(text, offsetX, 50 + i * 26);
     }

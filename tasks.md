@@ -1,18 +1,16 @@
 Tasks:
+- refactor job code
 - job "food market"
-    - add money
-    - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
     - can eat their own mushrooms
 - job "food gatherer"
-    - if reach max carry, sell to food seller
     - try to sell for highest price
-- refactor job code
 - chatter can fix their prices?
 - citizen can decide to go buy mushrooms from food market
 - streamer can set limits which citizen are not allowed to break
     - only allowed to break if they flag themselfes as criminal
+- chatter blacklist?, way to remove unwanted chatters like bots
 
 - use images
     - citizen image with move 8 directions
@@ -23,6 +21,12 @@ Tasks:
 
 
 Tasks done today:
+- job "food gatherer"
+    - if reach max carry, sell to food seller
+- job "food market"
+    - add money
+    - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
+    - if many mushrooms on stock, buy them for less
 - store chatter names in localStorage, but not test names, use them
 - job "food gatherer"
     - gathers mushrooms all the time
