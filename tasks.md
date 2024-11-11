@@ -1,22 +1,15 @@
 Tasks:
-- need a new job so food market become usefull
-    - job: house construction
-        - buys wood, if has no wood
-        - build houses
-            - if house.length < citizen.length * 1.2
-        - rent or sells houses
-        - if a citizen wants to order a new house
-    - job: house market
-        - if citizen wants to rent or buy a house, he goes here first
-    - citizen:
-        - want a house
-            - to store stuff
-            - to rest and sleep well
-                - boost performance. 
-                    - move faster ? 
 - what happens with houses of deceased citizens?
-- houses break down over time
+    - become empty and available for free
+        - first home marketer will grab it for himself
+    - citizen without a house will search first for house market
+        - second for an available house and rent it?
+- houses break down over time so wood becomes relevant with time
+    - if not enought citizen to upkeep houses, they break down completely and are deleted
 - make simple images
+- thinks about day cycles
+    - go to be at night to recharge energy
+    - if has a home -> faster reg, less sleep required
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -38,6 +31,11 @@ Tasks:
 
 
 Tasks done today:
+- job: house construction
+    - buys wood, if has no wood
+    - build houses
+- citizen:
+    - want a house
 - job: wood market
 - job: lumberjack
     - cut down trees for wood
