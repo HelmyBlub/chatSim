@@ -1,5 +1,4 @@
 Tasks:
-- refactor job code
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -21,6 +20,7 @@ Tasks:
 
 
 Tasks done today:
+- refactor job code
 - job "food gatherer"
     - if reach max carry, sell to food seller
 - job "food market"

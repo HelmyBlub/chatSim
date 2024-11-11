@@ -115,7 +115,7 @@ function initMyApp() {
     }
     //@ts-ignore
     ComfyJS.Init("HelmiBlub");
-    document.addEventListener('keyup', (e) => keyUp(e, state));
+    document.addEventListener('keydown', (e) => keyDown(e, state));
 
     runner(state);
 }
@@ -141,13 +141,24 @@ function loadLocalStorageChatters(state: ChatSimState) {
 }
 
 
-function keyUp(event: KeyboardEvent, state: ChatSimState) {
+function keyDown(event: KeyboardEvent, state: ChatSimState) {
+    const speedScaling = 1.2;
     switch (event.code) {
         case "Period":
-            state.gameSpeed++;
+            if (state.gameSpeed < 5) {
+                state.gameSpeed++;
+            } else {
+                state.gameSpeed *= speedScaling;
+                state.gameSpeed = Math.round(state.gameSpeed);
+            }
             break;
         case "Comma":
-            if (state.gameSpeed > 0) state.gameSpeed--;
+            if (state.gameSpeed < 5 && state.gameSpeed > 0) {
+                state.gameSpeed--;
+            } else {
+                state.gameSpeed /= speedScaling;
+                state.gameSpeed = Math.round(state.gameSpeed);
+            }
             break
         case "KeyM":
             addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
