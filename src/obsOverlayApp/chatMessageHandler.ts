@@ -82,7 +82,7 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
             chatter.draw.pawAnimation = "notLikeThis";
             chatter.draw.pawAnimationStart = undefined;
             return false;
-        case "eat cookie": case "eatCookie":
+        case "eat cookie": case "eatCookie": case "eatCookies": case "eat cookies":
             if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
                 chatter.draw.pawAnimation = "eatCookie";
                 chatter.draw.pawAnimationStart = undefined;

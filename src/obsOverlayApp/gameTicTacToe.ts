@@ -66,9 +66,27 @@ function handleChatCommand(game: Game, chatter: Chatter, message: string, state:
     }
     if (!validTurn) return false;
     checkWinCondition(ticTacToeGame);
+    checkDraw(ticTacToeGame);
     ticTacToeGame.turnTimer = performance.now();
     ticTacToeGame.currentPlayersTurnIndex = (ticTacToeGame.currentPlayersTurnIndex + 1) % 2;
     return true;
+}
+
+function checkDraw(ticTacToeGame: GameTicTacToe) {
+    let isBoardFull = true;
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (ticTacToeGame.field[i][j] === -1) {
+                isBoardFull = false;
+            }
+        }
+    }
+    if (isBoardFull) {
+        ticTacToeGame.finishedTime = performance.now();
+        ticTacToeGame.players[0].playingGameIdRef = undefined;
+        ticTacToeGame.players[1].playingGameIdRef = undefined;
+        ticTacToeGame.players = [];
+    }
 }
 
 function tick(game: Game, state: State) {
@@ -102,6 +120,9 @@ function draw(ctx: CanvasRenderingContext2D, game: Game, leftX: number, topY: nu
     const aplha = 0.7;
     if (ticTacToeGame.winner) {
         const text = `Winner: ${ticTacToeGame.winner.name}`;
+        drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize, aplha);
+    } else if (ticTacToeGame.finishedTime !== undefined) {
+        const text = `Draw`;
         drawTextWithBackgroundAndOutline(ctx, text, leftX, topY - fontSize, aplha);
     } else {
         if (ticTacToeGame.players.length < 2) {
