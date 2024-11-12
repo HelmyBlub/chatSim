@@ -115,7 +115,7 @@ export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], sh
     let distance = 0;
     for (let citizen of citizens) {
         const ivnentoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && citizen.moveTo === undefined && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);

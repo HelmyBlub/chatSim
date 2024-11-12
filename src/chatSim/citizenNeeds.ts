@@ -1,13 +1,12 @@
-import { formatDiagnostic } from "typescript";
 import { ChatSimState } from "./chatSimModels.js";
 import { findClosestFoodMarket, Citizen, addCitizenLogEntry, CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
-import { createJob, sellItem } from "./job.js";
+import { createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 import { CITIZEN_JOB_HOUSE_MARKET } from "./jobHouseMarket.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
-import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
-import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
+import { CITIZEN_JOB_WOOD_MARKET, findClosestWoodMarket } from "./jobWoodMarket.js";
+import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 
 export type CitizenNeedFunctions = {
     isFulfilled(citizen: Citizen, state: ChatSimState): boolean,
@@ -45,6 +44,7 @@ export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
     }
     if (needsFulfilled) {
         citizen.lastCheckedNeedsTime = state.time;
+        citizen.state = CITIZEN_STATE_WORKING_JOB;
     }
 }
 
@@ -57,7 +57,9 @@ function isFulfilledFood(citizen: Citizen, state: ChatSimState): boolean {
 }
 
 function isFulfilledHome(citizen: Citizen, state: ChatSimState): boolean {
-    return citizen.home !== undefined;
+    if (citizen.home === undefined) return false;
+    if (citizen.home.deterioration > 0.2) return false;
+    return true;
 }
 
 function tickFood(citizen: Citizen, state: ChatSimState) {
@@ -88,8 +90,8 @@ function tickFood(citizen: Citizen, state: ChatSimState) {
         if (!foundFood && citizen.job.name !== CITIZEN_JOB_FOOD_GATHERER) {
             addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as no food to buy found`, state);
             citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
-            citizen.state = CITIZEN_STATE_WORKING_JOB;
         }
+        citizen.state = CITIZEN_STATE_WORKING_JOB;
     }
     if (citizen.state === `${CITIZEN_NEED_FOOD}: move to food market`) {
         if (citizen.money < 2) {
@@ -121,10 +123,7 @@ function tickFood(citizen: Citizen, state: ChatSimState) {
 }
 
 function tickHome(citizen: Citizen, state: ChatSimState) {
-    const houseMarket = findClosestHouseMarket(citizen, state.map.citizens);
-    if (houseMarket) {
-        //TODO
-    } else {
+    if (!citizen.home) {
         const availableHouse = state.map.houses.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined);
         if (availableHouse) {
             addCitizenLogEntry(citizen, `moved into a house from ${availableHouse.owner}`, state);
@@ -136,26 +135,64 @@ function tickHome(citizen: Citizen, state: ChatSimState) {
             citizen.state = CITIZEN_STATE_WORKING_JOB;
         }
     }
-}
-
-function findClosestHouseMarket(searcher: Citizen, citizens: Citizen[]): Citizen | undefined {
-    let closest: Citizen | undefined;
-    let distance = 0;
-    for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_HOUSE_MARKET) {
-            if (closest === undefined) {
-                closest = citizen;
-                distance = calculateDistance(citizen.position, searcher.position);
+    if (citizen.home && citizen.home.deterioration > 0.2) {
+        if (citizen.state.indexOf(`${CITIZEN_NEED_HOME}:`) === -1) {
+            const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+            if (wood && wood.counter > 0) {
+                citizen.moveTo = {
+                    x: citizen.home.position.x,
+                    y: citizen.home.position.y,
+                }
+                citizen.state = `${CITIZEN_NEED_HOME}: move to house to repair`;
             } else {
-                const tempDistance = calculateDistance(citizen.position, searcher.position);
-                if (tempDistance < distance) {
-                    closest = citizen;
-                    distance = tempDistance;
+                if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
+                    const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
+                    if (woodMarket) {
+                        addCitizenLogEntry(citizen, `house repair required. Move to wood market from ${woodMarket.name} to buy wood.`, state);
+                        citizen.state = `${CITIZEN_NEED_HOME}: buy wood`;
+                        citizen.moveTo = {
+                            x: woodMarket.position.x,
+                            y: woodMarket.position.y,
+                        }
+                    } else {
+                        citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
+                        citizen.state = CITIZEN_STATE_WORKING_JOB;
+                        addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no wood market found and i need wood for house repairs`, state);
+                    }
+                }
+            }
+        }
+        if (citizen.state === `${CITIZEN_NEED_HOME}: buy wood`) {
+            if (citizen.moveTo === undefined) {
+                const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
+                if (woodMarket && isCitizenInInteractDistance(citizen, woodMarket.position)) {
+                    sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state, 1);
+                } else {
+                    addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
+                }
+                citizen.state = CITIZEN_STATE_WORKING_JOB;
+            }
+        }
+        if (citizen.state === `${CITIZEN_NEED_HOME}: move to house to repair`) {
+            if (citizen.moveTo === undefined) {
+                if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
+                    const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+                    if (wood && wood.counter > 0) {
+                        citizen.home.deterioration -= 0.2;
+                        wood.counter--;
+                        addCitizenLogEntry(citizen, `used ${INVENTORY_WOOD} to repair home. current deterioration: ${(citizen.home.deterioration * 100).toFixed()}%`, state);
+                    } else {
+                        citizen.state = `${CITIZEN_NEED_HOME}: buy wood`;
+                    }
+                } else {
+                    citizen.moveTo = {
+                        x: citizen.home.position.x,
+                        y: citizen.home.position.y,
+                    }
                 }
             }
         }
     }
-    return closest;
 }
 
 function isInHouseBuildingBusiness(citizen: Citizen) {

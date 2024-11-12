@@ -46,7 +46,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
     if (job.state === "selling") {
         const foodMarket = findAFoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
         if (foodMarket) {
-            if (isCitizenInInteractDistance(foodMarket, citizen)) {
+            if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
                 const mushroomPrice = 1;
                 sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice, state);
                 job.state = "gathering";

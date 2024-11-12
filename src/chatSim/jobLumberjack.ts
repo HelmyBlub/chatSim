@@ -48,7 +48,7 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     if (job.state === "selling") {
         const woodMarket = findAWoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
         if (woodMarket) {
-            if (isCitizenInInteractDistance(woodMarket, citizen)) {
+            if (isCitizenInInteractDistance(citizen, woodMarket.position)) {
                 const woodPrice = 2;
                 sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice, state);
                 job.state = "gathering";

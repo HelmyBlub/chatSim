@@ -1,4 +1,4 @@
-import { ChatSimState } from "./chatSimModels.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
 import { getCitizenUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "./citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
@@ -44,9 +44,9 @@ export function tickCitizenJob(citizen: Citizen, state: ChatSimState) {
     jobFunctions.tick(citizen, citizen.job, state);
 }
 
-export function isCitizenInInteractDistance(citizen: Citizen, target: Citizen) {
-    const distance = calculateDistance(citizen.position, target.position);
-    return distance <= target.speed;
+export function isCitizenInInteractDistance(citizen: Citizen, target: Position) {
+    const distance = calculateDistance(citizen.position, target);
+    return distance <= citizen.speed;
 }
 
 export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
