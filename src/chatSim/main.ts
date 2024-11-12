@@ -1,6 +1,6 @@
-import { drawTextWithOutline } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
-import { createJob, loadCitizenJobs } from "./job.js";
+import { loadCitizenNeedsFunctions } from "./citizenNeeds.js";
+import { createJob, loadCitizenJobsFunctions } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { paintChatSim } from "./paint.js";
 import { chatSimTick } from "./tick.js";
@@ -27,6 +27,7 @@ function chatSimStateInit(): ChatSimState {
         gameSpeed: 1,
         chatterNames: [],
         functionsCitizenJobs: {},
+        functionsCitizenNeeds: {},
         map: {
             paintOffset: { x: 0, y: 0 },
             mapHeight: 400,
@@ -59,7 +60,8 @@ function addCitizen(user: string, state: ChatSimState) {
 
 function initMyApp() {
     const state = chatSimStateInit();
-    loadCitizenJobs(state);
+    loadCitizenJobsFunctions(state);
+    loadCitizenNeedsFunctions(state);
     loadLocalStorageChatters(state);
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {

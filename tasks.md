@@ -1,6 +1,5 @@
 Tasks:
-- code refactor
-    - citizen have to switch jobs buy their own need
+- citizen decision log
 - houses break down over time so wood becomes relevant with time
     - if not enought citizen to upkeep houses, they break down completely and are deleted
 - make simple images
@@ -28,6 +27,12 @@ Tasks:
 
 
 Tasks done today:
+- code refactor
+    - citizen have to switch jobs buy their own need
+        - "citizen needs"
+            - food
+            - house
+            - check them frequently
 - what happens with houses of deceased citizens?
     - become empty and available for free
         - first home marketer will grab it for himself

@@ -25,12 +25,12 @@ function create(state: ChatSimState): CitizenJobWoodMarket {
 }
 
 function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) {
-    if (job.lastCheckedForConstructionJobs === undefined || job.lastCheckedForConstructionJobs + CHECK_INTERVAL < performance.now()) {
+    if (job.lastCheckedForConstructionJobs === undefined || job.lastCheckedForConstructionJobs + CHECK_INTERVAL < state.time) {
         let jobExists = false;
         for (let jobber of state.map.citizens) {
             if (jobber.job.name === CITIZEN_JOB_HOUSE_CONSTRUCTION) {
                 jobExists = true;
-                job.lastCheckedForConstructionJobs = performance.now();
+                job.lastCheckedForConstructionJobs = state.time;
                 break;
             }
         }

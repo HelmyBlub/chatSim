@@ -36,9 +36,9 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
             moveToTree(citizen, state);
             const isCloseToTreeIndex = isCloseToTree(citizen, state);
             if (isCloseToTreeIndex !== undefined) {
-                if (job.lastTreeCutTime + CUT_INTERVAL < performance.now()) {
+                if (job.lastTreeCutTime + CUT_INTERVAL < state.time) {
                     cutTreeForWood(citizen, state, isCloseToTreeIndex);
-                    job.lastTreeCutTime = performance.now();
+                    job.lastTreeCutTime = state.time;
                 }
             }
         } else {

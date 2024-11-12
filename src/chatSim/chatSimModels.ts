@@ -1,3 +1,4 @@
+import { CitizenNeedsFunctions } from "./citizenNeeds.js"
 import { CitizenJob, FunctionsCitizenJobs } from "./job.js"
 
 export type Position = {
@@ -18,6 +19,7 @@ export type Citizen = {
     home?: House,
     money: number,
     skills: { [key: string]: number },
+    lastCheckedNeedsTime?: number,
 }
 
 export type InventoryStuff = {
@@ -60,5 +62,6 @@ export type ChatSimState = {
     gameSpeed: number,
     map: ChatSimMap,
     functionsCitizenJobs: FunctionsCitizenJobs,
+    functionsCitizenNeeds: CitizenNeedsFunctions,
     chatterNames: string[],
 }

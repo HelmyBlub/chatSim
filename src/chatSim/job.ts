@@ -20,7 +20,7 @@ export type FunctionsCitizenJob = {
 
 export type FunctionsCitizenJobs = { [key: string]: FunctionsCitizenJob };
 
-export function loadCitizenJobs(state: ChatSimState) {
+export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobFoodGatherer(state);
     loadCitizenJobLumberjack(state);
     loadCitizenJobHouseConstruction(state);
