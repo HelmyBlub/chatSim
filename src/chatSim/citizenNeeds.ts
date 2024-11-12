@@ -1,7 +1,7 @@
 import { formatDiagnostic } from "typescript";
 import { ChatSimState } from "./chatSimModels.js";
 import { findClosestFoodMarket, Citizen, addCitizenLogEntry, CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
-import { createJob } from "./job.js";
+import { createJob, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 import { CITIZEN_JOB_HOUSE_MARKET } from "./jobHouseMarket.js";
@@ -15,9 +15,9 @@ export type CitizenNeedFunctions = {
 }
 
 export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
+export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
 const CITIZEN_NEED_FOOD = "need food";
 const CITIZEN_NEED_HOME = "need home";
-const FOOD_IN_INVENTORY_NEED = 2;
 
 
 export function loadCitizenNeedsFunctions(state: ChatSimState) {
@@ -51,7 +51,7 @@ export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
 function isFulfilledFood(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.foodPerCent < 0.5) return false;
     const inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-    const hasEnoughFoodInInventory = inventoryMushroom && inventoryMushroom.counter >= FOOD_IN_INVENTORY_NEED;
+    const hasEnoughFoodInInventory = inventoryMushroom && inventoryMushroom.counter >= CITIZEN_FOOD_IN_INVENTORY_NEED;
     if (hasEnoughFoodInInventory) return true;
     return false;
 }
@@ -66,10 +66,10 @@ function tickFood(citizen: Citizen, state: ChatSimState) {
         if (mushrooms && mushrooms.counter > 0) {
             citizen.foodPerCent = Math.min(citizen.foodPerCent + 0.5, 1);
             mushrooms.counter--;
-            addCitizenLogEntry(citizen, "eat mushroom", state);
+            addCitizenLogEntry(citizen, `eat ${INVENTORY_MUSHROOM} from inventory, ${mushrooms.counter}x${INVENTORY_MUSHROOM} left`, state);
         }
     }
-    if (mushrooms && mushrooms.counter >= FOOD_IN_INVENTORY_NEED) return;
+    if (mushrooms && mushrooms.counter >= CITIZEN_FOOD_IN_INVENTORY_NEED) return;
 
     if (citizen.state.indexOf(CITIZEN_NEED_FOOD) === -1) {
         let foundFood = false;
@@ -92,20 +92,16 @@ function tickFood(citizen: Citizen, state: ChatSimState) {
         }
     }
     if (citizen.state === `${CITIZEN_NEED_FOOD}: move to food market`) {
-        if (citizen.moveTo === undefined) {
+        if (citizen.money < 2) {
+            citizen.state = CITIZEN_STATE_WORKING_JOB;
+        } else if (citizen.moveTo === undefined) {
             const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
             if (foodMarket && foodMarket !== citizen) {
                 const distance = calculateDistance(foodMarket.position, citizen.position);
                 if (distance <= citizen.speed) {
                     const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                     if (mushroom) {
-                        addCitizenLogEntry(citizen, `buy mushroom from ${foodMarket.name}`, state);
-                        const mushroomFoodValue = 0.5;
-                        citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomFoodValue, 1);
-                        mushroom.counter--;
-                        const mushroomCost = 2;
-                        citizen.money -= mushroomCost;
-                        foodMarket.money += mushroomCost;
+                        sellItem(foodMarket, citizen, INVENTORY_MUSHROOM, 2, state, 1);
                         citizen.state = CITIZEN_STATE_WORKING_JOB;
                     }
                 } else {

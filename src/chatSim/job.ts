@@ -49,11 +49,12 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Citizen) {
     return distance <= target.speed;
 }
 
-export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState) {
+export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
     const sellerItem = seller.inventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    const buyerAmount = Math.min(buyer.maxInventory - getCitizenUsedInventoryCapacity(buyer), Math.floor(buyer.money / itemPrice));
+    const buyerInventoryMoneyAmount = Math.min(buyer.maxInventory - getCitizenUsedInventoryCapacity(buyer), Math.floor(buyer.money / itemPrice));
+    const buyerAmount = requestedAmount !== undefined ? Math.min(buyerInventoryMoneyAmount, requestedAmount) : buyerInventoryMoneyAmount;
     const tradeAmount = Math.min(sellerAmount, buyerAmount);
     let buyerItem = buyer.inventory.find(i => i.name === itemName);
     if (!buyerItem) {
@@ -66,5 +67,5 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     seller.money += totalPrice;
     buyer.money -= totalPrice;
     addCitizenLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
-    addCitizenLogEntry(seller, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
+    addCitizenLogEntry(buyer, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
 }

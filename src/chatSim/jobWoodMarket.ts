@@ -1,5 +1,5 @@
 import { ChatSimState } from "./chatSimModels.js";
-import { Citizen } from "./citizen.js";
+import { addCitizenLogEntry, Citizen } from "./citizen.js";
 import { CitizenJob, createJob } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 
@@ -36,6 +36,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
             }
         }
         if (!jobExists) {
+            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as their is no citizen with a job in house contruction to sell to`, state);
             citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
             return;
         }

@@ -1,6 +1,9 @@
 import { ChatSimState } from "./chatSimModels.js";
-import { Citizen } from "./citizen.js";
-import { CitizenJob } from "./job.js";
+import { addCitizenLogEntry, Citizen } from "./citizen.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "./citizenNeeds.js";
+import { CitizenJob, createJob } from "./job.js";
+import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
+import { INVENTORY_MUSHROOM } from "./main.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
     state: "takeRandomLocation" | "selling"
@@ -29,5 +32,10 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
             y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
         }
         job.state = "selling";
+    }
+    const mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    if (!mushrooms || mushrooms.counter <= CITIZEN_FOOD_IN_INVENTORY_NEED) {
+        addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as mushrooms run to low`, state);
+        citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
     }
 }

@@ -1,5 +1,5 @@
 import { Position, House, ChatSimState } from "./chatSimModels.js";
-import { canCitizenCarryMore, Citizen } from "./citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "./citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
@@ -97,14 +97,20 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
         }
     }
     if (job.state === "buyWood") {
-        if (canCitizenCarryMore(citizen) && citizen.money > 2) {
-            const woodMarket = findAWoodMarketWhichHasWood(citizen, state.map.citizens);
-            if (woodMarket) {
-                moveToMarket(citizen, woodMarket);
-                if (isCitizenInInteractDistance(citizen, woodMarket)) {
-                    sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state);
+        if (canCitizenCarryMore(citizen)) {
+            if (citizen.money > 2) {
+                const woodMarket = findAWoodMarketWhichHasWood(citizen, state.map.citizens);
+                if (woodMarket) {
+                    moveToMarket(citizen, woodMarket);
+                    if (isCitizenInInteractDistance(citizen, woodMarket)) {
+                        sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state);
+                    }
+                } else {
+                    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as their is no wood market to sell wood too`, state);
+                    citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
                 }
             } else {
+                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as i have no money for wood`, state);
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
             }
         }

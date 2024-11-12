@@ -6,6 +6,7 @@ import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
 
 export type Citizen = {
     job: CitizenJob,
+    birthTime: number,
     name: string,
     state: string,
     speed: number,

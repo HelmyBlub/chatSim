@@ -1,5 +1,5 @@
 import { ChatSimState } from "./chatSimModels.js";
-import { canCitizenCarryMore, Citizen } from "./citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "./citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "./main.js";
@@ -59,6 +59,7 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                 }
             }
         } else {
+            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_WOOD_MARKET} as their is no wood market to sell to`, state);
             citizen.job = createJob(CITIZEN_JOB_WOOD_MARKET, state);
         }
     }

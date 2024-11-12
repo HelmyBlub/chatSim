@@ -1,7 +1,7 @@
 Tasks:
 - citizen decision log
-- houses break down over time so wood becomes relevant with time
-    - if not enought citizen to upkeep houses, they break down completely and are deleted
+    - add more logs
+- citizen need to repait their houses
 - make simple images
 - thinks about day cycles
     - go to be at night to recharge energy
@@ -27,6 +27,8 @@ Tasks:
 
 
 Tasks done today:
+- citizen decision log
+- houses break down over time so wood becomes relevant with time
 - code refactor
     - citizen have to switch jobs buy their own need
         - "citizen needs"

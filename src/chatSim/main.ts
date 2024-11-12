@@ -47,6 +47,7 @@ function addCitizen(user: string, state: ChatSimState) {
     if (state.map.citizens.find(c => c.name === user)) return;
     state.map.citizens.push({
         name: user,
+        birthTime: state.time,
         speed: 2,
         foodPerCent: 1,
         position: { x: 0, y: 0 },
