@@ -1,5 +1,5 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
-import { canCitizenCarryMore } from "./citizen.js";
+import { ChatSimState } from "./chatSimModels.js";
+import { canCitizenCarryMore, Citizen } from "./citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "./main.js";
@@ -50,7 +50,7 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
         if (woodMarket) {
             if (isCitizenInInteractDistance(woodMarket, citizen)) {
                 const woodPrice = 2;
-                sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice);
+                sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice, state);
                 job.state = "gathering";
             } else {
                 citizen.moveTo = {

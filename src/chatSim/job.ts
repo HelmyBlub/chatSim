@@ -1,5 +1,5 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
-import { getCitizenUsedInventoryCapacity } from "./citizen.js";
+import { ChatSimState } from "./chatSimModels.js";
+import { getCitizenUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "./citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobHouseContruction.js";
@@ -49,7 +49,7 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Citizen) {
     return distance <= target.speed;
 }
 
-export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number) {
+export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState) {
     const sellerItem = seller.inventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
@@ -62,6 +62,9 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     }
     sellerItem.counter -= tradeAmount;
     buyerItem.counter += tradeAmount;
-    seller.money += itemPrice * tradeAmount;
-    buyer.money -= itemPrice * tradeAmount;
+    const totalPrice = itemPrice * tradeAmount;
+    seller.money += totalPrice;
+    buyer.money -= totalPrice;
+    addCitizenLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
+    addCitizenLogEntry(seller, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
 }

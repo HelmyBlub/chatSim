@@ -1,25 +1,10 @@
+import { Citizen } from "./citizen.js"
 import { CitizenNeedsFunctions } from "./citizenNeeds.js"
-import { CitizenJob, FunctionsCitizenJobs } from "./job.js"
+import { FunctionsCitizenJobs } from "./job.js"
 
 export type Position = {
     x: number,
     y: number,
-}
-
-export type Citizen = {
-    job: CitizenJob,
-    name: string,
-    state: "buyFoodFromMarket" | "workingJob",
-    speed: number,
-    position: Position,
-    moveTo?: Position,
-    foodPerCent: number,
-    inventory: InventoryStuff[],
-    maxInventory: number,
-    home?: House,
-    money: number,
-    skills: { [key: string]: number },
-    lastCheckedNeedsTime?: number,
 }
 
 export type InventoryStuff = {

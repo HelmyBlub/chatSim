@@ -1,4 +1,5 @@
 import { Position, ChatSimState } from "./chatSimModels.js";
+import { CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds.js";
 import { createJob, loadCitizenJobsFunctions } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
@@ -49,12 +50,14 @@ function addCitizen(user: string, state: ChatSimState) {
         speed: 2,
         foodPerCent: 1,
         position: { x: 0, y: 0 },
-        state: "workingJob",
+        state: CITIZEN_STATE_WORKING_JOB,
         inventory: [],
         maxInventory: 10,
         money: 10,
         skills: {},
         job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
+        log: [],
+        maxLogLength: 100,
     })
 }
 

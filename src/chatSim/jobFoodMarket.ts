@@ -1,4 +1,5 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
+import { ChatSimState } from "./chatSimModels.js";
+import { Citizen } from "./citizen.js";
 import { CitizenJob } from "./job.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {

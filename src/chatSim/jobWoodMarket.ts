@@ -1,4 +1,5 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
+import { ChatSimState } from "./chatSimModels.js";
+import { Citizen } from "./citizen.js";
 import { CitizenJob, createJob } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 

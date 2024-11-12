@@ -1,4 +1,4 @@
-import { ChatSimState, Citizen, Tree, Mushroom } from "./chatSimModels.js";
+import { ChatSimState, Tree, Mushroom } from "./chatSimModels.js";
 import { tickCitizens } from "./citizen.js";
 
 export function chatSimTick(state: ChatSimState) {

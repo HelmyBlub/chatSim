@@ -1,8 +1,43 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
+import { ChatSimState, House, InventoryStuff, Position } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds.js";
-import { tickCitizenJob } from "./job.js";
+import { CitizenJob, tickCitizenJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
+
+export type Citizen = {
+    job: CitizenJob,
+    name: string,
+    state: string,
+    speed: number,
+    position: Position,
+    moveTo?: Position,
+    foodPerCent: number,
+    inventory: InventoryStuff[],
+    maxInventory: number,
+    home?: House,
+    money: number,
+    skills: { [key: string]: number },
+    lastCheckedNeedsTime?: number,
+    log: CitizenLogEntry[];
+    maxLogLength: number,
+}
+
+export type CitizenLogEntry = {
+    time: number,
+    message: string,
+}
+
+export const CITIZEN_STATE_WORKING_JOB = "workingJob";
+
+export function addCitizenLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
+    citizen.log.push({
+        time: state.time,
+        message: message,
+    });
+    if (citizen.log.length > citizen.maxLogLength) {
+        citizen.log.shift();
+    }
+}
 
 export function canCitizenCarryMore(citizen: Citizen): boolean {
     return getCitizenUsedInventoryCapacity(citizen) < citizen.maxInventory;
@@ -31,27 +66,8 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
-    if (citizen.state === "workingJob") {
+    if (citizen.state === CITIZEN_STATE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
-    } else if (citizen.state === "buyFoodFromMarket") {
-        if (citizen.moveTo === undefined) {
-            const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
-            if (foodMarket) {
-                const distance = calculateDistance(foodMarket.position, citizen.position);
-                if (distance <= citizen.speed) {
-                    const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-                    if (mushroom) {
-                        const mushroomFoodValue = 0.5;
-                        citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomFoodValue, 1);
-                        mushroom.counter--;
-                        const mushroomCost = 2;
-                        citizen.money -= mushroomCost;
-                        foodMarket.money += mushroomCost;
-                        citizen.state = "workingJob";
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -98,7 +114,7 @@ export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], sh
     let distance = 0;
     for (let citizen of citizens) {
         const ivnentoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);

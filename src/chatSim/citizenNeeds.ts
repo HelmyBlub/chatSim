@@ -1,5 +1,6 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
-import { findClosestFoodMarket } from "./citizen.js";
+import { formatDiagnostic } from "typescript";
+import { ChatSimState } from "./chatSimModels.js";
+import { findClosestFoodMarket, Citizen, addCitizenLogEntry, CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
 import { createJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
@@ -65,25 +66,61 @@ function tickFood(citizen: Citizen, state: ChatSimState) {
         if (mushrooms && mushrooms.counter > 0) {
             citizen.foodPerCent = Math.min(citizen.foodPerCent + 0.5, 1);
             mushrooms.counter--;
+            addCitizenLogEntry(citizen, "eat mushroom", state);
         }
     }
     if (mushrooms && mushrooms.counter >= FOOD_IN_INVENTORY_NEED) return;
 
-    let foundFood = false;
-    if (citizen.money >= 2) {
-        const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
-        if (foodMarket) {
-            citizen.state = "buyFoodFromMarket";
-            citizen.moveTo = {
-                x: foodMarket.position.x,
-                y: foodMarket.position.y,
+    if (citizen.state.indexOf(CITIZEN_NEED_FOOD) === -1) {
+        let foundFood = false;
+        if (citizen.money >= 2) {
+            const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
+            if (foodMarket) {
+                addCitizenLogEntry(citizen, `move to food market from ${foodMarket.name}`, state);
+                citizen.state = `${CITIZEN_NEED_FOOD}: move to food market`;
+                citizen.moveTo = {
+                    x: foodMarket.position.x,
+                    y: foodMarket.position.y,
+                }
+                foundFood = true;
             }
-            foundFood = true;
+        }
+        if (!foundFood && citizen.job.name !== CITIZEN_JOB_FOOD_GATHERER) {
+            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as no food to buy found`, state);
+            citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
+            citizen.state = CITIZEN_STATE_WORKING_JOB;
         }
     }
-    if (!foundFood && citizen.job.name !== CITIZEN_JOB_FOOD_GATHERER) {
-        citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
-        citizen.state = "workingJob";
+    if (citizen.state === `${CITIZEN_NEED_FOOD}: move to food market`) {
+        if (citizen.moveTo === undefined) {
+            const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
+            if (foodMarket && foodMarket !== citizen) {
+                const distance = calculateDistance(foodMarket.position, citizen.position);
+                if (distance <= citizen.speed) {
+                    const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                    if (mushroom) {
+                        addCitizenLogEntry(citizen, `buy mushroom from ${foodMarket.name}`, state);
+                        const mushroomFoodValue = 0.5;
+                        citizen.foodPerCent = Math.min(citizen.foodPerCent + mushroomFoodValue, 1);
+                        mushroom.counter--;
+                        const mushroomCost = 2;
+                        citizen.money -= mushroomCost;
+                        foodMarket.money += mushroomCost;
+                        citizen.state = CITIZEN_STATE_WORKING_JOB;
+                    }
+                } else {
+                    addCitizenLogEntry(citizen, `food market location changed. Move to new location of food market from ${foodMarket.name}`, state);
+                    citizen.moveTo = {
+                        x: foodMarket.position.x,
+                        y: foodMarket.position.y,
+                    }
+                }
+            } else {
+                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as food market disappeared`, state);
+                citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
+                citizen.state = CITIZEN_STATE_WORKING_JOB;
+            }
+        }
     }
 }
 
@@ -94,11 +131,13 @@ function tickHome(citizen: Citizen, state: ChatSimState) {
     } else {
         const availableHouse = state.map.houses.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined);
         if (availableHouse) {
+            addCitizenLogEntry(citizen, `moved into a house from ${availableHouse.owner}`, state);
             availableHouse.inhabitedBy = citizen;
             citizen.home = availableHouse;
         } else if (!isInHouseBuildingBusiness(citizen)) {
+            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as no available house found`, state);
             citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
-            citizen.state = "workingJob";
+            citizen.state = CITIZEN_STATE_WORKING_JOB;
         }
     }
 }

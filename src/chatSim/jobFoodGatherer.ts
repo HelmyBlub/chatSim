@@ -1,5 +1,5 @@
-import { ChatSimState, Citizen } from "./chatSimModels.js";
-import { canCitizenCarryMore } from "./citizen.js";
+import { ChatSimState } from "./chatSimModels.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "./citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "./main.js";
@@ -31,6 +31,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
             moveToMushroom(citizen, state);
             const isCloseToMushroomIndex = isCloseToMushroom(citizen, state);
             if (isCloseToMushroomIndex !== undefined) {
+                addCitizenLogEntry(citizen, `picked up ${INVENTORY_MUSHROOM}`, state);
                 pickUpMushroom(citizen, state, isCloseToMushroomIndex);
             }
         } else {
@@ -42,7 +43,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         if (foodMarket) {
             if (isCitizenInInteractDistance(foodMarket, citizen)) {
                 const mushroomPrice = 1;
-                sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice);
+                sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice, state);
                 job.state = "gathering";
             } else {
                 citizen.moveTo = {
