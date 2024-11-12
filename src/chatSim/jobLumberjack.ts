@@ -1,7 +1,8 @@
+import { ChatSimState, Citizen } from "./chatSimModels.js";
+import { canCitizenCarryMore } from "./citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
-import { calculateDistance, ChatSimState, Citizen, INVENTORY_WOOD, SKILL_GATHERING } from "./main.js";
-import { canCitizenCarryMore } from "./tick.js";
+import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "./main.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     state: "gathering" | "selling",

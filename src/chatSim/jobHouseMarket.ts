@@ -1,6 +1,6 @@
+import { ChatSimState, Citizen } from "./chatSimModels.js";
 import { CitizenJob, createJob } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
-import { ChatSimState, Citizen } from "./main.js";
 
 export type CitizenJobHouseMarket = CitizenJob & {
     state: "takeRandomLocation" | "selling"
@@ -28,7 +28,7 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
     if (job.lastCheckedHouseAvailability === undefined || job.lastCheckedHouseAvailability + CHECK_INTERVAL < performance.now()) {
         let housesAvailable = false;
         for (let house of state.map.houses) {
-            if (house.available) {
+            if (house.inhabitedBy) {
                 housesAvailable = true;
                 job.lastCheckedHouseAvailability = performance.now();
                 break;

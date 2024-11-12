@@ -1,5 +1,5 @@
+import { ChatSimState, Citizen } from "./chatSimModels.js";
 import { CitizenJob } from "./job.js";
-import { ChatSimState, Citizen } from "./main.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
     state: "takeRandomLocation" | "selling"

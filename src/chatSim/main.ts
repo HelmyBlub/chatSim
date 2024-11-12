@@ -1,69 +1,9 @@
 import { drawTextWithOutline } from "../drawHelper.js";
-import { CitizenJob, createJob, FunctionsCitizenJobs, loadCitizenJobs } from "./job.js";
+import { Position, ChatSimState } from "./chatSimModels.js";
+import { createJob, loadCitizenJobs } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
+import { paintChatSim } from "./paint.js";
 import { chatSimTick } from "./tick.js";
-
-export type Position = {
-    x: number,
-    y: number,
-}
-
-export type Citizen = {
-    job: CitizenJob,
-    name: string,
-    state: "idle" | "buyFoodFromMarket" | "workingJob",
-    speed: number,
-    position: Position,
-    moveTo?: Position,
-    foodPerCent: number,
-    inventory: InventoryStuff[],
-    maxInventory: number,
-    home?: House,
-    money: number,
-    skills: { [key: string]: number },
-}
-
-export type InventoryStuff = {
-    name: string,
-    counter: number,
-}
-
-export type Mushroom = {
-    position: Position,
-}
-
-export type Tree = {
-    woodValue: 10,
-    position: Position,
-}
-
-export type House = {
-    owner: Citizen,
-    available?: boolean,
-    position: Position,
-    buildProgress?: number,
-}
-
-export type ChatSimMap = {
-    paintOffset: Position,
-    mapHeight: number,
-    mapWidth: number,
-    citizens: Citizen[],
-    mushrooms: Mushroom[],
-    maxMushrooms: number,
-    trees: Tree[],
-    houses: House[],
-    maxTrees: number,
-}
-
-export type ChatSimState = {
-    canvas: HTMLCanvasElement,
-    time: number,
-    gameSpeed: number,
-    map: ChatSimMap,
-    functionsCitizenJobs: FunctionsCitizenJobs,
-    chatterNames: string[],
-}
 
 export const SKILL_GATHERING = "Gathering";
 export const INVENTORY_MUSHROOM = "Mushroom";
@@ -165,7 +105,6 @@ function loadLocalStorageChatters(state: ChatSimState) {
     }
 }
 
-
 function keyDown(event: KeyboardEvent, state: ChatSimState) {
     const speedScaling = 1.2;
     switch (event.code) {
@@ -194,75 +133,13 @@ function keyDown(event: KeyboardEvent, state: ChatSimState) {
     }
 }
 
-function paint(state: ChatSimState) {
-    const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-
-    ctx.fillStyle = "green";
-    ctx.fillRect(state.map.paintOffset.x, state.map.paintOffset.y, state.map.mapWidth, state.map.mapHeight);
-    const mapPaintMiddle = {
-        x: Math.floor(state.map.paintOffset.x + state.map.mapWidth / 2),
-        y: Math.floor(state.map.paintOffset.y + state.map.mapHeight / 2),
-    };
-    const citizenSize = 20;
-    for (let citizen of state.map.citizens) {
-        ctx.fillStyle = "black";
-        ctx.strokeStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillRect(mapPaintMiddle.x + citizen.position.x - citizenSize / 2, mapPaintMiddle.y + citizen.position.y - citizenSize / 2, citizenSize, citizenSize * citizen.foodPerCent);
-        ctx.beginPath();
-        ctx.rect(mapPaintMiddle.x + citizen.position.x - citizenSize / 2, mapPaintMiddle.y + citizen.position.y - citizenSize / 2, citizenSize, citizenSize);
-        ctx.stroke();
-        const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
-        drawTextWithOutline(ctx, citizen.name, mapPaintMiddle.x + citizen.position.x - nameOffsetX, mapPaintMiddle.y + citizen.position.y - citizenSize / 2);
-    }
-    const mushroomSize = 10;
-    for (let mushroom of state.map.mushrooms) {
-        ctx.fillStyle = "red";
-        ctx.fillRect(mapPaintMiddle.x + mushroom.position.x - mushroomSize / 2, mapPaintMiddle.y + mushroom.position.y - mushroomSize / 2, mushroomSize, mushroomSize);
-    }
-    const treeSizeHeight = 20;
-    const treeSizeWidth = 5;
-    for (let tree of state.map.trees) {
-        ctx.fillStyle = "brown";
-        ctx.fillRect(mapPaintMiddle.x + tree.position.x - mushroomSize / 2, mapPaintMiddle.y + tree.position.y - mushroomSize / 2, treeSizeWidth, treeSizeHeight);
-    }
-    const houseSize = 20;
-    for (let house of state.map.houses) {
-        ctx.fillStyle = "blue";
-        ctx.strokeStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillRect(mapPaintMiddle.x + house.position.x - houseSize / 2, mapPaintMiddle.y + house.position.y - houseSize / 2, houseSize, houseSize * (house.buildProgress !== undefined ? house.buildProgress : 1));
-        ctx.beginPath();
-        ctx.rect(mapPaintMiddle.x + house.position.x - houseSize / 2, mapPaintMiddle.y + house.position.y - houseSize / 2, houseSize, houseSize);
-        ctx.stroke();
-        const nameOffsetX = Math.floor(ctx.measureText(house.owner.name).width / 2);
-        drawTextWithOutline(ctx, house.owner.name, mapPaintMiddle.x + house.position.x - nameOffsetX, mapPaintMiddle.y + house.position.y - houseSize / 2);
-    }
-
-    paintData(ctx, state);
-}
-
-function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "black";
-    const offsetX = state.map.mapWidth + 100;
-    ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
-    for (let i = 0; i < state.map.citizens.length; i++) {
-        const citizen = state.map.citizens[i];
-        let text = `${citizen.name}, state: ${citizen.state}, $${citizen.money}, Job: ${citizen.job.name}`;
-        ctx.fillText(text, offsetX, 50 + i * 26);
-    }
-}
-
 async function runner(state: ChatSimState) {
     try {
         while (true) {
             for (let i = 0; i < state.gameSpeed; i++) {
                 chatSimTick(state);
             }
-            paint(state);
+            paintChatSim(state);
             await sleep(16);
         }
     } catch (e) {

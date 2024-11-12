@@ -1,9 +1,6 @@
 Tasks:
-- what happens with houses of deceased citizens?
-    - become empty and available for free
-        - first home marketer will grab it for himself
-    - citizen without a house will search first for house market
-        - second for an available house and rent it?
+- code refactor
+    - citizen have to switch jobs buy their own need
 - houses break down over time so wood becomes relevant with time
     - if not enought citizen to upkeep houses, they break down completely and are deleted
 - make simple images
@@ -31,31 +28,11 @@ Tasks:
 
 
 Tasks done today:
-- job: house construction
-    - buys wood, if has no wood
-    - build houses
-- citizen:
-    - want a house
-- job: wood market
-- job: lumberjack
-    - cut down trees for wood
-    - sell wood to wood market
-    - skill: gathering => more wood per tree
-- refactor job code
-- job "food gatherer"
-    - if reach max carry, sell to food seller
-- job "food market"
-    - add money
-    - buys mushrooms from gatherer for 1$, sells mushrooms for 2$ to hungry customer
-    - if many mushrooms on stock, buy them for less
-- store chatter names in localStorage, but not test names, use them
-- job "food gatherer"
-    - gathers mushrooms all the time
-    - can carry up to 10 mushrooms
-    - i can eat my own mushrooms
-    - job skill. The more food i gather, the more i gain. so 0%skill 1Munshroom per pickup. 100% skill 2Mushrooms per pickup
-        - skill double efficiency
-        - skill increases with every pickup
+- what happens with houses of deceased citizens?
+    - become empty and available for free
+        - first home marketer will grab it for himself
+    - citizen without a house will search first for house market
+        - second for an available house and rent it?
 
 
 Big Idea:

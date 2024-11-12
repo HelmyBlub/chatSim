@@ -1,8 +1,9 @@
+import { Position, House, ChatSimState, Citizen } from "./chatSimModels.js";
+import { canCitizenCarryMore } from "./citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
-import { calculateDistance, ChatSimState, Citizen, House, INVENTORY_WOOD, Position, SKILL_GATHERING } from "./main.js";
-import { canCitizenCarryMore } from "./tick.js";
+import { calculateDistance, INVENTORY_WOOD } from "./main.js";
 
 export type CitizenJobHouseConstruction = CitizenJob & {
     state: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation",
@@ -71,6 +72,7 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
                             y: job.buildPosition.y,
                         },
                         buildProgress: 0,
+                        deterioration: 0,
                     }
                     state.map.houses.push(job.houseInProgress);
                     inventoryWood.counter -= WOOD_REQUIRED_FOR_HOUSE;
@@ -87,8 +89,7 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
             if (job.houseInProgress.buildProgress >= 1) {
                 if (!citizen.home) {
                     citizen.home = job.houseInProgress;
-                } else {
-                    job.houseInProgress.available = true;
+                    job.houseInProgress.inhabitedBy = citizen;
                 }
                 job.houseInProgress.buildProgress = undefined;
                 job.houseInProgress = undefined;
@@ -112,9 +113,10 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
 
 function moveToBuildLocation(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSimState) {
     if (!job.buildPosition) {
+        let height = state.map.mapHeight - 40;
         job.buildPosition = {
             x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
-            y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
+            y: Math.random() * height - height / 2,
         }
         citizen.moveTo = {
             x: job.buildPosition.x,
