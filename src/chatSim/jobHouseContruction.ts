@@ -106,7 +106,7 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
                         sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state);
                     }
                 } else {
-                    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as their is no wood market to sell wood too`, state);
+                    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as their is no wood market to buy wood from`, state);
                     citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
                 }
             } else {
