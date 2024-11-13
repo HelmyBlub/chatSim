@@ -1,3 +1,4 @@
+import { IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, loadImage } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
 import { CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds.js";
@@ -29,6 +30,7 @@ function chatSimStateInit(): ChatSimState {
         chatterNames: [],
         functionsCitizenJobs: {},
         functionsCitizenNeeds: {},
+        images: {},
         map: {
             paintOffset: { x: 0, y: 0 },
             mapHeight: 400,
@@ -62,11 +64,19 @@ function addCitizen(user: string, state: ChatSimState) {
     })
 }
 
+function loadImages(state: ChatSimState) {
+    state.images[IMAGE_PATH_TREE] = loadImage(IMAGE_PATH_TREE);
+    state.images[IMAGE_PATH_MUSHROOM] = loadImage(IMAGE_PATH_MUSHROOM);
+    state.images[IMAGE_PATH_CITIZEN] = loadImage(IMAGE_PATH_CITIZEN);
+    state.images[IMAGE_PATH_CITIZEN_HOUSE] = loadImage(IMAGE_PATH_CITIZEN_HOUSE);
+}
+
 function initMyApp() {
     const state = chatSimStateInit();
     loadCitizenJobsFunctions(state);
     loadCitizenNeedsFunctions(state);
     loadLocalStorageChatters(state);
+    loadImages(state);
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === "HelmiBlub") {

@@ -1,4 +1,4 @@
-import { loadImage } from "./draw.js";
+import { loadImage } from "../drawHelper.js";
 import { Chatter, State } from "./mainModels.js";
 
 

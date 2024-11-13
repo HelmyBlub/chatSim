@@ -48,5 +48,6 @@ export type ChatSimState = {
     map: ChatSimMap,
     functionsCitizenJobs: FunctionsCitizenJobs,
     functionsCitizenNeeds: CitizenNeedsFunctions,
+    images: { [key: string]: HTMLImageElement },
     chatterNames: string[],
 }

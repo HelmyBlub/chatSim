@@ -3,7 +3,7 @@ import { State } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { loadOutfitImages } from "./outfits.js";
-import { drawTextWithOutline, drawTextWithBackgroundAndOutline } from "../drawHelper.js";
+import { drawTextWithOutline, drawTextWithBackgroundAndOutline, loadImage } from "../drawHelper.js";
 
 export const IMAGE_PATH_COOKIE = "images/cookie.png";
 export const IMAGE_PATH_OVEN = "images/oven.png";
@@ -18,12 +18,6 @@ export function loadImages(state: State) {
     state.images[IMAGE_PATH_UNLABLED_JAR] = loadImage(IMAGE_PATH_UNLABLED_JAR);
     state.images[IMAGE_PATH_OVEN] = loadImage(IMAGE_PATH_OVEN);
     state.images[IMAGE_PATH_UNBAKED_COOKIE] = loadImage(IMAGE_PATH_UNBAKED_COOKIE);
-}
-
-export function loadImage(path: string) {
-    const imageChatter = new Image();
-    imageChatter.src = path;
-    return imageChatter;
 }
 
 export function draw(state: State) {

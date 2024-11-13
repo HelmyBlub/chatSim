@@ -1,5 +1,5 @@
-import { drawTextWithOutline } from "../drawHelper.js";
-import { IMAGE_PATH_COOKIE, IMAGE_PATH_UNBAKED_COOKIE, loadImage } from "./draw.js";
+import { drawTextWithOutline, loadImage } from "../drawHelper.js";
+import { IMAGE_PATH_COOKIE, IMAGE_PATH_UNBAKED_COOKIE } from "./draw.js";
 import { addCookieToOvenGame } from "./gameCookieOven.js";
 import { AUDIO_HEYGUYS, playSoundRandomClapping, localStorageStoreChatters } from "./main.js";
 import { Chatter, State } from "./mainModels.js";

@@ -1,3 +1,15 @@
+
+export const IMAGE_PATH_TREE = "images/tree.png";
+export const IMAGE_PATH_MUSHROOM = "images/mushroom.png";
+export const IMAGE_PATH_CITIZEN = "images/citizen.png";
+export const IMAGE_PATH_CITIZEN_HOUSE = "images/citizenHouse.png";
+
+export function loadImage(path: string) {
+    const imageChatter = new Image();
+    imageChatter.src = path;
+    return imageChatter;
+}
+
 export function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, outlineColor: string = "white", fillColor: string = "black") {
     ctx.fillStyle = fillColor;
     ctx.strokeStyle = outlineColor;

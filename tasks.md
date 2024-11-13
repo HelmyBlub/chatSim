@@ -1,14 +1,12 @@
 Tasks:
-- bug: citizens die in some wierd action loops
-    - debug "move to food market" loop
-        - citizen is visually close to market but somehow does not buy
 - make simple images
-    - animations?
     - make map bigger?
     - zooming
     - panning
+    - animations?
 - inventory management causes a lot of problems how they should behave
     - restructure code for some new citizen behavior better considering inventory?
+- bug: lumberjacks should not switch between trees after just one wood
 - thinks about day cycles
     - go to be at night to recharge energy
     - if has a home -> faster reg, less sleep required
@@ -33,26 +31,15 @@ Tasks:
 
 
 Tasks done today:
-- citizen need to repair their houses
-    - house inhabiter can repair with wood himself
-    - in house need, check if house is in good condition
-    - if not repair with wood, if no wood, buy wood, 1xwood repairs 20%
-- citizen decision log
-    - add more logs
-- citizen decision log
-- houses break down over time so wood becomes relevant with time
-- code refactor
-    - citizen have to switch jobs buy their own need
-        - "citizen needs"
-            - food
-            - house
-            - check them frequently
-- what happens with houses of deceased citizens?
-    - become empty and available for free
-        - first home marketer will grab it for himself
-    - citizen without a house will search first for house market
-        - second for an available house and rent it?
+- make simple images
+    - tree
+    - mushroom
+    - house
+    - citizen
 
+- bug: citizens die in some wierd action loops
+    - debug "move to food market" loop
+        - citizen is visually close to market but somehow does not buy
 
 Big Idea:
 - do some game for chatters.
