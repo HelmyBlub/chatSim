@@ -1,12 +1,13 @@
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { getCitizenUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "./citizen.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "./citizenNeeds.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobHouseContruction.js";
 import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
-import { calculateDistance } from "./main.js";
+import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
 
 export type CitizenJob = {
     name: string,
@@ -53,9 +54,21 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     const sellerItem = seller.inventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    const buyerInventoryMoneyAmount = Math.min(buyer.maxInventory - getCitizenUsedInventoryCapacity(buyer), Math.floor(buyer.money / itemPrice));
+    let buyerInventoryCapacity = buyer.maxInventory - getCitizenUsedInventoryCapacity(buyer);
+    if (itemName !== INVENTORY_MUSHROOM) {
+        const mushrooms = buyer.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        if (!mushrooms) {
+            buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED;
+        } else if (mushrooms.counter < CITIZEN_FOOD_IN_INVENTORY_NEED) {
+            buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED - mushrooms.counter;
+        }
+    }
+    const buyerInventoryMoneyAmount = Math.min(buyerInventoryCapacity, Math.floor(buyer.money / itemPrice));
     const buyerAmount = requestedAmount !== undefined ? Math.min(buyerInventoryMoneyAmount, requestedAmount) : buyerInventoryMoneyAmount;
     const tradeAmount = Math.min(sellerAmount, buyerAmount);
+    if (tradeAmount === 0) {
+        return;
+    }
     let buyerItem = buyer.inventory.find(i => i.name === itemName);
     if (!buyerItem) {
         buyerItem = { name: itemName, counter: 0 };

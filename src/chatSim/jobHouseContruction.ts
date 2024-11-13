@@ -113,6 +113,11 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
                 addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as i have no money for wood`, state);
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
             }
+        } else {
+            const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+            if (wood && wood.counter >= WOOD_REQUIRED_FOR_HOUSE) {
+                job.state = "searchBuildLocation";
+            }
         }
     }
 }
@@ -144,7 +149,8 @@ function findAWoodMarketWhichHasWood(searcher: Citizen, citizens: Citizen[]): Ci
     for (let citizen of citizens) {
         if (citizen.job && citizen.job.name === CITIZEN_JOB_WOOD_MARKET) {
             let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
-            if (inventoryWood !== undefined && inventoryWood.counter > 0) {
+            if (inventoryWood === undefined || inventoryWood.counter === 0) continue;
+            if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);
             } else {

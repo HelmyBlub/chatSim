@@ -23,7 +23,7 @@ export function findClosestWoodMarket(position: Position, state: ChatSimState, h
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of state.map.citizens) {
-        if (citizen.job.name === CITIZEN_JOB_WOOD_MARKET) {
+        if (citizen.job.name === CITIZEN_JOB_WOOD_MARKET && citizen.moveTo === undefined) {
             if (hasStock) {
                 const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
                 if (!wood || wood.counter === 0) continue;

@@ -42,25 +42,30 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                 }
             }
         } else {
-            job.state = "selling";
+            if (inventoryWood && inventoryWood.counter > 0) job.state = "selling";
         }
     }
     if (job.state === "selling") {
-        const woodMarket = findAWoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
-        if (woodMarket) {
-            if (isCitizenInInteractDistance(citizen, woodMarket.position)) {
-                const woodPrice = 2;
-                sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice, state);
-                job.state = "gathering";
-            } else {
-                citizen.moveTo = {
-                    x: woodMarket.position.x,
-                    y: woodMarket.position.y,
-                }
-            }
+        let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+        if (!inventoryWood || inventoryWood.counter === 0) {
+            job.state = "gathering";
         } else {
-            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_WOOD_MARKET} as their is no wood market to sell to`, state);
-            citizen.job = createJob(CITIZEN_JOB_WOOD_MARKET, state);
+            const woodMarket = findAWoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
+            if (woodMarket) {
+                if (isCitizenInInteractDistance(citizen, woodMarket.position)) {
+                    const woodPrice = 2;
+                    sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice, state);
+                    job.state = "gathering";
+                } else {
+                    citizen.moveTo = {
+                        x: woodMarket.position.x,
+                        y: woodMarket.position.y,
+                    }
+                }
+            } else {
+                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_WOOD_MARKET} as their is no wood market to sell to`, state);
+                citizen.job = createJob(CITIZEN_JOB_WOOD_MARKET, state);
+            }
         }
     }
 }

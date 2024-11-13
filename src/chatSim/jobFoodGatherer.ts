@@ -1,5 +1,6 @@
 import { ChatSimState } from "./chatSimModels.js";
 import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "./citizen.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "./citizenNeeds.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "./main.js";
@@ -27,10 +28,14 @@ function create(state: ChatSimState): CitizenJobFoodGatherer {
 
 function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState) {
     if (job.state === "setMoveToMushroom") {
-        if (canCitizenCarryMore(citizen)) {
+        const mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        if (canCitizenCarryMore(citizen) && (!mushrooms || mushrooms.counter < 9)) {
             moveToMushroom(citizen, state);
         } else {
-            job.state = "selling";
+            const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+            if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
+                job.state = "selling";
+            }
         }
     }
     if (job.state === "gathering") {
@@ -48,7 +53,11 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         if (foodMarket) {
             if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
                 const mushroomPrice = 1;
-                sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice, state);
+                const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
+                    const sellAmount = mushroom.counter - CITIZEN_FOOD_IN_INVENTORY_NEED;
+                    sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice, state, sellAmount);
+                }
                 job.state = "gathering";
             } else {
                 citizen.moveTo = {

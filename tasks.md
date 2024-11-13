@@ -7,6 +7,8 @@ Tasks:
     - make map bigger?
     - zooming
     - panning
+- inventory management causes a lot of problems how they should behave
+    - restructure code for some new citizen behavior better considering inventory?
 - thinks about day cycles
     - go to be at night to recharge energy
     - if has a home -> faster reg, less sleep required
