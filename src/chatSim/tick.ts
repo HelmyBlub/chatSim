@@ -1,5 +1,6 @@
 import { ChatSimState, Tree, Mushroom } from "./chatSimModels.js";
 import { tickCitizens } from "./citizen.js";
+import { moveMapCameraBy } from "./input.js";
 
 export function chatSimTick(state: ChatSimState) {
     state.time += 16;
@@ -7,6 +8,7 @@ export function chatSimTick(state: ChatSimState) {
     mushroomSpawnTick(state);
     treeSpawnTick(state);
     tickHouses(state);
+    if (state.inputData.map.moveX || state.inputData.map.moveY) moveMapCameraBy(state.inputData.map.moveX, state.inputData.map.moveY, state);
 }
 
 function tickHouses(state: ChatSimState) {

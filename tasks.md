@@ -1,11 +1,21 @@
 Tasks:
 - make simple images
+    - zooming, moving
+        - move camera with
+            - keys
+            - mouse
+        - zoom with
+            - keys
+            - mouse
+        - can not move out of map
+
     - make map bigger?
-    - zooming
-    - panning
     - animations?
+- map chunks for more efficient searching?
+    - some things can be bound to only one chunk and other to entire map
 - inventory management causes a lot of problems how they should behave
     - restructure code for some new citizen behavior better considering inventory?
+- more structured map house placing, do not place houses above each other
 - bug: lumberjacks should not switch between trees after just one wood
 - thinks about day cycles
     - go to be at night to recharge energy

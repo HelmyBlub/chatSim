@@ -30,7 +30,6 @@ export type House = {
 }
 
 export type ChatSimMap = {
-    paintOffset: Position,
     mapHeight: number,
     mapWidth: number,
     citizens: Citizen[],
@@ -41,11 +40,30 @@ export type ChatSimMap = {
     maxTrees: number,
 }
 
+export type PaintDataMap = {
+    paintOffset: Position,
+    paintHeight: number,
+    paintWidth: number,
+    zoom: number,
+    cameraPosition: Position,
+}
+
 export type ChatSimState = {
     canvas: HTMLCanvasElement,
+    streamer: string,
     time: number,
     gameSpeed: number,
     map: ChatSimMap,
+    paintData: {
+        map: PaintDataMap,
+    }
+    inputData: {
+        map: {
+            mouseMoveMap: boolean,
+            moveX: number,
+            moveY: number,
+        }
+    }
     functionsCitizenJobs: FunctionsCitizenJobs,
     functionsCitizenNeeds: CitizenNeedsFunctions,
     images: { [key: string]: HTMLImageElement },

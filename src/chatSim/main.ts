@@ -2,6 +2,7 @@ import { IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAG
 import { Position, ChatSimState } from "./chatSimModels.js";
 import { CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds.js";
+import { chatSimAddInputEventListeners } from "./input.js";
 import { createJob, loadCitizenJobsFunctions } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { paintChatSim } from "./paint.js";
@@ -18,13 +19,14 @@ export function calculateDistance(position1: Position, position2: Position): num
     return Math.sqrt(diffX * diffX + diffY * diffY);
 }
 
-function chatSimStateInit(): ChatSimState {
+function chatSimStateInit(streamer: string): ChatSimState {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth - 10;
     canvas.height = window.innerHeight - 10;
-
+    const mapSize = 400;
     return {
         canvas,
+        streamer: streamer,
         time: 0,
         gameSpeed: 1,
         chatterNames: [],
@@ -32,20 +34,35 @@ function chatSimStateInit(): ChatSimState {
         functionsCitizenNeeds: {},
         images: {},
         map: {
-            paintOffset: { x: 0, y: 0 },
-            mapHeight: 400,
-            mapWidth: 400,
+            mapHeight: mapSize,
+            mapWidth: mapSize,
             citizens: [],
             mushrooms: [],
             maxMushrooms: 2,
             maxTrees: 2,
             trees: [],
             houses: [],
+        },
+        paintData: {
+            map: {
+                paintOffset: { x: 20, y: 20 },
+                paintWidth: 440,
+                paintHeight: 440,
+                cameraPosition: { x: 0, y: 0 },
+                zoom: 1,
+            }
+        },
+        inputData: {
+            map: {
+                moveX: 0,
+                moveY: 0,
+                mouseMoveMap: false,
+            }
         }
     }
 }
 
-function addCitizen(user: string, state: ChatSimState) {
+export function addCitizen(user: string, state: ChatSimState) {
     if (state.map.citizens.find(c => c.name === user)) return;
     state.map.citizens.push({
         name: user,
@@ -72,14 +89,14 @@ function loadImages(state: ChatSimState) {
 }
 
 function initMyApp() {
-    const state = chatSimStateInit();
+    const state = chatSimStateInit("HelmiBlub");
     loadCitizenJobsFunctions(state);
     loadCitizenNeedsFunctions(state);
     loadLocalStorageChatters(state);
     loadImages(state);
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
-        if (user === "HelmiBlub") {
+        if (user === state.streamer) {
             if (message.indexOf("test") !== -1) {
                 for (let i = 0; i < 99; i++) {
                     addCitizen(user + i, state);
@@ -95,8 +112,8 @@ function initMyApp() {
         addChatter(user, state);
     }
     //@ts-ignore
-    ComfyJS.Init("HelmiBlub");
-    document.addEventListener('keydown', (e) => keyDown(e, state));
+    ComfyJS.Init(state.streamer);
+    chatSimAddInputEventListeners(state);
 
     runner(state);
 }
@@ -118,34 +135,6 @@ function loadLocalStorageChatters(state: ChatSimState) {
         for (let chatter of state.chatterNames) {
             addCitizen(chatter, state);
         }
-    }
-}
-
-function keyDown(event: KeyboardEvent, state: ChatSimState) {
-    const speedScaling = 1.2;
-    switch (event.code) {
-        case "Period":
-            if (state.gameSpeed < 5) {
-                state.gameSpeed++;
-            } else {
-                state.gameSpeed *= speedScaling;
-                state.gameSpeed = Math.round(state.gameSpeed);
-            }
-            break;
-        case "Comma":
-            if (state.gameSpeed < 5 && state.gameSpeed > 0) {
-                state.gameSpeed--;
-            } else {
-                state.gameSpeed /= speedScaling;
-                state.gameSpeed = Math.round(state.gameSpeed);
-            }
-            break
-        case "KeyM":
-            addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
-            break
-        default:
-            console.log(event.key, event.code);
-            break;
     }
 }
 
