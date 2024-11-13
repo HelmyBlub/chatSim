@@ -1,20 +1,45 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
+import { Citizen } from "./citizen.js";
 
 export function paintChatSim(state: ChatSimState) {
     const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     paintMap(ctx, state, state.paintData.map);
     paintMapBorder(ctx, state.paintData.map);
+    paintSelectedData(ctx, state);
     paintData(ctx, state);
 
 }
 
-function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: PaintDataMap): Position {
+export function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: PaintDataMap): Position {
     return {
         x: Math.floor(mapPosition.x - paintDataMap.cameraPosition.x + paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2),
         y: Math.floor(mapPosition.y - paintDataMap.cameraPosition.y + paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2),
     };
+}
+
+function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    const selected = state.inputData.selected;
+    if (!selected) return;
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "black";
+    const offsetX = state.map.mapWidth + 100;
+    const offsetY = 50;
+    let lineCounter = 0;
+    const lineSpacing = 25;
+    if (selected.type === "citizen") {
+        const citizen: Citizen = selected.object;
+        ctx.fillText(`Citizen: ${citizen.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    State: ${citizen.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`        State: ${citizen.job.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        for (let item of citizen.inventory) {
+            ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    }
 }
 
 function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataMap: PaintDataMap) {
@@ -87,6 +112,17 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         const nameYSpacing = 5;
         drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing);
     }
+    if (state.inputData.selected) {
+        if (state.inputData.selected.type === "citizen") {
+            const citizen: Citizen = state.inputData.selected.object;
+            const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.rect(Math.floor(paintPos.x - citizenPaintSize / 2), Math.floor(paintPos.y - citizenPaintSize / 2), citizenPaintSize, citizenPaintSize);
+            ctx.stroke();
+        }
+    }
     ctx.restore();
 }
 
@@ -101,7 +137,7 @@ function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMa
 function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
-    const offsetX = state.map.mapWidth + 100;
+    const offsetX = state.map.mapWidth + 500;
     ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];

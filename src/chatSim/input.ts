@@ -1,5 +1,8 @@
 import { ChatSimState, PaintDataMap } from "./chatSimModels.js";
 import { addCitizen } from "./main.js";
+import { mapPositionToPaintPosition } from "./paint.js";
+
+const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 
 export function chatSimAddInputEventListeners(state: ChatSimState) {
     document.addEventListener('keydown', (e) => keyDown(e, state));
@@ -34,12 +37,40 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
 
 function mouseDown(event: MouseEvent, state: ChatSimState) {
     state.inputData.map.mouseMoveMap = true;
+    state.inputData.lastMouseDownTime = performance.now();
 }
 function mouseUp(event: MouseEvent, state: ChatSimState) {
     state.inputData.map.mouseMoveMap = false;
+    if (performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME) {
+        const boundingRect = state.canvas.getBoundingClientRect();
+        const relativMouseX = event.clientX - boundingRect.left;
+        const relativMouseY = event.clientY - boundingRect.top;
+        const paintDataMap = state.paintData.map;
+        const isClickInsideMap = relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
+            && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
+        if (isClickInsideMap) {
+            console.log("click is inside map");
+            for (let citizen of state.map.citizens) {
+                const citizenPaintPosition = mapPositionToPaintPosition(citizen.position, paintDataMap);
+                const citizenPaintSizeHalved = 20;
+                const citizenClicked = relativMouseX >= citizenPaintPosition.x - citizenPaintSizeHalved
+                    && relativMouseX <= citizenPaintPosition.x + citizenPaintSizeHalved
+                    && relativMouseY >= citizenPaintPosition.y - citizenPaintSizeHalved
+                    && relativMouseY <= citizenPaintPosition.y + citizenPaintSizeHalved
+                if (citizenClicked) {
+                    state.inputData.selected = {
+                        object: citizen,
+                        type: "citizen"
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }
+
 function mouseMove(event: MouseEvent, state: ChatSimState) {
-    if (state.inputData.map.mouseMoveMap) {
+    if (state.inputData.map.mouseMoveMap && performance.now() - state.inputData.lastMouseDownTime > INPUT_CONSIDERED_CLICK_MAX_TIME) {
         moveMapCameraBy(-event.movementX, -event.movementY, state);
     }
 }

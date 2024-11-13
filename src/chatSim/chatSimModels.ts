@@ -58,6 +58,11 @@ export type ChatSimState = {
         map: PaintDataMap,
     }
     inputData: {
+        lastMouseDownTime: number,
+        selected?: {
+            type: string,
+            object: any,
+        },
         map: {
             mouseMoveMap: boolean,
             moveX: number,

@@ -53,6 +53,7 @@ function chatSimStateInit(streamer: string): ChatSimState {
             }
         },
         inputData: {
+            lastMouseDownTime: 0,
             map: {
                 moveX: 0,
                 moveY: 0,

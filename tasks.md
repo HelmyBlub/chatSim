@@ -1,25 +1,21 @@
 Tasks:
-- make simple images
-    - zooming, moving
-        - move camera with
-            - keys
-            - mouse
-        - zoom with
-            - keys
-            - mouse
-        - can not move out of map
-
-    - make map bigger?
-    - animations?
-- map chunks for more efficient searching?
-    - some things can be bound to only one chunk and other to entire map
+- select citizen 
+    - display data
+    - toogle following with camera
+- selection for other things like houses, tree, mushroom
+- paint citizen with a tool based on their job
 - inventory management causes a lot of problems how they should behave
     - restructure code for some new citizen behavior better considering inventory?
+    - reserver space for food always
+    - house should give storage capcity
+        - if hungry and no food, should check if food at home
+- thinks about day+night cycles
+    - go to bed at night to recharge energy
+    - if has a home -> faster reg, less sleep required
+    - food drain lowered but food gain per mushroom reduced, 
+        - be able to survive one day without food
 - more structured map house placing, do not place houses above each other
 - bug: lumberjacks should not switch between trees after just one wood
-- thinks about day cycles
-    - go to be at night to recharge energy
-    - if has a home -> faster reg, less sleep required
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -37,10 +33,17 @@ Tasks:
         - make top view image and rotate image => than just need some walking frames
     - hungry citizen visualized
     - starving citizen visualization
-    - mushroom image
 
 
 Tasks done today:
+- zooming, moving
+    - move camera with
+        - keys
+        - mouse
+    - zoom with
+        - keys
+        - mouse
+    - can not move out of map
 - make simple images
     - tree
     - mushroom
