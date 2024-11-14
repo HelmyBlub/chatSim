@@ -1,16 +1,17 @@
 Tasks:
-- inventory management causes a lot of problems how they should behave
-    - restructure code for some new citizen behavior better considering inventory?
-    - if has home use storage capacity of home if inventory full, instead of switching jobs
-    - reserver space for food always
-        - if check if can carry more it depends if it is food or not
-        - also ok if food at home
-        - eat to full before leaving home?
-    - house should give storage capacity
-        - if hungry and no food, should check if food at home
-    - store stuff at home
-    - go home to eat
-    - eat more at home, so i do not need to come back frequently
+- instead of switching jobs use house storage capacity for gatherer job
+    - food gatherer
+        - store food at home
+        - if even home storage high, switch to food market
+    - food market  
+        - if out of food. Try stocking up from home
+    - wood gatherer
+        - store wood at home
+        - if even home storage high, switch to wood market
+    - wood market
+        - if out of wood. Try stocking up from home
+    - if i want to repait my house
+        - also check and use home inventory
 - change: panning should not wait for timer if moved to far
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
@@ -36,6 +37,18 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- inventory management causes a lot of problems how they should behave
+    - restructure code for some new citizen behavior better considering inventory?
+    - if has home use storage capacity of home if inventory full
+    - reserve space for food always
+        - if check if can carry more it depends if it is food or not
+        - also ok if food at home
+        - eat to full before leaving home?
+    - house should give storage capacity
+        - if hungry and no food, should check if food at home
+    - store stuff at home
+    - go home to eat
+    - eat more at home, so i do not need to come back frequently
 - day+night cycles
     - vizualize sleeping
     - go to home if they have one to sleep
