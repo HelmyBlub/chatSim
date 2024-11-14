@@ -67,6 +67,8 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
                     job.state = "buildHouse";
                     job.houseInProgress = {
                         owner: citizen,
+                        inventory: [],
+                        maxInventory: 50,
                         position: {
                             x: job.buildPosition.x,
                             y: job.buildPosition.y,
@@ -94,6 +96,8 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
                 job.houseInProgress.buildProgress = undefined;
                 job.houseInProgress = undefined;
             }
+        } else {
+            job.state = "searchBuildLocation";
         }
     }
     if (job.state === "buyWood") {

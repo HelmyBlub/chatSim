@@ -27,6 +27,8 @@ export type House = {
     position: Position,
     buildProgress?: number,
     deterioration: number,
+    inventory: InventoryStuff[],
+    maxInventory: number,
 }
 
 export type ChatSimMap = {

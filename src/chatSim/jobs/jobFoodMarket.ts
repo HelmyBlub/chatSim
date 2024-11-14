@@ -1,9 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen } from "../citizen.js";
-import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeed.js";
 import { CitizenJob, createJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
     state: "takeRandomLocation" | "selling"

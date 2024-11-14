@@ -11,7 +11,6 @@ export type CitizenNeedFunctions = {
 }
 
 export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
-export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
 
 export function loadCitizenNeedsFunctions(state: ChatSimState) {
     loadCitizenNeedsFunctionsStarving(state);

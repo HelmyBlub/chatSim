@@ -40,25 +40,46 @@ export type CitizenLogEntry = {
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 
 export function addCitizenLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
-    citizen.log.push({
+    citizen.log.unshift({
         time: state.time,
         message: message,
     });
     if (citizen.log.length > citizen.maxLogLength) {
-        citizen.log.shift();
+        citizen.log.pop();
     }
 }
 
 export function canCitizenCarryMore(citizen: Citizen): boolean {
-    return getCitizenUsedInventoryCapacity(citizen) < citizen.maxInventory;
+    return getUsedInventoryCapacity(citizen.inventory) < citizen.maxInventory;
 }
 
-export function getCitizenUsedInventoryCapacity(citizen: Citizen): number {
+export function getUsedInventoryCapacity(inventory: InventoryStuff[]): number {
     let counter = 0;
-    for (let item of citizen.inventory) {
+    for (let item of inventory) {
         counter += item.counter;
     }
     return counter;
+}
+
+/**
+ * @returns actual amount put into inventory. As inventory has a max capacity it might not fit all in
+ */
+export function putItemIntoInventory(itemName: string, inventory: InventoryStuff[], maxInventory: number, amount: number): number {
+    let item = inventory.find(i => i.name === itemName);
+    let actualAmount = amount;
+    if (!item) {
+        item = {
+            name: itemName,
+            counter: 0,
+        }
+        inventory.push(item);
+    }
+    const usedCapacity = getUsedInventoryCapacity(inventory);
+    if (usedCapacity + amount > maxInventory) {
+        actualAmount = maxInventory - usedCapacity;
+    }
+    item.counter += amount;
+    return actualAmount;
 }
 
 export function tickCitizens(state: ChatSimState) {
@@ -171,6 +192,7 @@ export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], sh
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {
+        if (citizen === searcher) continue;
         const ivnentoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
         if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
             if (closest === undefined) {

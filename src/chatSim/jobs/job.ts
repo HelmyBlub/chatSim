@@ -1,6 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { getCitizenUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "../citizen.js";
-import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeed.js";
+import { getUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobHouseContruction.js";
@@ -8,6 +7,7 @@ import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 
 export type CitizenJob = {
     name: string,
@@ -50,11 +50,15 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Position) 
     return distance <= citizen.speed;
 }
 
+export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    sellItem(seller, buyer, itemName, itemPrice, state, requestedAmount);
+}
+
 export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
     const sellerItem = seller.inventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    let buyerInventoryCapacity = buyer.maxInventory - getCitizenUsedInventoryCapacity(buyer);
+    let buyerInventoryCapacity = buyer.maxInventory - getUsedInventoryCapacity(buyer.inventory);
     if (itemName !== INVENTORY_MUSHROOM) {
         const mushrooms = buyer.inventory.find(i => i.name === INVENTORY_MUSHROOM);
         if (!mushrooms) {
