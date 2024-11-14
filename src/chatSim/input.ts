@@ -1,8 +1,9 @@
 import { ChatSimState, PaintDataMap } from "./chatSimModels.js";
-import { addCitizen } from "./main.js";
+import { addCitizen, calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
+const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
 
 export function chatSimAddInputEventListeners(state: ChatSimState) {
     document.addEventListener('keydown', (e) => keyDown(e, state));
@@ -38,6 +39,10 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
 function mouseDown(event: MouseEvent, state: ChatSimState) {
     state.inputData.map.mouseMoveMap = true;
     state.inputData.lastMouseDownTime = performance.now();
+    state.inputData.lastMouseDownPosition = {
+        x: event.clientX,
+        y: event.clientY,
+    }
 }
 function mouseUp(event: MouseEvent, state: ChatSimState) {
     state.inputData.map.mouseMoveMap = false;
@@ -76,7 +81,9 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
 }
 
 function mouseMove(event: MouseEvent, state: ChatSimState) {
-    if (state.inputData.map.mouseMoveMap && performance.now() - state.inputData.lastMouseDownTime > INPUT_CONSIDERED_CLICK_MAX_TIME) {
+    const mightBeAClick = performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME;
+    const movedEnoughToNoBeAClick = calculateDistance(state.inputData.lastMouseDownPosition, { x: event.clientX, y: event.clientY }) >= INPUT_CONSIDERED_MIN_MOVING_DISTANCE;
+    if (state.inputData.map.mouseMoveMap && (!mightBeAClick || movedEnoughToNoBeAClick)) {
         moveMapCameraBy(-event.movementX, -event.movementY, state);
     }
 }

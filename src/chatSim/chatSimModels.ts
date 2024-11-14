@@ -64,6 +64,7 @@ export type ChatSimState = {
     }
     inputData: {
         lastMouseDownTime: number,
+        lastMouseDownPosition: Position,
         selected?: {
             type: string,
             object: any,

@@ -1,4 +1,5 @@
 Tasks:
+- change: panning should not wait for timer if moved to far
 - instead of switching jobs use house storage capacity for gatherer job
     - food gatherer
         - store food at home
@@ -12,7 +13,6 @@ Tasks:
         - if out of wood. Try stocking up from home
     - if i want to repait my house
         - also check and use home inventory
-- change: panning should not wait for timer if moved to far
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
 - more structured map house placing, do not place houses above each other
