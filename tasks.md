@@ -1,19 +1,18 @@
 Tasks:
-- select citizen 
-    - display data
-    - toogle following with camera
-- selection for other things like houses, tree, mushroom
-- paint citizen with a tool based on their job
-- inventory management causes a lot of problems how they should behave
-    - restructure code for some new citizen behavior better considering inventory?
-    - reserver space for food always
-    - house should give storage capcity
-        - if hungry and no food, should check if food at home
+- bug: zooming and selecting
 - thinks about day+night cycles
     - go to bed at night to recharge energy
     - if has a home -> faster reg, less sleep required
     - food drain lowered but food gain per mushroom reduced, 
         - be able to survive one day without food
+- inventory management causes a lot of problems how they should behave
+    - restructure code for some new citizen behavior better considering inventory?
+    - reserver space for food always
+    - house should give storage capcity
+        - if hungry and no food, should check if food at home
+- change: panning should not wait for timer if moved to far
+- selection for other things like houses, tree, mushroom
+- paint citizen with a tool based on their job
 - more structured map house placing, do not place houses above each other
 - bug: lumberjacks should not switch between trees after just one wood
 - job "food market"
@@ -36,6 +35,9 @@ Tasks:
 
 
 Tasks done today:
+- select citizen 
+    - display data
+    - toogle following with camera
 - zooming, moving
     - move camera with
         - keys

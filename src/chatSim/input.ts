@@ -49,14 +49,20 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
         const isClickInsideMap = relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
             && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
         if (isClickInsideMap) {
-            console.log("click is inside map");
+            const translateX = paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2;
+            const translateY = paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2;
+
             for (let citizen of state.map.citizens) {
                 const citizenPaintPosition = mapPositionToPaintPosition(citizen.position, paintDataMap);
-                const citizenPaintSizeHalved = 20;
-                const citizenClicked = relativMouseX >= citizenPaintPosition.x - citizenPaintSizeHalved
-                    && relativMouseX <= citizenPaintPosition.x + citizenPaintSizeHalved
-                    && relativMouseY >= citizenPaintPosition.y - citizenPaintSizeHalved
-                    && relativMouseY <= citizenPaintPosition.y + citizenPaintSizeHalved
+                const citizenPaintPositionWithZoom = {
+                    x: translateX - (translateX - citizenPaintPosition.x) * paintDataMap.zoom,
+                    y: translateY - (translateY - citizenPaintPosition.y) * paintDataMap.zoom,
+                }
+                const citizenPaintSizeHalved = 20 * paintDataMap.zoom;
+                const citizenClicked = relativMouseX >= citizenPaintPositionWithZoom.x - citizenPaintSizeHalved
+                    && relativMouseX <= citizenPaintPositionWithZoom.x + citizenPaintSizeHalved
+                    && relativMouseY >= citizenPaintPositionWithZoom.y - citizenPaintSizeHalved
+                    && relativMouseY <= citizenPaintPositionWithZoom.y + citizenPaintSizeHalved
                 if (citizenClicked) {
                     state.inputData.selected = {
                         object: citizen,

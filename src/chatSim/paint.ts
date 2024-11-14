@@ -138,7 +138,7 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
     const offsetX = state.map.mapWidth + 500;
-    ctx.fillText(`speed: ${state.gameSpeed}`, offsetX, 25);
+    ctx.fillText(`speed: ${state.gameSpeed},     zoom:${state.paintData.map.zoom.toFixed(2)}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];
         let text = `${citizen.name}, state: ${citizen.state}, $${citizen.money}, Job: ${citizen.job.name}`;
