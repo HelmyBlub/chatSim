@@ -1,9 +1,9 @@
-import { ChatSimState } from "./chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "./citizen.js";
-import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "./citizenNeeds.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "../citizen.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeed.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
-import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "./main.js";
+import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
 
 export type CitizenJobFoodGatherer = CitizenJob & {
     state: "gathering" | "selling" | "setMoveToMushroom",

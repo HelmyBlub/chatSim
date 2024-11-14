@@ -1,18 +1,24 @@
 import { ChatSimState, House, InventoryStuff, Position } from "./chatSimModels.js";
-import { tickCitizenNeeds } from "./citizenNeeds.js";
-import { CitizenJob, tickCitizenJob } from "./job.js";
-import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
+import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
+import { CitizenJob, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_JOB_FOOD_MARKET } from "./jobs/jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
+
+export type CitizenStateInfo = {
+    type: string,
+    state?: string,
+}
 
 export type Citizen = {
     job: CitizenJob,
     birthTime: number,
     name: string,
-    state: string,
+    stateInfo: CitizenStateInfo,
     speed: number,
     position: Position,
     moveTo?: Position,
     foodPerCent: number,
+    energyPerCent: number,
     inventory: InventoryStuff[],
     maxInventory: number,
     home?: House,
@@ -56,26 +62,31 @@ export function tickCitizens(state: ChatSimState) {
     for (let citizen of state.map.citizens) {
         tickCitizen(citizen, state);
     }
-    deleteStarvedCitizens(state);
+    deleteCitizens(state);
 }
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
-    citizen.foodPerCent -= 0.0010;
+    citizen.foodPerCent -= 0.0002;
+    citizen.energyPerCent -= 16 / state.timPerDay;
     tickCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
-    if (citizen.state === CITIZEN_STATE_WORKING_JOB) {
+    if (citizen.stateInfo.type === CITIZEN_STATE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
     }
 }
 
-function deleteStarvedCitizens(state: ChatSimState) {
+function deleteCitizens(state: ChatSimState) {
     for (let i = state.map.citizens.length - 1; i >= 0; i--) {
-        if (state.map.citizens[i].foodPerCent < 0) {
+        const starved = state.map.citizens[i].foodPerCent < 0;
+        const outOfEngergy = state.map.citizens[i].energyPerCent < 0;
+        if (starved || outOfEngergy) {
             let deceased = state.map.citizens.splice(i, 1)[0];
+            if (starved) console.log(`${deceased.name} died by starving`);
+            if (outOfEngergy) console.log(`${deceased.name} died by over working`);
             if (deceased.home) {
                 if (deceased.home.owner === deceased && state.map.citizens.length > 0) {
                     const randomNewOwnerIndex = Math.floor(Math.random() * state.map.citizens.length);

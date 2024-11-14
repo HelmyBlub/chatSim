@@ -1,6 +1,7 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
+import { getTimeOfDay, getTimeOfDayString } from "./main.js";
 
 export function paintChatSim(state: ChatSimState) {
     const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -32,7 +33,10 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         const citizen: Citizen = selected.object;
         ctx.fillText(`Citizen: ${citizen.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    State: ${citizen.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizen.stateInfo.state) ctx.fillText(`        ${citizen.stateInfo.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`        State: ${citizen.job.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
@@ -44,7 +48,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
 
 function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataMap: PaintDataMap) {
     ctx.fillStyle = "black";
-    ctx.rect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight);
+    ctx.fillRect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight);
     const clipPath = new Path2D();
     clipPath.rect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight)
     ctx.save();
@@ -124,6 +128,24 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         }
     }
     ctx.restore();
+
+    //paint night darkness
+    const timeOfDay = getTimeOfDay(state);
+    const transitionTime = 0.05;
+
+    if (timeOfDay < state.sunriseAt + transitionTime || timeOfDay > state.sunsetAt - transitionTime) {
+        const nightAlpha = 0.55;
+        let transitionAlpha = nightAlpha;
+        if (Math.abs(state.sunriseAt - timeOfDay + transitionTime) < transitionTime) {
+            transitionAlpha *= (state.sunriseAt - timeOfDay + transitionTime) / transitionTime;
+        } else if (Math.abs(state.sunsetAt - timeOfDay - transitionTime) < transitionTime) {
+            transitionAlpha *= (timeOfDay - state.sunsetAt + transitionTime) / transitionTime;
+        }
+        ctx.fillStyle = "black";
+        ctx.globalAlpha = transitionAlpha;
+        ctx.fillRect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight);
+        ctx.globalAlpha = 1;
+    }
 }
 
 function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap) {
@@ -138,10 +160,10 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
     const offsetX = state.map.mapWidth + 500;
-    ctx.fillText(`speed: ${state.gameSpeed},     zoom:${state.paintData.map.zoom.toFixed(2)}`, offsetX, 25);
+    ctx.fillText(`${getTimeOfDayString(state)}, speed: ${state.gameSpeed},     zoom:${state.paintData.map.zoom.toFixed(2)}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];
-        let text = `${citizen.name}, state: ${citizen.state}, $${citizen.money}, Job: ${citizen.job.name}`;
+        let text = `${citizen.name}, state: ${citizen.stateInfo.type}, $${citizen.money}, Job: ${citizen.job.name}`;
         ctx.fillText(text, offsetX, 50 + i * 26);
     }
 }

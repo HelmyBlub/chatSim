@@ -1,8 +1,8 @@
-import { ChatSimState, Position } from "./chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "./citizen.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "../citizen.js";
 import { CitizenJob, createJob } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
-import { calculateDistance, INVENTORY_WOOD } from "./main.js";
+import { calculateDistance, INVENTORY_WOOD } from "../main.js";
 
 export type CitizenJobWoodMarket = CitizenJob & {
     state: "takeRandomLocation" | "selling"

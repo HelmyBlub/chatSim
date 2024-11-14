@@ -1,6 +1,6 @@
 import { Citizen } from "./citizen.js"
-import { CitizenNeedsFunctions } from "./citizenNeeds.js"
-import { FunctionsCitizenJobs } from "./job.js"
+import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
+import { FunctionsCitizenJobs } from "./jobs/job.js"
 
 export type Position = {
     x: number,
@@ -52,7 +52,10 @@ export type ChatSimState = {
     canvas: HTMLCanvasElement,
     streamer: string,
     time: number,
+    timPerDay: number,
     gameSpeed: number,
+    sunriseAt: number,
+    sunsetAt: number,
     map: ChatSimMap,
     paintData: {
         map: PaintDataMap,

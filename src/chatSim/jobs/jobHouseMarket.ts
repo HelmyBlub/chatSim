@@ -1,5 +1,5 @@
-import { ChatSimState } from "./chatSimModels.js";
-import { addCitizenLogEntry, Citizen } from "./citizen.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { addCitizenLogEntry, Citizen } from "../citizen.js";
 import { CitizenJob, createJob } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 

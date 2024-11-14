@@ -1,13 +1,13 @@
-import { ChatSimState, Position } from "./chatSimModels.js";
-import { getCitizenUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "./citizen.js";
-import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "./citizenNeeds.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { getCitizenUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "../citizen.js";
+import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeed.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobHouseContruction.js";
 import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
-import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
+import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
 
 export type CitizenJob = {
     name: string,

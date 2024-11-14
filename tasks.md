@@ -1,10 +1,16 @@
 Tasks:
-- bug: zooming and selecting
 - thinks about day+night cycles
-    - go to bed at night to recharge energy
-    - if has a home -> faster reg, less sleep required
-    - food drain lowered but food gain per mushroom reduced, 
-        - be able to survive one day without food
+    - game.time calculate to  24H clock and day
+        - make configurable to test different speeds
+        - display value
+        - visualize night with darkening everything
+        - change food in a way a citizen won't die at night
+        - add energy for citizens, drains over time
+        - make citizen "need sleep"
+            - go to home if they have one to sleep
+            - sleep anywhere without a house but less effective
+            - vizualize sleeping
+            - if sleeping => don't interrupt for food if still full enough
 - inventory management causes a lot of problems how they should behave
     - restructure code for some new citizen behavior better considering inventory?
     - reserver space for food always
@@ -33,29 +39,13 @@ Tasks:
     - hungry citizen visualized
     - starving citizen visualization
 
-
+---------------------------------------------------
 Tasks done today:
-- select citizen 
-    - display data
-    - toogle following with camera
-- zooming, moving
-    - move camera with
-        - keys
-        - mouse
-    - zoom with
-        - keys
-        - mouse
-    - can not move out of map
-- make simple images
-    - tree
-    - mushroom
-    - house
-    - citizen
+- bug: zooming and selecting
 
-- bug: citizens die in some wierd action loops
-    - debug "move to food market" loop
-        - citizen is visually close to market but somehow does not buy
 
+
+--------------------------------------------------
 Big Idea:
 - do some game for chatters.
     - chatter can play something while i do coding

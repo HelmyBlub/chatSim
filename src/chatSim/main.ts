@@ -1,10 +1,10 @@
 import { IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, loadImage } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
 import { CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
-import { loadCitizenNeedsFunctions } from "./citizenNeeds.js";
+import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { chatSimAddInputEventListeners } from "./input.js";
-import { createJob, loadCitizenJobsFunctions } from "./job.js";
-import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
+import { createJob, loadCitizenJobsFunctions } from "./jobs/job.js";
+import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { paintChatSim } from "./paint.js";
 import { chatSimTick } from "./tick.js";
 
@@ -19,6 +19,45 @@ export function calculateDistance(position1: Position, position2: Position): num
     return Math.sqrt(diffX * diffX + diffY * diffY);
 }
 
+export function addCitizen(user: string, state: ChatSimState) {
+    if (state.map.citizens.find(c => c.name === user)) return;
+    state.map.citizens.push({
+        name: user,
+        birthTime: state.time,
+        speed: 2,
+        foodPerCent: 1,
+        energyPerCent: 1,
+        position: { x: 0, y: 0 },
+        stateInfo: {
+            type: CITIZEN_STATE_WORKING_JOB,
+        },
+        inventory: [],
+        maxInventory: 10,
+        money: 10,
+        skills: {},
+        job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
+        log: [],
+        maxLogLength: 100,
+    })
+}
+
+/**
+ * @returns value between 0 and 1. midnight = 0. 
+ */
+export function getTimeOfDay(state: ChatSimState): number {
+    return (state.time % state.timPerDay) / state.timPerDay;
+}
+
+export function getTimeOfDayString(state: ChatSimState): string {
+    const timeOfDayNumber = getTimeOfDay(state) * 24;
+    const days = Math.floor(state.time / state.timPerDay) + 1;
+    const hours = Math.floor(timeOfDayNumber);
+    const hoursString = hours >= 10 ? hours : `0${hours}`;
+    const minutes = Math.floor((timeOfDayNumber - hours) * 60);
+    const minutesString = minutes >= 10 ? minutes : `0${minutes}`;
+    return `Time ${hoursString}:${minutesString}, Day:${days}`;
+}
+
 function chatSimStateInit(streamer: string): ChatSimState {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth - 10;
@@ -28,7 +67,10 @@ function chatSimStateInit(streamer: string): ChatSimState {
         canvas,
         streamer: streamer,
         time: 0,
+        timPerDay: 100000,
         gameSpeed: 1,
+        sunriseAt: 0.22,
+        sunsetAt: 0.88,
         chatterNames: [],
         functionsCitizenJobs: {},
         functionsCitizenNeeds: {},
@@ -61,25 +103,6 @@ function chatSimStateInit(streamer: string): ChatSimState {
             }
         }
     }
-}
-
-export function addCitizen(user: string, state: ChatSimState) {
-    if (state.map.citizens.find(c => c.name === user)) return;
-    state.map.citizens.push({
-        name: user,
-        birthTime: state.time,
-        speed: 2,
-        foodPerCent: 1,
-        position: { x: 0, y: 0 },
-        state: CITIZEN_STATE_WORKING_JOB,
-        inventory: [],
-        maxInventory: 10,
-        money: 10,
-        skills: {},
-        job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
-        log: [],
-        maxLogLength: 100,
-    })
 }
 
 function loadImages(state: ChatSimState) {
