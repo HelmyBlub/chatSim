@@ -1,6 +1,6 @@
 import { IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, loadImage } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
-import { CITIZEN_STATE_WORKING_JOB } from "./citizen.js";
+import { CITIZEN_STATE_TYPE_WORKING_JOB } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { chatSimAddInputEventListeners } from "./input.js";
 import { createJob, loadCitizenJobsFunctions } from "./jobs/job.js";
@@ -29,7 +29,7 @@ export function addCitizen(user: string, state: ChatSimState) {
         energyPerCent: 1,
         position: { x: 0, y: 0 },
         stateInfo: {
-            type: CITIZEN_STATE_WORKING_JOB,
+            type: CITIZEN_STATE_TYPE_WORKING_JOB,
         },
         inventory: [],
         maxInventory: 10,

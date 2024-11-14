@@ -1,6 +1,6 @@
-import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
-import { Citizen } from "./citizen.js";
+import { Citizen, paintCitizens } from "./citizen.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
 
 export function paintChatSim(state: ChatSimState) {
@@ -10,7 +10,6 @@ export function paintChatSim(state: ChatSimState) {
     paintMapBorder(ctx, state.paintData.map);
     paintSelectedData(ctx, state);
     paintData(ctx, state);
-
 }
 
 export function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: PaintDataMap): Position {
@@ -102,31 +101,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
             drawTextWithOutline(ctx, house.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - citizenHousePaintSize / 2 + nameOffsetY);
         }
     }
-    const citizenImage = state.images[IMAGE_PATH_CITIZEN];
-    const citizenPaintSize = 40;
-    ctx.font = "20px Arial";
-    for (let citizen of state.map.citizens) {
-        const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
-        ctx.drawImage(citizenImage, 0, 0, 200, 200,
-            paintPos.x - citizenPaintSize / 2,
-            paintPos.y - citizenPaintSize / 2,
-            citizenPaintSize, citizenPaintSize);
-
-        const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
-        const nameYSpacing = 5;
-        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing);
-    }
-    if (state.inputData.selected) {
-        if (state.inputData.selected.type === "citizen") {
-            const citizen: Citizen = state.inputData.selected.object;
-            const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.rect(Math.floor(paintPos.x - citizenPaintSize / 2), Math.floor(paintPos.y - citizenPaintSize / 2), citizenPaintSize, citizenPaintSize);
-            ctx.stroke();
-        }
-    }
+    paintCitizens(ctx, state);
     ctx.restore();
 
     //paint night darkness

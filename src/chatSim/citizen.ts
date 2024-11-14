@@ -1,8 +1,11 @@
+import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { ChatSimState, House, InventoryStuff, Position } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
+import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CitizenJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobs/jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
+import { mapPositionToPaintPosition } from "./paint.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -34,7 +37,7 @@ export type CitizenLogEntry = {
     message: string,
 }
 
-export const CITIZEN_STATE_WORKING_JOB = "workingJob";
+export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 
 export function addCitizenLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
     citizen.log.push({
@@ -65,6 +68,49 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
+export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    const paintDataMap = state.paintData.map;
+    const citizenImage = state.images[IMAGE_PATH_CITIZEN];
+    const citizenPaintSize = 40;
+    ctx.font = "20px Arial";
+    for (let citizen of state.map.citizens) {
+        const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
+        ctx.drawImage(citizenImage, 0, 0, 200, 200,
+            paintPos.x - citizenPaintSize / 2,
+            paintPos.y - citizenPaintSize / 2,
+            citizenPaintSize, citizenPaintSize);
+
+        const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
+        const nameYSpacing = 5;
+        paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - citizenPaintSize / 2 - 10 }, state.time);
+        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing);
+    }
+    if (state.inputData.selected) {
+        if (state.inputData.selected.type === "citizen") {
+            const citizen: Citizen = state.inputData.selected.object;
+            const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.rect(Math.floor(paintPos.x - citizenPaintSize / 2), Math.floor(paintPos.y - citizenPaintSize / 2), citizenPaintSize, citizenPaintSize);
+            ctx.stroke();
+        }
+    }
+}
+
+function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPosition: Position, time: number) {
+    if (citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) return;
+    if (citizen.stateInfo.state !== "sleeping") return;
+    const timer = time / 300;
+    const swingRadius = 10;
+    const fontSize = 14;
+    const offsetY = -fontSize * ((Math.sin(timer) + 1) / 2);
+    ctx.font = `${fontSize}px Arial`;
+    drawTextWithOutline(ctx, "z", paintPosition.x + Math.floor(Math.sin(timer) * swingRadius), paintPosition.y + offsetY);
+    drawTextWithOutline(ctx, "Z", paintPosition.x + 5 + Math.floor(Math.sin(timer + 1) * swingRadius), paintPosition.y + offsetY - fontSize);
+    drawTextWithOutline(ctx, "Z", paintPosition.x + 10 + Math.floor(Math.sin(timer + 2) * swingRadius), paintPosition.y + offsetY - fontSize * 2);
+}
+
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
     citizen.foodPerCent -= 0.0002;
     citizen.energyPerCent -= 16 / state.timPerDay;
@@ -74,7 +120,7 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
-    if (citizen.stateInfo.type === CITIZEN_STATE_WORKING_JOB) {
+    if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
     }
 }
@@ -85,8 +131,8 @@ function deleteCitizens(state: ChatSimState) {
         const outOfEngergy = state.map.citizens[i].energyPerCent < 0;
         if (starved || outOfEngergy) {
             let deceased = state.map.citizens.splice(i, 1)[0];
-            if (starved) console.log(`${deceased.name} died by starving`);
-            if (outOfEngergy) console.log(`${deceased.name} died by over working`);
+            if (starved) console.log(`${deceased.name} died by starving`, deceased);
+            if (outOfEngergy) console.log(`${deceased.name} died by over working`, deceased);
             if (deceased.home) {
                 if (deceased.home.owner === deceased && state.map.citizens.length > 0) {
                     const randomNewOwnerIndex = Math.floor(Math.random() * state.map.citizens.length);

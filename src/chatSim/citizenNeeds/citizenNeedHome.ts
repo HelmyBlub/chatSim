@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CITIZEN_STATE_WORKING_JOB } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "../jobs/jobHouseContruction.js";
 import { CITIZEN_JOB_HOUSE_MARKET } from "../jobs/jobHouseMarket.js";
@@ -22,7 +22,6 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     return true;
 }
 
-
 function tick(citizen: Citizen, state: ChatSimState) {
     if (!citizen.home) {
         const availableHouse = state.map.houses.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined);
@@ -33,7 +32,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         } else if (!isInHouseBuildingBusiness(citizen)) {
             addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as no available house found`, state);
             citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
-            citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
     }
     if (citizen.home && citizen.home.deterioration > 0.2) {
@@ -68,7 +67,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     }
                     if (!canBuyWood) {
                         citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
-                        citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                         addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no money or no wood market found and i need wood for house repairs`, state);
                     }
                 }
@@ -78,7 +77,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 if (citizen.moveTo === undefined) {
                     if (citizen.money < 2) {
                         citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
-                        citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                         addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no money to buy wood for house repairs`, state);
                     } else {
                         const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
@@ -89,7 +88,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         } else {
                             addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
                         }
-                        citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                     }
                 }
             }

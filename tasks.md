@@ -1,21 +1,16 @@
 Tasks:
-- thinks about day+night cycles
-    - game.time calculate to  24H clock and day
-        - make configurable to test different speeds
-        - display value
-        - visualize night with darkening everything
-        - change food in a way a citizen won't die at night
-        - add energy for citizens, drains over time
-        - make citizen "need sleep"
-            - go to home if they have one to sleep
-            - sleep anywhere without a house but less effective
-            - vizualize sleeping
-            - if sleeping => don't interrupt for food if still full enough
 - inventory management causes a lot of problems how they should behave
     - restructure code for some new citizen behavior better considering inventory?
+    - if has home use storage capacity of home if inventory full, instead of switching jobs
     - reserver space for food always
-    - house should give storage capcity
+        - if check if can carry more it depends if it is food or not
+        - also ok if food at home
+        - eat to full before leaving home?
+    - house should give storage capacity
         - if hungry and no food, should check if food at home
+    - store stuff at home
+    - go home to eat
+    - eat more at home, so i do not need to come back frequently
 - change: panning should not wait for timer if moved to far
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
@@ -41,6 +36,22 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- day+night cycles
+    - vizualize sleeping
+    - go to home if they have one to sleep
+    - sleep more effective at home
+    - if very low on energy => sleep anywhere
+    - if want to sleep and has home => move back to home to sleep
+- day+night cycles
+    - game.time calculate to  24H clock and day
+        - make configurable to test different speeds
+        - display value
+        - visualize night with darkening everything
+        - change food in a way a citizen won't die at night
+        - add energy for citizens, drains over time
+        - make citizen "need sleep"
+            - sleep anywhere
+            - if sleeping => don't interrupt for food if still full enough
 - bug: zooming and selecting
 
 

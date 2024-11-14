@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_WORKING_JOB } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { createJob, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
@@ -49,7 +49,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 }
                 foundFood = true;
             } else {
-                citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
             }
         }
         if (!foundFood) {
@@ -57,12 +57,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as no food to buy found`, state);
                 citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
             }
-            citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
     } else {
         if (citizen.stateInfo.state === `move to food market`) {
             if (citizen.money < 2) {
-                citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
             } else if (citizen.moveTo === undefined) {
                 const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
                 if (foodMarket && foodMarket !== citizen) {
@@ -71,7 +71,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
                             sellItem(foodMarket, citizen, INVENTORY_MUSHROOM, 2, state, 1);
-                            citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                         }
                     } else {
                         addCitizenLogEntry(citizen, `food market location changed. Move to new location of food market from ${foodMarket.name}`, state);
@@ -83,7 +83,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 } else {
                     addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as food market disappeared`, state);
                     citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
-                    citizen.stateInfo = { type: CITIZEN_STATE_WORKING_JOB };
+                    citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                 }
             }
         }
