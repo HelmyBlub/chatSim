@@ -82,7 +82,7 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
             chatter.draw.pawAnimation = "notLikeThis";
             chatter.draw.pawAnimationStart = undefined;
             return false;
-        case "eat cookie": case "eatCookie": case "eatCookies": case "eat cookies":
+        case "eat cookie": case "eatCookie": case "eatCookies": case "eat cookies": case "eatcookie": case "eatcookies":
             if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
                 chatter.draw.pawAnimation = "eatCookie";
                 chatter.draw.pawAnimationStart = undefined;
@@ -92,7 +92,6 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
         case "bake cookie": case "bake cookies":
             if (chatter.draw.pawAnimation !== "bake cookies") chatter.draw.pawAnimationStart = undefined;
             chatter.draw.pawAnimation = "bake cookies";
-            state.gamesData.cookieGame.cookieCounter++;
             return false;
         case GAME_TIC_TAC_TOE:
             GAME_FUNCTIONS[GAME_TIC_TAC_TOE].handleStartMessage(chatter, state);
