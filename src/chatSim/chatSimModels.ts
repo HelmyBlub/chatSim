@@ -1,6 +1,7 @@
 import { Citizen } from "./citizen.js"
 import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
+import { ChatSimMap } from "./map.js"
 
 export type Position = {
     x: number,
@@ -29,17 +30,6 @@ export type House = {
     deterioration: number,
     inventory: InventoryStuff[],
     maxInventory: number,
-}
-
-export type ChatSimMap = {
-    mapHeight: number,
-    mapWidth: number,
-    citizens: Citizen[],
-    mushrooms: Mushroom[],
-    maxMushrooms: number,
-    trees: Tree[],
-    houses: House[],
-    maxTrees: number,
 }
 
 export type PaintDataMap = {

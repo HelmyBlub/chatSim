@@ -1,8 +1,17 @@
 Tasks:
+- trees/mushrooms should also spawn on tiles not positions
+- trees/mushrooms should not spawn on used tiles
+- trees/mushrooms should block tile
+
+- market building
+    - food market building
+        - has to be build
+        - place where food is sold or bought
+        - more storage
+        - if citizen is at food market place he does his job
+- pathing, citizen can not move over "private property"
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
-- more structured map house placing, do not place houses above each other
-- bug: lumberjacks should not switch between trees after just one wood
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -23,6 +32,13 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- more structured map house placing, do not place houses above each other
+    - add tileSize value
+    - map size has to be multiple of tileSize
+    - change houses to be build on correct locations fitting to a tile
+    - make some data structure to know what tiles is empty and which not
+        - check that despawning houses empty tiles
+    - houses should not be build on same tile
 - instead of switching jobs use house storage capacity for gatherer job
     - need starving
         - look at home for food

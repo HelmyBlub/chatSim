@@ -4,6 +4,7 @@ import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
+import { createHouseOnRandomTile } from "../map.js";
 
 export type CitizenJobHouseConstruction = CitizenJob & {
     state: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation",
@@ -64,21 +65,11 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
             if (inventoryWood && inventoryWood.counter >= WOOD_REQUIRED_FOR_HOUSE) {
                 moveToBuildLocation(citizen, job, state);
                 if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
-                    job.state = "buildHouse";
-                    job.houseInProgress = {
-                        owner: citizen,
-                        inventory: [],
-                        maxInventory: 50,
-                        position: {
-                            x: job.buildPosition.x,
-                            y: job.buildPosition.y,
-                        },
-                        buildProgress: 0,
-                        deterioration: 0,
+                    job.houseInProgress = createHouseOnRandomTile(citizen, state);
+                    if (job.houseInProgress !== undefined) {
+                        inventoryWood.counter -= WOOD_REQUIRED_FOR_HOUSE;
+                        job.state = "buildHouse";
                     }
-                    state.map.houses.push(job.houseInProgress);
-                    inventoryWood.counter -= WOOD_REQUIRED_FOR_HOUSE;
-                    job.state = "buildHouse";
                 }
             } else {
                 job.state = "buyWood";

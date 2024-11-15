@@ -5,6 +5,7 @@ import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { chatSimAddInputEventListeners } from "./input.js";
 import { createJob, loadCitizenJobsFunctions } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
+import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
 import { chatSimTick } from "./tick.js";
 
@@ -62,7 +63,6 @@ function chatSimStateInit(streamer: string): ChatSimState {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth - 10;
     canvas.height = window.innerHeight - 10;
-    const mapSize = 400;
     return {
         canvas,
         streamer: streamer,
@@ -75,21 +75,12 @@ function chatSimStateInit(streamer: string): ChatSimState {
         functionsCitizenJobs: {},
         functionsCitizenNeeds: {},
         images: {},
-        map: {
-            mapHeight: mapSize,
-            mapWidth: mapSize,
-            citizens: [],
-            mushrooms: [],
-            maxMushrooms: 2,
-            maxTrees: 2,
-            trees: [],
-            houses: [],
-        },
+        map: createDefaultMap(),
         paintData: {
             map: {
                 paintOffset: { x: 20, y: 20 },
-                paintWidth: 440,
-                paintHeight: 440,
+                paintWidth: 640,
+                paintHeight: 640,
                 cameraPosition: { x: 0, y: 0 },
                 zoom: 1,
             }

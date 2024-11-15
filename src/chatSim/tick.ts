@@ -1,6 +1,7 @@
 import { ChatSimState, Tree, Mushroom } from "./chatSimModels.js";
 import { tickCitizens } from "./citizen.js";
 import { moveMapCameraBy } from "./input.js";
+import { removeHouseFromMap } from "./map.js";
 
 export function chatSimTick(state: ChatSimState) {
     state.time += 16;
@@ -16,8 +17,8 @@ function tickHouses(state: ChatSimState) {
         const house = state.map.houses[i];
         house.deterioration += 0.00005;
         if (house.deterioration > 1) {
-            const brokenDownHouse = state.map.houses.splice(i, 1)[0];
-            if (brokenDownHouse.inhabitedBy) brokenDownHouse.inhabitedBy.home = undefined;
+            removeHouseFromMap(house, state.map);
+            if (house.inhabitedBy) house.inhabitedBy.home = undefined;
         }
     }
 }
