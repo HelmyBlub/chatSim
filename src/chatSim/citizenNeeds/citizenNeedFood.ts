@@ -2,6 +2,7 @@ import { ChatSimState, InventoryStuff } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, putItemIntoInventory } from "../citizen.js";
 import { buyItem, createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
+import { buyFoodFromFoodMarket } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
 
 export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
@@ -130,7 +131,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
                         const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
-                            buyItem(foodMarket, citizen, INVENTORY_MUSHROOM, 2, state);
+                            buyFoodFromFoodMarket(foodMarket, citizen, 2, state);
                             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                         }
                     } else {

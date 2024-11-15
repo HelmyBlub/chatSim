@@ -3,6 +3,7 @@ export const IMAGE_PATH_TREE = "images/tree.png";
 export const IMAGE_PATH_MUSHROOM = "images/mushroom.png";
 export const IMAGE_PATH_CITIZEN = "images/citizen.png";
 export const IMAGE_PATH_CITIZEN_HOUSE = "images/citizenHouse.png";
+export const IMAGE_PATH_BUILDING_MARKET = "images/buildingMarket.png";
 
 export function loadImage(path: string) {
     const imageChatter = new Image();

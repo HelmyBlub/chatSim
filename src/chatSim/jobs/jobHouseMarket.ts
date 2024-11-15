@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen } from "../citizen.js";
 import { CitizenJob, createJob } from "./job.js";
-import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
+import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 
 export type CitizenJobHouseMarket = CitizenJob & {
     state: "takeRandomLocation" | "selling"
@@ -36,8 +36,8 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
             }
         }
         if (!housesAvailable) {
-            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as their is no house to market`, state);
-            citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
+            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_BUILDING_CONSTRUCTION} as their is no house to market`, state);
+            citizen.job = createJob(CITIZEN_JOB_BUILDING_CONSTRUCTION, state);
             return;
         }
     }

@@ -22,7 +22,9 @@ export type Tree = {
     position: Position,
 }
 
-export type House = {
+export type BuildingType = "Market" | "House";
+export type Building = {
+    type: BuildingType,
     owner: Citizen,
     inhabitedBy?: Citizen,
     position: Position,

@@ -1,8 +1,8 @@
-import { ChatSimState, Position } from "../chatSimModels.js";
+import { Building, ChatSimState, InventoryStuff, Position } from "../chatSimModels.js";
 import { getUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
-import { loadCitizenJobHouseConstruction } from "./jobHouseContruction.js";
+import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
 import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
@@ -50,21 +50,19 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Position) 
     return distance <= citizen.speed;
 }
 
-export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    sellItem(seller, buyer, itemName, itemPrice, state, requestedAmount);
-}
-
-export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    const sellerItem = seller.inventory.find(i => i.name === itemName);
+export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: InventoryStuff[], buyerInventory: InventoryStuff[], state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    const sellerItem = sellerInventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
     let buyerInventoryCapacity = buyer.maxInventory - getUsedInventoryCapacity(buyer.inventory);
     if (itemName !== INVENTORY_MUSHROOM) {
-        const mushrooms = buyer.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-        if (!mushrooms) {
-            buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED;
-        } else if (mushrooms.counter < CITIZEN_FOOD_IN_INVENTORY_NEED) {
-            buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED - mushrooms.counter;
+        if (buyer.inventory === buyerInventory) {
+            const mushrooms = buyerInventory.find(i => i.name === INVENTORY_MUSHROOM);
+            if (!mushrooms) {
+                buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED;
+            } else if (mushrooms.counter < CITIZEN_FOOD_IN_INVENTORY_NEED) {
+                buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED - mushrooms.counter;
+            }
         }
     }
     const buyerInventoryMoneyAmount = Math.min(buyerInventoryCapacity, Math.floor(buyer.money / itemPrice));
@@ -73,7 +71,7 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     if (tradeAmount === 0) {
         return;
     }
-    let buyerItem = buyer.inventory.find(i => i.name === itemName);
+    let buyerItem = buyerInventory.find(i => i.name === itemName);
     if (!buyerItem) {
         buyerItem = { name: itemName, counter: 0 };
         buyer.inventory.push(buyerItem);
@@ -85,4 +83,19 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     buyer.money -= totalPrice;
     addCitizenLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
     addCitizenLogEntry(buyer, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
+}
+
+export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    return sellItem(seller, buyer, itemName, itemPrice, state, requestedAmount);
+}
+
+export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, state, requestedAmount);
+}
+
+export function findEmptyMarketBuilding(state: ChatSimState): Building | undefined {
+    for (let building of state.map.houses) {
+        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === "Market") return building;
+    }
+    return undefined;
 }

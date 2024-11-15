@@ -1,4 +1,4 @@
-import { drawTextWithOutline, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen, paintCitizens } from "./citizen.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
@@ -98,20 +98,22 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
             treePaintSize, treePaintSize);
     }
     const citizenHouseImage = state.images[IMAGE_PATH_CITIZEN_HOUSE];
-    const citizenHousePaintSize = 80;
-    const citizenHouseImageSize = 200;
-    const nameOffsetY = 90 * citizenHousePaintSize / citizenHouseImageSize;
+    const marketImage = state.images[IMAGE_PATH_BUILDING_MARKET];
+    const buildingPaintSize = 80;
+    const buildingImageSize = 200;
+    const nameOffsetY = 90 * buildingPaintSize / buildingImageSize;
     ctx.font = "8px Arial";
     for (let house of state.map.houses) {
         const paintPos = mapPositionToPaintPosition(house.position, paintDataMap);
         let factor = (house.buildProgress !== undefined ? house.buildProgress : 1);
-        ctx.drawImage(citizenHouseImage, 0, citizenHouseImageSize - citizenHouseImageSize * factor, citizenHouseImageSize, citizenHouseImageSize * factor,
-            paintPos.x - citizenHousePaintSize / 2,
-            paintPos.y - citizenHousePaintSize / 2 + citizenHousePaintSize - citizenHousePaintSize * factor,
-            citizenHousePaintSize, citizenHousePaintSize * factor);
+        const image = house.type === "House" ? citizenHouseImage : marketImage;
+        ctx.drawImage(image, 0, buildingImageSize - buildingImageSize * factor, buildingImageSize, buildingImageSize * factor,
+            paintPos.x - buildingPaintSize / 2,
+            paintPos.y - buildingPaintSize / 2 + buildingPaintSize - buildingPaintSize * factor,
+            buildingPaintSize, buildingPaintSize * factor);
         if (house.inhabitedBy) {
             const nameOffsetX = Math.floor(ctx.measureText(house.inhabitedBy.name).width / 2);
-            drawTextWithOutline(ctx, house.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - citizenHousePaintSize / 2 + nameOffsetY);
+            drawTextWithOutline(ctx, house.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - buildingPaintSize / 2 + nameOffsetY);
         }
     }
     paintCitizens(ctx, state);

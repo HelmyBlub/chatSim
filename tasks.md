@@ -1,10 +1,15 @@
 Tasks:
 - market building
     - food market building
-        - has to be build
-        - place where food is sold or bought
-        - more storage
-        - if citizen is at food market place he does his job
+        - when quiting job
+            - what happens with storage?
+            - try to sell
+            - else keep, might break down over time
+    - market building for wood
+- more images+animations
+    - make the map appear more realistic. Easier to follow what happens
+- visaulize interactions between citizens better
+    - like a chat bubble when requesting to sell or buy
 - pathing, citizen can not move over "private property"
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
@@ -28,6 +33,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- food market building
+    - has to be build
+    - place where food is sold or bought
+    - more storage
+    - citizen can only sell when at market building
 - trees/mushrooms 
     - should also spawn on tiles not positions
     - should not spawn on used tiles

@@ -1,7 +1,7 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance } from "./job.js";
-import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
+import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 
@@ -96,15 +96,15 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
         if (job.lastCheckedForConstructionJobs === undefined || job.lastCheckedForConstructionJobs + CHECK_INTERVAL < state.time) {
             let jobExists = false;
             for (let jobber of state.map.citizens) {
-                if (jobber.job.name === CITIZEN_JOB_HOUSE_CONSTRUCTION) {
+                if (jobber.job.name === CITIZEN_JOB_BUILDING_CONSTRUCTION) {
                     jobExists = true;
                     job.lastCheckedForConstructionJobs = state.time;
                     break;
                 }
             }
             if (!jobExists) {
-                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as their is no citizen with a job in house contruction to sell to`, state);
-                citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
+                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_BUILDING_CONSTRUCTION} as their is no citizen with a job in house contruction to sell to`, state);
+                citizen.job = createJob(CITIZEN_JOB_BUILDING_CONSTRUCTION, state);
                 return;
             }
         }

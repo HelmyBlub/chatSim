@@ -1,4 +1,4 @@
-import { Mushroom, Tree, House, ChatSimState, Position } from "./chatSimModels.js";
+import { Mushroom, Tree, Building, ChatSimState, Position, BuildingType } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
 
 export type TilePosition = {
@@ -24,7 +24,7 @@ export type ChatSimMap = {
     usedTiles: Tile[],
     emptyTiles: TilePosition[],
     trees: Tree[],
-    houses: House[],
+    houses: Building[],
     maxTrees: number,
 }
 
@@ -51,23 +51,23 @@ export function createDefaultMap(): ChatSimMap {
     return map;
 }
 
-export function createHouseOnRandomTile(owner: Citizen, state: ChatSimState): House | undefined {
+export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType): Building | undefined {
     if (state.map.emptyTiles.length === 0) return undefined;
     const emptyTileIndex = getRandomEmptyTileIndex(state);
     const tilePosition = state.map.emptyTiles[emptyTileIndex];
     const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
-    const house = createHouse(owner, mapPosition);
+    const house = createBuilding(owner, mapPosition, buildingType);
     state.map.houses.push(house);
     state.map.emptyTiles.splice(emptyTileIndex, 1);
     state.map.usedTiles.push({
         position: tilePosition,
-        usedByType: "House",
+        usedByType: buildingType,
         object: house,
     });
     return house;
 }
 
-export function removeHouseFromMap(house: House, map: ChatSimMap) {
+export function removeHouseFromMap(house: Building, map: ChatSimMap) {
     const usedTileIndex = map.usedTiles.findIndex(t => t.object === house);
     if (usedTileIndex === -1) return;
     const houseIndex = map.houses.findIndex(h => h === house);
@@ -177,8 +177,9 @@ function getRandomEmptyTileIndex(state: ChatSimState): number {
     return Math.floor(Math.random() * state.map.emptyTiles.length);
 }
 
-function createHouse(owner: Citizen, position: Position): House {
+function createBuilding(owner: Citizen, position: Position, type: BuildingType): Building {
     return {
+        type: type,
         owner: owner,
         inventory: [],
         maxInventory: 50,

@@ -1,9 +1,9 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
-import { ChatSimState, House, InventoryStuff, Position } from "./chatSimModels.js";
+import { ChatSimState, Building, InventoryStuff, Position } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CitizenJob, isCitizenInInteractDistance, tickCitizenJob } from "./jobs/job.js";
-import { CITIZEN_JOB_FOOD_MARKET } from "./jobs/jobFoodMarket.js";
+import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
@@ -24,7 +24,7 @@ export type Citizen = {
     energyPerCent: number,
     inventory: InventoryStuff[],
     maxInventory: number,
-    home?: House,
+    home?: Building,
     money: number,
     skills: { [key: string]: number },
     lastCheckedNeedsTime?: number,
@@ -218,8 +218,8 @@ export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], sh
     let distance = 0;
     for (let citizen of citizens) {
         if (citizen === searcher) continue;
-        const ivnentoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (ivnentoryMushroom && ivnentoryMushroom.counter > 0))) {
+        const inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (inventoryMushroom && hasFoodMarketStock(citizen)))) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);

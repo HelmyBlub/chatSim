@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
-import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "../jobs/jobHouseContruction.js";
+import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "../jobs/jobBuildingContruction.js";
 import { CITIZEN_JOB_HOUSE_MARKET } from "../jobs/jobHouseMarket.js";
 import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
 import { findClosestWoodMarket, CITIZEN_JOB_WOOD_MARKET } from "../jobs/jobWoodMarket.js";
@@ -30,8 +30,8 @@ function tick(citizen: Citizen, state: ChatSimState) {
             availableHouse.inhabitedBy = citizen;
             citizen.home = availableHouse;
         } else if (!isInHouseBuildingBusiness(citizen)) {
-            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as no available house found`, state);
-            citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
+            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_BUILDING_CONSTRUCTION} as no available house found`, state);
+            citizen.job = createJob(CITIZEN_JOB_BUILDING_CONSTRUCTION, state);
             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
     }
@@ -123,7 +123,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
 
 function isInHouseBuildingBusiness(citizen: Citizen) {
     return (citizen.job.name === CITIZEN_JOB_HOUSE_MARKET
-        || citizen.job.name === CITIZEN_JOB_HOUSE_CONSTRUCTION
+        || citizen.job.name === CITIZEN_JOB_BUILDING_CONSTRUCTION
         || citizen.job.name === CITIZEN_JOB_LUMBERJACK
         || citizen.job.name === CITIZEN_JOB_WOOD_MARKET
     )

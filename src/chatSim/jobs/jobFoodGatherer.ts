@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getUsedInventoryCapacity, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
-import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
+import { CITIZEN_JOB_FOOD_MARKET, sellFoodToFoodMarket } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
 import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 import { removeMushroomFromMap } from "../map.js";
@@ -70,11 +70,10 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         const foodMarket = findAFoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
         if (foodMarket) {
             if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
-                const mushroomPrice = 1;
                 const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                 if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
                     const sellAmount = mushroom.counter - CITIZEN_FOOD_IN_INVENTORY_NEED;
-                    sellItem(citizen, foodMarket, INVENTORY_MUSHROOM, mushroomPrice, state, sellAmount);
+                    sellFoodToFoodMarket(foodMarket, citizen, sellAmount, state);
                 }
                 job.state = "gathering";
             } else {
