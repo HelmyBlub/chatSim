@@ -45,7 +45,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         let foundFood = false;
         if (citizen.home) {
             const inventoryMushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-            if (inventoryMushrooms && inventoryMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
+            if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
                     state: `store food at home`,

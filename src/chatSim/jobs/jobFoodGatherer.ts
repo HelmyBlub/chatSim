@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, getUsedInventoryCapacity, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getUsedInventoryCapacity, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -48,14 +48,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
     }
     if (job.state === "goHome") {
         if (citizen.moveTo === undefined) {
-            if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                for (let item of citizen.inventory) {
-                    if (item.counter > 0) {
-                        const amount = moveItemBetweenInventories(item.name, citizen.inventory, citizen.home.inventory, citizen.home.maxInventory, item.counter);
-                        addCitizenLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
-                    }
-                }
-            }
+            emptyCitizenInventoryToHomeInventory(citizen, state);
             job.state = "setMoveToMushroom";
         }
     }

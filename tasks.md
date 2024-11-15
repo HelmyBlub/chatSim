@@ -1,16 +1,4 @@
 Tasks:
-- instead of switching jobs use house storage capacity for gatherer job
-    - food gatherer
-        - if all inventorys full, switch to a selling job for highest inventory item
-    - food market  
-        - if out of food. Try stocking up from home
-    - wood gatherer
-        - store wood at home
-        - if even home storage high, switch to wood market
-    - wood market
-        - if out of wood. Try stocking up from home
-    - if i want to repait my house
-        - also check and use home inventory
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
 - more structured map house placing, do not place houses above each other
@@ -41,6 +29,15 @@ Tasks done today:
     - food gatherer
         - store food at home
         - if even home storage high, switch to food market
+    - lumberjack
+        - store wood at home
+        - if even home storage high, switch to wood market
+    - food market  
+        - if out of food. Try stocking up from home
+    - wood market
+        - if out of wood. Try stocking up from home
+    - if i want to repair my house
+        - also check and use home inventory
 
 
 

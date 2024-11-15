@@ -1,11 +1,11 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getUsedInventoryCapacity, moveItemBetweenInventories } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
-    state: "gathering" | "selling",
+    state: "decideNext" | "gathering" | "selling" | "goHome",
     lastTreeCutTime: number,
 }
 
@@ -22,27 +22,54 @@ export function loadCitizenJobLumberjack(state: ChatSimState) {
 function create(state: ChatSimState): CitizenJobLuberjack {
     return {
         name: CITIZEN_JOB_LUMBERJACK,
-        state: "gathering",
+        state: "decideNext",
         lastTreeCutTime: 0,
     }
 }
 
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
-    if (job.state === "gathering") {
-        if (job.lastTreeCutTime === undefined) job.lastTreeCutTime = 0;
-        let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+    if (job.state === "decideNext") {
+        const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
         if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
             moveToTree(citizen, state);
-            const isCloseToTreeIndex = isCloseToTree(citizen, state);
-            if (isCloseToTreeIndex !== undefined) {
-                if (job.lastTreeCutTime + CUT_INTERVAL < state.time) {
-                    cutTreeForWood(citizen, state, isCloseToTreeIndex);
-                    job.lastTreeCutTime = state.time;
+            job.state = "gathering";
+        } else {
+            if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.maxInventory - 15) {
+                job.state = "goHome";
+                citizen.moveTo = {
+                    x: citizen.home.position.x,
+                    y: citizen.home.position.y,
+                }
+                addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
+            } else {
+                if (inventoryWood && inventoryWood.counter > 0) job.state = "selling";
+            }
+        }
+    }
+    if (job.state === "gathering") {
+        if (citizen.moveTo === undefined) {
+            if (job.lastTreeCutTime === undefined) job.lastTreeCutTime = 0;
+            if (job.lastTreeCutTime + CUT_INTERVAL < state.time) {
+                const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+                if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
+                    const isCloseToTreeIndex = isCloseToTree(citizen, state);
+                    if (isCloseToTreeIndex !== undefined) {
+                        cutTreeForWood(citizen, state, isCloseToTreeIndex);
+                        job.lastTreeCutTime = state.time;
+                    } else {
+                        job.state = "decideNext";
+                    }
+                } else {
+                    job.state = "decideNext";
                 }
             }
-        } else {
-            if (inventoryWood && inventoryWood.counter > 0) job.state = "selling";
+        }
+    }
+    if (job.state === "goHome") {
+        if (citizen.moveTo === undefined) {
+            emptyCitizenInventoryToHomeInventory(citizen, state);
+            job.state = "gathering";
         }
     }
     if (job.state === "selling") {

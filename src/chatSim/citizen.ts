@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { ChatSimState, House, InventoryStuff, Position } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
-import { CitizenJob, tickCitizenJob } from "./jobs/job.js";
+import { CitizenJob, isCitizenInInteractDistance, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobs/jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
@@ -59,6 +59,17 @@ export function getUsedInventoryCapacity(inventory: InventoryStuff[]): number {
         counter += item.counter;
     }
     return counter;
+}
+
+export function emptyCitizenInventoryToHomeInventory(citizen: Citizen, state: ChatSimState) {
+    if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
+        for (let item of citizen.inventory) {
+            if (item.counter > 0) {
+                const amount = moveItemBetweenInventories(item.name, citizen.inventory, citizen.home.inventory, citizen.home.maxInventory, item.counter);
+                if (amount > 0) addCitizenLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
+            }
+        }
+    }
 }
 
 export function moveItemBetweenInventories(itemName: string, fromInventory: InventoryStuff[], toInventory: InventoryStuff[], maxToInventory: number, amount: number): number {

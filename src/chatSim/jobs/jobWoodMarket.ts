@@ -1,11 +1,12 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "../citizen.js";
-import { CitizenJob, createJob } from "./job.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, putItemIntoInventory } from "../citizen.js";
+import { CitizenJob, createJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
+import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 
 export type CitizenJobWoodMarket = CitizenJob & {
-    state: "takeRandomLocation" | "selling"
+    state: "takeRandomLocation" | "selling" | "goHome",
     lastCheckedForConstructionJobs?: number,
 }
 
@@ -54,26 +55,67 @@ function create(state: ChatSimState): CitizenJobWoodMarket {
 }
 
 function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) {
-    if (job.lastCheckedForConstructionJobs === undefined || job.lastCheckedForConstructionJobs + CHECK_INTERVAL < state.time) {
-        let jobExists = false;
-        for (let jobber of state.map.citizens) {
-            if (jobber.job.name === CITIZEN_JOB_HOUSE_CONSTRUCTION) {
-                jobExists = true;
-                job.lastCheckedForConstructionJobs = state.time;
-                break;
+    if (job.state === "goHome") {
+        if (citizen.moveTo === undefined) {
+            if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
+                emptyCitizenInventoryToHomeInventory(citizen, state);
+                const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+                if (homeWood && homeWood.counter > 0) {
+                    const amount = Math.min(homeWood.counter, citizen.maxInventory - 2);
+                    const actualAmount = putItemIntoInventory(INVENTORY_WOOD, citizen.inventory, citizen.maxInventory, amount);
+                    addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_WOOD} from home inventory to inventory`, state);
+                }
             }
+            job.state = "takeRandomLocation";
         }
-        if (!jobExists) {
-            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as their is no citizen with a job in house contruction to sell to`, state);
-            citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
-            return;
+    }
+
+    if (job.state === "selling") {
+        const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+        if (citizen.home) {
+            if (!wood || wood.counter <= 0) {
+                const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+                if (homeWood && homeWood.counter > 0) {
+                    job.state = "goHome";
+                    citizen.moveTo = {
+                        x: citizen.home.position.x,
+                        y: citizen.home.position.y,
+                    }
+                    addCitizenLogEntry(citizen, `move home to get ${INVENTORY_WOOD} as inventory empty`, state);
+                } else {
+                    switchJob(citizen, state);
+                }
+            }
+        } else {
+            if (!wood || wood.counter <= 0) {
+                switchJob(citizen, state);
+            }
         }
     }
     if (job.state === "takeRandomLocation") {
+        if (job.lastCheckedForConstructionJobs === undefined || job.lastCheckedForConstructionJobs + CHECK_INTERVAL < state.time) {
+            let jobExists = false;
+            for (let jobber of state.map.citizens) {
+                if (jobber.job.name === CITIZEN_JOB_HOUSE_CONSTRUCTION) {
+                    jobExists = true;
+                    job.lastCheckedForConstructionJobs = state.time;
+                    break;
+                }
+            }
+            if (!jobExists) {
+                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_HOUSE_CONSTRUCTION} as their is no citizen with a job in house contruction to sell to`, state);
+                citizen.job = createJob(CITIZEN_JOB_HOUSE_CONSTRUCTION, state);
+                return;
+            }
+        }
         citizen.moveTo = {
             x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
             y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
         }
         job.state = "selling";
     }
+}
+function switchJob(citizen: Citizen, state: ChatSimState) {
+    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as ${INVENTORY_WOOD} run to low`, state);
+    citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
 }

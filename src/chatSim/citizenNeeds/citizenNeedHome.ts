@@ -35,81 +35,87 @@ function tick(citizen: Citizen, state: ChatSimState) {
             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
     }
-    if (citizen.home && citizen.home.deterioration > 0.2) {
-        if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
-            const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
-            if (wood && wood.counter > 0) {
-                citizen.moveTo = {
-                    x: citizen.home.position.x,
-                    y: citizen.home.position.y,
-                }
-                citizen.stateInfo = {
-                    type: CITIZEN_NEED_HOME,
-                    state: `move to house to repair`,
-                };
-            } else {
-                if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
-                    let canBuyWood = false;
-                    if (citizen.money > 1) {
-                        const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
-                        if (woodMarket) {
-                            addCitizenLogEntry(citizen, `house repair required. Move to wood market from ${woodMarket.name} to buy wood.`, state);
-                            citizen.stateInfo = {
-                                type: CITIZEN_NEED_HOME,
-                                state: `buy wood`,
-                            };
-                            citizen.moveTo = {
-                                x: woodMarket.position.x,
-                                y: woodMarket.position.y,
-                            }
-                            canBuyWood = true;
-                        }
-                    }
-                    if (!canBuyWood) {
-                        citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
-                        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
-                        addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no money or no wood market found and i need wood for house repairs`, state);
-                    }
-                }
-            }
+    if (!citizen.home || citizen.home.deterioration < 0.2) return;
+
+    if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
+        let foundWood = false;
+        const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+        if (wood && wood.counter > 0) {
+            foundWood = true;
         } else {
-            if (citizen.stateInfo.state === `buy wood`) {
-                if (citizen.moveTo === undefined) {
-                    if (citizen.money < 2) {
-                        citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
-                        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
-                        addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no money to buy wood for house repairs`, state);
-                    } else {
-                        const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
-                        if (woodMarket && isCitizenInInteractDistance(citizen, woodMarket.position)) {
-                            if (canCitizenCarryMore(citizen)) {
-                                sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state, 1);
-                            }
-                        } else {
-                            addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
+            const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+            if (homeWood && homeWood.counter > 0) {
+                foundWood = true;
+            }
+        }
+        if (foundWood) {
+            citizen.moveTo = {
+                x: citizen.home.position.x,
+                y: citizen.home.position.y,
+            }
+            citizen.stateInfo = {
+                type: CITIZEN_NEED_HOME,
+                state: `move to house to repair`,
+            };
+        } else {
+            if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
+                let canBuyWood = false;
+                if (citizen.money > 1) {
+                    const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
+                    if (woodMarket) {
+                        addCitizenLogEntry(citizen, `house repair required. Move to wood market from ${woodMarket.name} to buy wood.`, state);
+                        citizen.stateInfo = {
+                            type: CITIZEN_NEED_HOME,
+                            state: `buy wood`,
+                        };
+                        citizen.moveTo = {
+                            x: woodMarket.position.x,
+                            y: woodMarket.position.y,
                         }
-                        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                        canBuyWood = true;
                     }
+                }
+                if (!canBuyWood) {
+                    citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
+                    citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no money or no wood market found and i need wood for house repairs`, state);
                 }
             }
-            if (citizen.stateInfo.state === `move to house to repair`) {
-                if (citizen.moveTo === undefined) {
-                    if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                        const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
-                        if (wood && wood.counter > 0) {
-                            citizen.home.deterioration -= 0.2;
-                            wood.counter--;
-                            addCitizenLogEntry(citizen, `used ${INVENTORY_WOOD} to repair home. current deterioration: ${(citizen.home.deterioration * 100).toFixed()}%`, state);
-                        } else {
-                            citizen.stateInfo.state = `buy wood`;
+        }
+    } else {
+        if (citizen.stateInfo.state === `buy wood`) {
+            if (citizen.moveTo === undefined) {
+                if (citizen.money < 2) {
+                    citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
+                    citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as no money to buy wood for house repairs`, state);
+                } else {
+                    const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
+                    if (woodMarket && isCitizenInInteractDistance(citizen, woodMarket.position)) {
+                        if (canCitizenCarryMore(citizen)) {
+                            sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state, 1);
                         }
                     } else {
-                        citizen.moveTo = {
-                            x: citizen.home.position.x,
-                            y: citizen.home.position.y,
-                        }
+                        addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
+                    }
+                    citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                }
+            }
+        }
+        if (citizen.stateInfo.state === `move to house to repair`) {
+            if (citizen.moveTo === undefined) {
+                if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
+                    let wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+                    if (!wood || wood.counter <= 0) {
+                        wood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+                    }
+                    if (wood && wood.counter > 0) {
+                        citizen.home.deterioration -= 0.2;
+                        wood.counter--;
+                        addCitizenLogEntry(citizen, `used ${INVENTORY_WOOD} to repair home. current deterioration: ${(citizen.home.deterioration * 100).toFixed()}%`, state);
                     }
                 }
+                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
             }
         }
     }

@@ -1,6 +1,7 @@
 import { ChatSimState, PaintDataMap } from "./chatSimModels.js";
 import { addCitizen, calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
+import { chatSimTick } from "./tick.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -140,6 +141,9 @@ function keyDown(event: KeyboardEvent, state: ChatSimState) {
             break;
         case "KeyD":
             state.inputData.map.moveX = moveTickAmount;
+            break;
+        case "NumpadAdd":
+            if (state.gameSpeed === 0) chatSimTick(state);
             break;
         case "KeyM":
             addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
