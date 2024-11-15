@@ -145,6 +145,10 @@ function keyDown(event: KeyboardEvent, state: ChatSimState) {
         case "NumpadAdd":
             if (state.gameSpeed === 0) chatSimTick(state);
             break;
+        case "KeyK":
+            state.gameSpeed = 0;
+            console.log(state);
+            break;
         case "KeyM":
             addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
             break

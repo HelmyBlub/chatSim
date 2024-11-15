@@ -3,6 +3,7 @@ import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventory
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
+import { removeTreeFromMap } from "../map.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     state: "decideNext" | "gathering" | "selling" | "goHome",
@@ -127,7 +128,7 @@ function cutTreeForWood(citizen: Citizen, state: ChatSimState, treeIndex: number
     tree.woodValue--;
     inventoryWood.counter++;
     addCitizenLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}`, state);
-    if (tree.woodValue === 0) state.map.trees.splice(treeIndex, 1);
+    if (tree.woodValue === 0) removeTreeFromMap(tree, state.map);
 
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];

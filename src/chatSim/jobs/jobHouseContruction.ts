@@ -77,7 +77,9 @@ function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSim
         }
     }
     if (job.state === "buildHouse") {
-        if (job.houseInProgress && job.houseInProgress.buildProgress !== undefined) {
+        if (job.houseInProgress && job.houseInProgress.buildProgress !== undefined
+            && isCitizenInInteractDistance(citizen, job.houseInProgress.position)
+        ) {
             job.houseInProgress.buildProgress += 0.0016;
             if (job.houseInProgress.buildProgress >= 1) {
                 if (!citizen.home) {

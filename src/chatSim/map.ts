@@ -80,10 +80,96 @@ export function removeHouseFromMap(house: House, map: ChatSimMap) {
     });
 }
 
+export function removeTreeFromMap(tree: Tree, map: ChatSimMap) {
+    const usedTileIndex = map.usedTiles.findIndex(t => t.object === tree);
+    if (usedTileIndex === -1) return;
+    const treeIndex = map.trees.findIndex(h => h === tree);
+    if (treeIndex === -1) return;
+    map.trees.splice(treeIndex, 1);
+    const usedTile = map.usedTiles.splice(usedTileIndex, 1)[0];
+    map.emptyTiles.push({
+        tileX: usedTile.position.tileX,
+        tileY: usedTile.position.tileY,
+    });
+}
+
+export function removeMushroomFromMap(mushroom: Mushroom, map: ChatSimMap) {
+    const usedTileIndex = map.usedTiles.findIndex(t => t.object === mushroom);
+    if (usedTileIndex === -1) return;
+    const mushroomIndex = map.mushrooms.findIndex(h => h === mushroom);
+    if (mushroomIndex === -1) return;
+    map.mushrooms.splice(mushroomIndex, 1);
+    const usedTile = map.usedTiles.splice(usedTileIndex, 1)[0];
+    map.emptyTiles.push({
+        tileX: usedTile.position.tileX,
+        tileY: usedTile.position.tileY,
+    });
+}
+
 export function tilePositionToMapPosition(tilePosition: TilePosition, map: ChatSimMap): Position {
     return {
         x: tilePosition.tileX * map.tileSize + map.tileSize / 2 - map.mapWidth / 2,
         y: tilePosition.tileY * map.tileSize + map.tileSize / 2 - map.mapHeight / 2,
+    }
+}
+
+export function tickChatSimMap(state: ChatSimState) {
+    treeSpawnTick(state);
+    mushroomSpawnTick(state);
+    tickHouses(state);
+}
+
+function treeSpawnTick(state: ChatSimState) {
+    if (state.map.trees.length >= state.map.maxTrees) return;
+    if (state.map.emptyTiles.length === 0) return undefined;
+    const emptyTileIndex = getRandomEmptyTileIndex(state);
+    const tilePosition = state.map.emptyTiles[emptyTileIndex];
+    const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
+    const newTree: Tree = {
+        woodValue: 10,
+        position: {
+            x: mapPosition.x,
+            y: mapPosition.y,
+        }
+    }
+    state.map.emptyTiles.splice(emptyTileIndex, 1);
+    state.map.usedTiles.push({
+        position: tilePosition,
+        usedByType: "Tree",
+        object: newTree,
+    });
+    state.map.trees.push(newTree);
+}
+
+function mushroomSpawnTick(state: ChatSimState) {
+    if (state.map.mushrooms.length >= state.map.maxMushrooms) return;
+    if (state.map.emptyTiles.length === 0) return undefined;
+    const emptyTileIndex = getRandomEmptyTileIndex(state);
+    const tilePosition = state.map.emptyTiles[emptyTileIndex];
+    const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
+    const mushroom: Mushroom = {
+        position: {
+            x: mapPosition.x,
+            y: mapPosition.y,
+        }
+    }
+    state.map.emptyTiles.splice(emptyTileIndex, 1);
+    state.map.usedTiles.push({
+        position: tilePosition,
+        usedByType: "Mushroom",
+        object: mushroom,
+    });
+    state.map.mushrooms.push(mushroom);
+}
+
+function tickHouses(state: ChatSimState) {
+    for (let i = 0; i < state.map.houses.length; i++) {
+        const house = state.map.houses[i];
+        house.deterioration += 0.00005;
+        if (house.deterioration > 1) {
+            removeHouseFromMap(house, state.map);
+            if (house.inhabitedBy) house.inhabitedBy.home = undefined;
+        }
     }
 }
 

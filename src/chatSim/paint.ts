@@ -24,7 +24,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (!selected) return;
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
-    const offsetX = state.map.mapWidth + 100;
+    const offsetX = state.paintData.map.paintWidth + 100;
     const offsetY = 50;
     let lineCounter = 0;
     const lineSpacing = 25;
@@ -147,7 +147,7 @@ function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMa
 function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
-    const offsetX = state.map.mapWidth + 500;
+    const offsetX = state.paintData.map.paintWidth + 500;
     ctx.fillText(`${getTimeOfDayString(state)}, speed: ${state.gameSpeed},     zoom:${state.paintData.map.zoom.toFixed(2)}`, offsetX, 25);
     for (let i = 0; i < state.map.citizens.length; i++) {
         const citizen = state.map.citizens[i];

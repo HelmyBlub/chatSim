@@ -1,8 +1,4 @@
 Tasks:
-- trees/mushrooms should also spawn on tiles not positions
-- trees/mushrooms should not spawn on used tiles
-- trees/mushrooms should block tile
-
 - market building
     - food market building
         - has to be build
@@ -32,6 +28,10 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- trees/mushrooms 
+    - should also spawn on tiles not positions
+    - should not spawn on used tiles
+    - should block tile
 - more structured map house placing, do not place houses above each other
     - add tileSize value
     - map size has to be multiple of tileSize
