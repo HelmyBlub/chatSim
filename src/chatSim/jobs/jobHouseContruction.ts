@@ -31,13 +31,17 @@ function create(state: ChatSimState): CitizenJobHouseConstruction {
 
 function tick(citizen: Citizen, job: CitizenJobHouseConstruction, state: ChatSimState) {
     if (job.state === "moveToOldLocation") {
-        if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
-            job.state = "buildHouse";
-            for (let house of state.map.houses) {
-                if (house.owner === citizen && house.buildProgress !== undefined) {
-                    job.houseInProgress = house;
-                    break;
+        if (citizen.moveTo === undefined) {
+            if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
+                job.state = "buildHouse";
+                for (let house of state.map.houses) {
+                    if (house.owner === citizen && house.buildProgress !== undefined) {
+                        job.houseInProgress = house;
+                        break;
+                    }
                 }
+            } else {
+                job.state = "searchBuildLocation";
             }
         }
     }

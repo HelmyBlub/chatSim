@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, putItemIntoInventory } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_HOUSE_CONSTRUCTION } from "./jobHouseContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
@@ -62,7 +62,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                 const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
                 if (homeWood && homeWood.counter > 0) {
                     const amount = Math.min(homeWood.counter, citizen.maxInventory - 2);
-                    const actualAmount = putItemIntoInventory(INVENTORY_WOOD, citizen.inventory, citizen.maxInventory, amount);
+                    const actualAmount = moveItemBetweenInventories(INVENTORY_WOOD, citizen.home.inventory, citizen.inventory, citizen.maxInventory, amount);
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_WOOD} from home inventory to inventory`, state);
                 }
             }

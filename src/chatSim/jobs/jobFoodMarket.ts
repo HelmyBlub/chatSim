@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, putItemIntoInventory } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
@@ -40,7 +40,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                 const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                 if (homeMushrooms && homeMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
                     const amount = Math.min(homeMushrooms.counter - CITIZEN_FOOD_AT_HOME_NEED, citizen.maxInventory);
-                    const actualAmount = putItemIntoInventory(INVENTORY_MUSHROOM, citizen.inventory, citizen.maxInventory, amount);
+                    const actualAmount = moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.home.inventory, citizen.inventory, citizen.maxInventory, amount);
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_MUSHROOM} from home inventory to inventory`, state);
                 }
             }

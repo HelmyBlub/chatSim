@@ -30,8 +30,8 @@ export type ChatSimMap = {
 
 export function createDefaultMap(): ChatSimMap {
     const tileSize = 60;
-    const tilesHorizontal = 5;
-    const tilesVertical = 5;
+    const tilesHorizontal = 10;
+    const tilesVertical = 10;
     const map: ChatSimMap = {
         tileSize: tileSize,
         tileCounterHorizontal: tilesHorizontal,
@@ -40,7 +40,7 @@ export function createDefaultMap(): ChatSimMap {
         mapWidth: tileSize * tilesHorizontal,
         citizens: [],
         mushrooms: [],
-        maxMushrooms: 2,
+        maxMushrooms: 3,
         maxTrees: 2,
         trees: [],
         houses: [],
