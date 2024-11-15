@@ -7,7 +7,7 @@ import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
 export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
 export const CITIZEN_FOOD_AT_HOME_NEED = 4;
 export const CITIZEN_NEED_FOOD = "need food";
-const MUSHROOM_FOOD_VALUE = 0.15;
+export const MUSHROOM_FOOD_VALUE = 0.15;
 
 export function loadCitizenNeedsFunctionsFood(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_FOOD] = {
@@ -19,7 +19,7 @@ export function loadCitizenNeedsFunctionsFood(state: ChatSimState) {
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     const inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
     if (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && inventoryMushroom && inventoryMushroom.counter > 0) {
-        eatMushroom(citizen, inventoryMushroom, state, "inventory");
+        citizenEatMushroom(citizen, inventoryMushroom, state, "inventory");
     }
     if (citizen.foodPerCent < 0.5) return false;
     if (citizen.home) {
@@ -34,7 +34,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     return false;
 }
 
-function eatMushroom(citizen: Citizen, inventoryMushroom: InventoryStuff, state: ChatSimState, inventoryName: string) {
+export function citizenEatMushroom(citizen: Citizen, inventoryMushroom: InventoryStuff, state: ChatSimState, inventoryName: string) {
     citizen.foodPerCent = Math.min(citizen.foodPerCent + MUSHROOM_FOOD_VALUE, 1);
     inventoryMushroom.counter--;
     addCitizenLogEntry(citizen, `eat ${INVENTORY_MUSHROOM} from ${inventoryName}, ${inventoryMushroom.counter}x${INVENTORY_MUSHROOM} left`, state);
@@ -102,7 +102,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
                         while (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
-                            eatMushroom(citizen, homeMushrooms, state, "home");
+                            citizenEatMushroom(citizen, homeMushrooms, state, "home");
                         }
                     }
                 }

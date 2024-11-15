@@ -61,6 +61,20 @@ export function getUsedInventoryCapacity(inventory: InventoryStuff[]): number {
     return counter;
 }
 
+export function moveItemBetweenInventories(itemName: string, fromInventory: InventoryStuff[], toInventory: InventoryStuff[], maxToInventory: number, amount: number): number {
+    const item = fromInventory.find(i => i.name === itemName);
+    if (!item || item.counter === 0) {
+        return 0;
+    }
+    let maxFromInventoryAmount = amount;
+    if (item.counter < maxFromInventoryAmount) {
+        maxFromInventoryAmount = item.counter;
+    }
+    const toAmount = putItemIntoInventory(itemName, toInventory, maxToInventory, maxFromInventoryAmount);
+    item.counter -= toAmount;
+    return toAmount;
+}
+
 /**
  * @returns actual amount put into inventory. As inventory has a max capacity it might not fit all in
  */
@@ -78,7 +92,7 @@ export function putItemIntoInventory(itemName: string, inventory: InventoryStuff
     if (usedCapacity + amount > maxInventory) {
         actualAmount = maxInventory - usedCapacity;
     }
-    item.counter += amount;
+    item.counter += actualAmount;
     return actualAmount;
 }
 

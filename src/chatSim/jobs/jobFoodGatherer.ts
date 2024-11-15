@@ -1,12 +1,12 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, getUsedInventoryCapacity, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
 import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 
 export type CitizenJobFoodGatherer = CitizenJob & {
-    state: "gathering" | "selling" | "setMoveToMushroom",
+    state: "gathering" | "selling" | "setMoveToMushroom" | "goHome",
 }
 
 export const CITIZEN_JOB_FOOD_GATHERER = "Food Gatherer";
@@ -31,10 +31,32 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         if (canCitizenCarryMore(citizen) && (!mushrooms || mushrooms.counter < 9)) {
             moveToMushroom(citizen, state);
         } else {
-            const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-            if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                job.state = "selling";
+            if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.maxInventory) {
+                job.state = "goHome";
+                citizen.moveTo = {
+                    x: citizen.home.position.x,
+                    y: citizen.home.position.y,
+                }
+                addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
+            } else {
+                const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
+                    job.state = "selling";
+                }
             }
+        }
+    }
+    if (job.state === "goHome") {
+        if (citizen.moveTo === undefined) {
+            if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
+                for (let item of citizen.inventory) {
+                    if (item.counter > 0) {
+                        const amount = moveItemBetweenInventories(item.name, citizen.inventory, citizen.home.inventory, citizen.home.maxInventory, item.counter);
+                        addCitizenLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
+                    }
+                }
+            }
+            job.state = "setMoveToMushroom";
         }
     }
     if (job.state === "gathering") {
