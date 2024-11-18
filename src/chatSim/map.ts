@@ -24,7 +24,7 @@ export type ChatSimMap = {
     usedTiles: Tile[],
     emptyTiles: TilePosition[],
     trees: Tree[],
-    houses: Building[],
+    buildings: Building[],
     maxTrees: number,
 }
 
@@ -43,7 +43,7 @@ export function createDefaultMap(): ChatSimMap {
         maxMushrooms: 3,
         maxTrees: 2,
         trees: [],
-        houses: [],
+        buildings: [],
         emptyTiles: [],
         usedTiles: [],
     }
@@ -57,7 +57,7 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     const tilePosition = state.map.emptyTiles[emptyTileIndex];
     const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
     const house = createBuilding(owner, mapPosition, buildingType);
-    state.map.houses.push(house);
+    state.map.buildings.push(house);
     state.map.emptyTiles.splice(emptyTileIndex, 1);
     state.map.usedTiles.push({
         position: tilePosition,
@@ -70,9 +70,9 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
 export function removeHouseFromMap(house: Building, map: ChatSimMap) {
     const usedTileIndex = map.usedTiles.findIndex(t => t.object === house);
     if (usedTileIndex === -1) return;
-    const houseIndex = map.houses.findIndex(h => h === house);
+    const houseIndex = map.buildings.findIndex(h => h === house);
     if (houseIndex === -1) return;
-    map.houses.splice(houseIndex, 1);
+    map.buildings.splice(houseIndex, 1);
     const usedTile = map.usedTiles.splice(usedTileIndex, 1)[0];
     map.emptyTiles.push({
         tileX: usedTile.position.tileX,
@@ -163,8 +163,8 @@ function mushroomSpawnTick(state: ChatSimState) {
 }
 
 function tickHouses(state: ChatSimState) {
-    for (let i = 0; i < state.map.houses.length; i++) {
-        const house = state.map.houses[i];
+    for (let i = 0; i < state.map.buildings.length; i++) {
+        const house = state.map.buildings[i];
         house.deterioration += 0.00005;
         if (house.deterioration > 1) {
             removeHouseFromMap(house, state.map);

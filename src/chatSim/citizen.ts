@@ -5,7 +5,7 @@ import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CitizenJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
-import { mapPositionToPaintPosition } from "./paint.js";
+import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -114,23 +114,29 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
-export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState, layer: number) {
     const paintDataMap = state.paintData.map;
     const citizenImage = state.images[IMAGE_PATH_CITIZEN];
     const citizenPaintSize = 40;
-    ctx.font = "20px Arial";
+    let nameFontSize = 16 / state.paintData.map.zoom;
+    let nameLineWidth = 2 / state.paintData.map.zoom;
+    ctx.font = `${nameFontSize}px Arial`;
     for (let citizen of state.map.citizens) {
+        if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.job.state !== "selling") continue;
+        if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && citizen.job.state === "selling") continue;
         const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
         ctx.drawImage(citizenImage, 0, 0, 200, 200,
             paintPos.x - citizenPaintSize / 2,
             paintPos.y - citizenPaintSize / 2,
-            citizenPaintSize, citizenPaintSize);
+            citizenPaintSize, citizenPaintSize
+        );
+
+        paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - citizenPaintSize / 2 - 10 }, state.time);
+        paintCitizenJobTool(ctx, citizen, state);
 
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
         const nameYSpacing = 5;
-        paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - citizenPaintSize / 2 - 10 }, state.time);
-        paintCitizenJobTool(ctx, citizen, state);
-        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing);
+        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing, "white", "black", nameLineWidth);
     }
     if (state.inputData.selected) {
         if (state.inputData.selected.type === "citizen") {

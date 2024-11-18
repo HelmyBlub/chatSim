@@ -4,10 +4,11 @@ import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance,
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_FOOD_AT_HOME_NEED, CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
+import { mapPositionToPaintPosition } from "../paint.js";
+import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
     state: "findLocation" | "selling" | "goHome" | "repairMarket",
-    marketBuilding?: Building,
 }
 
 export const CITIZEN_JOB_FOOD_MARKET = "Food Market";
@@ -15,6 +16,7 @@ export const CITIZEN_JOB_FOOD_MARKET = "Food Market";
 export function loadCitizenJobFoodMarket(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_FOOD_MARKET] = {
         create: create,
+        paintInventoryOnMarket: paintInventoryOnMarket,
         tick: tick,
     };
 }
@@ -65,6 +67,17 @@ function create(state: ChatSimState): CitizenJobFoodMarket {
     return {
         name: CITIZEN_JOB_FOOD_MARKET,
         state: "findLocation",
+    }
+}
+
+function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    if (!job.marketBuilding) return;
+    const mushroomPaintSize = 14;
+    const paintPos = mapPositionToPaintPosition(job.marketBuilding.position, state.paintData.map);
+    const mushrooms = job.marketBuilding.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    if (!mushrooms || mushrooms.counter === 0) return;
+    for (let i = 0; i < Math.min(13, mushrooms.counter); i++) {
+        ctx.drawImage(state.images[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200, paintPos.x + i * 5 - 38, paintPos.y - 2, mushroomPaintSize, mushroomPaintSize);
     }
 }
 

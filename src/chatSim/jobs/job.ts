@@ -12,12 +12,14 @@ import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.
 export type CitizenJob = {
     name: string,
     state: string,
+    marketBuilding?: Building,
 }
 
 export type FunctionsCitizenJob = {
     create(state: ChatSimState): CitizenJob,
     tick(citizen: Citizen, job: CitizenJob, state: ChatSimState): void,
     paintTool?(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState): void,
+    paintInventoryOnMarket?(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState): void,
 }
 
 export type FunctionsCitizenJobs = { [key: string]: FunctionsCitizenJob };
@@ -34,6 +36,18 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
 export function createJob(jobname: string, state: ChatSimState): CitizenJob {
     const jobFunctions = state.functionsCitizenJobs[jobname];
     return jobFunctions.create(state);
+}
+
+export function paintCitizenJobInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
+    if (!citizen.job) return;
+    const jobFunctions = state.functionsCitizenJobs[citizen.job.name];
+    if (jobFunctions === undefined) {
+        console.log("job functions missing for job " + citizen.job);
+        return;
+    }
+    if (jobFunctions.paintInventoryOnMarket && citizen.job.marketBuilding !== undefined) {
+        jobFunctions.paintInventoryOnMarket(ctx, citizen, citizen.job, state);
+    }
 }
 
 export function paintCitizenJobTool(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
@@ -107,12 +121,12 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
 }
 
 export function findMarketBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {
-    for (let building of state.map.houses) {
+    for (let building of state.map.buildings) {
         if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === "Market") {
             return building;
         }
     }
-    for (let building of state.map.houses) {
+    for (let building of state.map.buildings) {
         if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === "Market") return building;
     }
     return undefined;

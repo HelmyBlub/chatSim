@@ -24,7 +24,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 
 function tick(citizen: Citizen, state: ChatSimState) {
     if (!citizen.home) {
-        const availableHouse = state.map.houses.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
+        const availableHouse = state.map.buildings.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
         if (availableHouse) {
             addCitizenLogEntry(citizen, `moved into a house from ${availableHouse.owner}`, state);
             availableHouse.inhabitedBy = citizen;

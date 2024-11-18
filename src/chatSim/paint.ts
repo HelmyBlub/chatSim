@@ -1,7 +1,11 @@
 import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen, paintCitizens } from "./citizen.js";
+import { paintCitizenJobInventoryOnMarket } from "./jobs/job.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
+
+export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
+export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
 
 export function paintChatSim(state: ChatSimState) {
     const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -97,26 +101,36 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
             paintPos.y - treePaintSize / 2,
             treePaintSize, treePaintSize);
     }
+    paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
     const citizenHouseImage = state.images[IMAGE_PATH_CITIZEN_HOUSE];
     const marketImage = state.images[IMAGE_PATH_BUILDING_MARKET];
     const buildingPaintSize = 80;
     const buildingImageSize = 200;
-    const nameOffsetY = 90 * buildingPaintSize / buildingImageSize;
+    const houseNameOffsetY = 90 * buildingPaintSize / buildingImageSize;
+    const marketNameOffsetY = 181 * buildingPaintSize / buildingImageSize;
+    const marketJobOffsetY = 161 * buildingPaintSize / buildingImageSize;
     ctx.font = "8px Arial";
-    for (let house of state.map.houses) {
-        const paintPos = mapPositionToPaintPosition(house.position, paintDataMap);
-        let factor = (house.buildProgress !== undefined ? house.buildProgress : 1);
-        const image = house.type === "House" ? citizenHouseImage : marketImage;
+    for (let building of state.map.buildings) {
+        const paintPos = mapPositionToPaintPosition(building.position, paintDataMap);
+        let factor = (building.buildProgress !== undefined ? building.buildProgress : 1);
+        const image = building.type === "House" ? citizenHouseImage : marketImage;
         ctx.drawImage(image, 0, buildingImageSize - buildingImageSize * factor, buildingImageSize, buildingImageSize * factor,
             paintPos.x - buildingPaintSize / 2,
             paintPos.y - buildingPaintSize / 2 + buildingPaintSize - buildingPaintSize * factor,
             buildingPaintSize, buildingPaintSize * factor);
-        if (house.inhabitedBy) {
-            const nameOffsetX = Math.floor(ctx.measureText(house.inhabitedBy.name).width / 2);
-            drawTextWithOutline(ctx, house.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - buildingPaintSize / 2 + nameOffsetY);
+        if (building.inhabitedBy) {
+            const nameOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.name).width / 2);
+            if (building.type === "House") {
+                drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - buildingPaintSize / 2 + houseNameOffsetY);
+            } else if (building.type === "Market") {
+                const jobOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.job.name).width / 2);
+                drawTextWithOutline(ctx, building.inhabitedBy.job.name, paintPos.x - jobOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketJobOffsetY);
+                drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketNameOffsetY);
+                paintCitizenJobInventoryOnMarket(ctx, building.inhabitedBy, state);
+            }
         }
     }
-    paintCitizens(ctx, state);
+    paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
     ctx.restore();
 
     //paint night darkness

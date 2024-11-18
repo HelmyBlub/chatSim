@@ -59,7 +59,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         if (citizen.moveTo === undefined) {
             if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
                 job.state = "buildHouse";
-                for (let house of state.map.houses) {
+                for (let house of state.map.buildings) {
                     if (house.owner === citizen && house.buildProgress !== undefined) {
                         job.houseInProgress = house;
                         break;
@@ -72,7 +72,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
     }
     if (job.state === "searchBuildLocation") {
         let doIHaveAHouseBuildInProgress = false;
-        for (let house of state.map.houses) {
+        for (let house of state.map.buildings) {
             if (house.owner === citizen && house.buildProgress !== undefined) {
                 job.state = "moveToOldLocation";
                 citizen.moveTo = {

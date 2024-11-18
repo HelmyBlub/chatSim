@@ -8,7 +8,6 @@ import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 export type CitizenJobWoodMarket = CitizenJob & {
     state: "findLocation" | "selling" | "goHome",
     lastCheckedForConstructionJobs?: number,
-    marketBuilding?: Building,
 }
 
 export const CITIZEN_JOB_WOOD_MARKET = "Wood Market";

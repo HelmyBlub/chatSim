@@ -14,10 +14,10 @@ export function loadImage(path: string) {
     return imageChatter;
 }
 
-export function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, outlineColor: string = "white", fillColor: string = "black") {
+export function drawTextWithOutline(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, outlineColor: string = "white", fillColor: string = "black", lineWidth: number = 2) {
     ctx.fillStyle = fillColor;
     ctx.strokeStyle = outlineColor;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = lineWidth;
     ctx.beginPath();
     ctx.strokeText(text, x, y);
     ctx.stroke();

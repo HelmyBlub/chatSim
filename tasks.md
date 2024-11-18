@@ -1,12 +1,10 @@
 Tasks:
 - more images+animations
-    - paint citizen with a tool based on their job
-        - foodGatherer: Basket
-        - lumberjack: axe
-        - construction: helmet
-        - foodMarket: ??
-        - woodMarket: ??
-    - paint item in market building
+    - Market: 
+        - paint type
+        - move name to bottom
+        - paint citizen behind building
+        - paint item in market building
     - animation for cutting down tree
 
     - make the map appear more realistic. Easier to follow what happens
@@ -37,6 +35,10 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+    - paint citizen with a tool based on their job
+        - foodGatherer: Basket
+        - lumberjack: axe
+        - construction: helmet
 - bug: two homes
 - market building
     - market building for wood
