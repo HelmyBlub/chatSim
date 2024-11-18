@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { ChatSimState, Building, InventoryStuff, Position } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
-import { CitizenJob, isCitizenInInteractDistance, tickCitizenJob } from "./jobs/job.js";
+import { CitizenJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
@@ -129,6 +129,7 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
         const nameYSpacing = 5;
         paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - citizenPaintSize / 2 - 10 }, state.time);
+        paintCitizenJobTool(ctx, citizen, state);
         drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing);
     }
     if (state.inputData.selected) {

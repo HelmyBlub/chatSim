@@ -1,5 +1,14 @@
 Tasks:
 - more images+animations
+    - paint citizen with a tool based on their job
+        - foodGatherer: Basket
+        - lumberjack: axe
+        - construction: helmet
+        - foodMarket: ??
+        - woodMarket: ??
+    - paint item in market building
+    - animation for cutting down tree
+
     - make the map appear more realistic. Easier to follow what happens
     - make actions take time for animations to be displayed
     - visaulize interactions between citizens better
@@ -8,7 +17,6 @@ Tasks:
     - be able to unselect
 - pathing, citizen can not move over "private property"
 - selection for other things like houses, tree, mushroom
-- paint citizen with a tool based on their job
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more

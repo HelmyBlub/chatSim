@@ -1,10 +1,12 @@
-import { ChatSimState } from "../chatSimModels.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
 import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getUsedInventoryCapacity, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET, sellFoodToFoodMarket } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
 import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 import { removeMushroomFromMap } from "../map.js";
+import { IMAGE_PATH_BASKET, IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
+import { mapPositionToPaintPosition } from "../paint.js";
 
 export type CitizenJobFoodGatherer = CitizenJob & {
     state: "gathering" | "selling" | "setMoveToMushroom" | "goHome",
@@ -16,6 +18,7 @@ export function loadCitizenJobFoodGatherer(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_FOOD_GATHERER] = {
         create: create,
         tick: tick,
+        paintTool: paintTool,
     };
 }
 
@@ -25,6 +28,40 @@ function create(state: ChatSimState): CitizenJobFoodGatherer {
         state: "setMoveToMushroom",
     }
 }
+
+function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+    const basketSize = 20;
+    ctx.drawImage(state.images[IMAGE_PATH_BASKET], 0, 0, 100, 100, paintPos.x, paintPos.y, basketSize, basketSize);
+
+    const mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    const mushroomsPaintSize = 10;
+    ctx.save();
+    ctx.clip(getBasketClipPath(paintPos, basketSize));
+    if (mushrooms && mushrooms.counter > 0) {
+        for (let i = Math.max(6 - mushrooms.counter, 0); i < 6; i++) {
+            const mushroomX = paintPos.x + (i % 3) * mushroomsPaintSize / 2;
+            const mushroomY = paintPos.y + Math.floor(i / 3) * mushroomsPaintSize / 3 + 2;
+            ctx.drawImage(state.images[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200, mushroomX, mushroomY, mushroomsPaintSize, mushroomsPaintSize);
+        }
+    }
+    ctx.restore();
+}
+
+function getBasketClipPath(topLeft: Position, basketPaintSize: number): Path2D {
+    const basketImageSize = 100;
+    const basketSizeFactor = basketPaintSize / basketImageSize;
+    const path = new Path2D();
+    path.moveTo(topLeft.x + 8 * basketSizeFactor, topLeft.y + 48 * basketSizeFactor);
+    path.quadraticCurveTo(topLeft.x + 48 * basketSizeFactor, topLeft.y + 64 * basketSizeFactor, topLeft.x + 88 * basketSizeFactor, topLeft.y + 48 * basketSizeFactor);
+    path.lineTo(topLeft.x + 120 * basketSizeFactor, topLeft.y + 48 * basketSizeFactor);
+    path.lineTo(topLeft.x + 120 * basketSizeFactor, topLeft.y - 20);
+    path.lineTo(topLeft.x - 20 * basketSizeFactor, topLeft.y - 20 * basketSizeFactor);
+    path.lineTo(topLeft.x - 20 * basketSizeFactor, topLeft.y + 48 * basketSizeFactor);
+    path.lineTo(topLeft.x + 8 * basketSizeFactor, topLeft.y + 48 * basketSizeFactor);
+    return path;
+}
+
 
 function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState) {
     if (job.state === "setMoveToMushroom") {
