@@ -4,6 +4,8 @@ import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance 
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
+import { mapPositionToPaintPosition } from "../paint.js";
+import { IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
 
 export type CitizenJobWoodMarket = CitizenJob & {
     state: "findLocation" | "selling" | "goHome",
@@ -16,6 +18,7 @@ const CHECK_INTERVAL = 1000;
 export function loadCitizenJobWoodMarket(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_WOOD_MARKET] = {
         create: create,
+        paintInventoryOnMarket: paintInventoryOnMarket,
         tick: tick,
     };
 }
@@ -51,6 +54,19 @@ function create(state: ChatSimState): CitizenJobWoodMarket {
     return {
         name: CITIZEN_JOB_WOOD_MARKET,
         state: "findLocation",
+    }
+}
+
+function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    if (!job.marketBuilding) return;
+    const woodPlankPaintSize = 30;
+    const paintPos = mapPositionToPaintPosition(job.marketBuilding.position, state.paintData.map);
+    const wood = job.marketBuilding.inventory.find(i => i.name === INVENTORY_WOOD);
+    if (!wood || wood.counter === 0) return;
+    for (let i = 0; i < Math.min(20, wood.counter); i++) {
+        const offsetX = - 38 + Math.floor(i / 10) * 45;
+        const offsetY = - 2 - (i % 10) * 2;
+        ctx.drawImage(state.images[IMAGE_PATH_WOOD_PLANK], 0, 0, 200, 200, paintPos.x + offsetX, paintPos.y + offsetY, woodPlankPaintSize, woodPlankPaintSize);
     }
 }
 

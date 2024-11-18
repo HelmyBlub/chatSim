@@ -44,6 +44,7 @@ export type ChatSimState = {
     time: number,
     timPerDay: number,
     gameSpeed: number,
+    gameSpeedRemainder?: number,
     sunriseAt: number,
     sunsetAt: number,
     map: ChatSimMap,

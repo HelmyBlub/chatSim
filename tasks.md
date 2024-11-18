@@ -1,13 +1,16 @@
 Tasks:
 - change: remove job.state and only use citizen.state 
 - more images+animations
-  - paint item in wood market building        
+    - paint item in wood market building        
     - citizen moving animation
 
     - make the map appear more realistic. Easier to follow what happens
     - make actions take time for animations to be displayed
     - visaulize interactions between citizens better
         - like a chat bubble when requesting to sell or buy
+- mushroom pickup behavior
+- think about: change market jobs only possible with market. Before can try to get food from other citizens
+
 
 - pathing, citizen can not move over "private property"
 - selection for other things like houses, tree, mushroom

@@ -164,7 +164,17 @@ function loadLocalStorageChatters(state: ChatSimState) {
 async function runner(state: ChatSimState) {
     try {
         while (true) {
-            for (let i = 0; i < state.gameSpeed; i++) {
+            let startIndex = 0;
+            if (state.gameSpeed % 1 !== 0) {
+                startIndex++;
+                if (state.gameSpeedRemainder === undefined) state.gameSpeedRemainder = 0;
+                state.gameSpeedRemainder += state.gameSpeed % 1;
+                if (state.gameSpeedRemainder >= 1) {
+                    state.gameSpeedRemainder--;
+                    chatSimTick(state);
+                }
+            }
+            for (let i = startIndex; i < state.gameSpeed; i++) {
                 chatSimTick(state);
             }
             paintChatSim(state);

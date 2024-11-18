@@ -115,23 +115,19 @@ function keyUp(event: KeyboardEvent, state: ChatSimState) {
 
 function keyDown(event: KeyboardEvent, state: ChatSimState) {
     const moveTickAmount = 4;
-    const speedScaling = 1.2;
+    const speedScaling = 0.2;
     switch (event.code) {
         case "Period":
-            if (state.gameSpeed < 5) {
-                state.gameSpeed++;
+            if (state.gameSpeed !== 0) {
+                state.gameSpeed *= 1 + speedScaling;
+                if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
             } else {
-                state.gameSpeed *= speedScaling;
-                state.gameSpeed = Math.round(state.gameSpeed);
+                state.gameSpeed = 1;
             }
             break;
         case "Comma":
-            if (state.gameSpeed < 5 && state.gameSpeed > 0) {
-                state.gameSpeed--;
-            } else {
-                state.gameSpeed /= speedScaling;
-                state.gameSpeed = Math.round(state.gameSpeed);
-            }
+            state.gameSpeed /= 1 + speedScaling;
+            if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
             break
         case "KeyW":
             state.inputData.map.moveY = -moveTickAmount;
