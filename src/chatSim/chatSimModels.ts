@@ -40,6 +40,7 @@ export type PaintDataMap = {
     paintWidth: number,
     zoom: number,
     cameraPosition: Position,
+    lockCameraToSelected: boolean,
 }
 
 export type ChatSimState = {

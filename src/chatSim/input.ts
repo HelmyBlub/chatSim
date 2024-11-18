@@ -35,6 +35,7 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
     } else if (paintDataMap.cameraPosition.y > maxBottom) {
         paintDataMap.cameraPosition.y = maxBottom;
     }
+    state.paintData.map.lockCameraToSelected = false;
 }
 
 function mouseDown(event: MouseEvent, state: ChatSimState) {
@@ -74,9 +75,11 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
                         object: citizen,
                         type: "citizen"
                     }
-                    break;
+                    state.paintData.map.lockCameraToSelected = true;
+                    return;
                 }
             }
+            state.inputData.selected = undefined;
         }
     }
 }

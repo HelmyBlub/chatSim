@@ -1,6 +1,6 @@
 import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
-import { Citizen, paintCitizens } from "./citizen.js";
+import { Citizen, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { paintCitizenJobInventoryOnMarket } from "./jobs/job.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
 
@@ -130,6 +130,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
             }
         }
     }
+    paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
     ctx.restore();
 

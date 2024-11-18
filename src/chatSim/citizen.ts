@@ -38,6 +38,7 @@ export type CitizenLogEntry = {
 }
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
+const CITIZEN_PAINT_SIZE = 40;
 
 export function addCitizenLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
     citizen.log.unshift({
@@ -117,7 +118,6 @@ export function tickCitizens(state: ChatSimState) {
 export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState, layer: number) {
     const paintDataMap = state.paintData.map;
     const citizenImage = state.images[IMAGE_PATH_CITIZEN];
-    const citizenPaintSize = 40;
     let nameFontSize = 16 / state.paintData.map.zoom;
     let nameLineWidth = 2 / state.paintData.map.zoom;
     ctx.font = `${nameFontSize}px Arial`;
@@ -127,26 +127,29 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
         if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && paintBehind) continue;
         const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
         ctx.drawImage(citizenImage, 0, 0, 200, 200,
-            paintPos.x - citizenPaintSize / 2,
-            paintPos.y - citizenPaintSize / 2,
-            citizenPaintSize, citizenPaintSize
+            paintPos.x - CITIZEN_PAINT_SIZE / 2,
+            paintPos.y - CITIZEN_PAINT_SIZE / 2,
+            CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
         );
 
-        paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - citizenPaintSize / 2 - 10 }, state.time);
+        paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
         paintCitizenJobTool(ctx, citizen, state);
 
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
         const nameYSpacing = 5;
-        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - citizenPaintSize / 2 - nameYSpacing, "white", "black", nameLineWidth);
+        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
     }
+}
+
+export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (state.inputData.selected) {
         if (state.inputData.selected.type === "citizen") {
             const citizen: Citizen = state.inputData.selected.object;
-            const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
+            const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
             ctx.strokeStyle = "black";
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.rect(Math.floor(paintPos.x - citizenPaintSize / 2), Math.floor(paintPos.y - citizenPaintSize / 2), citizenPaintSize, citizenPaintSize);
+            ctx.rect(Math.floor(paintPos.x - CITIZEN_PAINT_SIZE / 2), Math.floor(paintPos.y - CITIZEN_PAINT_SIZE / 2), CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE);
             ctx.stroke();
         }
     }

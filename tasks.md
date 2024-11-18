@@ -1,18 +1,12 @@
 Tasks:
 - more images+animations
-    - Market: 
-        - paint type
-        - move name to bottom
-        - paint citizen behind building
-        - paint item in market building
+  - paint item in wood market building
     - animation for cutting down tree
 
     - make the map appear more realistic. Easier to follow what happens
     - make actions take time for animations to be displayed
     - visaulize interactions between citizens better
         - like a chat bubble when requesting to sell or buy
-- camera follows selected citizen
-    - be able to unselect
 - pathing, citizen can not move over "private property"
 - selection for other things like houses, tree, mushroom
 - job "food market"
@@ -35,10 +29,17 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-    - paint citizen with a tool based on their job
-        - foodGatherer: Basket
-        - lumberjack: axe
-        - construction: helmet
+- camera follows selected citizen
+    - be able to unselect
+- Market: 
+    - paint type
+    - move name to bottom
+    - paint citizen behind building
+    - paint item in market building for food market
+- paint citizen with a tool based on their job
+    - foodGatherer: Basket
+    - lumberjack: axe
+    - construction: helmet
 - bug: two homes
 - market building
     - market building for wood
