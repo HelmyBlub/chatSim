@@ -1,5 +1,5 @@
 import { Building, ChatSimState, InventoryStuff, Position } from "../chatSimModels.js";
-import { getUsedInventoryCapacity, Citizen, addCitizenLogEntry } from "../citizen.js";
+import { getUsedInventoryCapacity, Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
@@ -43,7 +43,9 @@ export function paintCitizenJobTool(ctx: CanvasRenderingContext2D, citizen: Citi
         console.log("job functions missing for job " + citizen.job);
         return;
     }
-    if (jobFunctions.paintTool) jobFunctions.paintTool(ctx, citizen, citizen.job, state);
+    if (jobFunctions.paintTool && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
+        jobFunctions.paintTool(ctx, citizen, citizen.job, state);
+    }
 }
 
 export function tickCitizenJob(citizen: Citizen, state: ChatSimState) {

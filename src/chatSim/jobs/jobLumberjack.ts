@@ -4,6 +4,8 @@ import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
+import { mapPositionToPaintPosition } from "../paint.js";
+import { IMAGE_PATH_AXE } from "../../drawHelper.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     state: "decideNext" | "gathering" | "selling" | "goHome",
@@ -17,6 +19,7 @@ export function loadCitizenJobLumberjack(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_LUMBERJACK] = {
         create: create,
         tick: tick,
+        paintTool: paintTool,
     };
 }
 
@@ -28,6 +31,11 @@ function create(state: ChatSimState): CitizenJobLuberjack {
     }
 }
 
+function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+    const axeSize = 20;
+    ctx.drawImage(state.images[IMAGE_PATH_AXE], 0, 0, 100, 100, paintPos.x, paintPos.y - 15, axeSize, axeSize);
+}
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     if (job.state === "decideNext") {

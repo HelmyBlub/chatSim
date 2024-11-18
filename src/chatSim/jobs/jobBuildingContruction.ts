@@ -5,6 +5,8 @@ import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
+import { mapPositionToPaintPosition } from "../paint.js";
+import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
 
 export type CitizenJobBuildingConstruction = CitizenJob & {
     state: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation" | "decideType",
@@ -27,6 +29,7 @@ export function loadCitizenJobHouseConstruction(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_BUILDING_CONSTRUCTION] = {
         create: create,
         tick: tick,
+        paintTool: paintTool,
     };
 }
 
@@ -35,6 +38,12 @@ function create(state: ChatSimState): CitizenJobBuildingConstruction {
         name: CITIZEN_JOB_BUILDING_CONSTRUCTION,
         state: "decideType",
     }
+}
+
+function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+    const axeSize = 20;
+    ctx.drawImage(state.images[IMAGE_PATH_HELMET], 0, 0, 100, 100, paintPos.x - axeSize / 2, paintPos.y - 33, axeSize, axeSize);
 }
 
 function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: ChatSimState) {
