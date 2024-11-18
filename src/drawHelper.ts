@@ -7,6 +7,8 @@ export const IMAGE_PATH_AXE = "images/axe.png";
 export const IMAGE_PATH_BASKET = "images/basket.png";
 export const IMAGE_PATH_HELMET = "images/helmet.png";
 export const IMAGE_PATH_BUILDING_MARKET = "images/buildingMarket.png";
+export const IMAGE_PATH_TREE_LOG = "images/treeLog.png";
+export const IMAGE_PATH_WOOD_PLANK = "images/woodPlank.png";
 
 export function loadImage(path: string) {
     const imageChatter = new Image();

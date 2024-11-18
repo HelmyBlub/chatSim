@@ -17,11 +17,6 @@ export type Mushroom = {
     position: Position,
 }
 
-export type Tree = {
-    woodValue: 10,
-    position: Position,
-}
-
 export type BuildingType = "Market" | "House";
 export type Building = {
     type: BuildingType,

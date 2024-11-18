@@ -3,6 +3,7 @@ import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { paintCitizenJobInventoryOnMarket } from "./jobs/job.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
+import { paintTrees } from "./tree.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
 export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
@@ -92,15 +93,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
             paintPos.y - mushroomPaintSize / 2,
             mushroomPaintSize, mushroomPaintSize);
     }
-    const treePaintSize = 60;
-    const treeImage = state.images[IMAGE_PATH_TREE];
-    for (let tree of state.map.trees) {
-        const paintPos = mapPositionToPaintPosition(tree.position, paintDataMap);
-        ctx.drawImage(treeImage, 0, 0, 200, 200,
-            paintPos.x - treePaintSize / 2,
-            paintPos.y - treePaintSize / 2,
-            treePaintSize, treePaintSize);
-    }
+    paintTrees(ctx, paintDataMap, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
     const citizenHouseImage = state.images[IMAGE_PATH_CITIZEN_HOUSE];
     const marketImage = state.images[IMAGE_PATH_BUILDING_MARKET];

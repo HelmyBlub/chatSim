@@ -1,4 +1,4 @@
-import { ChatSimState, Tree, Mushroom, Position } from "./chatSimModels.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
 import { tickCitizens } from "./citizen.js";
 import { moveMapCameraBy } from "./input.js";
 import { tickChatSimMap } from "./map.js";

@@ -6,10 +6,12 @@ import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_AXE } from "../../drawHelper.js";
+import { Tree } from "../tree.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
-    state: "decideNext" | "gathering" | "selling" | "goHome",
-    lastTreeCutTime: number,
+    state: "decideNext" | "searchingTree" | "cutDownTree" | "cutTreeLogIntoPlanks" | "selling" | "goHome",
+    actionEndTime?: number,
+    tree?: Tree,
 }
 
 export const CITIZEN_JOB_LUMBERJACK = "Lumberjack";
@@ -27,7 +29,6 @@ function create(state: ChatSimState): CitizenJobLuberjack {
     return {
         name: CITIZEN_JOB_LUMBERJACK,
         state: "decideNext",
-        lastTreeCutTime: 0,
     }
 }
 
@@ -38,60 +39,28 @@ function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: Citizen
 }
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
-    if (job.state === "decideNext") {
-        const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
-        if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
-            moveToTree(citizen, state);
-            job.state = "gathering";
-        } else {
-            if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.maxInventory - 15) {
-                job.state = "goHome";
-                citizen.moveTo = {
-                    x: citizen.home.position.x,
-                    y: citizen.home.position.y,
-                }
-                addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
-            } else {
-                if (inventoryWood && inventoryWood.counter > 0) job.state = "selling";
-            }
-        }
-    }
-    if (job.state === "gathering") {
-        if (citizen.moveTo === undefined) {
-            if (job.lastTreeCutTime === undefined) job.lastTreeCutTime = 0;
-            if (job.lastTreeCutTime + CUT_INTERVAL < state.time) {
-                const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
-                if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
-                    const isCloseToTreeIndex = isCloseToTree(citizen, state);
-                    if (isCloseToTreeIndex !== undefined) {
-                        cutTreeForWood(citizen, state, isCloseToTreeIndex);
-                        job.lastTreeCutTime = state.time;
-                    } else {
-                        job.state = "decideNext";
-                    }
-                } else {
-                    job.state = "decideNext";
-                }
-            }
-        }
-    }
+    if (job.state === "decideNext") decideNext(citizen, job, state);
+    if (job.state === "searchingTree") searchTree(citizen, job, state);
+    if (job.state === "cutDownTree") cutDownTree(citizen, job, state);
+    if (job.state === "cutTreeLogIntoPlanks") cutTreeLogIntoPlanks(citizen, job, state);
+
     if (job.state === "goHome") {
         if (citizen.moveTo === undefined) {
             emptyCitizenInventoryToHomeInventory(citizen, state);
-            job.state = "gathering";
+            job.state = "decideNext";
         }
     }
     if (job.state === "selling") {
         let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
         if (!inventoryWood || inventoryWood.counter === 0) {
-            job.state = "gathering";
+            job.state = "decideNext";
         } else {
             const woodMarket = findAWoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
             if (woodMarket) {
                 if (isCitizenInInteractDistance(citizen, woodMarket.position)) {
                     const woodPrice = 2;
                     sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice, state);
-                    job.state = "gathering";
+                    job.state = "decideNext";
                 } else {
                     citizen.moveTo = {
                         x: woodMarket.position.x,
@@ -102,6 +71,85 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                 addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_WOOD_MARKET} as their is no wood market to sell to`, state);
                 citizen.job = createJob(CITIZEN_JOB_WOOD_MARKET, state);
             }
+        }
+    }
+}
+
+function cutDownTree(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
+    if (citizen.moveTo === undefined) {
+        if (!job.tree) {
+            job.state = "decideNext";
+            return;
+        }
+        if (!isCitizenInInteractDistance(citizen, job.tree.position)) {
+            job.state = "decideNext";
+            return;
+        }
+        if (job.tree.trunkDamagePerCent < 1) {
+            const progressPerTick = 1 / 60 / 3;
+            job.tree.trunkDamagePerCent += progressPerTick;
+            if (job.tree.trunkDamagePerCent >= 1) {
+                job.tree.fallTime = state.time;
+            }
+        } else {
+            job.state = "cutTreeLogIntoPlanks";
+            job.actionEndTime = undefined;
+        }
+    }
+}
+
+function cutTreeLogIntoPlanks(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
+    if (!job.tree || job.tree.woodValue === 0
+        || !isCitizenInInteractDistance(citizen, job.tree.position)
+    ) {
+        job.state = "decideNext";
+        return;
+    }
+    const cutDuration = 1000;
+    if (job.actionEndTime === undefined) job.actionEndTime = state.time + cutDuration;
+    if (job.actionEndTime < state.time) {
+        job.actionEndTime = state.time + cutDuration;
+        const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+        if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
+            cutTreeForWood(citizen, job.tree, state);
+        } else {
+            job.state = "decideNext";
+        }
+    }
+
+}
+
+function searchTree(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
+    if (job.actionEndTime !== undefined && job.actionEndTime < state.time) {
+        if (state.map.trees.length > 0) {
+            const treeIndex = Math.floor(Math.random() * state.map.trees.length);
+            const tree = state.map.trees[treeIndex];
+            citizen.moveTo = {
+                x: tree.position.x,
+                y: tree.position.y,
+            };
+            job.tree = tree;
+            job.state = "cutDownTree";
+        }
+    }
+}
+
+function decideNext(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
+    const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+    if (canCitizenCarryMore(citizen) && (!inventoryWood || inventoryWood.counter < 5)) {
+        const lookingForTreeDuration = 1000;
+        job.state = "searchingTree";
+        job.actionEndTime = state.time + lookingForTreeDuration;
+    } else {
+        if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.maxInventory - 15) {
+            job.state = "goHome";
+            citizen.moveTo = {
+                x: citizen.home.position.x,
+                y: citizen.home.position.y,
+            }
+            addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
+        } else {
+            if (inventoryWood && inventoryWood.counter > 0) job.state = "selling";
         }
     }
 }
@@ -126,8 +174,7 @@ function findAWoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
     return closest;
 }
 
-function cutTreeForWood(citizen: Citizen, state: ChatSimState, treeIndex: number) {
-    const tree = state.map.trees[treeIndex];
+function cutTreeForWood(citizen: Citizen, tree: Tree, state: ChatSimState) {
     let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
     if (inventoryWood === undefined) {
         inventoryWood = { name: INVENTORY_WOOD, counter: 0 };
@@ -153,14 +200,4 @@ function isCloseToTree(citizen: Citizen, state: ChatSimState): number | undefine
         if (distance < 10) return i;
     }
     return undefined;
-}
-
-function moveToTree(citizen: Citizen, state: ChatSimState) {
-    if (!citizen.moveTo && state.map.trees.length > 0) {
-        const treeIndex = Math.floor(Math.random() * state.map.trees.length);
-        citizen.moveTo = {
-            x: state.map.trees[treeIndex].position.x,
-            y: state.map.trees[treeIndex].position.y,
-        }
-    }
 }

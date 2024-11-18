@@ -1,5 +1,6 @@
-import { Mushroom, Tree, Building, ChatSimState, Position, BuildingType } from "./chatSimModels.js";
+import { Mushroom, Building, ChatSimState, Position, BuildingType } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
+import { createTree, Tree } from "./tree.js";
 
 export type TilePosition = {
     tileX: number,
@@ -114,24 +115,18 @@ export function tilePositionToMapPosition(tilePosition: TilePosition, map: ChatS
 }
 
 export function tickChatSimMap(state: ChatSimState) {
-    treeSpawnTick(state);
+    tickTreeSpawn(state);
     mushroomSpawnTick(state);
     tickHouses(state);
 }
 
-function treeSpawnTick(state: ChatSimState) {
+function tickTreeSpawn(state: ChatSimState) {
     if (state.map.trees.length >= state.map.maxTrees) return;
     if (state.map.emptyTiles.length === 0) return undefined;
     const emptyTileIndex = getRandomEmptyTileIndex(state);
     const tilePosition = state.map.emptyTiles[emptyTileIndex];
     const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
-    const newTree: Tree = {
-        woodValue: 10,
-        position: {
-            x: mapPosition.x,
-            y: mapPosition.y,
-        }
-    }
+    const newTree: Tree = createTree(mapPosition);
     state.map.emptyTiles.splice(emptyTileIndex, 1);
     state.map.usedTiles.push({
         position: tilePosition,
@@ -140,6 +135,7 @@ function treeSpawnTick(state: ChatSimState) {
     });
     state.map.trees.push(newTree);
 }
+
 
 function mushroomSpawnTick(state: ChatSimState) {
     if (state.map.mushrooms.length >= state.map.maxMushrooms) return;

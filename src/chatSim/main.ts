@@ -1,4 +1,4 @@
-import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, loadImage } from "../drawHelper.js";
+import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG, IMAGE_PATH_WOOD_PLANK, loadImage } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
 import { CITIZEN_STATE_TYPE_WORKING_JOB } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
@@ -107,6 +107,8 @@ function loadImages(state: ChatSimState) {
     state.images[IMAGE_PATH_AXE] = loadImage(IMAGE_PATH_AXE);
     state.images[IMAGE_PATH_BASKET] = loadImage(IMAGE_PATH_BASKET);
     state.images[IMAGE_PATH_HELMET] = loadImage(IMAGE_PATH_HELMET);
+    state.images[IMAGE_PATH_TREE_LOG] = loadImage(IMAGE_PATH_TREE_LOG);
+    state.images[IMAGE_PATH_WOOD_PLANK] = loadImage(IMAGE_PATH_WOOD_PLANK);
 }
 
 function initMyApp() {
