@@ -168,7 +168,7 @@ function tickHouses(state: ChatSimState) {
         house.deterioration += 0.00005;
         if (house.deterioration > 1) {
             removeHouseFromMap(house, state.map);
-            if (house.inhabitedBy) house.inhabitedBy.home = undefined;
+            if (house.inhabitedBy && house.inhabitedBy.home === house) house.inhabitedBy.home = undefined;
         }
     }
 }

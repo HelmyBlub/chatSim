@@ -1,15 +1,11 @@
 Tasks:
-- market building
-    - food market building
-        - when quiting job
-            - what happens with storage?
-            - try to sell
-            - else keep, might break down over time
-    - market building for wood
 - more images+animations
     - make the map appear more realistic. Easier to follow what happens
-- visaulize interactions between citizens better
-    - like a chat bubble when requesting to sell or buy
+    - make actions take time for animations to be displayed
+    - visaulize interactions between citizens better
+        - like a chat bubble when requesting to sell or buy
+- camera follows selected citizen
+    - be able to unselect
 - pathing, citizen can not move over "private property"
 - selection for other things like houses, tree, mushroom
 - paint citizen with a tool based on their job
@@ -33,38 +29,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- food market building
-    - has to be build
-    - place where food is sold or bought
-    - more storage
-    - citizen can only sell when at market building
-- trees/mushrooms 
-    - should also spawn on tiles not positions
-    - should not spawn on used tiles
-    - should block tile
-- more structured map house placing, do not place houses above each other
-    - add tileSize value
-    - map size has to be multiple of tileSize
-    - change houses to be build on correct locations fitting to a tile
-    - make some data structure to know what tiles is empty and which not
-        - check that despawning houses empty tiles
-    - houses should not be build on same tile
-- instead of switching jobs use house storage capacity for gatherer job
-    - need starving
-        - look at home for food
-    - food gatherer
-        - store food at home
-        - if even home storage high, switch to food market
-    - lumberjack
-        - store wood at home
-        - if even home storage high, switch to wood market
-    - food market  
-        - if out of food. Try stocking up from home
-    - wood market
-        - if out of wood. Try stocking up from home
-    - if i want to repair my house
-        - also check and use home inventory
-
+- bug: two homes
+- market building
+    - market building for wood
+    - repair market building
+        - when using it for a job
 
 
 --------------------------------------------------

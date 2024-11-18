@@ -74,7 +74,7 @@ export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemNam
     let buyerItem = buyerInventory.find(i => i.name === itemName);
     if (!buyerItem) {
         buyerItem = { name: itemName, counter: 0 };
-        buyer.inventory.push(buyerItem);
+        buyerInventory.push(buyerItem);
     }
     sellerItem.counter -= tradeAmount;
     buyerItem.counter += tradeAmount;
@@ -93,7 +93,12 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, state, requestedAmount);
 }
 
-export function findEmptyMarketBuilding(state: ChatSimState): Building | undefined {
+export function findMarketBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {
+    for (let building of state.map.houses) {
+        if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === "Market") {
+            return building;
+        }
+    }
     for (let building of state.map.houses) {
         if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === "Market") return building;
     }

@@ -1,12 +1,12 @@
 import { Building, ChatSimState, InventoryStuff } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
-import { CitizenJob, createJob, findEmptyMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
+import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_FOOD_AT_HOME_NEED, CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
-    state: "findLocation" | "selling" | "goHome"
+    state: "findLocation" | "selling" | "goHome" | "repairMarket",
     marketBuilding?: Building,
 }
 
@@ -69,9 +69,24 @@ function create(state: ChatSimState): CitizenJobFoodMarket {
 }
 
 function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) {
+    if (job.marketBuilding && job.marketBuilding.deterioration > 0.5 && job.state !== "repairMarket") {
+        job.state = "repairMarket";
+        citizen.moveTo = {
+            x: job.marketBuilding.position.x,
+            y: job.marketBuilding.position.y,
+        }
+    }
+    if (job.state === "repairMarket") {
+        if (citizen.moveTo === undefined) {
+            if (job.marketBuilding && job.marketBuilding.deterioration > 0.5) {
+                job.marketBuilding.deterioration -= 0.5;
+            }
+            job.state = "findLocation";
+        }
+    }
     if (job.state === "findLocation") {
         if (!job.marketBuilding) {
-            job.marketBuilding = findEmptyMarketBuilding(state);
+            job.marketBuilding = findMarketBuilding(citizen, state);
         }
         if (!job.marketBuilding) {
             citizen.moveTo = {
