@@ -122,8 +122,9 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
     let nameLineWidth = 2 / state.paintData.map.zoom;
     ctx.font = `${nameFontSize}px Arial`;
     for (let citizen of state.map.citizens) {
-        if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.job.state !== "selling") continue;
-        if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && citizen.job.state === "selling") continue;
+        const paintBehind = citizen.job.state === "selling" && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB;
+        if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && !paintBehind) continue;
+        if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && paintBehind) continue;
         const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
         ctx.drawImage(citizenImage, 0, 0, 200, 200,
             paintPos.x - citizenPaintSize / 2,
