@@ -35,7 +35,15 @@ function create(state: ChatSimState): CitizenJobLuberjack {
 function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const axeSize = 20;
+    ctx.save();
+    if (citizen.moveTo === undefined && (job.state === "cutDownTree" || job.state === "cutTreeLogIntoPlanks")) {
+        const rotation = (Math.sin(state.time / 100) + 1) / 2 * Math.PI / 2;
+        ctx.translate(paintPos.x, paintPos.y);
+        ctx.rotate(rotation)
+        ctx.translate(-paintPos.x, -paintPos.y);
+    }
     ctx.drawImage(state.images[IMAGE_PATH_AXE], 0, 0, 100, 100, paintPos.x, paintPos.y - 15, axeSize, axeSize);
+    ctx.restore();
 }
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {

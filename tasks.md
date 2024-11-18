@@ -1,15 +1,7 @@
 Tasks:
 - change: remove job.state and only use citizen.state 
 - more images+animations
-  - paint item in wood market building
-    - animation for cutting down tree
-        - swinging axe
-        - falling down tree
-        - tree turn into tree log
-        - more axe swinging
-        - tree turns into planks
-        - citizen picks up planks
-        
+  - paint item in wood market building        
     - citizen moving animation
 
     - make the map appear more realistic. Easier to follow what happens
@@ -39,6 +31,12 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- animation for cutting down tree
+    - swinging axe
+    - falling down tree
+    - tree turn into tree log
+    - more axe swinging
+    - tree turns into wood
 - camera follows selected citizen
     - be able to unselect
 - Market: 
