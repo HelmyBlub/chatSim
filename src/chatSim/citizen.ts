@@ -1,5 +1,5 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
-import { ChatSimState, Building, Inventory, Position } from "./chatSimModels.js";
+import { ChatSimState, Building, Inventory, Position, Mushroom } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
@@ -7,6 +7,7 @@ import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
+import { Tree } from "./tree.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -216,13 +217,36 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
 
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (state.inputData.selected) {
-        if (state.inputData.selected.type === "citizen") {
-            const citizen: Citizen = state.inputData.selected.object;
-            const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+        let position: Position | undefined;
+        let size = 0;
+        switch (state.inputData.selected.type) {
+            case "citizen":
+                const citizen: Citizen = state.inputData.selected.object;
+                position = citizen.position;
+                size = CITIZEN_PAINT_SIZE;
+                break;
+            case "building":
+                const building: Building = state.inputData.selected.object;
+                position = building.position;
+                size = 60;
+                break;
+            case "tree":
+                const tree: Tree = state.inputData.selected.object;
+                position = tree.position;
+                size = 60;
+                break;
+            case "mushroom":
+                const mushroom: Mushroom = state.inputData.selected.object;
+                position = mushroom.position;
+                size = 20;
+                break;
+        }
+        if (position) {
+            const paintPos = mapPositionToPaintPosition(position, state.paintData.map);
             ctx.strokeStyle = "black";
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.rect(Math.floor(paintPos.x - CITIZEN_PAINT_SIZE / 2), Math.floor(paintPos.y - CITIZEN_PAINT_SIZE / 2), CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE);
+            ctx.rect(Math.floor(paintPos.x - size / 2), Math.floor(paintPos.y - size / 2), size, size);
             ctx.stroke();
         }
     }

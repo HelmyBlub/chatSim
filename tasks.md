@@ -1,6 +1,6 @@
 Tasks:
+- selection for other things like houses, tree, mushroom
 - more images+animations
-    - citizen moving animation
     - thought animation
     - buy/sell animation
     - don't move directly to the middle
@@ -23,7 +23,6 @@ Tasks:
 
 
 - pathing, citizen can not move over "private property"
-- selection for other things like houses, tree, mushroom
 - job "food market"
     - if many mushrooms on stock, buy them for less
     - if low on mushrooms, sell for more
@@ -44,6 +43,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- citizen moving animation
 - code refactor: remove job.state and only use citizen.state 
 - code refactor: inventory type should include maxInventory
 - bug: starving by inventory full of wood

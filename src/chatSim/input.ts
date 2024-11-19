@@ -1,4 +1,4 @@
-import { ChatSimState, PaintDataMap } from "./chatSimModels.js";
+import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
@@ -57,21 +57,8 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
         const isClickInsideMap = relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
             && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
         if (isClickInsideMap) {
-            const translateX = paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2;
-            const translateY = paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2;
-
             for (let citizen of state.map.citizens) {
-                const citizenPaintPosition = mapPositionToPaintPosition(citizen.position, paintDataMap);
-                const citizenPaintPositionWithZoom = {
-                    x: translateX - (translateX - citizenPaintPosition.x) * paintDataMap.zoom,
-                    y: translateY - (translateY - citizenPaintPosition.y) * paintDataMap.zoom,
-                }
-                const citizenPaintSizeHalved = 20 * paintDataMap.zoom;
-                const citizenClicked = relativMouseX >= citizenPaintPositionWithZoom.x - citizenPaintSizeHalved
-                    && relativMouseX <= citizenPaintPositionWithZoom.x + citizenPaintSizeHalved
-                    && relativMouseY >= citizenPaintPositionWithZoom.y - citizenPaintSizeHalved
-                    && relativMouseY <= citizenPaintPositionWithZoom.y + citizenPaintSizeHalved
-                if (citizenClicked) {
+                if (isObjectClicked(citizen.position, 40, relativMouseX, relativMouseY, state)) {
                     state.inputData.selected = {
                         object: citizen,
                         type: "citizen"
@@ -80,9 +67,54 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
                     return;
                 }
             }
+            for (let building of state.map.buildings) {
+                if (isObjectClicked(building.position, 60, relativMouseX, relativMouseY, state)) {
+                    state.inputData.selected = {
+                        object: building,
+                        type: "building"
+                    }
+                    return;
+                }
+            }
+            for (let tree of state.map.trees) {
+                if (isObjectClicked(tree.position, 60, relativMouseX, relativMouseY, state)) {
+                    state.inputData.selected = {
+                        object: tree,
+                        type: "tree"
+                    }
+                    return;
+                }
+            }
+            for (let mushroom of state.map.mushrooms) {
+                if (isObjectClicked(mushroom.position, 20, relativMouseX, relativMouseY, state)) {
+                    state.inputData.selected = {
+                        object: mushroom,
+                        type: "mushroom"
+                    }
+                    return;
+                }
+            }
             state.inputData.selected = undefined;
         }
     }
+}
+
+function isObjectClicked(objectPosition: Position, objectSize: number, relativMouseX: number, relativMouseY: number, state: ChatSimState): boolean {
+    const paintDataMap = state.paintData.map;
+    const translateX = paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2;
+    const translateY = paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2;
+
+    const citizenPaintPosition = mapPositionToPaintPosition(objectPosition, paintDataMap);
+    const citizenPaintPositionWithZoom = {
+        x: translateX - (translateX - citizenPaintPosition.x) * paintDataMap.zoom,
+        y: translateY - (translateY - citizenPaintPosition.y) * paintDataMap.zoom,
+    }
+    const citizenPaintSizeHalved = objectSize / 2 * paintDataMap.zoom;
+    const objectClicked = relativMouseX >= citizenPaintPositionWithZoom.x - citizenPaintSizeHalved
+        && relativMouseX <= citizenPaintPositionWithZoom.x + citizenPaintSizeHalved
+        && relativMouseY >= citizenPaintPositionWithZoom.y - citizenPaintSizeHalved
+        && relativMouseY <= citizenPaintPositionWithZoom.y + citizenPaintSizeHalved;
+    return objectClicked;
 }
 
 function mouseMove(event: MouseEvent, state: ChatSimState) {

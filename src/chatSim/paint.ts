@@ -1,9 +1,10 @@
 import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
-import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
+import { Building, ChatSimState, Mushroom, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen, paintCitizens, paintSelectionBox } from "./citizen.js";
+import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { paintCitizenJobInventoryOnMarket } from "./jobs/job.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
-import { paintTrees } from "./tree.js";
+import { paintTrees, Tree } from "./tree.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
 export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
@@ -59,6 +60,26 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
                 ctx.fillText(`        ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
             }
         }
+    } else if (selected.type === "building") {
+        const building: Building = selected.object;
+        ctx.fillText(`Building: ${building.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Owner: ${building.owner.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (building.inhabitedBy !== undefined) ctx.fillText(`    Inhabited by: ${building.inhabitedBy.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (building.buildProgress !== undefined) ctx.fillText(`    Build Progress: ${(building.buildProgress * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Deterioration: ${(building.deterioration * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        for (let item of building.inventory.items) {
+            ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    } else if (selected.type === "tree") {
+        const tree: Tree = selected.object;
+        ctx.fillText(`Tree:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    wood: ${tree.woodValue}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    trunkDamage: ${(tree.trunkDamagePerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    } else if (selected.type === "mushroom") {
+        const mushroom: Mushroom = selected.object;
+        ctx.fillText(`Mushroom:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    foodValue: ${MUSHROOM_FOOD_VALUE}`, offsetX, offsetY + lineSpacing * lineCounter++);
     }
 }
 
