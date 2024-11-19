@@ -1,8 +1,21 @@
 Tasks:
-- change: remove job.state and only use citizen.state 
+- bug: starving by inventory full of wood
+- code change: remove job.state and only use citizen.state 
+
 - more images+animations
-    - paint item in wood market building        
     - citizen moving animation
+    - thought animation
+    - buy/sell animation
+    - don't move directly to the middle
+        - lumberjack walks besides tree, (left and right)
+            - can not be more than two people cutting?
+    - buildings in poor conditions
+    - think about: inventory consitency
+        - just switching jobs and the basket with mushrooms disapears. Should stay as long as mushrooms in inventory?
+        - market inventory disapears if jobs swichted. Should market continue display these
+            - can only change if citizen in market building
+    - put planks beside buildings beeing build
+    - visualize citizen transporting wood planks
 
     - make the map appear more realistic. Easier to follow what happens
     - make actions take time for animations to be displayed
@@ -34,28 +47,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- animation for cutting down tree
-    - swinging axe
-    - falling down tree
-    - tree turn into tree log
-    - more axe swinging
-    - tree turns into wood
-- camera follows selected citizen
-    - be able to unselect
-- Market: 
-    - paint type
-    - move name to bottom
-    - paint citizen behind building
-    - paint item in market building for food market
-- paint citizen with a tool based on their job
-    - foodGatherer: Basket
-    - lumberjack: axe
-    - construction: helmet
-- bug: two homes
-- market building
-    - market building for wood
-    - repair market building
-        - when using it for a job
+- when sleeping at home, don't paint citizen
 
 
 --------------------------------------------------

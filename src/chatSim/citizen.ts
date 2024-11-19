@@ -126,11 +126,14 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
         if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && !paintBehind) continue;
         if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && paintBehind) continue;
         const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
-        ctx.drawImage(citizenImage, 0, 0, 200, 200,
-            paintPos.x - CITIZEN_PAINT_SIZE / 2,
-            paintPos.y - CITIZEN_PAINT_SIZE / 2,
-            CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
-        );
+        const isAtHomeSleeping = citizen.home && citizen.stateInfo.type === CITIZEN_NEED_SLEEP && isCitizenInInteractDistance(citizen, citizen.home.position);
+        if (!isAtHomeSleeping) {
+            ctx.drawImage(citizenImage, 0, 0, 200, 200,
+                paintPos.x - CITIZEN_PAINT_SIZE / 2,
+                paintPos.y - CITIZEN_PAINT_SIZE / 2,
+                CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+            );
+        }
 
         paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
         paintCitizenJobTool(ctx, citizen, state);
