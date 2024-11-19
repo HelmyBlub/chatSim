@@ -1,4 +1,4 @@
-import { Building, ChatSimState, InventoryStuff } from "../chatSimModels.js";
+import { Building, ChatSimState, Inventory, InventoryItem } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
 import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
@@ -24,12 +24,12 @@ export function loadCitizenJobFoodMarket(state: ChatSimState) {
 export function hasFoodMarketStock(foodMarket: Citizen): boolean {
     if (foodMarket.job.name !== CITIZEN_JOB_FOOD_MARKET) return false;
     const job = foodMarket.job as CitizenJobFoodMarket;
-    let mushrooms: InventoryStuff | undefined = undefined;
+    let mushrooms: InventoryItem | undefined = undefined;
     if (job.marketBuilding) {
-        mushrooms = job.marketBuilding.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        mushrooms = job.marketBuilding.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
         if (mushrooms && mushrooms.counter > 0) return true;
     } else {
-        mushrooms = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        mushrooms = foodMarket.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
         if (!mushrooms || mushrooms.counter <= 0) return false;
         if (foodMarket.home) {
             return true;
@@ -46,7 +46,7 @@ export function buyFoodFromFoodMarket(foodMarket: Citizen, buyer: Citizen, reque
     const job = foodMarket.job as CitizenJobFoodMarket;
     const buyPrice = 2;
     if (job.marketBuilding) {
-        sellItemWithInventories(foodMarket, buyer, INVENTORY_MUSHROOM, buyPrice, job.marketBuilding.inventory, buyer.inventory, buyer.maxInventory, state, requestedAmount);
+        sellItemWithInventories(foodMarket, buyer, INVENTORY_MUSHROOM, buyPrice, job.marketBuilding.inventory, buyer.inventory, state, requestedAmount);
     } else {
         sellItem(foodMarket, buyer, INVENTORY_MUSHROOM, buyPrice, state, requestedAmount);
     }
@@ -57,7 +57,7 @@ export function sellFoodToFoodMarket(foodMarket: Citizen, seller: Citizen, reque
     const job = foodMarket.job as CitizenJobFoodMarket;
     const sellPrice = 1;
     if (job.marketBuilding) {
-        sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, job.marketBuilding.maxInventory, state, requestedAmount);
+        sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, state, requestedAmount);
     } else {
         sellItem(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, state, requestedAmount);
     }
@@ -74,7 +74,7 @@ function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen,
     if (!job.marketBuilding) return;
     const mushroomPaintSize = 14;
     const paintPos = mapPositionToPaintPosition(job.marketBuilding.position, state.paintData.map);
-    const mushrooms = job.marketBuilding.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    const mushrooms = job.marketBuilding.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (!mushrooms || mushrooms.counter === 0) return;
     for (let i = 0; i < Math.min(13, mushrooms.counter); i++) {
         ctx.drawImage(state.images[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200, paintPos.x + i * 5 - 38, paintPos.y - 2, mushroomPaintSize, mushroomPaintSize);
@@ -120,10 +120,10 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
         if (citizen.moveTo === undefined) {
             if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                 emptyCitizenInventoryToHomeInventory(citizen, state);
-                const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (homeMushrooms && homeMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
-                    const amount = Math.min(homeMushrooms.counter - CITIZEN_FOOD_AT_HOME_NEED, citizen.maxInventory);
-                    const actualAmount = moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.home.inventory, citizen.inventory, citizen.maxInventory, amount);
+                    const amount = Math.min(homeMushrooms.counter - CITIZEN_FOOD_AT_HOME_NEED, citizen.inventory.size);
+                    const actualAmount = moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.home.inventory, citizen.inventory, amount);
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_MUSHROOM} from home inventory to inventory`, state);
                 }
             }
@@ -136,16 +136,16 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
                 job.state = "findLocation";
             } else {
-                let mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                let mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (job.marketBuilding) {
                     if (mushrooms && mushrooms.counter > 0) {
-                        moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.inventory, job.marketBuilding.inventory, job.marketBuilding.maxInventory, mushrooms.counter);
+                        moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.inventory, job.marketBuilding.inventory, mushrooms.counter);
                     }
-                    mushrooms = job.marketBuilding.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                    mushrooms = job.marketBuilding.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 }
                 if (citizen.home) {
                     if (!mushrooms || mushrooms.counter <= 0) {
-                        const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                        const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (homeMushrooms && homeMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
                             job.state = "goHome";
                             citizen.moveTo = {

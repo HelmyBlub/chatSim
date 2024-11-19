@@ -1,5 +1,6 @@
 import { Mushroom, Building, ChatSimState, Position, BuildingType } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { createTree, Tree } from "./tree.js";
 
 export type TilePosition = {
@@ -177,8 +178,20 @@ function createBuilding(owner: Citizen, position: Position, type: BuildingType):
     return {
         type: type,
         owner: owner,
-        inventory: [],
-        maxInventory: 50,
+        inventory: {
+            items: [],
+            reservedSpace: [
+                {
+                    counter: 3,
+                    name: INVENTORY_MUSHROOM
+                },
+                {
+                    counter: 3,
+                    name: INVENTORY_WOOD
+                },
+            ],
+            size: 50,
+        },
         position: {
             x: position.x,
             y: position.y,

@@ -20,7 +20,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
-    const mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (citizen.foodPerCent < STARVING_FOOD_PER_CENT) {
         if (mushrooms && mushrooms.counter > 0) {
             citizenEatMushroom(citizen, mushrooms, state, "inventory");
@@ -31,7 +31,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_STARVING) {
         let foundFood = false;
         if (citizen.home) {
-            const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+            const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (homeMushrooms && homeMushrooms.counter > 0) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_STARVING,
@@ -72,7 +72,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.stateInfo.state === `go home to eat`) {
             if (citizen.moveTo === undefined) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                    const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                    const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
                         while (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
                             citizenEatMushroom(citizen, homeMushrooms, state, "home");
@@ -90,7 +90,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 if (foodMarket && foodMarket !== citizen) {
                     const distance = calculateDistance(foodMarket.position, citizen.position);
                     if (distance <= citizen.speed) {
-                        const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                        const mushroom = foodMarket.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
                             sellItem(foodMarket, citizen, INVENTORY_MUSHROOM, 2, state, 1);
                             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };

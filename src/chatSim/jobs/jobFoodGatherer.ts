@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getUsedInventoryCapacity } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, getUsedInventoryCapacity } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET, sellFoodToFoodMarket } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -34,7 +34,7 @@ function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: Citizen
     const basketSize = 20;
     ctx.drawImage(state.images[IMAGE_PATH_BASKET], 0, 0, 100, 100, paintPos.x, paintPos.y, basketSize, basketSize);
 
-    const mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     const mushroomsPaintSize = 10;
     ctx.save();
     ctx.clip(getBasketClipPath(paintPos, basketSize));
@@ -65,12 +65,11 @@ function getBasketClipPath(topLeft: Position, basketPaintSize: number): Path2D {
 
 function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState) {
     if (job.state === "setMoveToMushroom") {
-        const mushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
-        if (canCitizenCarryMore(citizen) && (!mushrooms || mushrooms.counter < 9)) {
+        if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_MUSHROOM) > 0) {
             moveToMushroom(citizen, state);
             job.state = "gathering";
         } else {
-            if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.maxInventory) {
+            if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.inventory.size) {
                 job.state = "goHome";
                 citizen.moveTo = {
                     x: citizen.home.position.x,
@@ -78,7 +77,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                 }
                 addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
             } else {
-                const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
                     job.state = "selling";
                 }
@@ -107,7 +106,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         const foodMarket = findAFoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
         if (foodMarket) {
             if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
-                const mushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
                     const sellAmount = mushroom.counter - CITIZEN_FOOD_IN_INVENTORY_NEED;
                     sellFoodToFoodMarket(foodMarket, citizen, sellAmount, state);
@@ -148,10 +147,10 @@ function findAFoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
 
 function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: number) {
     removeMushroomFromMap(state.map.mushrooms[mushroomIndex], state.map);
-    let inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (inventoryMushroom === undefined) {
         inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0 };
-        citizen.inventory.push(inventoryMushroom);
+        citizen.inventory.items.push(inventoryMushroom);
     }
     inventoryMushroom.counter++;
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;

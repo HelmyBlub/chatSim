@@ -8,9 +8,15 @@ export type Position = {
     y: number,
 }
 
-export type InventoryStuff = {
+export type InventoryItem = {
     name: string,
     counter: number,
+}
+
+export type Inventory = {
+    items: InventoryItem[],
+    reservedSpace?: InventoryItem[],
+    size: number,
 }
 
 export type Mushroom = {
@@ -25,8 +31,7 @@ export type Building = {
     position: Position,
     buildProgress?: number,
     deterioration: number,
-    inventory: InventoryStuff[],
-    maxInventory: number,
+    inventory: Inventory,
 }
 
 export type PaintDataMap = {

@@ -1,13 +1,12 @@
-import { Building, ChatSimState, InventoryStuff, Position } from "../chatSimModels.js";
-import { getUsedInventoryCapacity, Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { Building, ChatSimState, Inventory, Position } from "../chatSimModels.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
 import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
-import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
-import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
+import { calculateDistance } from "../main.js";
 
 export type CitizenJob = {
     name: string,
@@ -77,31 +76,21 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Position) 
     return distance <= citizen.speed;
 }
 
-export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: InventoryStuff[], buyerInventory: InventoryStuff[], maxBuyerInventory: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    const sellerItem = sellerInventory.find(i => i.name === itemName);
+export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: Inventory, buyerInventory: Inventory, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    const sellerItem = sellerInventory.items.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    let buyerInventoryCapacity = maxBuyerInventory - getUsedInventoryCapacity(buyerInventory);
-    if (itemName !== INVENTORY_MUSHROOM) {
-        if (buyer.inventory === buyerInventory) {
-            const mushrooms = buyerInventory.find(i => i.name === INVENTORY_MUSHROOM);
-            if (!mushrooms) {
-                buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED;
-            } else if (mushrooms.counter < CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                buyerInventoryCapacity -= CITIZEN_FOOD_IN_INVENTORY_NEED - mushrooms.counter;
-            }
-        }
-    }
+    let buyerInventoryCapacity = getAvaiableInventoryCapacity(buyerInventory, itemName);
     const buyerInventoryMoneyAmount = Math.min(buyerInventoryCapacity, Math.floor(buyer.money / itemPrice));
     const buyerAmount = requestedAmount !== undefined ? Math.min(buyerInventoryMoneyAmount, requestedAmount) : buyerInventoryMoneyAmount;
     const tradeAmount = Math.min(sellerAmount, buyerAmount);
     if (tradeAmount === 0) {
         return;
     }
-    let buyerItem = buyerInventory.find(i => i.name === itemName);
+    let buyerItem = buyerInventory.items.find(i => i.name === itemName);
     if (!buyerItem) {
         buyerItem = { name: itemName, counter: 0 };
-        buyerInventory.push(buyerItem);
+        buyerInventory.items.push(buyerItem);
     }
     sellerItem.counter -= tradeAmount;
     buyerItem.counter += tradeAmount;
@@ -117,7 +106,7 @@ export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemP
 }
 
 export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, buyer.maxInventory, state, requestedAmount);
+    return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, state, requestedAmount);
 }
 
 export function findMarketBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {

@@ -29,7 +29,7 @@ export function findClosestWoodMarket(position: Position, state: ChatSimState, h
     for (let citizen of state.map.citizens) {
         if (citizen.job.name === CITIZEN_JOB_WOOD_MARKET && citizen.moveTo === undefined) {
             if (hasStock) {
-                const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+                const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (!wood || wood.counter === 0) continue;
             }
             if (willBuy && (citizen.money < 2 || canCitizenCarryMore(citizen))) {
@@ -61,7 +61,7 @@ function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen,
     if (!job.marketBuilding) return;
     const woodPlankPaintSize = 30;
     const paintPos = mapPositionToPaintPosition(job.marketBuilding.position, state.paintData.map);
-    const wood = job.marketBuilding.inventory.find(i => i.name === INVENTORY_WOOD);
+    const wood = job.marketBuilding.inventory.items.find(i => i.name === INVENTORY_WOOD);
     if (!wood || wood.counter === 0) return;
     for (let i = 0; i < Math.min(20, wood.counter); i++) {
         const offsetX = - 38 + Math.floor(i / 10) * 45;
@@ -110,10 +110,10 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
         if (citizen.moveTo === undefined) {
             if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                 emptyCitizenInventoryToHomeInventory(citizen, state);
-                const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+                const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (homeWood && homeWood.counter > 0) {
-                    const amount = Math.min(homeWood.counter, citizen.maxInventory - 2);
-                    const actualAmount = moveItemBetweenInventories(INVENTORY_WOOD, citizen.home.inventory, citizen.inventory, citizen.maxInventory, amount);
+                    const amount = Math.min(homeWood.counter, citizen.inventory.size - 2);
+                    const actualAmount = moveItemBetweenInventories(INVENTORY_WOOD, citizen.home.inventory, citizen.inventory, amount);
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_WOOD} from home inventory to inventory`, state);
                 }
             }
@@ -126,16 +126,16 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
                 job.state = "findLocation";
             } else {
-                let wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+                let wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (job.marketBuilding) {
                     if (wood && wood.counter > 0) {
-                        moveItemBetweenInventories(INVENTORY_WOOD, citizen.inventory, job.marketBuilding.inventory, job.marketBuilding.maxInventory, wood.counter);
+                        moveItemBetweenInventories(INVENTORY_WOOD, citizen.inventory, job.marketBuilding.inventory, wood.counter);
                     }
-                    wood = job.marketBuilding.inventory.find(i => i.name === INVENTORY_WOOD);
+                    wood = job.marketBuilding.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 }
                 if (citizen.home) {
                     if (!wood || wood.counter <= 0) {
-                        const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+                        const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
                         if (homeWood && homeWood.counter > 0) {
                             job.state = "goHome";
                             citizen.moveTo = {

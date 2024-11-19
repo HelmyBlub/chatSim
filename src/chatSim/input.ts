@@ -1,5 +1,6 @@
 import { ChatSimState, PaintDataMap } from "./chatSimModels.js";
-import { addCitizen, calculateDistance } from "./main.js";
+import { addCitizen } from "./citizen.js";
+import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { chatSimTick } from "./tick.js";
 

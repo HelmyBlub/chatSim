@@ -1,9 +1,9 @@
-import { ChatSimState, InventoryStuff } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, putItemIntoInventory, moveItemBetweenInventories } from "../citizen.js";
-import { buyItem, createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
+import { ChatSimState, Inventory, InventoryItem } from "../chatSimModels.js";
+import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories } from "../citizen.js";
+import { createJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket } from "../jobs/jobFoodMarket.js";
-import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../main.js";
 
 export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
 export const CITIZEN_FOOD_AT_HOME_NEED = 4;
@@ -18,13 +18,13 @@ export function loadCitizenNeedsFunctionsFood(state: ChatSimState) {
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
-    const inventoryMushroom = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+    const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && inventoryMushroom && inventoryMushroom.counter > 0) {
         citizenEatMushroom(citizen, inventoryMushroom, state, "inventory");
     }
     if (citizen.foodPerCent < 0.5) return false;
     if (citizen.home) {
-        const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+        const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
         const hasEnoughFoodAtHome = homeMushrooms && homeMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED;
         if (hasEnoughFoodAtHome) return true;
     } else {
@@ -35,7 +35,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     return false;
 }
 
-export function citizenEatMushroom(citizen: Citizen, inventoryMushroom: InventoryStuff, state: ChatSimState, inventoryName: string) {
+export function citizenEatMushroom(citizen: Citizen, inventoryMushroom: InventoryItem, state: ChatSimState, inventoryName: string) {
     citizen.foodPerCent = Math.min(citizen.foodPerCent + MUSHROOM_FOOD_VALUE, 1);
     inventoryMushroom.counter--;
     addCitizenLogEntry(citizen, `eat ${INVENTORY_MUSHROOM} from ${inventoryName}, ${inventoryMushroom.counter}x${INVENTORY_MUSHROOM} left`, state);
@@ -45,7 +45,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_FOOD) {
         let foundFood = false;
         if (citizen.home) {
-            const inventoryMushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+            const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
@@ -59,7 +59,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 foundFood = true;
             }
             if (!foundFood && citizen.foodPerCent < 0.5) {
-                const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (homeMushrooms && homeMushrooms.counter > 0) {
                     citizen.stateInfo = {
                         type: CITIZEN_NEED_FOOD,
@@ -100,7 +100,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.stateInfo.state === `go home to eat`) {
             if (citizen.moveTo === undefined) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                    const homeMushrooms = citizen.home.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                    const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
                         while (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
                             citizenEatMushroom(citizen, homeMushrooms, state, "home");
@@ -113,9 +113,9 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.stateInfo.state === `store food at home`) {
             if (citizen.moveTo === undefined) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                    const inventoryMushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                    const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (inventoryMushrooms) {
-                        moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.inventory, citizen.home.inventory, citizen.home.maxInventory);
+                        moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.inventory, citizen.home.inventory);
                     }
                 }
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
@@ -128,7 +128,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
                 if (foodMarket) {
                     if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
-                        const mushroom = foodMarket.inventory.find(i => i.name === INVENTORY_MUSHROOM);
+                        const mushroom = foodMarket.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
                             buyFoodFromFoodMarket(foodMarket, citizen, 2, state);
                             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };

@@ -1,5 +1,5 @@
 import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, getAvaiableInventoryCapacity } from "../citizen.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
@@ -90,7 +90,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         }
 
         if (!doIHaveAHouseBuildInProgress) {
-            const inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+            const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
             if (inventoryWood && inventoryWood.counter >= woodRequired) {
                 moveToBuildLocation(citizen, job, state);
@@ -127,7 +127,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         }
     }
     if (job.state === "buyWood") {
-        if (canCitizenCarryMore(citizen)) {
+        if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
             if (citizen.money > 2) {
                 const woodMarket = findAWoodMarketWhichHasWood(citizen, state.map.citizens);
                 if (woodMarket) {
@@ -144,7 +144,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
             }
         } else {
-            const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+            const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             const requiredWood = BUILDING_DATA[job.buildType!].woodAmount;
             if (wood && wood.counter >= requiredWood) {
                 job.state = "searchBuildLocation";
@@ -179,7 +179,7 @@ function findAWoodMarketWhichHasWood(searcher: Citizen, citizens: Citizen[]): Ci
     let distance = 0;
     for (let citizen of citizens) {
         if (citizen.job && citizen.job.name === CITIZEN_JOB_WOOD_MARKET) {
-            let inventoryWood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+            let inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             if (inventoryWood === undefined || inventoryWood.counter === 0) continue;
             if (closest === undefined) {
                 closest = citizen;

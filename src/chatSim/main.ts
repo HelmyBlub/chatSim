@@ -1,6 +1,6 @@
 import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG, IMAGE_PATH_WOOD_PLANK, loadImage } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
-import { CITIZEN_STATE_TYPE_WORKING_JOB } from "./citizen.js";
+import { addCitizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { chatSimAddInputEventListeners } from "./input.js";
 import { createJob, loadCitizenJobsFunctions } from "./jobs/job.js";
@@ -18,28 +18,6 @@ export function calculateDistance(position1: Position, position2: Position): num
     const diffX = position1.x - position2.x;
     const diffY = position1.y - position2.y;
     return Math.sqrt(diffX * diffX + diffY * diffY);
-}
-
-export function addCitizen(user: string, state: ChatSimState) {
-    if (state.map.citizens.find(c => c.name === user)) return;
-    state.map.citizens.push({
-        name: user,
-        birthTime: state.time,
-        speed: 2,
-        foodPerCent: 1,
-        energyPerCent: 1,
-        position: { x: 0, y: 0 },
-        stateInfo: {
-            type: CITIZEN_STATE_TYPE_WORKING_JOB,
-        },
-        inventory: [],
-        maxInventory: 10,
-        money: 10,
-        skills: {},
-        job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
-        log: [],
-        maxLogLength: 100,
-    })
 }
 
 /**

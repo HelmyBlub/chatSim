@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
-import { createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
+import { addCitizenLogEntry, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity } from "../citizen.js";
+import { buyItem, createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "../jobs/jobBuildingContruction.js";
 import { CITIZEN_JOB_HOUSE_MARKET } from "../jobs/jobHouseMarket.js";
 import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
@@ -39,11 +39,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
 
     if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
         let foundWood = false;
-        const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+        const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
         if (wood && wood.counter > 0) {
             foundWood = true;
         } else {
-            const homeWood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+            const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
             if (homeWood && homeWood.counter > 0) {
                 foundWood = true;
             }
@@ -92,8 +92,8 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 } else {
                     const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
                     if (woodMarket && isCitizenInInteractDistance(citizen, woodMarket.position)) {
-                        if (canCitizenCarryMore(citizen)) {
-                            sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state, 1);
+                        if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
+                            buyItem(woodMarket, citizen, INVENTORY_WOOD, 2, state, 1);
                         }
                     } else {
                         addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
@@ -105,9 +105,9 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.stateInfo.state === `move to house to repair`) {
             if (citizen.moveTo === undefined) {
                 if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                    let wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+                    let wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                     if (!wood || wood.counter <= 0) {
-                        wood = citizen.home.inventory.find(i => i.name === INVENTORY_WOOD);
+                        wood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
                     }
                     if (wood && wood.counter > 0) {
                         citizen.home.deterioration -= 0.2;
