@@ -4,7 +4,7 @@ import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CitizenJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
-import { calculateDistance, INVENTORY_MUSHROOM } from "./main.js";
+import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 
 export type CitizenStateInfo = {
@@ -73,12 +73,12 @@ export function emptyCitizenInventoryToHomeInventory(citizen: Citizen, state: Ch
     }
 }
 
-export function moveItemBetweenInventories(itemName: string, fromInventory: InventoryStuff[], toInventory: InventoryStuff[], maxToInventory: number, amount: number): number {
+export function moveItemBetweenInventories(itemName: string, fromInventory: InventoryStuff[], toInventory: InventoryStuff[], maxToInventory: number, amount: number | undefined = undefined): number {
     const item = fromInventory.find(i => i.name === itemName);
     if (!item || item.counter === 0) {
         return 0;
     }
-    let maxFromInventoryAmount = amount;
+    let maxFromInventoryAmount = amount !== undefined ? amount : maxToInventory;
     if (item.counter < maxFromInventoryAmount) {
         maxFromInventoryAmount = item.counter;
     }
@@ -103,6 +103,9 @@ export function putItemIntoInventory(itemName: string, inventory: InventoryStuff
     const usedCapacity = getUsedInventoryCapacity(inventory);
     if (usedCapacity + amount > maxInventory) {
         actualAmount = maxInventory - usedCapacity;
+    }
+    if (actualAmount < 0) {
+        throw "negativ trade not allowed";
     }
     item.counter += actualAmount;
     return actualAmount;
@@ -177,6 +180,11 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     tickCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);
+
+    const wood = citizen.inventory.find(i => i.name === INVENTORY_WOOD);
+    if (wood && wood.counter >= 10) {
+        debugger;
+    }
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {

@@ -190,7 +190,7 @@ function cutTreeForWood(citizen: Citizen, tree: Tree, state: ChatSimState) {
     }
     tree.woodValue--;
     inventoryWood.counter++;
-    addCitizenLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}`, state);
+    addCitizenLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}, in inventory: ${inventoryWood.counter}x${INVENTORY_WOOD}`, state);
     if (tree.woodValue === 0) removeTreeFromMap(tree, state.map);
 
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;

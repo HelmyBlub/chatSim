@@ -1,5 +1,5 @@
 import { Building, ChatSimState, InventoryStuff } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
 import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
@@ -46,7 +46,7 @@ export function buyFoodFromFoodMarket(foodMarket: Citizen, buyer: Citizen, reque
     const job = foodMarket.job as CitizenJobFoodMarket;
     const buyPrice = 2;
     if (job.marketBuilding) {
-        sellItemWithInventories(foodMarket, buyer, INVENTORY_MUSHROOM, buyPrice, job.marketBuilding.inventory, buyer.inventory, state, requestedAmount);
+        sellItemWithInventories(foodMarket, buyer, INVENTORY_MUSHROOM, buyPrice, job.marketBuilding.inventory, buyer.inventory, buyer.maxInventory, state, requestedAmount);
     } else {
         sellItem(foodMarket, buyer, INVENTORY_MUSHROOM, buyPrice, state, requestedAmount);
     }
@@ -57,7 +57,7 @@ export function sellFoodToFoodMarket(foodMarket: Citizen, seller: Citizen, reque
     const job = foodMarket.job as CitizenJobFoodMarket;
     const sellPrice = 1;
     if (job.marketBuilding) {
-        sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, state, requestedAmount);
+        sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, job.marketBuilding.maxInventory, state, requestedAmount);
     } else {
         sellItem(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, state, requestedAmount);
     }

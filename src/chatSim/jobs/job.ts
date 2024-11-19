@@ -77,11 +77,11 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Position) 
     return distance <= citizen.speed;
 }
 
-export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: InventoryStuff[], buyerInventory: InventoryStuff[], state: ChatSimState, requestedAmount: number | undefined = undefined) {
+export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: InventoryStuff[], buyerInventory: InventoryStuff[], maxBuyerInventory: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
     const sellerItem = sellerInventory.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    let buyerInventoryCapacity = buyer.maxInventory - getUsedInventoryCapacity(buyer.inventory);
+    let buyerInventoryCapacity = maxBuyerInventory - getUsedInventoryCapacity(buyerInventory);
     if (itemName !== INVENTORY_MUSHROOM) {
         if (buyer.inventory === buyerInventory) {
             const mushrooms = buyerInventory.find(i => i.name === INVENTORY_MUSHROOM);
@@ -117,7 +117,7 @@ export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemP
 }
 
 export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, state, requestedAmount);
+    return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, buyer.maxInventory, state, requestedAmount);
 }
 
 export function findMarketBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {

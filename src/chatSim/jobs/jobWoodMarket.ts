@@ -1,5 +1,5 @@
 import { Building, ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, putItemIntoInventory } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
 import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";

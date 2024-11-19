@@ -1,5 +1,5 @@
 import { ChatSimState, InventoryStuff } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, putItemIntoInventory } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, putItemIntoInventory, moveItemBetweenInventories } from "../citizen.js";
 import { buyItem, createJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket } from "../jobs/jobFoodMarket.js";
@@ -115,8 +115,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                     const inventoryMushrooms = citizen.inventory.find(i => i.name === INVENTORY_MUSHROOM);
                     if (inventoryMushrooms) {
-                        const actualAmount = putItemIntoInventory(INVENTORY_MUSHROOM, citizen.home.inventory, citizen.home.maxInventory, inventoryMushrooms.counter);
-                        inventoryMushrooms.counter -= actualAmount;
+                        moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.inventory, citizen.home.inventory, citizen.home.maxInventory);
                     }
                 }
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };

@@ -1,6 +1,7 @@
 Tasks:
 - bug: starving by inventory full of wood
 - code change: remove job.state and only use citizen.state 
+- code change: inventory type should include maxInventory
 
 - more images+animations
     - citizen moving animation
