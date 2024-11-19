@@ -19,6 +19,24 @@ export function calculateDistance(position1: Position, position2: Position): num
     return Math.sqrt(diffX * diffX + diffY * diffY);
 }
 
+export function calculateDirection(startPos: Position, targetPos: Position): number {
+    let direction = 0;
+
+    const yDiff = (startPos.y - targetPos.y);
+    const xDiff = (startPos.x - targetPos.x);
+
+    if (xDiff >= 0) {
+        direction = - Math.PI + Math.atan(yDiff / xDiff);
+    } else if (yDiff < 0) {
+        direction = - Math.atan(xDiff / yDiff) + Math.PI / 2;
+    } else {
+        direction = - Math.atan(xDiff / yDiff) - Math.PI / 2;
+    }
+    if (isNaN(direction)) return 0;
+    return direction;
+}
+
+
 /**
  * @returns value between 0 and 1. midnight = 0. 
  */

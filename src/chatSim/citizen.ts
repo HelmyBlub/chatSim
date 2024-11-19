@@ -5,7 +5,7 @@ import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
-import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
+import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 
 export type CitizenStateInfo = {
@@ -184,11 +184,25 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
         const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
         const isAtHomeSleeping = citizen.home && citizen.stateInfo.type === CITIZEN_NEED_SLEEP && isCitizenInInteractDistance(citizen, citizen.home.position);
         if (!isAtHomeSleeping) {
-            ctx.drawImage(citizenImage, 0, 0, 200, 200,
-                paintPos.x - CITIZEN_PAINT_SIZE / 2,
-                paintPos.y - CITIZEN_PAINT_SIZE / 2,
-                CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
-            );
+            if (citizen.moveTo) {
+                const frames = 4;
+                const frameTime = 100;
+                const walkingFrameNumber = Math.floor((state.time % (frames * frameTime)) / frameTime);
+                const imageIndexX = walkingFrameNumber === 3 ? 1 : walkingFrameNumber;
+                const direction = calculateDirection(citizen.position, citizen.moveTo);
+                const imageIndexY = Math.floor((direction + Math.PI * 2 - Math.PI / 4) % (Math.PI * 2) / (Math.PI / 2));
+                ctx.drawImage(citizenImage, imageIndexX * 200, imageIndexY * 200, 200, 200,
+                    paintPos.x - CITIZEN_PAINT_SIZE / 2,
+                    paintPos.y - CITIZEN_PAINT_SIZE / 2,
+                    CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+                );
+            } else {
+                ctx.drawImage(citizenImage, 200, 0, 200, 200,
+                    paintPos.x - CITIZEN_PAINT_SIZE / 2,
+                    paintPos.y - CITIZEN_PAINT_SIZE / 2,
+                    CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+                );
+            }
         }
 
         paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);

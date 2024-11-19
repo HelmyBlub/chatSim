@@ -1,6 +1,4 @@
 Tasks:
-- code change: remove job.state and only use citizen.state 
-
 - more images+animations
     - citizen moving animation
     - thought animation
@@ -46,6 +44,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- code refactor: remove job.state and only use citizen.state 
 - code refactor: inventory type should include maxInventory
 - bug: starving by inventory full of wood
 - when sleeping at home, don't paint citizen

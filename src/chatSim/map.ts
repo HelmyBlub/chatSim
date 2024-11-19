@@ -42,7 +42,7 @@ export function createDefaultMap(): ChatSimMap {
         mapWidth: tileSize * tilesHorizontal,
         citizens: [],
         mushrooms: [],
-        maxMushrooms: 3,
+        maxMushrooms: 4,
         maxTrees: 2,
         trees: [],
         buildings: [],
