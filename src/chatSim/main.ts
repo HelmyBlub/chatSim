@@ -1,10 +1,9 @@
 import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG, IMAGE_PATH_WOOD_PLANK, loadImage } from "../drawHelper.js";
 import { Position, ChatSimState } from "./chatSimModels.js";
-import { addCitizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "./citizen.js";
+import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { chatSimAddInputEventListeners } from "./input.js";
-import { createJob, loadCitizenJobsFunctions } from "./jobs/job.js";
-import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
+import { loadCitizenJobsFunctions } from "./jobs/job.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
 import { chatSimTick } from "./tick.js";

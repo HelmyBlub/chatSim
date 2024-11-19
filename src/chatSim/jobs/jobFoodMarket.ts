@@ -1,6 +1,6 @@
-import { Building, ChatSimState, Inventory, InventoryItem } from "../chatSimModels.js";
+import { ChatSimState, InventoryItem } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
-import { CitizenJob, createJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
+import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_FOOD_AT_HOME_NEED, CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
@@ -8,7 +8,10 @@ import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
-    state: "findLocation" | "selling" | "goHome" | "repairMarket",
+}
+type JobFoodMarketStateInfo = {
+    type: string,
+    state?: "selling" | "goHome" | "repairMarket",
 }
 
 export const CITIZEN_JOB_FOOD_MARKET = "Food Market";
@@ -66,7 +69,6 @@ export function sellFoodToFoodMarket(foodMarket: Citizen, seller: Citizen, reque
 function create(state: ChatSimState): CitizenJobFoodMarket {
     return {
         name: CITIZEN_JOB_FOOD_MARKET,
-        state: "findLocation",
     }
 }
 
@@ -82,22 +84,24 @@ function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen,
 }
 
 function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) {
-    if (job.marketBuilding && job.marketBuilding.deterioration > 0.5 && job.state !== "repairMarket") {
-        job.state = "repairMarket";
+    const stateInfo = citizen.stateInfo as JobFoodMarketStateInfo;
+
+    if (job.marketBuilding && job.marketBuilding.deterioration > 0.5 && stateInfo.state !== "repairMarket") {
+        stateInfo.state = "repairMarket";
         citizen.moveTo = {
             x: job.marketBuilding.position.x,
             y: job.marketBuilding.position.y,
         }
     }
-    if (job.state === "repairMarket") {
+    if (stateInfo.state === "repairMarket") {
         if (citizen.moveTo === undefined) {
             if (job.marketBuilding && job.marketBuilding.deterioration > 0.5) {
                 job.marketBuilding.deterioration -= 0.5;
             }
-            job.state = "findLocation";
+            stateInfo.state = undefined;
         }
     }
-    if (job.state === "findLocation") {
+    if (stateInfo.state === undefined) {
         if (!job.marketBuilding) {
             job.marketBuilding = findMarketBuilding(citizen, state);
         }
@@ -106,17 +110,17 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                 x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
                 y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
             }
-            job.state = "selling";
+            stateInfo.state = "selling";
         } else {
             job.marketBuilding.inhabitedBy = citizen;
             citizen.moveTo = {
                 x: job.marketBuilding.position.x,
                 y: job.marketBuilding.position.y,
             }
-            job.state = "selling";
+            stateInfo.state = "selling";
         }
     }
-    if (job.state === "goHome") {
+    if (stateInfo.state === "goHome") {
         if (citizen.moveTo === undefined) {
             if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                 emptyCitizenInventoryToHomeInventory(citizen, state);
@@ -127,14 +131,14 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_MUSHROOM} from home inventory to inventory`, state);
                 }
             }
-            job.state = "findLocation";
+            stateInfo.state = undefined;
         }
     }
 
-    if (job.state === "selling") {
+    if (stateInfo.state === "selling") {
         if (citizen.moveTo === undefined) {
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
-                job.state = "findLocation";
+                stateInfo.state = undefined;
             } else {
                 let mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (job.marketBuilding) {
@@ -147,27 +151,22 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                     if (!mushrooms || mushrooms.counter <= 0) {
                         const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (homeMushrooms && homeMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
-                            job.state = "goHome";
+                            stateInfo.state = "goHome";
                             citizen.moveTo = {
                                 x: citizen.home.position.x,
                                 y: citizen.home.position.y,
                             }
                             addCitizenLogEntry(citizen, `move home to get ${INVENTORY_MUSHROOM} as inventory empty`, state);
                         } else {
-                            switchJob(citizen, state);
+                            citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, `${INVENTORY_MUSHROOM} run to low`);
                         }
                     }
                 } else {
                     if (!mushrooms || mushrooms.counter <= CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                        switchJob(citizen, state);
+                        citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, `${INVENTORY_MUSHROOM} run to low`);
                     }
                 }
             }
         }
     }
-}
-
-function switchJob(citizen: Citizen, state: ChatSimState) {
-    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_FOOD_GATHERER} as ${INVENTORY_MUSHROOM} run to low`, state);
-    citizen.job = createJob(CITIZEN_JOB_FOOD_GATHERER, state);
 }

@@ -1,11 +1,15 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen } from "../citizen.js";
-import { CitizenJob, createJob } from "./job.js";
+import { Citizen } from "../citizen.js";
+import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 
 export type CitizenJobHouseMarket = CitizenJob & {
-    state: "takeRandomLocation" | "selling"
     lastCheckedHouseAvailability?: number,
+}
+
+type JobHouseMarketStateInfo = {
+    type: string,
+    state?: "selling",
 }
 
 export const CITIZEN_JOB_HOUSE_MARKET = "House Market";
@@ -21,11 +25,12 @@ export function loadCitizenJobHouseMarket(state: ChatSimState) {
 function create(state: ChatSimState): CitizenJobHouseMarket {
     return {
         name: CITIZEN_JOB_HOUSE_MARKET,
-        state: "takeRandomLocation",
     }
 }
 
 function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState) {
+    const stateInfo = citizen.stateInfo as JobHouseMarketStateInfo;
+
     if (job.lastCheckedHouseAvailability === undefined || job.lastCheckedHouseAvailability + CHECK_INTERVAL < state.time) {
         let housesAvailable = false;
         for (let house of state.map.buildings) {
@@ -36,16 +41,15 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
             }
         }
         if (!housesAvailable) {
-            addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_BUILDING_CONSTRUCTION} as their is no house to market`, state);
-            citizen.job = createJob(CITIZEN_JOB_BUILDING_CONSTRUCTION, state);
+            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, `there is no house to market`);
             return;
         }
     }
-    if (job.state === "takeRandomLocation") {
+    if (stateInfo.state === undefined) {
         citizen.moveTo = {
             x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
             y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
         }
-        job.state = "selling";
+        stateInfo.state = "selling";
     }
 }

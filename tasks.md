@@ -1,5 +1,4 @@
 Tasks:
-- code change: inventory type should include maxInventory
 - code change: remove job.state and only use citizen.state 
 
 - more images+animations
@@ -47,6 +46,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- code refactor: inventory type should include maxInventory
 - bug: starving by inventory full of wood
 - when sleeping at home, don't paint citizen
 

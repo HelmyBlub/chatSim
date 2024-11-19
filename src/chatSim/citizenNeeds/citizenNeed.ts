@@ -34,6 +34,6 @@ export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
     }
     if (needsFulfilled) {
         citizen.lastCheckedNeedsTime = state.time;
-        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+        if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
     }
 }

@@ -1,6 +1,6 @@
 import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, getAvaiableInventoryCapacity } from "../citizen.js";
-import { CitizenJob, createJob, isCitizenInInteractDistance, sellItem } from "./job.js";
+import { Citizen, getAvaiableInventoryCapacity } from "../citizen.js";
+import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
@@ -8,8 +8,12 @@ import { createBuildingOnRandomTile } from "../map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
 
+type JobContructionStateInfo = {
+    type: string,
+    state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation",
+}
+
 export type CitizenJobBuildingConstruction = CitizenJob & {
-    state: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation" | "decideType",
     buildPosition?: Position,
     houseInProgress?: Building,
     buildType?: BuildingType,
@@ -36,7 +40,6 @@ export function loadCitizenJobHouseConstruction(state: ChatSimState) {
 function create(state: ChatSimState): CitizenJobBuildingConstruction {
     return {
         name: CITIZEN_JOB_BUILDING_CONSTRUCTION,
-        state: "decideType",
     }
 }
 
@@ -47,18 +50,19 @@ function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: Citizen
 }
 
 function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: ChatSimState) {
-    if (job.state === "decideType") {
+    const stateInfo = citizen.stateInfo as JobContructionStateInfo;
+    if (stateInfo.state === undefined) {
         if (!citizen.home) {
             job.buildType = "House";
         } else {
             job.buildType = Math.random() < 0.5 ? "House" : "Market";
         }
-        job.state = "searchBuildLocation";
+        stateInfo.state = "searchBuildLocation";
     }
-    if (job.state === "moveToOldLocation") {
+    if (stateInfo.state === "moveToOldLocation") {
         if (citizen.moveTo === undefined) {
             if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
-                job.state = "buildHouse";
+                stateInfo.state = "buildHouse";
                 for (let house of state.map.buildings) {
                     if (house.owner === citizen && house.buildProgress !== undefined) {
                         job.houseInProgress = house;
@@ -66,15 +70,15 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                     }
                 }
             } else {
-                job.state = "searchBuildLocation";
+                stateInfo.state = "searchBuildLocation";
             }
         }
     }
-    if (job.state === "searchBuildLocation") {
+    if (stateInfo.state === "searchBuildLocation") {
         let doIHaveAHouseBuildInProgress = false;
         for (let house of state.map.buildings) {
             if (house.owner === citizen && house.buildProgress !== undefined) {
-                job.state = "moveToOldLocation";
+                stateInfo.state = "moveToOldLocation";
                 citizen.moveTo = {
                     x: house.position.x,
                     y: house.position.y,
@@ -98,15 +102,15 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                     job.houseInProgress = createBuildingOnRandomTile(citizen, state, job.buildType!);
                     if (job.houseInProgress !== undefined) {
                         inventoryWood.counter -= woodRequired;
-                        job.state = "buildHouse";
+                        stateInfo.state = "buildHouse";
                     }
                 }
             } else {
-                job.state = "buyWood";
+                stateInfo.state = "buyWood";
             }
         }
     }
-    if (job.state === "buildHouse") {
+    if (stateInfo.state === "buildHouse") {
         if (job.houseInProgress && job.houseInProgress.buildProgress !== undefined
             && isCitizenInInteractDistance(citizen, job.houseInProgress.position)
         ) {
@@ -123,10 +127,10 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                 job.buildType = undefined;
             }
         } else {
-            job.state = "decideType";
+            stateInfo.state = undefined;
         }
     }
-    if (job.state === "buyWood") {
+    if (stateInfo.state === "buyWood") {
         if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
             if (citizen.money > 2) {
                 const woodMarket = findAWoodMarketWhichHasWood(citizen, state.map.citizens);
@@ -136,18 +140,16 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                         sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state);
                     }
                 } else {
-                    addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as their is no wood market to buy wood from`, state);
-                    citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
+                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, "there is no wood market to buy wood from");
                 }
             } else {
-                addCitizenLogEntry(citizen, `switch job to ${CITIZEN_JOB_LUMBERJACK} as i have no money for wood`, state);
-                citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
+                citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, "as i have no money for wood");
             }
         } else {
             const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             const requiredWood = BUILDING_DATA[job.buildType!].woodAmount;
             if (wood && wood.counter >= requiredWood) {
-                job.state = "searchBuildLocation";
+                stateInfo.state = "searchBuildLocation";
             }
         }
     }

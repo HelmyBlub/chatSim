@@ -39,10 +39,9 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
         if (citizen.stateInfo.state) ctx.fillText(`        ${citizen.stateInfo.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`        State: ${citizen.job.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
         for (let item of citizen.inventory.items) {
             ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);

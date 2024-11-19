@@ -10,7 +10,6 @@ import { calculateDistance } from "../main.js";
 
 export type CitizenJob = {
     name: string,
-    state: string,
     marketBuilding?: Building,
 }
 
@@ -30,6 +29,13 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobFoodMarket(state);
     loadCitizenJobWoodMarket(state);
     loadCitizenJobHouseMarket(state);
+}
+
+export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string | undefined = undefined) {
+    citizen.job = createJob(jobName, state);
+    addCitizenLogEntry(citizen, `switch job to ${jobName}. Reason: ${reason}`, state);
+    citizen.stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
+    citizen.stateInfo.state = undefined;
 }
 
 export function createJob(jobname: string, state: ChatSimState): CitizenJob {
