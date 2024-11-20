@@ -59,6 +59,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
             citizen.stateInfo = {
                 type: CITIZEN_NEED_HOME,
                 state: `move to house to repair`,
+                actionStartTime: state.time,
+                thoughts: [
+                    `I will go home to repair my house.`,
+                ]
             };
         } else {
             if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
@@ -70,6 +74,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         citizen.stateInfo = {
                             type: CITIZEN_NEED_HOME,
                             state: `buy wood`,
+                            actionStartTime: state.time,
+                            thoughts: [
+                                `I will go to ${woodMarket.name} to buy ${INVENTORY_WOOD}`,
+                            ]
                         };
                         citizen.moveTo = {
                             x: woodMarket.position.x,

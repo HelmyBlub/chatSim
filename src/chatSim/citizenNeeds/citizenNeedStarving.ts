@@ -37,6 +37,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_STARVING,
                     state: `go home to eat`,
+                    actionStartTime: state.time,
+                    thoughts: [
+                        `I am starving. I go home to eat.`
+                    ],
                 }
                 citizen.moveTo = {
                     x: citizen.home.position.x,
@@ -54,6 +58,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_STARVING,
                     state: `move to food market`,
+                    actionStartTime: state.time,
+                    thoughts: [
+                        `I am starving. I go buy food at ${foodMarket.name}.`
+                    ],
                 };
                 citizen.moveTo = {
                     x: foodMarket.position.x,
@@ -71,7 +79,15 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 ];
                 citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
             }
-            if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+            if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
+                citizen.stateInfo = {
+                    type: CITIZEN_STATE_TYPE_WORKING_JOB,
+                    actionStartTime: state.time,
+                    thoughts: [
+                        `I am starving. Go back gathering.`
+                    ]
+                };
+            }
         }
     } else {
         if (citizen.stateInfo.state === `go home to eat`) {

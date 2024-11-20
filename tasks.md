@@ -1,7 +1,15 @@
 Tasks:
 - more images+animations
-    - thought animation
-        - make thoughs usable for jobs and needs
+    - thought bubbles for
+        - needs
+            - food
+            - home
+            - starving
+            - sleep
+        - jobs
+            - food gatherer
+            - lumberjack
+            - wood/mushroom markets            
     - buy/sell animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
@@ -47,6 +55,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- make thoughs usable for jobs and needs
 - selected citizen to the front. If many citizen thinking they can overlap their thoughts bubble. To see each one i can select citizen
 - problem: citizen get to starving while thinking to much. Make starving gather a bit more food once triggered
 - thought animation

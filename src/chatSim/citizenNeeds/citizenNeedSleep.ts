@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking } from "../citizen.js";
 import { isCitizenInInteractDistance } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 
@@ -17,6 +17,8 @@ function tick(citizen: Citizen, state: ChatSimState) {
         citizen.stateInfo = {
             type: CITIZEN_NEED_SLEEP,
         }
+    }
+    if (citizen.stateInfo.state === undefined) {
         if (citizen.home && citizen.energyPerCent > 0.1) {
             citizen.stateInfo.state = "move home";
             citizen.moveTo = {
@@ -29,7 +31,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         }
     }
     if (citizen.stateInfo.state === "move home") {
-        if (citizen.moveTo === undefined) {
+        if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
             citizen.stateInfo.state = "sleeping";
         }
     }
@@ -46,15 +48,15 @@ function tick(citizen: Citizen, state: ChatSimState) {
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
-    if (citizen.energyPerCent < 0.1) return false;
+    if (citizen.energyPerCent < 0.1) {
+        sleep(citizen, ["I am falling asleep."], state);
+        return false;
+    }
     if (citizen.energyPerCent < 0.3 && citizen.stateInfo.type === CITIZEN_NEED_SLEEP) return false;
     if (citizen.energyPerCent > 0.99) {
         return noSleep(citizen);
     }
     if (citizen.energyPerCent > 0.9 && citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) {
-        if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP) {
-            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
-        }
         return noSleep(citizen);
     }
 
@@ -62,8 +64,19 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     const goToBedTime = 0.9;
     const sleepDuration = 0.33;
     const wakeUpTime = (goToBedTime + sleepDuration) % 1;
-    if (time > goToBedTime || time < wakeUpTime) return false;
+    if (time > goToBedTime || time < wakeUpTime) {
+        sleep(citizen, [`It is dark outside and i want to sleep`], state);
+        return false;
+    }
     return noSleep(citizen);
+}
+
+function sleep(citizen: Citizen, reason: string[], state: ChatSimState) {
+    if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP) return;
+    citizen.stateInfo.type = CITIZEN_NEED_SLEEP;
+    citizen.stateInfo.state = undefined;
+    citizen.stateInfo.actionStartTime = state.time;
+    citizen.stateInfo.thoughts = reason;
 }
 
 function noSleep(citizen: Citizen): boolean {

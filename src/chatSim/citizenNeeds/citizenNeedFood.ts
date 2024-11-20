@@ -1,5 +1,5 @@
 import { ChatSimState, InventoryItem } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories, isCitizenThinking } from "../citizen.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket, CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
@@ -67,6 +67,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
                     state: `store food at home`,
+                    actionStartTime: state.time,
+                    thoughts: [
+                        `I have enough ${INVENTORY_MUSHROOM}.`,
+                        `I will store them at home.`
+                    ]
                 }
                 citizen.moveTo = {
                     x: citizen.home.position.x,
@@ -81,6 +86,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     citizen.stateInfo = {
                         type: CITIZEN_NEED_FOOD,
                         state: `go home to eat`,
+                        actionStartTime: state.time,
+                        thoughts: [
+                            `I am hungry.`,
+                            `I will go home to eat ${INVENTORY_MUSHROOM}.`,
+                        ]
                     }
                     citizen.moveTo = {
                         x: citizen.home.position.x,
@@ -98,6 +108,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
                     state: `move to food market`,
+                    actionStartTime: state.time,
+                    thoughts: [
+                        `I want to stock up on ${INVENTORY_MUSHROOM}.`,
+                        `I will go to ${foodMarket.name} to buy some.`,
+                    ]
                 };
                 citizen.moveTo = {
                     x: foodMarket.position.x,
@@ -128,7 +143,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         }
     } else {
         if (citizen.stateInfo.state === `go home to eat`) {
-            if (citizen.moveTo === undefined) {
+            if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                     const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
@@ -141,7 +156,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             }
         }
         if (citizen.stateInfo.state === `store food at home`) {
-            if (citizen.moveTo === undefined) {
+            if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                     const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (inventoryMushrooms) {
@@ -154,13 +169,13 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.stateInfo.state === `move to food market`) {
             if (citizen.money < 2) {
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
-            } else if (citizen.moveTo === undefined) {
+            } else if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
                 const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
                 if (foodMarket) {
                     if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
                         const mushroom = foodMarket.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
-                            buyFoodFromFoodMarket(foodMarket, citizen, 2, state);
+                            buyFoodFromFoodMarket(foodMarket, citizen, 4, state);
                             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                         }
                     } else {
