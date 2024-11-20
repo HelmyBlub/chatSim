@@ -1,6 +1,10 @@
 Tasks:
 - more images+animations
     - thought animation
+        - job switch
+            - thought bubble
+            - display text in it
+            - each tought takes time to be able to follow
     - buy/sell animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
@@ -19,8 +23,9 @@ Tasks:
     - visaulize interactions between citizens better
         - like a chat bubble when requesting to sell or buy
 - mushroom pickup behavior
+    - vision radius different for night and day
 - think about: change market jobs only possible with market. Before can try to get food from other citizens
-
+- zoom in to mouse cursor not map middle
 
 - pathing, citizen can not move over "private property"
 - job "food market"

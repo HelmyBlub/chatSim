@@ -21,6 +21,7 @@ export type FunctionsCitizenJob = {
 }
 
 export type FunctionsCitizenJobs = { [key: string]: FunctionsCitizenJob };
+export const CITIZEN_STATE_TYPE_CHANGE_JOB = "change job";
 
 export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobFoodGatherer(state);
@@ -34,8 +35,9 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
 export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string | undefined = undefined) {
     citizen.job = createJob(jobName, state);
     addCitizenLogEntry(citizen, `switch job to ${jobName}. Reason: ${reason}`, state);
-    citizen.stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
-    citizen.stateInfo.state = undefined;
+    citizen.stateInfo.type = CITIZEN_STATE_TYPE_CHANGE_JOB;
+    citizen.stateInfo.state = reason;
+    citizen.stateInfo.actionStartTime = state.time;
 }
 
 export function createJob(jobname: string, state: ChatSimState): CitizenJob {

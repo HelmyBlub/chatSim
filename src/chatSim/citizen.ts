@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { ChatSimState, Building, Inventory, Position, Mushroom } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
-import { CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_STATE_TYPE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
@@ -12,6 +12,7 @@ import { Tree } from "./tree.js";
 export type CitizenStateInfo = {
     type: string,
     state?: string,
+    actionStartTime?: number,
 }
 
 export type Citizen = {
@@ -177,8 +178,8 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
     const citizenImage = state.images[IMAGE_PATH_CITIZEN];
     let nameFontSize = 16 / state.paintData.map.zoom;
     let nameLineWidth = 2 / state.paintData.map.zoom;
-    ctx.font = `${nameFontSize}px Arial`;
-    for (let citizen of state.map.citizens) {
+    let sortedForPaintCitizens = state.map.citizens.sort((a, b) => a.position.y - b.position.y);
+    for (let citizen of sortedForPaintCitizens) {
         const paintBehind = citizen.stateInfo.state === "selling" && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB;
         if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && !paintBehind) continue;
         if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && paintBehind) continue;
@@ -206,13 +207,74 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
             }
         }
 
+        paintThoughtBubble(ctx, citizen, paintPos, state);
         paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
         paintCitizenJobTool(ctx, citizen, state);
 
+        ctx.font = `${nameFontSize}px Arial`;
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
         const nameYSpacing = 5;
         drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
     }
+}
+
+function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+    if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_CHANGE_JOB || citizen.stateInfo.state === undefined) return;
+    const fontSize = 8;
+    ctx.font = `${fontSize}px Arial`;
+    const text = citizen.stateInfo.state;
+    const margin = 5;
+    const thoughtBubbleHeight = fontSize + margin * 2;
+    const thoughtBubbleWidth = ctx.measureText(text).width + margin * 2;
+    const thoughtBubbleCenterX = paintPos.x;
+    const thoughtBubbleBottomY = paintPos.y - CITIZEN_PAINT_SIZE / 2;
+    const thoughtBubbleLeftX = thoughtBubbleCenterX - thoughtBubbleWidth / 2;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(thoughtBubbleCenterX - 5, thoughtBubbleBottomY - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(thoughtBubbleCenterX, thoughtBubbleBottomY - 10, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillRect(thoughtBubbleLeftX, thoughtBubbleBottomY - thoughtBubbleHeight - 20, thoughtBubbleWidth, thoughtBubbleHeight);
+    const topY = thoughtBubbleBottomY - thoughtBubbleHeight - 20;
+    const bottomY = topY + thoughtBubbleHeight;
+    const leftX = thoughtBubbleLeftX;
+    const rightX = leftX + thoughtBubbleWidth;
+    const cloudPartTargetSize = 15;
+    ctx.beginPath();
+    ctx.moveTo(leftX, topY);
+    const partCounterX = Math.round(thoughtBubbleWidth / cloudPartTargetSize);
+    const sizeX = thoughtBubbleWidth / partCounterX;
+    const partCounterY = Math.round(thoughtBubbleHeight / cloudPartTargetSize);
+    const sizeY = thoughtBubbleHeight / partCounterY;
+    let currentX = leftX;
+    let currentY = topY;
+    for (let x = 0; x < partCounterX; x++) {
+        ctx.quadraticCurveTo(currentX + sizeX / 2, currentY - sizeX * 0.7, currentX + sizeX, currentY);
+        currentX += sizeX;
+    }
+    for (let y = 0; y < partCounterY; y++) {
+        ctx.quadraticCurveTo(currentX + sizeY * 0.7, currentY + sizeY / 2, currentX, currentY + sizeY);
+        currentY += sizeY;
+    }
+    for (let x = 0; x < partCounterX; x++) {
+        ctx.quadraticCurveTo(currentX - sizeX / 2, currentY + sizeX * 0.7, currentX - sizeX, currentY);
+        currentX -= sizeX;
+    }
+    for (let y = 0; y < partCounterY; y++) {
+        ctx.quadraticCurveTo(currentX - sizeY * 0.7, currentY - sizeY / 2, currentX, currentY - sizeY);
+        currentY -= sizeY;
+    }
+    ctx.fill();
+    ctx.stroke();
+
+
+    drawTextWithOutline(ctx, text, thoughtBubbleLeftX + margin, thoughtBubbleBottomY - margin - 20, "white", "black", 1);
 }
 
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
@@ -276,6 +338,12 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
+    }
+    if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_CHANGE_JOB) {
+        if (citizen.stateInfo.actionStartTime === undefined || citizen.stateInfo.actionStartTime + 2000 < state.time) {
+            citizen.stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
+            citizen.stateInfo.state = undefined;
+        }
     }
 }
 

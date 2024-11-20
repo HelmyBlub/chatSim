@@ -8,8 +8,8 @@ const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
 
 export function chatSimAddInputEventListeners(state: ChatSimState) {
-    state.canvas.addEventListener('keydown', (e) => keyDown(e, state));
-    state.canvas.addEventListener('keyup', (e) => keyUp(e, state));
+    document.addEventListener('keydown', (e) => keyDown(e, state));
+    document.addEventListener('keyup', (e) => keyUp(e, state));
     state.canvas.addEventListener('wheel', (e) => mouseWheel(e, state));
     state.canvas.addEventListener('mousedown', (e) => mouseDown(e, state));
     state.canvas.addEventListener('mouseup', (e) => mouseUp(e, state));
