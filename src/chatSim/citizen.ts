@@ -248,7 +248,7 @@ function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, pai
     const texts = stateInfo.thoughts.slice(0, textLinesAmount);
     const margin = 5;
     let maxTextWidth = 0;
-    for (let text of texts) {
+    for (let text of stateInfo.thoughts) {
         const currentWidth = ctx.measureText(text).width;
         if (currentWidth > maxTextWidth) maxTextWidth = currentWidth;
     }

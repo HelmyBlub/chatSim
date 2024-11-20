@@ -1,5 +1,4 @@
 Tasks:
-- selected citizen to the front. If many citizen thinking they can overlap their thoughts bubble. To see each one i can select citizen
 - more images+animations
     - thought animation
         - make thoughs usable for jobs
@@ -48,6 +47,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- selected citizen to the front. If many citizen thinking they can overlap their thoughts bubble. To see each one i can select citizen
 - problem: citizen get to starving while thinking to much. Make starving gather a bit more food once triggered
 - thought animation
     - job switch improve display text
