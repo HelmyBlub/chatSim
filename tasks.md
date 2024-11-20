@@ -1,12 +1,9 @@
 Tasks:
 - more images+animations
     - thought bubbles for
-        - needs
-            - food
-            - home
-            - starving
-            - sleep
         - jobs
+            - construction
+                - some problems with how buildings are setup. Code needs to be refactored.
             - food gatherer
             - lumberjack
             - wood/mushroom markets            
@@ -55,6 +52,12 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- thought bubbles for
+    - needs
+        - food
+        - home
+        - starving
+        - sleep
 - make thoughs usable for jobs and needs
 - selected citizen to the front. If many citizen thinking they can overlap their thoughts bubble. To see each one i can select citizen
 - problem: citizen get to starving while thinking to much. Make starving gather a bit more food once triggered

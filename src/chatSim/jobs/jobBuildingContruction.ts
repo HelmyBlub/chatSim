@@ -1,6 +1,6 @@
 import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
 import { Citizen, CitizenStateInfo, getAvaiableInventoryCapacity } from "../citizen.js";
-import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
+import { buyItem, citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
@@ -9,13 +9,14 @@ import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
 
 type JobContructionStateInfo = CitizenStateInfo & {
-    state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation",
+    state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation" | "buyWoodFromMarket" | "carryWoodToSetupLocation",
 }
 
 export type CitizenJobBuildingConstruction = CitizenJob & {
     buildPosition?: Position,
     houseInProgress?: Building,
     buildType?: BuildingType,
+    marketToBuyFrom?: Citizen,
 }
 
 export const CITIZEN_JOB_BUILDING_CONSTRUCTION = "Building Construction";
@@ -78,6 +79,10 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         for (let house of state.map.buildings) {
             if (house.owner === citizen && house.buildProgress !== undefined) {
                 stateInfo.state = "moveToOldLocation";
+                stateInfo.actionStartTime = state.time;
+                stateInfo.thoughts = [
+                    `I have a unfinished building. Let's go there.`
+                ]
                 citizen.moveTo = {
                     x: house.position.x,
                     y: house.position.y,
@@ -97,6 +102,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
             if (inventoryWood && inventoryWood.counter >= woodRequired) {
                 moveToBuildLocation(citizen, job, state);
+                stateInfo.state = "carryWoodToSetupLocation";
                 if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
                     job.houseInProgress = createBuildingOnRandomTile(citizen, state, job.buildType!);
                     if (job.houseInProgress !== undefined) {
@@ -109,6 +115,27 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                 }
             } else {
                 stateInfo.state = "buyWood";
+            }
+        }
+    }
+    if (stateInfo.state === "carryWoodToSetupLocation") {
+        if (citizen.moveTo === undefined) {
+            if (job.buildPosition && isCitizenInInteractDistance(citizen, job.buildPosition)) {
+                const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
+                const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
+                if (inventoryWood && inventoryWood.counter >= woodRequired) {
+                    job.houseInProgress = createBuildingOnRandomTile(citizen, state, job.buildType!);
+                    if (job.houseInProgress !== undefined) {
+                        inventoryWood.counter -= woodRequired;
+                        stateInfo.state = "buildHouse";
+                    }
+                } else {
+                    stateInfo.state = undefined;
+                    job.buildPosition = undefined;
+                }
+            } else {
+                stateInfo.state = undefined;
+                job.buildPosition = undefined;
             }
         }
     }
@@ -132,15 +159,34 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             stateInfo.state = undefined;
         }
     }
+    if (stateInfo.state === "buyWoodFromMarket") {
+        if (citizen.moveTo === undefined) {
+            if (job.marketToBuyFrom && isCitizenInInteractDistance(citizen, job.marketToBuyFrom.position)) {
+                let woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
+                const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
+                if (wood && wood.counter > 0) {
+                    woodRequired = Math.max(0, woodRequired - wood.counter);
+                }
+                buyItem(job.marketToBuyFrom, citizen, INVENTORY_WOOD, woodRequired, state);
+                stateInfo.state = "searchBuildLocation";
+            }
+        }
+    }
     if (stateInfo.state === "buyWood") {
         if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
             if (citizen.money > 2) {
                 const woodMarket = findAWoodMarketWhichHasWood(citizen, state.map.citizens);
                 if (woodMarket) {
-                    moveToMarket(citizen, woodMarket);
-                    if (isCitizenInInteractDistance(citizen, woodMarket.position)) {
-                        sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state);
+                    citizen.moveTo = {
+                        x: woodMarket.position.x,
+                        y: woodMarket.position.y,
                     }
+                    job.marketToBuyFrom = woodMarket;
+                    stateInfo.state = "buyWoodFromMarket";
+                    stateInfo.actionStartTime = state.time;
+                    stateInfo.thoughts = [
+                        `I need more ${INVENTORY_WOOD}. I go buy from ${woodMarket.name}.`
+                    ]
                 } else {
                     const reason = [
                         `I need ${INVENTORY_WOOD} to build a building.`,
@@ -178,13 +224,6 @@ function moveToBuildLocation(citizen: Citizen, job: CitizenJobBuildingConstructi
             x: job.buildPosition.x,
             y: job.buildPosition.y,
         }
-    }
-}
-
-function moveToMarket(citizen: Citizen, market: Citizen) {
-    citizen.moveTo = {
-        x: market.position.x,
-        y: market.position.y,
     }
 }
 

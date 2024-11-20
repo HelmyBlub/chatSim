@@ -128,7 +128,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                     sellFoodToFoodMarket(foodMarket, citizen, sellAmount, state);
                 }
                 stateInfo.state = "gathering";
-            } else {
+            } else if (citizen.moveTo === undefined) {
                 stateInfo.actionStartTime = state.time;
                 stateInfo.thoughts = [
                     `I can not carry more ${INVENTORY_MUSHROOM}.`,
