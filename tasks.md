@@ -1,5 +1,4 @@
 Tasks:
-- selection for other things like houses, tree, mushroom
 - more images+animations
     - thought animation
     - buy/sell animation
@@ -13,6 +12,7 @@ Tasks:
             - can only change if citizen in market building
     - put planks beside buildings beeing build
     - visualize citizen transporting wood planks
+    - sleeping dog image
 
     - make the map appear more realistic. Easier to follow what happens
     - make actions take time for animations to be displayed
@@ -43,11 +43,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- citizen moving animation
-- code refactor: remove job.state and only use citizen.state 
-- code refactor: inventory type should include maxInventory
-- bug: starving by inventory full of wood
-- when sleeping at home, don't paint citizen
+- map zoom only in map area and prevent default
 
 
 --------------------------------------------------

@@ -8,12 +8,12 @@ const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
 
 export function chatSimAddInputEventListeners(state: ChatSimState) {
-    document.addEventListener('keydown', (e) => keyDown(e, state));
-    document.addEventListener('keyup', (e) => keyUp(e, state));
-    document.addEventListener('wheel', (e) => mouseWheel(e, state));
-    document.addEventListener('mousedown', (e) => mouseDown(e, state));
-    document.addEventListener('mouseup', (e) => mouseUp(e, state));
-    document.addEventListener('mousemove', (e) => mouseMove(e, state));
+    state.canvas.addEventListener('keydown', (e) => keyDown(e, state));
+    state.canvas.addEventListener('keyup', (e) => keyUp(e, state));
+    state.canvas.addEventListener('wheel', (e) => mouseWheel(e, state));
+    state.canvas.addEventListener('mousedown', (e) => mouseDown(e, state));
+    state.canvas.addEventListener('mouseup', (e) => mouseUp(e, state));
+    state.canvas.addEventListener('mousemove', (e) => mouseMove(e, state));
 }
 
 export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimState) {
@@ -53,10 +53,7 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
         const boundingRect = state.canvas.getBoundingClientRect();
         const relativMouseX = event.clientX - boundingRect.left;
         const relativMouseY = event.clientY - boundingRect.top;
-        const paintDataMap = state.paintData.map;
-        const isClickInsideMap = relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
-            && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
-        if (isClickInsideMap) {
+        if (isClickInsideMapRelativ(relativMouseX, relativMouseY, state.paintData.map)) {
             for (let citizen of state.map.citizens) {
                 if (isObjectClicked(citizen.position, 40, relativMouseX, relativMouseY, state)) {
                     state.inputData.selected = {
@@ -99,6 +96,21 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
     }
 }
 
+function isClickInsideMapRelativ(relativMouseX: number, relativMouseY: number, paintDataMap: PaintDataMap) {
+    return relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
+        && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
+}
+
+function isClickInsideMap(clientX: number, clientY: number, state: ChatSimState) {
+    const paintDataMap = state.paintData.map;
+    const boundingRect = state.canvas.getBoundingClientRect();
+    const relativMouseX = clientX - boundingRect.left;
+    const relativMouseY = clientY - boundingRect.top;
+
+    return relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
+        && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
+}
+
 function isObjectClicked(objectPosition: Position, objectSize: number, relativMouseX: number, relativMouseY: number, state: ChatSimState): boolean {
     const paintDataMap = state.paintData.map;
     const translateX = paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2;
@@ -126,9 +138,11 @@ function mouseMove(event: MouseEvent, state: ChatSimState) {
 }
 
 function mouseWheel(event: WheelEvent, state: ChatSimState) {
+    if (!isClickInsideMap(event.clientX, event.clientY, state)) return;
     const zoomFactor = 0.2;
     const maxZoom = 10;
     const minZoom = 0.1;
+    event.preventDefault();
     state.paintData.map.zoom *= event.deltaY < 0 ? 1 + zoomFactor : 1 / (1 + zoomFactor);
     if (Math.abs(1 - state.paintData.map.zoom) < zoomFactor * 0.80) state.paintData.map.zoom = 1;
     if (state.paintData.map.zoom > maxZoom) state.paintData.map.zoom = maxZoom;
