@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { ChatSimState, Building, Inventory, Position, Mushroom } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
-import { CITIZEN_STATE_TYPE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_STATE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
@@ -12,7 +12,11 @@ import { Tree } from "./tree.js";
 export type CitizenStateInfo = {
     type: string,
     state?: string,
-    actionStartTime?: number,
+}
+
+export type CitizenStateThinking = CitizenStateInfo & {
+    actionStartTime: number,
+    thoughts: string[],
 }
 
 export type Citizen = {
@@ -40,7 +44,9 @@ export type CitizenLogEntry = {
 }
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
+export const CITIZEN_STATE_TYPE_THINKING = "thinking";
 const CITIZEN_PAINT_SIZE = 40;
+const TIME_PER_THOUGHT_LINE = 2000;
 
 export function addCitizen(user: string, state: ChatSimState) {
     if (state.map.citizens.find(c => c.name === user)) return;
@@ -219,13 +225,20 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
 }
 
 function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
-    if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_CHANGE_JOB || citizen.stateInfo.state === undefined) return;
+    if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_THINKING) return;
+    const stateInfo = citizen.stateInfo as CitizenStateThinking;
     const fontSize = 8;
     ctx.font = `${fontSize}px Arial`;
-    const text = citizen.stateInfo.state;
+    const textLinesAmount = Math.ceil((state.time - stateInfo.actionStartTime) / TIME_PER_THOUGHT_LINE);
+    const texts = stateInfo.thoughts.slice(0, textLinesAmount);
     const margin = 5;
-    const thoughtBubbleHeight = fontSize + margin * 2;
-    const thoughtBubbleWidth = ctx.measureText(text).width + margin * 2;
+    let maxTextWidth = 0;
+    for (let text of texts) {
+        const currentWidth = ctx.measureText(text).width;
+        if (currentWidth > maxTextWidth) maxTextWidth = currentWidth;
+    }
+    const thoughtBubbleHeight = fontSize * texts.length + margin * 2;
+    const thoughtBubbleWidth = maxTextWidth + margin * 2;
     const thoughtBubbleCenterX = paintPos.x;
     const thoughtBubbleBottomY = paintPos.y - CITIZEN_PAINT_SIZE / 2;
     const thoughtBubbleLeftX = thoughtBubbleCenterX - thoughtBubbleWidth / 2;
@@ -273,8 +286,11 @@ function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, pai
     ctx.fill();
     ctx.stroke();
 
-
-    drawTextWithOutline(ctx, text, thoughtBubbleLeftX + margin, thoughtBubbleBottomY - margin - 20, "white", "black", 1);
+    const textBottom = thoughtBubbleBottomY - margin - 20;
+    for (let i = 0; i < texts.length; i++) {
+        const offsetY = -(texts.length - i - 1) * fontSize;
+        drawTextWithOutline(ctx, texts[i], thoughtBubbleLeftX + margin, textBottom + offsetY, "white", "black", 1);
+    }
 }
 
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
@@ -339,10 +355,13 @@ function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
     }
-    if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_CHANGE_JOB) {
-        if (citizen.stateInfo.actionStartTime === undefined || citizen.stateInfo.actionStartTime + 2000 < state.time) {
-            citizen.stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
-            citizen.stateInfo.state = undefined;
+    if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_THINKING) {
+        const stateInfo = citizen.stateInfo as CitizenStateThinking;
+        if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + TIME_PER_THOUGHT_LINE * stateInfo.thoughts.length < state.time) {
+            if (stateInfo.state === CITIZEN_STATE_CHANGE_JOB) {
+                stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
+                stateInfo.state = undefined;
+            }
         }
     }
 }

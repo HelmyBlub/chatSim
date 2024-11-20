@@ -140,10 +140,20 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                         sellItem(woodMarket, citizen, INVENTORY_WOOD, 2, state);
                     }
                 } else {
-                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, "there is no wood market to buy wood from");
+                    const reason = [
+                        `I need ${INVENTORY_WOOD} to build a building.`,
+                        `There is no ${CITIZEN_JOB_WOOD_MARKET} to buy ${INVENTORY_WOOD} from.`,
+                        `I become a ${CITIZEN_JOB_LUMBERJACK} to gather ${INVENTORY_WOOD} myself.`,
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
                 }
             } else {
-                citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, "as i have no money for wood");
+                const reason = [
+                    `I need ${INVENTORY_WOOD} to build a building.`,
+                    `I do not have enough money.`,
+                    `I become a ${CITIZEN_JOB_LUMBERJACK} to gather ${INVENTORY_WOOD} myself.`,
+                ];
+                citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
             }
         } else {
             const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);

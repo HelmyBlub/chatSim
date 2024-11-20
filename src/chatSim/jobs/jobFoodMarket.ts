@@ -158,12 +158,21 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                             }
                             addCitizenLogEntry(citizen, `move home to get ${INVENTORY_MUSHROOM} as inventory empty`, state);
                         } else {
-                            citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, `${INVENTORY_MUSHROOM} run to low`);
+                            const reason = [
+                                `${INVENTORY_MUSHROOM} run to low.`,
+                                `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
+                            ];
+
+                            citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
                         }
                     }
                 } else {
                     if (!mushrooms || mushrooms.counter <= CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                        citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, `${INVENTORY_MUSHROOM} run to low`);
+                        const reason = [
+                            `${INVENTORY_MUSHROOM} run to low.`,
+                            `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
+                        ];
+                        citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
                     }
                 }
             }

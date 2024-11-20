@@ -2,6 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { citizenChangeJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
+import { CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
 import { citizenEatMushroom, MUSHROOM_FOOD_VALUE } from "./citizenNeedFood.js";
 
@@ -63,7 +64,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
         }
         if (!foundFood) {
             if (citizen.job.name !== CITIZEN_JOB_FOOD_GATHERER) {
-                citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, "no food to buy found");
+                const reason = [
+                    `I am starving.`,
+                    `I do not see a ${CITIZEN_JOB_FOOD_MARKET}.`,
+                    `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
+                ];
+                citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
             }
             if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
@@ -102,7 +108,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         }
                     }
                 } else {
-                    citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, "as food market disappeared");
+                    const reason = [
+                        `I am starving.`,
+                        `The ${CITIZEN_JOB_FOOD_MARKET} disappeared.`,
+                        `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
                 }
             }
         }

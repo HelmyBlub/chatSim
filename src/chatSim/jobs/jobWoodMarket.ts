@@ -87,7 +87,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                 }
             }
             if (!jobExists) {
-                citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, `there is no citizen with a job in house contruction to sell to`);
+                citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, [`there is no citizen with a job in house contruction to sell to`]);
                 return;
             }
         }
@@ -148,12 +148,12 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                             }
                             addCitizenLogEntry(citizen, `move home to get ${INVENTORY_WOOD} as inventory empty`, state);
                         } else {
-                            citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, `${INVENTORY_WOOD} run to low`);
+                            citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, [`${INVENTORY_WOOD} run to low`]);
                         }
                     }
                 } else {
                     if (!wood || wood.counter === 0) {
-                        citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, `${INVENTORY_WOOD} run to low`);
+                        citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, [`${INVENTORY_WOOD} run to low`]);
                     }
                 }
             }

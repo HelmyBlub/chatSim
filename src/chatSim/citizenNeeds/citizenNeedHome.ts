@@ -30,7 +30,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
             availableHouse.inhabitedBy = citizen;
             citizen.home = availableHouse;
         } else if (!isInHouseBuildingBusiness(citizen)) {
-            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, "no available house found");
+            const reason = [
+                `I want a home.`,
+                `I do not see an available home.`,
+                `I become a ${CITIZEN_JOB_BUILDING_CONSTRUCTION} to build a home myself.`,
+            ];
+            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, reason);
         }
     }
     if (!citizen.home || citizen.home.deterioration < 0.2) return;
@@ -74,7 +79,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 if (!canBuyWood) {
-                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, "no money or no wood market found and i need wood for house repairs");
+                    const reason = [
+                        `I need ${INVENTORY_WOOD} to repair my home.`,
+                        `I did not find a way to get ${INVENTORY_WOOD}.`,
+                        `I become a ${CITIZEN_JOB_LUMBERJACK} to gather ${INVENTORY_WOOD} myself.`,
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
                 }
             }
         }
@@ -82,7 +92,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.stateInfo.state === `buy wood`) {
             if (citizen.moveTo === undefined) {
                 if (citizen.money < 2) {
-                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, "as no money to buy wood for house repairs");
+                    const reason = [
+                        `I need ${INVENTORY_WOOD} to repair my home.`,
+                        `I do not have enough money to buy ${INVENTORY_WOOD}.`,
+                        `I become a ${CITIZEN_JOB_LUMBERJACK} to gather ${INVENTORY_WOOD} myself.`,
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
                 } else {
                     const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
                     if (woodMarket && isCitizenInInteractDistance(citizen, woodMarket.position)) {

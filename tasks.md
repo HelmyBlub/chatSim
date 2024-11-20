@@ -1,10 +1,8 @@
 Tasks:
 - more images+animations
     - thought animation
-        - job switch
-            - thought bubble
-            - display text in it
-            - each tought takes time to be able to follow
+        - job switch improve display text
+        - make multiple lines possible
     - buy/sell animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
@@ -48,6 +46,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- thought animation
+    - job switch
+        - thought bubble
+        - display text in it
+        - each tought takes time to be able to follow
 - map zoom only in map area and prevent default
 
 

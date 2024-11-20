@@ -41,7 +41,7 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
             }
         }
         if (!housesAvailable) {
-            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, `there is no house to market`);
+            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, [`there is no house to market`]);
             return;
         }
     }

@@ -2,7 +2,7 @@ import { ChatSimState, InventoryItem } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories } from "../citizen.js";
 import { citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
-import { buyFoodFromFoodMarket } from "../jobs/jobFoodMarket.js";
+import { buyFoodFromFoodMarket, CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 
 export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
@@ -91,7 +91,13 @@ function tick(citizen: Citizen, state: ChatSimState) {
         }
         if (!foundFood) {
             if (citizen.job.name !== CITIZEN_JOB_FOOD_GATHERER) {
-                citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, "no food to buy found");
+                const reason = [
+                    `I am hungry.`,
+                    `I did not find a way to get ${INVENTORY_MUSHROOM}.`,
+                    `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
+                ];
+
+                citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
             }
             if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
@@ -140,7 +146,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         }
                     }
                 } else {
-                    citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, "food market disappeared");
+                    const reason = [
+                        `I am hungry.`,
+                        `The ${CITIZEN_JOB_FOOD_MARKET} i wanted to buy from disappeared.`,
+                        `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
                 }
             }
         }

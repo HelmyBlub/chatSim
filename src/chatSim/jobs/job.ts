@@ -1,5 +1,5 @@
 import { Building, ChatSimState, Inventory, Position } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity, CitizenStateThinking, CITIZEN_STATE_TYPE_THINKING } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
@@ -21,7 +21,7 @@ export type FunctionsCitizenJob = {
 }
 
 export type FunctionsCitizenJobs = { [key: string]: FunctionsCitizenJob };
-export const CITIZEN_STATE_TYPE_CHANGE_JOB = "change job";
+export const CITIZEN_STATE_CHANGE_JOB = "change job";
 
 export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobFoodGatherer(state);
@@ -32,12 +32,16 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobHouseMarket(state);
 }
 
-export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string | undefined = undefined) {
+export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string[]) {
     citizen.job = createJob(jobName, state);
-    addCitizenLogEntry(citizen, `switch job to ${jobName}. Reason: ${reason}`, state);
-    citizen.stateInfo.type = CITIZEN_STATE_TYPE_CHANGE_JOB;
-    citizen.stateInfo.state = reason;
-    citizen.stateInfo.actionStartTime = state.time;
+    addCitizenLogEntry(citizen, `switch job to ${jobName}. Reason: ${reason.join()}`, state);
+    const stateThinking: CitizenStateThinking = {
+        actionStartTime: state.time,
+        thoughts: reason,
+        type: CITIZEN_STATE_TYPE_THINKING,
+        state: CITIZEN_STATE_CHANGE_JOB,
+    }
+    citizen.stateInfo = stateThinking;
 }
 
 export function createJob(jobname: string, state: ChatSimState): CitizenJob {
