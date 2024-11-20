@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen } from "../citizen.js";
+import { Citizen, CitizenStateInfo } from "../citizen.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 
@@ -7,8 +7,7 @@ export type CitizenJobHouseMarket = CitizenJob & {
     lastCheckedHouseAvailability?: number,
 }
 
-type JobHouseMarketStateInfo = {
-    type: string,
+type JobHouseMarketStateInfo = CitizenStateInfo & {
     state?: "selling",
 }
 

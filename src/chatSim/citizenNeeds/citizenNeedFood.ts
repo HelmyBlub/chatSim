@@ -1,6 +1,6 @@
 import { ChatSimState, InventoryItem } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories } from "../citizen.js";
-import { citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
+import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket, CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
@@ -40,7 +40,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
         if (hasEnoughFoodAtHome) return true;
     } else {
         let foodInInventoryRequired = CITIZEN_FOOD_IN_INVENTORY_NEED;
-        if (needData.gatherMoreFood) foodInInventoryRequired += 1;
+        if (needData.gatherMoreFood) foodInInventoryRequired += 2;
 
         const hasEnoughFoodInInventory = inventoryMushroom && inventoryMushroom.counter >= foodInInventoryRequired;
         if (hasEnoughFoodInInventory) {
@@ -109,14 +109,22 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (!foundFood) {
             if (citizen.job.name !== CITIZEN_JOB_FOOD_GATHERER) {
                 const reason = [
-                    `I am hungry.`,
-                    `I did not find a way to get ${INVENTORY_MUSHROOM}.`,
+                    `I am low on ${INVENTORY_MUSHROOM}.`,
+                    `I did not find a market to buy a ${INVENTORY_MUSHROOM}.`,
                     `I become a ${CITIZEN_JOB_FOOD_GATHERER} to gather ${INVENTORY_MUSHROOM} myself.`,
                 ];
 
                 citizenChangeJob(citizen, CITIZEN_JOB_FOOD_GATHERER, state, reason);
+            } else if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB && citizen.stateInfo.type !== CITIZEN_STATE_TYPE_CHANGE_JOB) {
+                citizen.stateInfo = {
+                    type: CITIZEN_STATE_TYPE_WORKING_JOB,
+                    actionStartTime: state.time,
+                    thoughts: [
+                        `I am low on ${INVENTORY_MUSHROOM}.`,
+                        `I will start gathering.`,
+                    ]
+                };
             }
-            if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
         }
     } else {
         if (citizen.stateInfo.state === `go home to eat`) {

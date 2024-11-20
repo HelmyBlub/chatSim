@@ -1,5 +1,5 @@
 import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { Citizen, getAvaiableInventoryCapacity } from "../citizen.js";
+import { Citizen, CitizenStateInfo, getAvaiableInventoryCapacity } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
@@ -8,8 +8,7 @@ import { createBuildingOnRandomTile } from "../map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
 
-type JobContructionStateInfo = {
-    type: string,
+type JobContructionStateInfo = CitizenStateInfo & {
     state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation",
 }
 
@@ -104,6 +103,9 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                         inventoryWood.counter -= woodRequired;
                         stateInfo.state = "buildHouse";
                     }
+                } else if (citizen.moveTo === undefined) {
+                    stateInfo.state = undefined;
+                    job.buildPosition = undefined;
                 }
             } else {
                 stateInfo.state = "buyWood";

@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { ChatSimState, Building, Inventory, Position, Mushroom, PaintDataMap } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
-import { CITIZEN_STATE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_STATE_TYPE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
 import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
@@ -12,11 +12,8 @@ import { Tree } from "./tree.js";
 export type CitizenStateInfo = {
     type: string,
     state?: string,
-}
-
-export type CitizenStateThinking = CitizenStateInfo & {
-    actionStartTime: number,
-    thoughts: string[],
+    actionStartTime?: number,
+    thoughts?: string[],
 }
 
 export type CitizenNeeds = {
@@ -49,9 +46,9 @@ export type CitizenLogEntry = {
 }
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
-export const CITIZEN_STATE_TYPE_THINKING = "thinking";
+export const CITIZEN_STATE_THINKING = "thinking";
+export const CITIZEN_TIME_PER_THOUGHT_LINE = 2000;
 const CITIZEN_PAINT_SIZE = 40;
-const TIME_PER_THOUGHT_LINE = 2000;
 
 export function addCitizen(user: string, state: ChatSimState) {
     if (state.map.citizens.find(c => c.name === user)) return;
@@ -72,7 +69,7 @@ export function addCitizen(user: string, state: ChatSimState) {
             items: [],
             reservedSpace: [
                 {
-                    counter: 4,
+                    counter: 5,
                     name: INVENTORY_MUSHROOM
                 },
                 {
@@ -187,11 +184,77 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
+
+export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
+    let closest: Citizen | undefined;
+    let distance = 0;
+    for (let citizen of citizens) {
+        if (citizen === searcher) continue;
+        const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (inventoryMushroom && hasFoodMarketStock(citizen)))) {
+            if (closest === undefined) {
+                closest = citizen;
+                distance = calculateDistance(citizen.position, searcher.position);
+            } else {
+                const tempDistance = calculateDistance(citizen.position, searcher.position);
+                if (tempDistance < distance) {
+                    closest = citizen;
+                    distance = tempDistance;
+                }
+            }
+        }
+    }
+    return closest;
+}
+
+export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    if (state.inputData.selected) {
+        let position: Position | undefined;
+        let size = 0;
+        switch (state.inputData.selected.type) {
+            case "citizen":
+                const citizen: Citizen = state.inputData.selected.object;
+                position = citizen.position;
+                size = CITIZEN_PAINT_SIZE;
+                break;
+            case "building":
+                const building: Building = state.inputData.selected.object;
+                position = building.position;
+                size = 60;
+                break;
+            case "tree":
+                const tree: Tree = state.inputData.selected.object;
+                position = tree.position;
+                size = 60;
+                break;
+            case "mushroom":
+                const mushroom: Mushroom = state.inputData.selected.object;
+                position = mushroom.position;
+                size = 20;
+                break;
+        }
+        if (position) {
+            const paintPos = mapPositionToPaintPosition(position, state.paintData.map);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.rect(Math.floor(paintPos.x - size / 2), Math.floor(paintPos.y - size / 2), size, size);
+            ctx.stroke();
+        }
+    }
+}
+
+export function isCitizenThinking(citizen: Citizen, state: ChatSimState) {
+    return citizen.stateInfo.actionStartTime !== undefined
+        && citizen.stateInfo.thoughts
+        && citizen.stateInfo.actionStartTime + citizen.stateInfo.thoughts.length * CITIZEN_TIME_PER_THOUGHT_LINE >= state.time;
+}
+
 export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState, layer: number) {
     const paintDataMap = state.paintData.map;
     let nameFontSize = 16 / state.paintData.map.zoom;
     let nameLineWidth = 2 / state.paintData.map.zoom;
-    let sortedForPaintCitizens = state.map.citizens.sort((a, b) => a.position.y - b.position.y);
+    let sortedForPaintCitizens = state.map.citizens.toSorted((a, b) => a.position.y - b.position.y);
     for (let citizen of sortedForPaintCitizens) {
         paintCitizen(ctx, citizen, layer, paintDataMap, nameFontSize, nameLineWidth, state);
     }
@@ -240,11 +303,12 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
 }
 
 function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
-    if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_THINKING) return;
-    const stateInfo = citizen.stateInfo as CitizenStateThinking;
+    if (!isCitizenThinking(citizen, state)) return;
+    const stateInfo = citizen.stateInfo;
+    if (stateInfo.actionStartTime === undefined || stateInfo.thoughts === undefined) return;
     const fontSize = 8;
     ctx.font = `${fontSize}px Arial`;
-    const textLinesAmount = Math.ceil((state.time - stateInfo.actionStartTime) / TIME_PER_THOUGHT_LINE);
+    const textLinesAmount = Math.ceil((state.time - stateInfo.actionStartTime) / CITIZEN_TIME_PER_THOUGHT_LINE);
     const texts = stateInfo.thoughts.slice(0, textLinesAmount);
     const margin = 5;
     let maxTextWidth = 0;
@@ -308,43 +372,6 @@ function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, pai
     }
 }
 
-export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
-    if (state.inputData.selected) {
-        let position: Position | undefined;
-        let size = 0;
-        switch (state.inputData.selected.type) {
-            case "citizen":
-                const citizen: Citizen = state.inputData.selected.object;
-                position = citizen.position;
-                size = CITIZEN_PAINT_SIZE;
-                break;
-            case "building":
-                const building: Building = state.inputData.selected.object;
-                position = building.position;
-                size = 60;
-                break;
-            case "tree":
-                const tree: Tree = state.inputData.selected.object;
-                position = tree.position;
-                size = 60;
-                break;
-            case "mushroom":
-                const mushroom: Mushroom = state.inputData.selected.object;
-                position = mushroom.position;
-                size = 20;
-                break;
-        }
-        if (position) {
-            const paintPos = mapPositionToPaintPosition(position, state.paintData.map);
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.rect(Math.floor(paintPos.x - size / 2), Math.floor(paintPos.y - size / 2), size, size);
-            ctx.stroke();
-        }
-    }
-}
-
 function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPosition: Position, time: number) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) return;
     if (citizen.stateInfo.state !== "sleeping") return;
@@ -370,10 +397,10 @@ function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
     }
-    if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_THINKING) {
-        const stateInfo = citizen.stateInfo as CitizenStateThinking;
-        if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + TIME_PER_THOUGHT_LINE * stateInfo.thoughts.length < state.time) {
-            if (stateInfo.state === CITIZEN_STATE_CHANGE_JOB) {
+    if (citizen.stateInfo.state === CITIZEN_STATE_THINKING) {
+        const stateInfo = citizen.stateInfo;
+        if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + CITIZEN_TIME_PER_THOUGHT_LINE * stateInfo.thoughts!.length < state.time) {
+            if (stateInfo.type === CITIZEN_STATE_TYPE_CHANGE_JOB) {
                 stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
                 stateInfo.state = undefined;
             }
@@ -423,24 +450,3 @@ function citizenMoveToTick(citizen: Citizen) {
     }
 }
 
-export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
-    let closest: Citizen | undefined;
-    let distance = 0;
-    for (let citizen of citizens) {
-        if (citizen === searcher) continue;
-        const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (inventoryMushroom && hasFoodMarketStock(citizen)))) {
-            if (closest === undefined) {
-                closest = citizen;
-                distance = calculateDistance(citizen.position, searcher.position);
-            } else {
-                const tempDistance = calculateDistance(citizen.position, searcher.position);
-                if (tempDistance < distance) {
-                    closest = citizen;
-                    distance = tempDistance;
-                }
-            }
-        }
-    }
-    return closest;
-}

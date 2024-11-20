@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, getUsedInventoryCapacity } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CITIZEN_TIME_PER_THOUGHT_LINE, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, getUsedInventoryCapacity, isCitizenThinking } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET, sellFoodToFoodMarket } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -12,8 +12,7 @@ import { mapPositionToPaintPosition } from "../paint.js";
 export type CitizenJobFoodGatherer = CitizenJob & {
 }
 
-type JobFoodGathererStateInfo = {
-    type: string,
+type JobFoodGathererStateInfo = CitizenStateInfo & {
     state?: "gathering" | "selling" | "goHome",
 }
 
@@ -76,10 +75,11 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         } else {
             if (citizen.home && getUsedInventoryCapacity(citizen.home.inventory) < citizen.home.inventory.size) {
                 stateInfo.state = "goHome";
-                citizen.moveTo = {
-                    x: citizen.home.position.x,
-                    y: citizen.home.position.y,
-                }
+                stateInfo.actionStartTime = state.time;
+                stateInfo.thoughts = [
+                    `I can not carry more ${INVENTORY_MUSHROOM}.`,
+                    `I will store them at home.`
+                ];
                 addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
             } else {
                 const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
@@ -91,8 +91,19 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
     }
     if (stateInfo.state === "goHome") {
         if (citizen.moveTo === undefined) {
-            emptyCitizenInventoryToHomeInventory(citizen, state);
-            stateInfo.state = undefined;
+            if (citizen.home && stateInfo.actionStartTime !== undefined && stateInfo.thoughts !== undefined) {
+                if (!isCitizenThinking(citizen, state)) {
+                    stateInfo.actionStartTime = undefined;
+                    stateInfo.thoughts = undefined;
+                    citizen.moveTo = {
+                        x: citizen.home.position.x,
+                        y: citizen.home.position.y,
+                    }
+                }
+            } else {
+                emptyCitizenInventoryToHomeInventory(citizen, state);
+                stateInfo.state = undefined;
+            }
         }
     }
     if (stateInfo.state === "gathering") {
@@ -118,6 +129,12 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                 }
                 stateInfo.state = "gathering";
             } else {
+                stateInfo.actionStartTime = state.time;
+                stateInfo.thoughts = [
+                    `I can not carry more ${INVENTORY_MUSHROOM}.`,
+                    `I will try to sell them`,
+                    `at ${foodMarket.name} ${CITIZEN_JOB_FOOD_MARKET}.`
+                ];
                 citizen.moveTo = {
                     x: foodMarket.position.x,
                     y: foodMarket.position.y,

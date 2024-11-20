@@ -1,5 +1,5 @@
 import { ChatSimState, InventoryItem } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
@@ -9,8 +9,7 @@ import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
 }
-type JobFoodMarketStateInfo = {
-    type: string,
+type JobFoodMarketStateInfo = CitizenStateInfo & {
     state?: "selling" | "goHome" | "repairMarket",
 }
 

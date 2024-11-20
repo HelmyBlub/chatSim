@@ -1,7 +1,7 @@
 Tasks:
 - more images+animations
     - thought animation
-        - make thoughs usable for jobs
+        - make thoughs usable for jobs and needs
     - buy/sell animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
