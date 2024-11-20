@@ -19,6 +19,11 @@ export type CitizenStateThinking = CitizenStateInfo & {
     thoughts: string[],
 }
 
+export type CitizenNeeds = {
+    needsData: { [key: string]: any };
+    lastSuccededCheckedNeedsTime?: number,
+}
+
 export type Citizen = {
     job: CitizenJob,
     birthTime: number,
@@ -33,7 +38,7 @@ export type Citizen = {
     home?: Building,
     money: number,
     skills: { [key: string]: number },
-    lastCheckedNeedsTime?: number,
+    needs: CitizenNeeds,
     log: CitizenLogEntry[];
     maxLogLength: number,
 }
@@ -60,11 +65,14 @@ export function addCitizen(user: string, state: ChatSimState) {
         stateInfo: {
             type: CITIZEN_STATE_TYPE_WORKING_JOB,
         },
+        needs: {
+            needsData: {},
+        },
         inventory: {
             items: [],
             reservedSpace: [
                 {
-                    counter: 3,
+                    counter: 4,
                     name: INVENTORY_MUSHROOM
                 },
                 {

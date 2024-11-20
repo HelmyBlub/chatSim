@@ -1,8 +1,8 @@
 Tasks:
+- problem: citizen get to starving while thinking to much. Make starving gather a bit more food once triggered
 - more images+animations
     - thought animation
-        - job switch improve display text
-        - make multiple lines possible
+        - make thoughs usable for jobs
     - buy/sell animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
@@ -15,11 +15,13 @@ Tasks:
     - put planks beside buildings beeing build
     - visualize citizen transporting wood planks
     - sleeping dog image
+    - death animation
 
     - make the map appear more realistic. Easier to follow what happens
     - make actions take time for animations to be displayed
     - visaulize interactions between citizens better
         - like a chat bubble when requesting to sell or buy
+- selected citizen to the front. If many citizen thinking they can overlap their thoughts bubble. To see each one i can select citizen
 - mushroom pickup behavior
     - vision radius different for night and day
 - think about: change market jobs only possible with market. Before can try to get food from other citizens
@@ -46,6 +48,9 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+    - thought animation
+        - job switch improve display text
+        - make multiple lines possible
 - thought animation
     - job switch
         - thought bubble

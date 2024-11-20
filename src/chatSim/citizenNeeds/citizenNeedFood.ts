@@ -4,6 +4,11 @@ import { citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket, CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
+import { getCitizenNeedData } from "./citizenNeed.js";
+
+type CitizenNeedFood = {
+    gatherMoreFood: boolean,
+}
 
 export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
 export const CITIZEN_FOOD_AT_HOME_NEED = 4;
@@ -12,9 +17,14 @@ export const MUSHROOM_FOOD_VALUE = 0.15;
 
 export function loadCitizenNeedsFunctionsFood(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_FOOD] = {
+        createDefaultData: createDefaultData,
         isFulfilled: isFulfilled,
         tick: tick,
     }
+}
+
+function createDefaultData(): CitizenNeedFood {
+    return { gatherMoreFood: false };
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
@@ -23,15 +33,22 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
         citizenEatMushroom(citizen, inventoryMushroom, state, "inventory");
     }
     if (citizen.foodPerCent < 0.5) return false;
+    const needData = getCitizenNeedData(CITIZEN_NEED_FOOD, citizen, state) as CitizenNeedFood;
     if (citizen.home) {
         const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
         const hasEnoughFoodAtHome = homeMushrooms && homeMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED;
         if (hasEnoughFoodAtHome) return true;
     } else {
-        const hasEnoughFoodInInventory = inventoryMushroom && inventoryMushroom.counter >= CITIZEN_FOOD_IN_INVENTORY_NEED;
-        if (hasEnoughFoodInInventory) return true;
-    }
+        let foodInInventoryRequired = CITIZEN_FOOD_IN_INVENTORY_NEED;
+        if (needData.gatherMoreFood) foodInInventoryRequired += 1;
 
+        const hasEnoughFoodInInventory = inventoryMushroom && inventoryMushroom.counter >= foodInInventoryRequired;
+        if (hasEnoughFoodInInventory) {
+            needData.gatherMoreFood = false;
+            return true;
+        }
+    }
+    needData.gatherMoreFood = true;
     return false;
 }
 

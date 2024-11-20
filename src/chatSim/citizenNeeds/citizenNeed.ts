@@ -7,7 +7,8 @@ import { CITIZEN_NEED_STARVING, loadCitizenNeedsFunctionsStarving } from "./citi
 
 export type CitizenNeedFunctions = {
     isFulfilled(citizen: Citizen, state: ChatSimState): boolean,
-    tick(citizen: Citizen, state: ChatSimState): void
+    tick(citizen: Citizen, state: ChatSimState): void,
+    createDefaultData?(): any,
 }
 
 export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
@@ -21,7 +22,7 @@ export function loadCitizenNeedsFunctions(state: ChatSimState) {
 
 export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
     const checkInterval = 1000;
-    if (citizen.lastCheckedNeedsTime !== undefined && citizen.lastCheckedNeedsTime + checkInterval > state.time) return;
+    if (citizen.needs.lastSuccededCheckedNeedsTime !== undefined && citizen.needs.lastSuccededCheckedNeedsTime + checkInterval > state.time) return;
     const needs = [CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME];
     let needsFulfilled = true;
     for (let need of needs) {
@@ -33,7 +34,19 @@ export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
         }
     }
     if (needsFulfilled) {
-        citizen.lastCheckedNeedsTime = state.time;
+        citizen.needs.lastSuccededCheckedNeedsTime = state.time;
         if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
     }
+}
+
+export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSimState) {
+    let needData = citizen.needs.needsData[need];
+    if (!needData) {
+        const needFunctions = state.functionsCitizenNeeds[need];
+        if (needFunctions && needFunctions.createDefaultData) {
+            needData = needFunctions.createDefaultData();
+            citizen.needs.needsData[need] = needData;
+        }
+    }
+    return needData;
 }
