@@ -2,7 +2,7 @@ import { ChatSimState, InventoryItem } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
-import { INVENTORY_MUSHROOM } from "../main.js";
+import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_FOOD_AT_HOME_NEED, CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
@@ -21,6 +21,28 @@ export function loadCitizenJobFoodMarket(state: ChatSimState) {
         paintInventoryOnMarket: paintInventoryOnMarket,
         tick: tick,
     };
+}
+
+export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
+    let closest: Citizen | undefined;
+    let distance = 0;
+    for (let citizen of citizens) {
+        if (citizen === searcher) continue;
+        const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (inventoryMushroom && hasFoodMarketStock(citizen)))) {
+            if (closest === undefined) {
+                closest = citizen;
+                distance = calculateDistance(citizen.position, searcher.position);
+            } else {
+                const tempDistance = calculateDistance(citizen.position, searcher.position);
+                if (tempDistance < distance) {
+                    closest = citizen;
+                    distance = tempDistance;
+                }
+            }
+        }
+    }
+    return closest;
 }
 
 export function hasFoodMarketStock(foodMarket: Citizen): boolean {

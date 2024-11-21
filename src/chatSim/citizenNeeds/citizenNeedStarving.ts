@@ -1,8 +1,8 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, findClosestFoodMarket, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { citizenChangeJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
-import { CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
+import { CITIZEN_JOB_FOOD_MARKET, findClosestFoodMarket } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
 import { citizenEatMushroom, MUSHROOM_FOOD_VALUE } from "./citizenNeedFood.js";
 

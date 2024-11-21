@@ -5,6 +5,7 @@ import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
+import { CITIZEN_JOB_WOOD_MARKET } from "./jobs/jobWoodMarket.js";
 import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { Tree } from "./tree.js";
@@ -184,29 +185,6 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
-
-export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
-    let closest: Citizen | undefined;
-    let distance = 0;
-    for (let citizen of citizens) {
-        if (citizen === searcher) continue;
-        const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && (!shouldHaveFood || (inventoryMushroom && hasFoodMarketStock(citizen)))) {
-            if (closest === undefined) {
-                closest = citizen;
-                distance = calculateDistance(citizen.position, searcher.position);
-            } else {
-                const tempDistance = calculateDistance(citizen.position, searcher.position);
-                if (tempDistance < distance) {
-                    closest = citizen;
-                    distance = tempDistance;
-                }
-            }
-        }
-    }
-    return closest;
-}
-
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (state.inputData.selected) {
         let position: Position | undefined;
@@ -265,7 +243,8 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
 }
 
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
-    const paintBehind = citizen.stateInfo.state === "selling" && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB;
+    const paintBehind = citizen.stateInfo.state === "selling" && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB
+        && (citizen.job.name === CITIZEN_JOB_FOOD_MARKET || citizen.job.name === CITIZEN_JOB_WOOD_MARKET);
     if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && !paintBehind) return;
     if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && paintBehind) return;
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);

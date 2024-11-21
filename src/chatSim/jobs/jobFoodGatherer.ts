@@ -10,10 +10,11 @@ import { mapPositionToPaintPosition } from "../paint.js";
 
 
 export type CitizenJobFoodGatherer = CitizenJob & {
+    sellToFoodMarket?: Citizen,
 }
 
 type JobFoodGathererStateInfo = CitizenStateInfo & {
-    state?: "gathering" | "selling" | "goHome",
+    state?: "gathering" | "selling" | "goHome" | "sellAtFoodMarket",
 }
 
 export const CITIZEN_JOB_FOOD_GATHERER = "Food Gatherer";
@@ -118,28 +119,20 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
             stateInfo.state = undefined;
         }
     }
-    if (stateInfo.state === "selling") {
+    if (stateInfo.state === "selling" && !isCitizenThinking(citizen, state)) {
         const foodMarket = findAFoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
         if (foodMarket) {
-            if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
-                const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-                if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                    const sellAmount = mushroom.counter - CITIZEN_FOOD_IN_INVENTORY_NEED;
-                    sellFoodToFoodMarket(foodMarket, citizen, sellAmount, state);
-                }
-                stateInfo.state = "gathering";
-            } else if (citizen.moveTo === undefined) {
-                stateInfo.actionStartTime = state.time;
-                stateInfo.thoughts = [
-                    `I can not carry more ${INVENTORY_MUSHROOM}.`,
-                    `I will try to sell them`,
-                    `at ${foodMarket.name} ${CITIZEN_JOB_FOOD_MARKET}.`
-                ];
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
-                citizen.moveTo = {
-                    x: foodMarket.position.x,
-                    y: foodMarket.position.y,
-                }
+            job.sellToFoodMarket = foodMarket;
+            stateInfo.state = "sellAtFoodMarket";
+            stateInfo.actionStartTime = state.time;
+            stateInfo.thoughts = [
+                `I can not carry more ${INVENTORY_MUSHROOM}.`,
+                `I will sell them to ${foodMarket.name}.`,
+            ];
+            addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+            citizen.moveTo = {
+                x: foodMarket.position.x,
+                y: foodMarket.position.y,
             }
         } else {
             const reason = [
@@ -148,8 +141,26 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                 `I become a ${CITIZEN_JOB_FOOD_MARKET} myself,`,
                 `so i can sell my ${INVENTORY_MUSHROOM}.`
             ];
-
             citizenChangeJob(citizen, CITIZEN_JOB_FOOD_MARKET, state, reason);
+        }
+    }
+    if (stateInfo.state === "sellAtFoodMarket") {
+        if (citizen.moveTo === undefined) {
+            if (job.sellToFoodMarket && isCitizenInInteractDistance(citizen, job.sellToFoodMarket.position)) {
+                const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+                if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
+                    const sellAmount = mushroom.counter - CITIZEN_FOOD_IN_INVENTORY_NEED;
+                    sellFoodToFoodMarket(job.sellToFoodMarket, citizen, sellAmount, state);
+                }
+                stateInfo.state = "gathering";
+            } else {
+                stateInfo.state = "selling";
+                stateInfo.actionStartTime = state.time;
+                stateInfo.thoughts = [
+                    `I do not see the food market.`,
+                ];
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+            }
         }
     }
 }
@@ -158,7 +169,7 @@ function findAFoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.money > 2 && canCitizenCarryMore(citizen)) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && citizen.money > 2 && canCitizenCarryMore(citizen)) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);
