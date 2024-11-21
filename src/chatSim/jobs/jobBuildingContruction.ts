@@ -1,5 +1,5 @@
 import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { Citizen, CitizenStateInfo, getAvaiableInventoryCapacity } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, CitizenStateInfo, getAvaiableInventoryCapacity, moveItemBetweenInventories } from "../citizen.js";
 import { buyItem, citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
@@ -9,12 +9,11 @@ import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
 
 type JobContructionStateInfo = CitizenStateInfo & {
-    state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "moveToOldLocation" | "buyWoodFromMarket" | "carryWoodToSetupLocation",
+    state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "buyWoodFromMarket" | "carryWoodToSetupLocation",
 }
 
 export type CitizenJobBuildingConstruction = CitizenJob & {
-    buildPosition?: Position,
-    houseInProgress?: Building,
+    buildingInProgress?: Building,
     buildType?: BuildingType,
     marketToBuyFrom?: Citizen,
 }
@@ -59,38 +58,21 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         }
         stateInfo.state = "searchBuildLocation";
     }
-    if (stateInfo.state === "moveToOldLocation") {
-        if (citizen.moveTo === undefined) {
-            if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
-                stateInfo.state = "buildHouse";
-                for (let house of state.map.buildings) {
-                    if (house.owner === citizen && house.buildProgress !== undefined) {
-                        job.houseInProgress = house;
-                        break;
-                    }
-                }
-            } else {
-                stateInfo.state = "searchBuildLocation";
-            }
-        }
-    }
     if (stateInfo.state === "searchBuildLocation") {
         let doIHaveAHouseBuildInProgress = false;
-        for (let house of state.map.buildings) {
-            if (house.owner === citizen && house.buildProgress !== undefined) {
-                stateInfo.state = "moveToOldLocation";
+        for (let building of state.map.buildings) {
+            if (building.owner === citizen && building.buildProgress !== undefined) {
+                stateInfo.state = "buildHouse";
                 stateInfo.actionStartTime = state.time;
                 stateInfo.thoughts = [
                     `I have a unfinished building. Let's go there.`
                 ]
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 citizen.moveTo = {
-                    x: house.position.x,
-                    y: house.position.y,
+                    x: building.position.x,
+                    y: building.position.y,
                 };
-                job.buildPosition = {
-                    x: house.position.x,
-                    y: house.position.y,
-                }
+                job.buildingInProgress = building;
 
                 doIHaveAHouseBuildInProgress = true;
                 break;
@@ -101,17 +83,14 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
             if (inventoryWood && inventoryWood.counter >= woodRequired) {
-                moveToBuildLocation(citizen, job, state);
-                stateInfo.state = "carryWoodToSetupLocation";
-                if (job.buildPosition && calculateDistance(job.buildPosition, citizen.position) < 10) {
-                    job.houseInProgress = createBuildingOnRandomTile(citizen, state, job.buildType!);
-                    if (job.houseInProgress !== undefined) {
-                        inventoryWood.counter -= woodRequired;
-                        stateInfo.state = "buildHouse";
+                job.buildingInProgress = createBuildingOnRandomTile(citizen, state, job.buildType!);
+                if (job.buildingInProgress) {
+                    addCitizenLogEntry(citizen, `start a new building`, state);
+                    citizen.moveTo = {
+                        x: job.buildingInProgress.position.x,
+                        y: job.buildingInProgress.position.y,
                     }
-                } else if (citizen.moveTo === undefined) {
-                    stateInfo.state = undefined;
-                    job.buildPosition = undefined;
+                    stateInfo.state = "carryWoodToSetupLocation";
                 }
             } else {
                 stateInfo.state = "buyWood";
@@ -120,43 +99,55 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
     }
     if (stateInfo.state === "carryWoodToSetupLocation") {
         if (citizen.moveTo === undefined) {
-            if (job.buildPosition && isCitizenInInteractDistance(citizen, job.buildPosition)) {
+            if (job.buildingInProgress && job.buildingInProgress.position && isCitizenInInteractDistance(citizen, job.buildingInProgress.position)) {
                 const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-                const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
+                const woodRequired = BUILDING_DATA[job.buildingInProgress.type].woodAmount;
                 if (inventoryWood && inventoryWood.counter >= woodRequired) {
-                    job.houseInProgress = createBuildingOnRandomTile(citizen, state, job.buildType!);
-                    if (job.houseInProgress !== undefined) {
-                        inventoryWood.counter -= woodRequired;
-                        stateInfo.state = "buildHouse";
-                    }
+                    moveItemBetweenInventories(INVENTORY_WOOD, citizen.inventory, job.buildingInProgress.inventory, woodRequired);
+                    stateInfo.state = "buildHouse";
                 } else {
-                    stateInfo.state = undefined;
-                    job.buildPosition = undefined;
+                    addCitizenLogEntry(citizen, `not enough wood. Buy some.`, state);
+                    stateInfo.state = "buyWood";
+                    job.buildingInProgress = undefined;
                 }
             } else {
+                addCitizenLogEntry(citizen, `no building in progress. But i should have? `, state);
+                debugger;
                 stateInfo.state = undefined;
-                job.buildPosition = undefined;
+                job.buildingInProgress = undefined;
             }
         }
     }
     if (stateInfo.state === "buildHouse") {
-        if (job.houseInProgress && job.houseInProgress.buildProgress !== undefined
-            && isCitizenInInteractDistance(citizen, job.houseInProgress.position)
-        ) {
-            const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
-            const progressPerTick = 0.008 / woodRequired;
-            job.houseInProgress.buildProgress += progressPerTick;
-            if (job.houseInProgress.buildProgress >= 1) {
-                if (!citizen.home) {
-                    citizen.home = job.houseInProgress;
-                    job.houseInProgress.inhabitedBy = citizen;
+        if (citizen.moveTo === undefined) {
+            if (job.buildingInProgress && job.buildingInProgress.buildProgress !== undefined
+                && isCitizenInInteractDistance(citizen, job.buildingInProgress.position)
+            ) {
+                const woodRequired = BUILDING_DATA[job.buildType!].woodAmount;
+                const progressPerTick = 0.008 / woodRequired;
+                if ((job.buildingInProgress.buildProgress * woodRequired) % 1 < progressPerTick * woodRequired) {
+                    const wood = job.buildingInProgress.inventory.items.find(i => i.name === INVENTORY_WOOD);
+                    addCitizenLogEntry(citizen, `building in Progress ${job.buildingInProgress.buildProgress} `, state);
+                    if (!wood) {
+                        stateInfo.state = "carryWoodToSetupLocation";
+                        return;
+                    }
+                    if (wood.counter > 0) wood.counter--;
                 }
-                job.houseInProgress.buildProgress = undefined;
-                job.houseInProgress = undefined;
-                job.buildType = undefined;
+                job.buildingInProgress.buildProgress += progressPerTick;
+                if (job.buildingInProgress.buildProgress >= 1) {
+                    addCitizenLogEntry(citizen, `building finished`, state);
+                    if (!citizen.home) {
+                        citizen.home = job.buildingInProgress;
+                        job.buildingInProgress.inhabitedBy = citizen;
+                    }
+                    job.buildingInProgress.buildProgress = undefined;
+                    job.buildingInProgress = undefined;
+                    job.buildType = undefined;
+                }
+            } else {
+                stateInfo.state = undefined;
             }
-        } else {
-            stateInfo.state = undefined;
         }
     }
     if (stateInfo.state === "buyWoodFromMarket") {
@@ -169,6 +160,8 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                 }
                 buyItem(job.marketToBuyFrom, citizen, INVENTORY_WOOD, woodRequired, state);
                 stateInfo.state = "searchBuildLocation";
+            } else {
+                stateInfo.state = "buyWood";
             }
         }
     }
@@ -187,6 +180,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                     stateInfo.thoughts = [
                         `I need more ${INVENTORY_WOOD}. I go buy from ${woodMarket.name}.`
                     ]
+                    addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 } else {
                     const reason = [
                         `I need ${INVENTORY_WOOD} to build a building.`,
@@ -209,20 +203,6 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             if (wood && wood.counter >= requiredWood) {
                 stateInfo.state = "searchBuildLocation";
             }
-        }
-    }
-}
-
-function moveToBuildLocation(citizen: Citizen, job: CitizenJobBuildingConstruction, state: ChatSimState) {
-    if (!job.buildPosition) {
-        let height = state.map.mapHeight - 40;
-        job.buildPosition = {
-            x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
-            y: Math.random() * height - height / 2,
-        }
-        citizen.moveTo = {
-            x: job.buildPosition.x,
-            y: job.buildPosition.y,
         }
     }
 }

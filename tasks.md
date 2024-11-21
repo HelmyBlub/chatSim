@@ -2,8 +2,6 @@ Tasks:
 - more images+animations
     - thought bubbles for
         - jobs
-            - construction
-                - some problems with how buildings are setup. Code needs to be refactored.
             - food gatherer
             - lumberjack
             - wood/mushroom markets            
@@ -25,10 +23,12 @@ Tasks:
     - make actions take time for animations to be displayed
     - visaulize interactions between citizens better
         - like a chat bubble when requesting to sell or buy
+    - eating animation
 - selecting click should select closest not first
 - mushroom pickup behavior
     - vision radius different for night and day
 - think about: change market jobs only possible with market. Before can try to get food from other citizens
+    - change markets to get a queue so citizens don't stack above each other
 - zoom in to mouse cursor not map middle
 
 - pathing, citizen can not move over "private property"
@@ -53,24 +53,9 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - thought bubbles for
-    - needs
-        - food
-        - home
-        - starving
-        - sleep
-- make thoughs usable for jobs and needs
-- selected citizen to the front. If many citizen thinking they can overlap their thoughts bubble. To see each one i can select citizen
-- problem: citizen get to starving while thinking to much. Make starving gather a bit more food once triggered
-- thought animation
-    - job switch improve display text
-    - make multiple lines possible
-- thought animation
-    - job switch
-        - thought bubble
-        - display text in it
-        - each tought takes time to be able to follow
-- map zoom only in map area and prevent default
-
+    - jobs
+        - construction
+            - some problems with how buildings are setup. Code needs to be refactored.
 
 --------------------------------------------------
 Big Idea:

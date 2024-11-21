@@ -80,7 +80,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                     `I can not carry more ${INVENTORY_MUSHROOM}.`,
                     `I will store them at home.`
                 ];
-                addCitizenLogEntry(citizen, `go home to store stuff to free inventory space`, state);
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
             } else {
                 const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
@@ -135,6 +135,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                     `I will try to sell them`,
                     `at ${foodMarket.name} ${CITIZEN_JOB_FOOD_MARKET}.`
                 ];
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 citizen.moveTo = {
                     x: foodMarket.position.x,
                     y: foodMarket.position.y,

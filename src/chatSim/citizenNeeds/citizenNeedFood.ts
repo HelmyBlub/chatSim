@@ -77,7 +77,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     x: citizen.home.position.x,
                     y: citizen.home.position.y,
                 }
-                addCitizenLogEntry(citizen, `move to home to store ${INVENTORY_MUSHROOM}`, state);
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 foundFood = true;
             }
             if (!foundFood && citizen.foodPerCent < 0.5) {
@@ -96,7 +96,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         x: citizen.home.position.x,
                         y: citizen.home.position.y,
                     }
-                    addCitizenLogEntry(citizen, `move to home to eat ${INVENTORY_MUSHROOM}`, state);
+                    addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                     foundFood = true;
                 }
             }
@@ -104,7 +104,6 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (!foundFood && citizen.money >= 2) {
             const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
             if (foodMarket) {
-                addCitizenLogEntry(citizen, `move to food market from ${foodMarket.name}`, state);
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
                     state: `move to food market`,
@@ -114,6 +113,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         `I will go to ${foodMarket.name} to buy some.`,
                     ]
                 };
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 citizen.moveTo = {
                     x: foodMarket.position.x,
                     y: foodMarket.position.y,

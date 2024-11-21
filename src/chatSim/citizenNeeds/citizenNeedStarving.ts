@@ -42,11 +42,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         `I am starving. I go home to eat.`
                     ],
                 }
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 citizen.moveTo = {
                     x: citizen.home.position.x,
                     y: citizen.home.position.y,
                 }
-                addCitizenLogEntry(citizen, `move to home to eat ${INVENTORY_MUSHROOM}`, state);
                 foundFood = true;
             }
         }
@@ -63,6 +63,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         `I am starving. I go buy food at ${foodMarket.name}.`
                     ],
                 };
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 citizen.moveTo = {
                     x: foodMarket.position.x,
                     y: foodMarket.position.y,
@@ -87,6 +88,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         `I am starving. Go back gathering.`
                     ]
                 };
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
             }
         }
     } else {

@@ -1,9 +1,9 @@
-import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
 import { Building, ChatSimState, Mushroom, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { paintCitizenJobInventoryOnMarket } from "./jobs/job.js";
-import { getTimeOfDay, getTimeOfDayString } from "./main.js";
+import { getTimeOfDay, getTimeOfDayString, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { paintTrees, Tree } from "./tree.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
@@ -115,34 +115,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     }
     paintTrees(ctx, paintDataMap, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
-    const citizenHouseImage = state.images[IMAGE_PATH_CITIZEN_HOUSE];
-    const marketImage = state.images[IMAGE_PATH_BUILDING_MARKET];
-    const buildingPaintSize = 80;
-    const buildingImageSize = 200;
-    const houseNameOffsetY = 90 * buildingPaintSize / buildingImageSize;
-    const marketNameOffsetY = 181 * buildingPaintSize / buildingImageSize;
-    const marketJobOffsetY = 161 * buildingPaintSize / buildingImageSize;
-    ctx.font = "8px Arial";
-    for (let building of state.map.buildings) {
-        const paintPos = mapPositionToPaintPosition(building.position, paintDataMap);
-        let factor = (building.buildProgress !== undefined ? building.buildProgress : 1);
-        const image = building.type === "House" ? citizenHouseImage : marketImage;
-        ctx.drawImage(image, 0, buildingImageSize - buildingImageSize * factor, buildingImageSize, buildingImageSize * factor,
-            paintPos.x - buildingPaintSize / 2,
-            paintPos.y - buildingPaintSize / 2 + buildingPaintSize - buildingPaintSize * factor,
-            buildingPaintSize, buildingPaintSize * factor);
-        if (building.inhabitedBy) {
-            const nameOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.name).width / 2);
-            if (building.type === "House") {
-                drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - buildingPaintSize / 2 + houseNameOffsetY);
-            } else if (building.type === "Market") {
-                const jobOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.job.name).width / 2);
-                drawTextWithOutline(ctx, building.inhabitedBy.job.name, paintPos.x - jobOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketJobOffsetY);
-                drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketNameOffsetY);
-                paintCitizenJobInventoryOnMarket(ctx, building.inhabitedBy, state);
-            }
-        }
-    }
+    paintBuildings(ctx, state);
     paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
     ctx.restore();
@@ -163,6 +136,50 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         ctx.globalAlpha = transitionAlpha;
         ctx.fillRect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight);
         ctx.globalAlpha = 1;
+    }
+}
+
+function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    const citizenHouseImage = state.images[IMAGE_PATH_CITIZEN_HOUSE];
+    const marketImage = state.images[IMAGE_PATH_BUILDING_MARKET];
+    const buildingPaintSize = 80;
+    const buildingImageSize = 200;
+    const houseNameOffsetY = 90 * buildingPaintSize / buildingImageSize;
+    const marketNameOffsetY = 181 * buildingPaintSize / buildingImageSize;
+    const marketJobOffsetY = 161 * buildingPaintSize / buildingImageSize;
+    ctx.font = "8px Arial";
+    for (let building of state.map.buildings) {
+        const paintPos = mapPositionToPaintPosition(building.position, state.paintData.map);
+        let factor = (building.buildProgress !== undefined ? building.buildProgress : 1);
+        const image = building.type === "House" ? citizenHouseImage : marketImage;
+        ctx.drawImage(image, 0, buildingImageSize - buildingImageSize * factor, buildingImageSize, buildingImageSize * factor,
+            paintPos.x - buildingPaintSize / 2,
+            paintPos.y - buildingPaintSize / 2 + buildingPaintSize - buildingPaintSize * factor,
+            buildingPaintSize, buildingPaintSize * factor);
+        if (building.buildProgress !== undefined) {
+            const wood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
+            if (wood) {
+                const woodPaintSize = 30;
+                for (let i = 0; i < wood.counter; i++) {
+                    const offsetY = buildingPaintSize / 2 - i * 2 - woodPaintSize;
+                    ctx.drawImage(state.images[IMAGE_PATH_WOOD_PLANK], 0, 0, 200, 200,
+                        paintPos.x,
+                        paintPos.y + offsetY,
+                        woodPaintSize, woodPaintSize);
+                }
+            }
+        }
+        if (building.inhabitedBy) {
+            const nameOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.name).width / 2);
+            if (building.type === "House") {
+                drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - buildingPaintSize / 2 + houseNameOffsetY);
+            } else if (building.type === "Market") {
+                const jobOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.job.name).width / 2);
+                drawTextWithOutline(ctx, building.inhabitedBy.job.name, paintPos.x - jobOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketJobOffsetY);
+                drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketNameOffsetY);
+                paintCitizenJobInventoryOnMarket(ctx, building.inhabitedBy, state);
+            }
+        }
     }
 }
 

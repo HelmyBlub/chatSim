@@ -64,6 +64,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     `I will go home to repair my house.`,
                 ]
             };
+            addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
         } else {
             if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
                 let canBuyWood = false;
@@ -79,6 +80,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                                 `I will go to ${woodMarket.name} to buy ${INVENTORY_WOOD}`,
                             ]
                         };
+                        addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                         citizen.moveTo = {
                             x: woodMarket.position.x,
                             y: woodMarket.position.y,
