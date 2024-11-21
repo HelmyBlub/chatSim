@@ -24,6 +24,9 @@ Tasks:
         - both seller and buyer should be visible
         - make chats happen not instantly
             - conversation takes time
+    - check behind building paint
+- food need should check market building for food
+- home need should also check job market building for repair
 - more images+animations
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
