@@ -34,6 +34,11 @@ export type Building = {
     inventory: Inventory,
 }
 
+export type BuildingMarket = Building & {
+    queue: Citizen[],
+    displayedItem: string,
+}
+
 export type PaintDataMap = {
     paintOffset: Position,
     paintHeight: number,

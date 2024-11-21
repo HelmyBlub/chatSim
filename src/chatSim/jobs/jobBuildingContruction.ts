@@ -1,5 +1,5 @@
 import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, CitizenStateInfo, getAvaiableInventoryCapacity, moveItemBetweenInventories } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, CitizenStateInfo, getAvaiableInventoryCapacity, moveItemBetweenInventories, setCitizenThought } from "../citizen.js";
 import { buyItem, citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
@@ -63,11 +63,9 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         for (let building of state.map.buildings) {
             if (building.owner === citizen && building.buildProgress !== undefined) {
                 stateInfo.state = "buildHouse";
-                stateInfo.actionStartTime = state.time;
-                stateInfo.thoughts = [
+                setCitizenThought(citizen, [
                     `I have a unfinished building. Let's go there.`
-                ]
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                ], state);
                 citizen.moveTo = {
                     x: building.position.x,
                     y: building.position.y,
@@ -176,11 +174,9 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                     }
                     job.marketToBuyFrom = woodMarket;
                     stateInfo.state = "buyWoodFromMarket";
-                    stateInfo.actionStartTime = state.time;
-                    stateInfo.thoughts = [
+                    setCitizenThought(citizen, [
                         `I need more ${INVENTORY_WOOD}. I go buy from ${woodMarket.name}.`
-                    ]
-                    addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                    ], state);
                 } else {
                     const reason = [
                         `I need ${INVENTORY_WOOD} to build a building.`,

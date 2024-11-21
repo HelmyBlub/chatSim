@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, isCitizenThinking } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -72,11 +72,9 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
             if (woodMarket) {
                 job.sellToWoodMarket = woodMarket;
                 stateInfo.state = "sellToWoodMarket";
-                stateInfo.actionStartTime = state.time;
-                stateInfo.thoughts = [
+                setCitizenThought(citizen, [
                     `I can not carry more. I will sell to ${woodMarket.name}.`,
-                ];
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                ], state);
                 citizen.moveTo = {
                     x: woodMarket.position.x,
                     y: woodMarket.position.y,
@@ -100,11 +98,9 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                 stateInfo.state = undefined;
             } else {
                 stateInfo.state = "selling";
-                stateInfo.actionStartTime = state.time;
-                stateInfo.thoughts = [
+                setCitizenThought(citizen, [
                     `I do not see the ${CITIZEN_JOB_WOOD_MARKET}.`,
-                ];
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                ], state);
             }
         }
 

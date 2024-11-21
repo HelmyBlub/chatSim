@@ -1,27 +1,29 @@
 Tasks:
-- speech bubbles
-    - add new type "chat"
-        - has participants, only care for two for now
-        - has chats in order
-        - each chat has message and citizen who sayed it
-        - currently add chat object to market citizen
-    - add texts to chats
-    - draw chats
-    - make chats happen not instantly
-        - conversation takes time
-    - try on food market
-    - should display chat in order like a chat app
-- job "food market"
-    - should also work for wood market and future markets?
-    - should market sell more than one type of item?
+- restructure markets
+    - dev steps:
+        - new file jobMarket
+        - setup inventory for what it wants to sell/buy
+        - add queue for customers
+        - add displayed items property
+        - state for talking with customers
+            - market:   "How can i help you?"
+            - customer: "buy x" or "sell x"
+                case too much:
+                   - market:   "can only buy amount y"
+                   - customer:  "its fine"
+            - market: "this would cost z" | "i would pay z"
+            - customer: "ok"
+
+    - market can sell multiple items
     - change market jobs only possible with market building. 
     - change markets to get a queue so citizens don't stack above each other
     - market inventory disapears if jobs swichted. Should market continue display these
         - can only change if citizen in market building
-
     - buy/sell animation
         - speech bubbles
         - both seller and buyer should be visible
+        - make chats happen not instantly
+            - conversation takes time
 - more images+animations
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
@@ -62,6 +64,14 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- chat bubble
+    - add new type "chat"
+        - has participants, only care for two for now
+        - has chats in order
+        - each chat has message and citizen who sayed it
+        - currently add chat object to market citizen
+    - add texts to chats
+    - draw chats
 - thought bubbles for
     - jobs
         - construction

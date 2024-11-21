@@ -1,5 +1,5 @@
 import { ChatSimState, InventoryItem } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories, isCitizenThinking } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket, CITIZEN_JOB_FOOD_MARKET, findClosestFoodMarket } from "../jobs/jobFoodMarket.js";
@@ -67,17 +67,15 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
                     state: `store food at home`,
-                    actionStartTime: state.time,
-                    thoughts: [
-                        `I have enough ${INVENTORY_MUSHROOM}.`,
-                        `I will store them at home.`
-                    ]
                 }
+                setCitizenThought(citizen, [
+                    `I have enough ${INVENTORY_MUSHROOM}.`,
+                    `I will store them at home.`
+                ], state);
                 citizen.moveTo = {
                     x: citizen.home.position.x,
                     y: citizen.home.position.y,
                 }
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                 foundFood = true;
             }
             if (!foundFood && citizen.foodPerCent < 0.5) {
@@ -86,17 +84,15 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     citizen.stateInfo = {
                         type: CITIZEN_NEED_FOOD,
                         state: `go home to eat`,
-                        actionStartTime: state.time,
-                        thoughts: [
-                            `I am hungry.`,
-                            `I will go home to eat ${INVENTORY_MUSHROOM}.`,
-                        ]
                     }
+                    setCitizenThought(citizen, [
+                        `I am hungry.`,
+                        `I will go home to eat ${INVENTORY_MUSHROOM}.`,
+                    ], state);
                     citizen.moveTo = {
                         x: citizen.home.position.x,
                         y: citizen.home.position.y,
                     }
-                    addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
                     foundFood = true;
                 }
             }
@@ -107,13 +103,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
                     state: `move to food market`,
-                    actionStartTime: state.time,
-                    thoughts: [
-                        `I want to stock up on ${INVENTORY_MUSHROOM}.`,
-                        `I will go to ${foodMarket.name} to buy some.`,
-                    ]
                 };
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                setCitizenThought(citizen, [
+                    `I want to stock up on ${INVENTORY_MUSHROOM}.`,
+                    `I will go to ${foodMarket.name} to buy some.`,
+                ], state);
+
                 citizen.moveTo = {
                     x: foodMarket.position.x,
                     y: foodMarket.position.y,
@@ -133,12 +128,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
             } else if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB && citizen.stateInfo.type !== CITIZEN_STATE_TYPE_CHANGE_JOB) {
                 citizen.stateInfo = {
                     type: CITIZEN_STATE_TYPE_WORKING_JOB,
-                    actionStartTime: state.time,
-                    thoughts: [
-                        `I am low on ${INVENTORY_MUSHROOM}.`,
-                        `I will start gathering.`,
-                    ]
                 };
+                setCitizenThought(citizen, [
+                    `I am low on ${INVENTORY_MUSHROOM}.`,
+                    `I will start gathering.`,
+                ], state);
             }
         }
     } else {

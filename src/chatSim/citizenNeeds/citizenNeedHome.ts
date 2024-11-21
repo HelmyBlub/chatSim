@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity, setCitizenThought } from "../citizen.js";
 import { buyItem, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "../jobs/jobBuildingContruction.js";
 import { CITIZEN_JOB_HOUSE_MARKET } from "../jobs/jobHouseMarket.js";
@@ -59,28 +59,27 @@ function tick(citizen: Citizen, state: ChatSimState) {
             citizen.stateInfo = {
                 type: CITIZEN_NEED_HOME,
                 state: `move to house to repair`,
-                actionStartTime: state.time,
-                thoughts: [
-                    `I will go home to repair my house.`,
-                ]
             };
-            addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+            setCitizenThought(citizen, [
+                `I will go home to repair my house.`,
+            ], state);
         } else {
             if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
                 let canBuyWood = false;
                 if (citizen.money > 1) {
                     const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
                     if (woodMarket) {
-                        addCitizenLogEntry(citizen, `house repair required. Move to wood market from ${woodMarket.name} to buy wood.`, state);
                         citizen.stateInfo = {
                             type: CITIZEN_NEED_HOME,
                             state: `buy wood`,
                             actionStartTime: state.time,
                             thoughts: [
-                                `I will go to ${woodMarket.name} to buy ${INVENTORY_WOOD}`,
                             ]
                         };
-                        addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                        setCitizenThought(citizen, [
+                            `My house needs repairs. I will go to ${woodMarket.name} to buy ${INVENTORY_WOOD}`,
+                        ], state);
+
                         citizen.moveTo = {
                             x: woodMarket.position.x,
                             y: woodMarket.position.y,

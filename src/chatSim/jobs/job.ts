@@ -1,5 +1,5 @@
 import { Building, ChatSimState, Inventory, Position } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity, CITIZEN_STATE_THINKING, CitizenStateInfo } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity, CITIZEN_STATE_THINKING, CitizenStateInfo, setCitizenThought } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
@@ -34,15 +34,12 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
 
 export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string[]) {
     citizen.job = createJob(jobName, state);
-    addCitizenLogEntry(citizen, `switch job to ${jobName}. Reason: ${reason.join()}`, state);
-    const stateThinking: CitizenStateInfo = {
-        actionStartTime: state.time,
-        thoughts: reason,
+    citizen.moveTo = undefined;
+    citizen.stateInfo = {
         type: CITIZEN_STATE_TYPE_CHANGE_JOB,
         state: CITIZEN_STATE_THINKING,
     }
-    citizen.moveTo = undefined;
-    citizen.stateInfo = stateThinking;
+    setCitizenThought(citizen, reason, state);
 }
 
 export function createJob(jobname: string, state: ChatSimState): CitizenJob {

@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, setCitizenThought } from "../citizen.js";
 import { buyItem, citizenChangeJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, findClosestFoodMarket } from "../jobs/jobFoodMarket.js";
@@ -37,12 +37,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_STARVING,
                     state: `go home to eat`,
-                    actionStartTime: state.time,
-                    thoughts: [
-                        `I am starving. I go home to eat.`
-                    ],
                 }
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                setCitizenThought(citizen, [
+                    `I am starving. I go home to eat.`
+                ], state);
                 citizen.moveTo = {
                     x: citizen.home.position.x,
                     y: citizen.home.position.y,
@@ -57,12 +55,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_STARVING,
                     state: `move to food market`,
-                    actionStartTime: state.time,
-                    thoughts: [
-                        `I am starving. I go buy food at ${foodMarket.name}.`
-                    ],
                 };
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                setCitizenThought(citizen, [
+                    `I am starving. I go buy food at ${foodMarket.name}.`
+                ], state);
                 citizen.moveTo = {
                     x: foodMarket.position.x,
                     y: foodMarket.position.y,
@@ -82,12 +78,10 @@ function tick(citizen: Citizen, state: ChatSimState) {
             if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
                 citizen.stateInfo = {
                     type: CITIZEN_STATE_TYPE_WORKING_JOB,
-                    actionStartTime: state.time,
-                    thoughts: [
-                        `I am starving. Go back gathering.`
-                    ]
                 };
-                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                setCitizenThought(citizen, [
+                    `I am starving. Go back gathering.`
+                ], state);
             }
         }
     } else {

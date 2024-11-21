@@ -1,5 +1,5 @@
 import { ChatSimState, InventoryItem } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItem, sellItemWithInventories } from "./job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobFoodGatherer.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
@@ -182,15 +182,14 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                         const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (homeMushrooms && homeMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
                             stateInfo.state = "goHome";
-                            stateInfo.actionStartTime = state.time;
-                            stateInfo.thoughts = [
+                            setCitizenThought(citizen, [
                                 `I am out of ${INVENTORY_MUSHROOM}. Go home to get more.`,
-                            ]
+                            ], state);
+
                             citizen.moveTo = {
                                 x: citizen.home.position.x,
                                 y: citizen.home.position.y,
                             }
-                            addCitizenLogEntry(citizen, stateInfo.thoughts.join(), state);
                         } else {
                             const reason = [
                                 `${INVENTORY_MUSHROOM} run to low.`,

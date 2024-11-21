@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenInInteractDistance } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 
@@ -75,8 +75,7 @@ function sleep(citizen: Citizen, reason: string[], state: ChatSimState) {
     if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP) return;
     citizen.stateInfo.type = CITIZEN_NEED_SLEEP;
     citizen.stateInfo.state = undefined;
-    citizen.stateInfo.actionStartTime = state.time;
-    citizen.stateInfo.thoughts = reason;
+    setCitizenThought(citizen, reason, state);
 }
 
 function noSleep(citizen: Citizen): boolean {

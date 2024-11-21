@@ -101,6 +101,12 @@ export function addCitizenLogEntry(citizen: Citizen, message: string, state: Cha
     }
 }
 
+export function setCitizenThought(citizen: Citizen, thoughts: string[], state: ChatSimState) {
+    citizen.stateInfo.thoughts = thoughts;
+    citizen.stateInfo.actionStartTime = state.time;
+    addCitizenLogEntry(citizen, thoughts.join(""), state);
+}
+
 export function canCitizenCarryMore(citizen: Citizen): boolean {
     return getUsedInventoryCapacity(citizen.inventory) < citizen.inventory.size;
 }

@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
@@ -142,15 +142,14 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                         const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
                         if (homeWood && homeWood.counter > 0) {
                             stateInfo.state = "goHome";
-                            stateInfo.actionStartTime = state.time;
-                            stateInfo.thoughts = [
+                            setCitizenThought(citizen, [
                                 `I am out of ${INVENTORY_WOOD}. Go home to get more.`,
-                            ]
+                            ], state);
+
                             citizen.moveTo = {
                                 x: citizen.home.position.x,
                                 y: citizen.home.position.y,
                             }
-                            addCitizenLogEntry(citizen, stateInfo.thoughts.join(), state);
                         } else {
                             citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, [`${INVENTORY_WOOD} run to low`]);
                         }
