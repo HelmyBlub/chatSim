@@ -30,7 +30,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (!selected) return;
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
-    const offsetX = state.paintData.map.paintWidth + 100;
+    const offsetX = state.paintData.map.paintWidth + 20;
     const offsetY = 50;
     let lineCounter = 0;
     const lineSpacing = 25;
@@ -177,11 +177,7 @@ function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMa
 function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
-    const offsetX = state.paintData.map.paintWidth + 500;
-    ctx.fillText(`${getTimeOfDayString(state)}, speed: ${state.gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}`, offsetX, 25);
-    for (let i = 0; i < state.map.citizens.length; i++) {
-        const citizen = state.map.citizens[i];
-        let text = `${citizen.name}, state: ${citizen.stateInfo.type}, $${citizen.money}, Job: ${citizen.job.name}`;
-        ctx.fillText(text, offsetX, 50 + i * 26);
-    }
+    const offsetX = state.paintData.map.paintWidth + 20;
+    const citizenCounter = state.map.citizens.length;
+    ctx.fillText(`${getTimeOfDayString(state)}, speed: ${state.gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
 }

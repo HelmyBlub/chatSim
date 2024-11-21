@@ -73,8 +73,8 @@ function chatSimStateInit(streamer: string): ChatSimState {
         map: createDefaultMap(),
         paintData: {
             map: {
-                paintOffset: { x: 20, y: 20 },
-                paintWidth: 640,
+                paintOffset: { x: 0, y: 0 },
+                paintWidth: 1040,
                 paintHeight: 640,
                 cameraPosition: { x: 0, y: 0 },
                 zoom: 1,
