@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, isCitizenThinking } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -11,10 +11,11 @@ import { Tree } from "../tree.js";
 export type CitizenJobLuberjack = CitizenJob & {
     actionEndTime?: number,
     tree?: Tree,
+    sellToWoodMarket?: Citizen,
 }
 
 type JobLumberjackStateInfo = CitizenStateInfo & {
-    state?: "searchingTree" | "cutDownTree" | "cutTreeLogIntoPlanks" | "selling" | "goHome",
+    state?: "searchingTree" | "cutDownTree" | "cutTreeLogIntoPlanks" | "selling" | "goHome" | "sellToWoodMarket",
 }
 
 export const CITIZEN_JOB_LUMBERJACK = "Lumberjack";
@@ -62,22 +63,23 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
             stateInfo.state = undefined;
         }
     }
-    if (stateInfo.state === "selling") {
+    if (stateInfo.state === "selling" && !isCitizenThinking(citizen, state)) {
         let inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
         if (!inventoryWood || inventoryWood.counter === 0) {
             stateInfo.state = undefined;
         } else {
             const woodMarket = findAWoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
             if (woodMarket) {
-                if (isCitizenInInteractDistance(citizen, woodMarket.position)) {
-                    const woodPrice = 2;
-                    sellItem(citizen, woodMarket, INVENTORY_WOOD, woodPrice, state);
-                    stateInfo.state = undefined;
-                } else {
-                    citizen.moveTo = {
-                        x: woodMarket.position.x,
-                        y: woodMarket.position.y,
-                    }
+                job.sellToWoodMarket = woodMarket;
+                stateInfo.state = "sellToWoodMarket";
+                stateInfo.actionStartTime = state.time;
+                stateInfo.thoughts = [
+                    `I can not carry more. I will sell to ${woodMarket.name}.`,
+                ];
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+                citizen.moveTo = {
+                    x: woodMarket.position.x,
+                    y: woodMarket.position.y,
                 }
             } else {
                 const reason = [
@@ -89,6 +91,23 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                 citizenChangeJob(citizen, CITIZEN_JOB_WOOD_MARKET, state, reason);
             }
         }
+    }
+    if (stateInfo.state === "sellToWoodMarket" && !isCitizenThinking(citizen, state)) {
+        if (citizen.moveTo === undefined) {
+            if (job.sellToWoodMarket && isCitizenInInteractDistance(citizen, job.sellToWoodMarket.position)) {
+                const woodPrice = 2;
+                sellItem(citizen, job.sellToWoodMarket, INVENTORY_WOOD, woodPrice, state);
+                stateInfo.state = undefined;
+            } else {
+                stateInfo.state = "selling";
+                stateInfo.actionStartTime = state.time;
+                stateInfo.thoughts = [
+                    `I do not see the ${CITIZEN_JOB_WOOD_MARKET}.`,
+                ];
+                addCitizenLogEntry(citizen, citizen.stateInfo.thoughts!.join(), state);
+            }
+        }
+
     }
 }
 
@@ -180,7 +199,7 @@ function findAWoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Ci
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_WOOD_MARKET && citizen.money > 2 && canCitizenCarryMore(citizen)) {
+        if (citizen.job && citizen.job.name === CITIZEN_JOB_WOOD_MARKET && citizen.moveTo === undefined && citizen.money > 2 && canCitizenCarryMore(citizen)) {
             if (closest === undefined) {
                 closest = citizen;
                 distance = calculateDistance(citizen.position, searcher.position);

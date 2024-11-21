@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
-import { citizenChangeJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
+import { buyItem, citizenChangeJob, isCitizenInInteractDistance, sellItem } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { CITIZEN_JOB_FOOD_MARKET, findClosestFoodMarket } from "../jobs/jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance } from "../main.js";
@@ -54,7 +54,6 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (!foundFood && citizen.money >= 2) {
             const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
             if (foodMarket) {
-                addCitizenLogEntry(citizen, `move to food market from ${foodMarket.name}`, state);
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_STARVING,
                     state: `move to food market`,
@@ -110,12 +109,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
             } else if (citizen.moveTo === undefined) {
                 const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
-                if (foodMarket && foodMarket !== citizen) {
-                    const distance = calculateDistance(foodMarket.position, citizen.position);
-                    if (distance <= citizen.speed) {
+                if (foodMarket) {
+                    if (isCitizenInInteractDistance(citizen, foodMarket.position)) {
                         const mushroom = foodMarket.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
-                            sellItem(foodMarket, citizen, INVENTORY_MUSHROOM, 2, state, 1);
+                            buyItem(foodMarket, citizen, INVENTORY_MUSHROOM, 2, state, 1);
                             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
                         }
                     } else {
