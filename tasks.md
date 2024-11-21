@@ -1,32 +1,44 @@
 Tasks:
-- more images+animations
-    - thought bubbles for
-        - jobs
-            - wood/mushroom markets            
+- speech bubbles
+    - add new type "chat"
+        - has participants, only care for two for now
+        - has chats in order
+        - each chat has message and citizen who sayed it
+        - currently add chat object to market citizen
+    - add texts to chats
+    - draw chats
+    - make chats happen not instantly
+        - conversation takes time
+    - try on food market
+    - should display chat in order like a chat app
+- job "food market"
+    - should also work for wood market and future markets?
+    - should market sell more than one type of item?
+    - change market jobs only possible with market building. 
+    - change markets to get a queue so citizens don't stack above each other
+    - market inventory disapears if jobs swichted. Should market continue display these
+        - can only change if citizen in market building
+
     - buy/sell animation
+        - speech bubbles
+        - both seller and buyer should be visible
+- more images+animations
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
             - can not be more than two people cutting?
     - buildings in poor conditions
     - think about: inventory consitency
         - just switching jobs and the basket with mushrooms disapears. Should stay as long as mushrooms in inventory?
-        - market inventory disapears if jobs swichted. Should market continue display these
-            - can only change if citizen in market building
-    - put planks beside buildings beeing build
     - visualize citizen transporting wood planks
     - sleeping dog image
     - death animation
 
-    - make the map appear more realistic. Easier to follow what happens
-    - make actions take time for animations to be displayed
     - visaulize interactions between citizens better
         - like a chat bubble when requesting to sell or buy
     - eating animation
 - selecting click should select closest not first
 - mushroom pickup behavior
     - vision radius different for night and day
-- think about: change market jobs only possible with market. Before can try to get food from other citizens
-    - change markets to get a queue so citizens don't stack above each other
 - zoom in to mouse cursor not map middle
 
 - pathing, citizen can not move over "private property"
@@ -56,6 +68,7 @@ Tasks done today:
             - some problems with how buildings are setup. Code needs to be refactored.
         - food gatherer
         - lumberjack
+        - wood/mushroom markets            
 
 --------------------------------------------------
 Big Idea:

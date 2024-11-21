@@ -6,6 +6,7 @@ import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_FOOD_AT_HOME_NEED, CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
+import { addChatMessage, createEmptyChat } from "../chatBubble.js";
 
 export type CitizenJobFoodMarket = CitizenJob & {
 }
@@ -81,7 +82,14 @@ export function sellFoodToFoodMarket(foodMarket: Citizen, seller: Citizen, reque
     const job = foodMarket.job as CitizenJobFoodMarket;
     const sellPrice = 1;
     if (job.marketBuilding) {
-        sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, state, requestedAmount);
+        const amount = sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, state, requestedAmount);
+        if (amount !== undefined && amount > 0) {
+            const chat = createEmptyChat();
+            addChatMessage(chat, seller, `I want to sell ${requestedAmount}x${INVENTORY_MUSHROOM}`, state);
+            addChatMessage(chat, foodMarket, `I would buy ${amount}x${INVENTORY_MUSHROOM} for $${sellPrice * amount}`, state);
+            addChatMessage(chat, seller, `Yes please!`, state);
+            foodMarket.lastChat = chat;
+        }
     } else {
         sellItem(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, state, requestedAmount);
     }
@@ -158,6 +166,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
 
     if (stateInfo.state === "selling") {
         if (citizen.moveTo === undefined) {
+            citizen.paintBehindBuildings = true;
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
                 stateInfo.state = undefined;
             } else {

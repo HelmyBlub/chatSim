@@ -126,6 +126,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
 
     if (stateInfo.state === "selling") {
         if (citizen.moveTo === undefined) {
+            citizen.paintBehindBuildings = true;
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
                 stateInfo.state = undefined;
             } else {

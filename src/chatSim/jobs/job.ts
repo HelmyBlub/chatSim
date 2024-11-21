@@ -112,6 +112,7 @@ export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemNam
     buyer.money -= totalPrice;
     addCitizenLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
     addCitizenLogEntry(buyer, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
+    return tradeAmount;
 }
 
 export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {

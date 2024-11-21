@@ -1,4 +1,5 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
+import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Building, Inventory, Position, Mushroom, PaintDataMap } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
@@ -38,7 +39,9 @@ export type Citizen = {
     skills: { [key: string]: number },
     needs: CitizenNeeds,
     log: CitizenLogEntry[];
+    lastChat?: Chat,
     maxLogLength: number,
+    paintBehindBuildings?: boolean,
 }
 
 export type CitizenLogEntry = {
@@ -234,6 +237,7 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
     let nameLineWidth = 2 / state.paintData.map.zoom;
     let sortedForPaintCitizens = state.map.citizens.toSorted((a, b) => a.position.y - b.position.y);
     for (let citizen of sortedForPaintCitizens) {
+        if (citizen.paintBehindBuildings && citizen.stateInfo.state !== "selling") citizen.paintBehindBuildings = undefined;
         paintCitizen(ctx, citizen, layer, paintDataMap, nameFontSize, nameLineWidth, state);
     }
     if (state.inputData.selected && state.inputData.selected.type === "citizen") {
@@ -243,13 +247,10 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
 }
 
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
-    const paintBehind = citizen.stateInfo.state === "selling" && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB
-        && (citizen.job.name === CITIZEN_JOB_FOOD_MARKET || citizen.job.name === CITIZEN_JOB_WOOD_MARKET);
-    if (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && !paintBehind) return;
-    if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && paintBehind) return;
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
     const isAtHomeSleeping = citizen.home && citizen.stateInfo.type === CITIZEN_NEED_SLEEP && isCitizenInInteractDistance(citizen, citizen.home.position);
-    if (!isAtHomeSleeping) {
+    const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintBehindBuildings);
+    if (!isAtHomeSleeping && paintInThisLayer) {
         if (citizen.moveTo) {
             const frames = 4;
             const frameTime = 100;
@@ -269,16 +270,19 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
                 CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
             );
         }
+        paintCitizenJobTool(ctx, citizen, state);
     }
 
-    paintThoughtBubble(ctx, citizen, paintPos, state);
-    paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
-    paintCitizenJobTool(ctx, citizen, state);
+    if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES) {
+        paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
+        paintThoughtBubble(ctx, citizen, paintPos, state);
+        paintChatBubbles(ctx, citizen, citizen.lastChat, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 4 }, state);
 
-    ctx.font = `${nameFontSize}px Arial`;
-    const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
-    const nameYSpacing = 5;
-    drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
+        ctx.font = `${nameFontSize}px Arial`;
+        const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
+        const nameYSpacing = 5;
+        drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
+    }
 }
 
 function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
