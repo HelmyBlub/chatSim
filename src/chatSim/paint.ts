@@ -197,10 +197,12 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const offsetX = state.paintData.map.paintWidth + 20;
     const citizenCounter = state.map.citizens.length;
     ctx.fillText(`${getTimeOfDayString(state)}, speed: ${state.gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
-    for (let i = 0; i < Math.min(20, state.map.citizens.length); i++) {
-        const citizen = state.map.citizens[i];
-        ctx.fillText(`${citizen.name}`, offsetX, 45 + 20 * i);
-        ctx.fillText(`$${citizen.money}`, offsetX + 240, 45 + 20 * i);
-        ctx.fillText(`job:${citizen.job.name}`, offsetX + 300, 45 + 20 * i);
+    if (state.inputData.selected === undefined) {
+        for (let i = 0; i < Math.min(20, state.map.citizens.length); i++) {
+            const citizen = state.map.citizens[i];
+            ctx.fillText(`${citizen.name}`, offsetX, 45 + 20 * i);
+            ctx.fillText(`$${citizen.money}`, offsetX + 240, 45 + 20 * i);
+            ctx.fillText(`job:${citizen.job.name}`, offsetX + 300, 45 + 20 * i);
+        }
     }
 }

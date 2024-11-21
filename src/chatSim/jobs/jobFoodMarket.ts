@@ -173,11 +173,15 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                         const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (homeMushrooms && homeMushrooms.counter > CITIZEN_FOOD_AT_HOME_NEED) {
                             stateInfo.state = "goHome";
+                            stateInfo.actionStartTime = state.time;
+                            stateInfo.thoughts = [
+                                `I am out of ${INVENTORY_MUSHROOM}. Go home to get more.`,
+                            ]
                             citizen.moveTo = {
                                 x: citizen.home.position.x,
                                 y: citizen.home.position.y,
                             }
-                            addCitizenLogEntry(citizen, `move home to get ${INVENTORY_MUSHROOM} as inventory empty`, state);
+                            addCitizenLogEntry(citizen, stateInfo.thoughts.join(), state);
                         } else {
                             const reason = [
                                 `${INVENTORY_MUSHROOM} run to low.`,

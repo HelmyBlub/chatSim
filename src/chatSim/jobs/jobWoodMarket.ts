@@ -141,11 +141,15 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                         const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
                         if (homeWood && homeWood.counter > 0) {
                             stateInfo.state = "goHome";
+                            stateInfo.actionStartTime = state.time;
+                            stateInfo.thoughts = [
+                                `I am out of ${INVENTORY_WOOD}. Go home to get more.`,
+                            ]
                             citizen.moveTo = {
                                 x: citizen.home.position.x,
                                 y: citizen.home.position.y,
                             }
-                            addCitizenLogEntry(citizen, `move home to get ${INVENTORY_WOOD} as inventory empty`, state);
+                            addCitizenLogEntry(citizen, stateInfo.thoughts.join(), state);
                         } else {
                             citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, [`${INVENTORY_WOOD} run to low`]);
                         }

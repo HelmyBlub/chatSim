@@ -2,7 +2,6 @@ Tasks:
 - more images+animations
     - thought bubbles for
         - jobs
-            - lumberjack
             - wood/mushroom markets            
     - buy/sell animation
     - don't move directly to the middle
@@ -56,6 +55,7 @@ Tasks done today:
         - construction
             - some problems with how buildings are setup. Code needs to be refactored.
         - food gatherer
+        - lumberjack
 
 --------------------------------------------------
 Big Idea:
