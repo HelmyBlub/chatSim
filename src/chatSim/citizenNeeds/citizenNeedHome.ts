@@ -115,6 +115,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
                     }
                     citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+                    return;
                 }
             }
         }
@@ -132,6 +133,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+                return;
             }
         }
     }

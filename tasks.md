@@ -1,14 +1,9 @@
 Tasks:
-- add timestamp to action log
+- make canvas resize on window resize. Don't want to refresh browser for this
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
-        - implement getItem
-        - fix all the code
-    - state stack
-        - always only tick last one. push and pop
-    - currently alot of code duplication would happen. Should restructure code to be more reusable
-    - more reusable if done bad can hurt more
-    - so i should think more about it
+        - get citizen behavior back to working
+        - try use new code structure ideas for all
     - citizenHelperTasks:
         - sellItem:
             - sell mushrooms
@@ -115,6 +110,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- resturcture citizen behavior to have some code i can use for every job
+    - nextstep?:   
+        - implement getItem
+        - fix all the code
+- add timestamp to action log
 
 --------------------------------------------------
 Big Idea:

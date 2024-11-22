@@ -149,6 +149,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+                return;
             }
         }
         if (citizen.stateInfo.stack[0].state === `store food at home`) {
@@ -160,6 +161,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+                return;
             }
         }
         if (citizen.stateInfo.stack[0].state === `move to food market`) {
@@ -173,6 +175,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         if (mushroom) {
                             buyFoodFromFoodMarket(foodMarket, citizen, 4, state);
                             citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+                            return;
                         }
                     } else {
                         addCitizenLogEntry(citizen, `food market location changed. Move to new location of food market from ${foodMarket.name}`, state);

@@ -315,7 +315,7 @@ function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_THINKING) {
         const stateInfo = citizen.stateInfo;
         if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + CITIZEN_TIME_PER_THOUGHT_LINE * stateInfo.thoughts!.length < state.time) {
-            stateInfo.stack.shift();
+            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
         }
     }
 }
