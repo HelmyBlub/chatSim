@@ -6,7 +6,7 @@ import { chatSimAddInputEventListeners } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
-import { chatSimTick } from "./tick.js";
+import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 
 export const SKILL_GATHERING = "Gathering";
 export const INVENTORY_MUSHROOM = "Mushroom";
@@ -112,6 +112,7 @@ function initMyApp() {
     loadCitizenNeedsFunctions(state);
     loadLocalStorageChatters(state);
     loadImages(state);
+    onLoadCitizenStateDefaultTickFuntions();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === state.streamer) {

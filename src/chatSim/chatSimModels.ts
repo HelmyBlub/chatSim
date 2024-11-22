@@ -1,22 +1,12 @@
 import { Citizen } from "./citizen.js"
 import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
+import { Inventory } from "./inventory.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap } from "./map.js"
 
 export type Position = {
     x: number,
     y: number,
-}
-
-export type InventoryItem = {
-    name: string,
-    counter: number,
-}
-
-export type Inventory = {
-    items: InventoryItem[],
-    reservedSpace?: InventoryItem[],
-    size: number,
 }
 
 export type Mushroom = {

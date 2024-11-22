@@ -1,18 +1,19 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, moveItemBetweenInventories, setCitizenThought } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
+import { inventoryEmptyCitizenToHomeInventory, inventoryMoveItemBetween } from "../inventory.js";
 
 export type CitizenJobWoodMarket = CitizenJob & {
     lastCheckedForConstructionJobs?: number,
 }
 
-type JobWoodMarketStateInfo = CitizenStateInfo & {
-    state?: "selling" | "goHome",
+type JobWoodMarketStateInfo = {
+    state: "selling" | "goHome",
 }
 
 export const CITIZEN_JOB_WOOD_MARKET = "Wood Market";
@@ -73,9 +74,7 @@ function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen,
 }
 
 function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobWoodMarketStateInfo;
-
-    if (stateInfo.state === undefined) {
+    if (citizen.stateInfo.stack.length === 0) {
         if (job.lastCheckedForConstructionJobs === undefined || job.lastCheckedForConstructionJobs + CHECK_INTERVAL < state.time) {
             let jobExists = false;
             for (let jobber of state.map.citizens) {
@@ -98,29 +97,33 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                 x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
                 y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
             }
-            stateInfo.state = "selling";
+            const citizenState: JobWoodMarketStateInfo = { state: "selling" };
+            citizen.stateInfo.stack.push(citizenState);
         } else {
             job.marketBuilding.inhabitedBy = citizen;
             citizen.moveTo = {
                 x: job.marketBuilding.position.x,
                 y: job.marketBuilding.position.y,
             }
-            stateInfo.state = "selling";
+            const citizenState: JobWoodMarketStateInfo = { state: "selling" };
+            citizen.stateInfo.stack.push(citizenState);
         }
     }
+    if (citizen.stateInfo.stack.length === 0) return;
+    const stateInfo = citizen.stateInfo.stack[0] as JobWoodMarketStateInfo;
 
     if (stateInfo.state === "goHome") {
         if (citizen.moveTo === undefined) {
             if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                emptyCitizenInventoryToHomeInventory(citizen, state);
+                inventoryEmptyCitizenToHomeInventory(citizen, state);
                 const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (homeWood && homeWood.counter > 0) {
                     const amount = Math.min(homeWood.counter, citizen.inventory.size - 2);
-                    const actualAmount = moveItemBetweenInventories(INVENTORY_WOOD, citizen.home.inventory, citizen.inventory, amount);
+                    const actualAmount = inventoryMoveItemBetween(INVENTORY_WOOD, citizen.home.inventory, citizen.inventory, amount);
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_WOOD} from home inventory to inventory`, state);
                 }
             }
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
         }
     }
 
@@ -128,12 +131,12 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
         if (citizen.moveTo === undefined) {
             citizen.paintBehindBuildings = true;
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
-                stateInfo.state = undefined;
+                citizen.stateInfo.stack.shift();
             } else {
                 let wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (job.marketBuilding) {
                     if (wood && wood.counter > 0) {
-                        moveItemBetweenInventories(INVENTORY_WOOD, citizen.inventory, job.marketBuilding.inventory, wood.counter);
+                        inventoryMoveItemBetween(INVENTORY_WOOD, citizen.inventory, job.marketBuilding.inventory, wood.counter);
                     }
                     wood = job.marketBuilding.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 }

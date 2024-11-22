@@ -1,9 +1,56 @@
 Tasks:
 - add timestamp to action log
+- resturcture citizen behavior to have some code i can use for every job
+    - nextstep?:   
+        - implement getItem
+        - fix all the code
+    - state stack
+        - always only tick last one. push and pop
+    - currently alot of code duplication would happen. Should restructure code to be more reusable
+    - more reusable if done bad can hurt more
+    - so i should think more about it
+    - citizenHelperTasks:
+        - sellItem:
+            - sell mushrooms
+            - sell wood
+        - getItem
+            - wood, to build building
+            - wood, to repair building
+            - food, to not starve
+            - food, to store some at home
+            - item to stock up at market
+        - getBuilding
+            - home for home need
+            - market for job market
+    - job food market
+        - step1: need market
+            - getBuilding market
+                - check if building exists
+                    - does
+                        - done
+                    - else 
+                        - check if unfinished building exists
+                            - continue building
+                        - getItem wood
+                            - can buy
+                                - done
+                            - can not buy
+                                - lumberjack myself
+                                    - done
+                        - build market
+                            - done
+        - step2: fill up market inventory
+            - use only own inventories
+
+    
+    - finding one material and geting it into inventory
+        - make string to function mapping for stateInfo.state
 - restructure markets
     - dev steps:
         - new file jobMarket
         - setup inventory for what it wants to sell/buy
+        - creating job change: requires market building
+            - 
         - add queue for customers
         - add displayed items property
         - state for talking with customers
@@ -68,25 +115,6 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- restructure markets
-    - dev steps:
-        - new file jobMarket
-        - setup inventory for what it wants to sell/buy
-- chat bubble
-    - add new type "chat"
-        - has participants, only care for two for now
-        - has chats in order
-        - each chat has message and citizen who sayed it
-        - currently add chat object to market citizen
-    - add texts to chats
-    - draw chats
-- thought bubbles for
-    - jobs
-        - construction
-            - some problems with how buildings are setup. Code needs to be refactored.
-        - food gatherer
-        - lumberjack
-        - wood/mushroom markets            
 
 --------------------------------------------------
 Big Idea:

@@ -1,19 +1,21 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Building, Inventory, Position, Mushroom, PaintDataMap } from "./chatSimModels.js";
+import { ChatSimState, Building, Position, Mushroom, PaintDataMap } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
-import { CITIZEN_NEED_SLEEP } from "./citizenNeeds/citizenNeedSleep.js";
+import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
+import { inventoryGetUsedCapacity, Inventory } from "./inventory.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
-import { CITIZEN_JOB_FOOD_MARKET, hasFoodMarketStock } from "./jobs/jobFoodMarket.js";
-import { CITIZEN_JOB_WOOD_MARKET } from "./jobs/jobWoodMarket.js";
-import { calculateDirection, calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
+import { calculateDirection, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { Tree } from "./tree.js";
 
 export type CitizenStateInfo = {
     type: string,
-    state?: string,
+    stack: {
+        state: string,
+        data?: any,
+    }[],
     actionStartTime?: number,
     thoughts?: string[],
 }
@@ -65,6 +67,7 @@ export function addCitizen(user: string, state: ChatSimState) {
         position: { x: 0, y: 0 },
         stateInfo: {
             type: CITIZEN_STATE_TYPE_WORKING_JOB,
+            stack: [],
         },
         needs: {
             needsData: {},
@@ -108,83 +111,7 @@ export function setCitizenThought(citizen: Citizen, thoughts: string[], state: C
 }
 
 export function canCitizenCarryMore(citizen: Citizen): boolean {
-    return getUsedInventoryCapacity(citizen.inventory) < citizen.inventory.size;
-}
-
-export function getAvaiableInventoryCapacity(inventory: Inventory, itemName: string) {
-    if (inventory.reservedSpace) {
-        let counter = 0;
-        for (let item of inventory.items) {
-            const reserved = inventory.reservedSpace.find(i => i.name === item.name);
-            if (itemName !== item.name && reserved) {
-                if (reserved.counter > item.counter) {
-                    counter += reserved.counter;
-                } else {
-                    counter += item.counter;
-                }
-            } else {
-                counter += item.counter;
-            }
-        }
-        return Math.max(inventory.size - counter, 0);
-    } else {
-        return Math.max(inventory.size - getUsedInventoryCapacity(inventory), 0);
-    }
-}
-
-export function getUsedInventoryCapacity(inventory: Inventory): number {
-    let counter = 0;
-    for (let item of inventory.items) {
-        counter += item.counter;
-    }
-    return counter;
-}
-
-export function emptyCitizenInventoryToHomeInventory(citizen: Citizen, state: ChatSimState) {
-    if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
-        for (let item of citizen.inventory.items) {
-            if (item.counter > 0) {
-                const amount = moveItemBetweenInventories(item.name, citizen.inventory, citizen.home.inventory, item.counter);
-                if (amount > 0) addCitizenLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
-            }
-        }
-    }
-}
-
-export function moveItemBetweenInventories(itemName: string, fromInventory: Inventory, toInventory: Inventory, amount: number | undefined = undefined): number {
-    const item = fromInventory.items.find(i => i.name === itemName);
-    if (!item || item.counter === 0) {
-        return 0;
-    }
-    let maxFromInventoryAmount = amount !== undefined ? amount : item.counter;
-    if (item.counter < maxFromInventoryAmount) {
-        maxFromInventoryAmount = item.counter;
-    }
-    const toAmount = putItemIntoInventory(itemName, toInventory, maxFromInventoryAmount);
-    item.counter -= toAmount;
-    return toAmount;
-}
-
-/**
- * @returns actual amount put into inventory. As inventory has a max capacity it might not fit all in
- */
-export function putItemIntoInventory(itemName: string, inventory: Inventory, amount: number): number {
-    let item = inventory.items.find(i => i.name === itemName);
-    let actualAmount = amount;
-    if (!item) {
-        item = {
-            name: itemName,
-            counter: 0,
-        }
-        inventory.items.push(item);
-    }
-    const availableCapacity = getAvaiableInventoryCapacity(inventory, itemName);
-    if (actualAmount > availableCapacity) actualAmount = availableCapacity;
-    if (actualAmount < 0) {
-        throw "negativ trade not allowed";
-    }
-    item.counter += actualAmount;
-    return actualAmount;
+    return inventoryGetUsedCapacity(citizen.inventory) < citizen.inventory.size;
 }
 
 export function tickCitizens(state: ChatSimState) {
@@ -243,7 +170,6 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
     let nameLineWidth = 2 / state.paintData.map.zoom;
     let sortedForPaintCitizens = state.map.citizens.toSorted((a, b) => a.position.y - b.position.y);
     for (let citizen of sortedForPaintCitizens) {
-        if (citizen.paintBehindBuildings && citizen.stateInfo.state !== "selling") citizen.paintBehindBuildings = undefined;
         paintCitizen(ctx, citizen, layer, paintDataMap, nameFontSize, nameLineWidth, state);
     }
     if (state.inputData.selected && state.inputData.selected.type === "citizen") {
@@ -363,7 +289,7 @@ function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, pai
 
 function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPosition: Position, time: number) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) return;
-    if (citizen.stateInfo.state !== "sleeping") return;
+    if (citizen.stateInfo.stack[0].state !== CITIZEN_NEED_STATE_SLEEPING) return;
     const timer = time / 300;
     const swingRadius = 10;
     const fontSize = 14;
@@ -386,13 +312,10 @@ function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
         tickCitizenJob(citizen, state);
     }
-    if (citizen.stateInfo.state === CITIZEN_STATE_THINKING) {
+    if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_THINKING) {
         const stateInfo = citizen.stateInfo;
         if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + CITIZEN_TIME_PER_THOUGHT_LINE * stateInfo.thoughts!.length < state.time) {
-            if (stateInfo.type === CITIZEN_STATE_TYPE_CHANGE_JOB) {
-                stateInfo.type = CITIZEN_STATE_TYPE_WORKING_JOB;
-                stateInfo.state = undefined;
-            }
+            stateInfo.stack.shift();
         }
     }
 }

@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, emptyCitizenInventoryToHomeInventory, getAvaiableInventoryCapacity, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -7,6 +7,7 @@ import { removeTreeFromMap } from "../map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_AXE } from "../../drawHelper.js";
 import { Tree } from "../tree.js";
+import { inventoryEmptyCitizenToHomeInventory, inventoryGetAvaiableCapacity } from "../inventory.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     actionEndTime?: number,
@@ -14,8 +15,8 @@ export type CitizenJobLuberjack = CitizenJob & {
     sellToWoodMarket?: Citizen,
 }
 
-type JobLumberjackStateInfo = CitizenStateInfo & {
-    state?: "searchingTree" | "cutDownTree" | "cutTreeLogIntoPlanks" | "selling" | "goHome" | "sellToWoodMarket",
+type JobLumberjackStateInfo = {
+    state: "searchingTree" | "cutDownTree" | "cutTreeLogIntoPlanks" | "selling" | "goHome" | "sellToWoodMarket",
 }
 
 export const CITIZEN_JOB_LUMBERJACK = "Lumberjack";
@@ -36,11 +37,11 @@ function create(state: ChatSimState): CitizenJobLuberjack {
 }
 
 function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobLumberjackStateInfo;
+    const stateInfo = citizen.stateInfo.stack.length > 0 ? citizen.stateInfo.stack[0] : undefined;
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const axeSize = 20;
     ctx.save();
-    if (citizen.moveTo === undefined && (stateInfo.state === "cutDownTree" || stateInfo.state === "cutTreeLogIntoPlanks")) {
+    if (citizen.moveTo === undefined && (stateInfo && (stateInfo.state === "cutDownTree" || stateInfo.state === "cutTreeLogIntoPlanks"))) {
         const rotation = (Math.sin(state.time / 100) + 1) / 2 * Math.PI / 2;
         ctx.translate(paintPos.x, paintPos.y);
         ctx.rotate(rotation)
@@ -51,22 +52,23 @@ function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: Citizen
 }
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobLumberjackStateInfo;
-    if (stateInfo.state === undefined) decideNext(citizen, job, state);
+    if (citizen.stateInfo.stack.length === 0) decideNext(citizen, job, state);
+    if (citizen.stateInfo.stack.length === 0) return;
+    const stateInfo = citizen.stateInfo.stack[0] as JobLumberjackStateInfo;
     if (stateInfo.state === "searchingTree") searchTree(citizen, job, state);
     if (stateInfo.state === "cutDownTree") cutDownTree(citizen, job, state);
     if (stateInfo.state === "cutTreeLogIntoPlanks") cutTreeLogIntoPlanks(citizen, job, state);
 
     if (stateInfo.state === "goHome") {
         if (citizen.moveTo === undefined) {
-            emptyCitizenInventoryToHomeInventory(citizen, state);
-            stateInfo.state = undefined;
+            inventoryEmptyCitizenToHomeInventory(citizen, state);
+            citizen.stateInfo.stack.shift();
         }
     }
     if (stateInfo.state === "selling" && !isCitizenThinking(citizen, state)) {
         let inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
         if (!inventoryWood || inventoryWood.counter === 0) {
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
         } else {
             const woodMarket = findAWoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
             if (woodMarket) {
@@ -95,7 +97,7 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
             if (job.sellToWoodMarket && isCitizenInInteractDistance(citizen, job.sellToWoodMarket.position)) {
                 const woodPrice = 2;
                 sellItem(citizen, job.sellToWoodMarket, INVENTORY_WOOD, woodPrice, state);
-                stateInfo.state = undefined;
+                citizen.stateInfo.stack.shift();
             } else {
                 stateInfo.state = "selling";
                 setCitizenThought(citizen, [
@@ -109,13 +111,13 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
 
 function cutDownTree(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
-        const stateInfo = citizen.stateInfo as JobLumberjackStateInfo;
+        const stateInfo = citizen.stateInfo.stack[0] as JobLumberjackStateInfo;
         if (!job.tree) {
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
             return;
         }
         if (!isCitizenInInteractDistance(citizen, job.tree.position)) {
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
             return;
         }
         if (job.tree.trunkDamagePerCent < 1) {
@@ -132,11 +134,11 @@ function cutDownTree(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimS
 }
 
 function cutTreeLogIntoPlanks(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobLumberjackStateInfo;
+    const stateInfo = citizen.stateInfo.stack[0] as JobLumberjackStateInfo;
     if (!job.tree || job.tree.woodValue === 0
         || !isCitizenInInteractDistance(citizen, job.tree.position)
     ) {
-        stateInfo.state = undefined;
+        citizen.stateInfo.stack.shift();
         return;
     }
     const cutDuration = 1000;
@@ -144,18 +146,17 @@ function cutTreeLogIntoPlanks(citizen: Citizen, job: CitizenJobLuberjack, state:
     if (job.actionEndTime < state.time) {
         job.actionEndTime = state.time + cutDuration;
         const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-        if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
+        if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
             cutTreeForWood(citizen, job.tree, state);
         } else {
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
         }
     }
-
 }
 
 function searchTree(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     if (job.actionEndTime !== undefined && job.actionEndTime < state.time) {
-        const stateInfo = citizen.stateInfo as JobLumberjackStateInfo;
+        const stateInfo = citizen.stateInfo.stack[0] as JobLumberjackStateInfo;
         if (state.map.trees.length > 0) {
             stateInfo
             const treeIndex = Math.floor(Math.random() * state.map.trees.length);
@@ -172,13 +173,13 @@ function searchTree(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimSt
 
 function decideNext(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-    const stateInfo = citizen.stateInfo as JobLumberjackStateInfo;
-    if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
+    const stateInfo = citizen.stateInfo.stack[0] as JobLumberjackStateInfo;
+    if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
         const lookingForTreeDuration = 1000;
         stateInfo.state = "searchingTree";
         job.actionEndTime = state.time + lookingForTreeDuration;
     } else {
-        if (citizen.home && getAvaiableInventoryCapacity(citizen.home.inventory, INVENTORY_WOOD) > 5) {
+        if (citizen.home && inventoryGetAvaiableCapacity(citizen.home.inventory, INVENTORY_WOOD) > 5) {
             stateInfo.state = "goHome";
             citizen.moveTo = {
                 x: citizen.home.position.x,

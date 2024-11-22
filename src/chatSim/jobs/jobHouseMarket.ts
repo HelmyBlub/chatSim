@@ -7,8 +7,8 @@ export type CitizenJobHouseMarket = CitizenJob & {
     lastCheckedHouseAvailability?: number,
 }
 
-type JobHouseMarketStateInfo = CitizenStateInfo & {
-    state?: "selling",
+type JobHouseMarketStateInfo = {
+    state: "selling",
 }
 
 export const CITIZEN_JOB_HOUSE_MARKET = "House Market";
@@ -28,8 +28,6 @@ function create(state: ChatSimState): CitizenJobHouseMarket {
 }
 
 function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobHouseMarketStateInfo;
-
     if (job.lastCheckedHouseAvailability === undefined || job.lastCheckedHouseAvailability + CHECK_INTERVAL < state.time) {
         let housesAvailable = false;
         for (let house of state.map.buildings) {
@@ -44,11 +42,12 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
             return;
         }
     }
-    if (stateInfo.state === undefined) {
+    if (citizen.stateInfo.stack.length === 0) {
         citizen.moveTo = {
             x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
             y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
         }
-        stateInfo.state = "selling";
+        const citizenState: JobHouseMarketStateInfo = { state: "selling" };
+        citizen.stateInfo.stack.push(citizenState);
     }
 }

@@ -1,5 +1,6 @@
-import { ChatSimState, InventoryItem } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, moveItemBetweenInventories, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { InventoryItem, inventoryMoveItemBetween } from "../inventory.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
 import { buyFoodFromFoodMarket, CITIZEN_JOB_FOOD_MARKET, findClosestFoodMarket } from "../jobs/jobFoodMarket.js";
@@ -66,7 +67,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
-                    state: `store food at home`,
+                    stack: [{ state: `store food at home` }],
                 }
                 setCitizenThought(citizen, [
                     `I have enough ${INVENTORY_MUSHROOM}.`,
@@ -83,7 +84,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 if (homeMushrooms && homeMushrooms.counter > 0) {
                     citizen.stateInfo = {
                         type: CITIZEN_NEED_FOOD,
-                        state: `go home to eat`,
+                        stack: [{ state: `go home to eat` }],
                     }
                     setCitizenThought(citizen, [
                         `I am hungry.`,
@@ -102,7 +103,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             if (foodMarket) {
                 citizen.stateInfo = {
                     type: CITIZEN_NEED_FOOD,
-                    state: `move to food market`,
+                    stack: [{ state: `move to food market` }],
                 };
                 setCitizenThought(citizen, [
                     `I want to stock up on ${INVENTORY_MUSHROOM}.`,
@@ -128,6 +129,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             } else if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB && citizen.stateInfo.type !== CITIZEN_STATE_TYPE_CHANGE_JOB) {
                 citizen.stateInfo = {
                     type: CITIZEN_STATE_TYPE_WORKING_JOB,
+                    stack: [],
                 };
                 setCitizenThought(citizen, [
                     `I am low on ${INVENTORY_MUSHROOM}.`,
@@ -135,8 +137,8 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 ], state);
             }
         }
-    } else {
-        if (citizen.stateInfo.state === `go home to eat`) {
+    } else if (citizen.stateInfo.stack.length > 0) {
+        if (citizen.stateInfo.stack[0].state === `go home to eat`) {
             if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                     const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
@@ -146,23 +148,23 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         }
                     }
                 }
-                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
             }
         }
-        if (citizen.stateInfo.state === `store food at home`) {
+        if (citizen.stateInfo.stack[0].state === `store food at home`) {
             if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
                 if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
                     const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (inventoryMushrooms) {
-                        moveItemBetweenInventories(INVENTORY_MUSHROOM, citizen.inventory, citizen.home.inventory);
+                        inventoryMoveItemBetween(INVENTORY_MUSHROOM, citizen.inventory, citizen.home.inventory);
                     }
                 }
-                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
             }
         }
-        if (citizen.stateInfo.state === `move to food market`) {
+        if (citizen.stateInfo.stack[0].state === `move to food market`) {
             if (citizen.money < 2) {
-                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
             } else if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
                 const foodMarket = findClosestFoodMarket(citizen, state.map.citizens, true);
                 if (foodMarket) {
@@ -170,7 +172,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         const mushroom = foodMarket.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                         if (mushroom) {
                             buyFoodFromFoodMarket(foodMarket, citizen, 4, state);
-                            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB };
+                            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
                         }
                     } else {
                         addCitizenLogEntry(citizen, `food market location changed. Move to new location of food market from ${foodMarket.name}`, state);

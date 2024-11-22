@@ -1,5 +1,5 @@
-import { Building, ChatSimState, Inventory, Position } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, getAvaiableInventoryCapacity, CITIZEN_STATE_THINKING, CitizenStateInfo, setCitizenThought } from "../citizen.js";
+import { Building, ChatSimState, Position } from "../chatSimModels.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, CITIZEN_STATE_THINKING, setCitizenThought } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
@@ -7,6 +7,7 @@ import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
 import { calculateDistance } from "../main.js";
+import { Inventory, inventoryGetAvaiableCapacity } from "../inventory.js";
 
 export type CitizenJob = {
     name: string,
@@ -37,8 +38,8 @@ export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatS
     citizen.moveTo = undefined;
     citizen.stateInfo = {
         type: CITIZEN_STATE_TYPE_CHANGE_JOB,
-        state: CITIZEN_STATE_THINKING,
-    }
+        stack: [{ state: CITIZEN_STATE_THINKING }],
+    };
     setCitizenThought(citizen, reason, state);
 }
 
@@ -90,7 +91,7 @@ export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemNam
     const sellerItem = sellerInventory.items.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    let buyerInventoryCapacity = getAvaiableInventoryCapacity(buyerInventory, itemName);
+    let buyerInventoryCapacity = inventoryGetAvaiableCapacity(buyerInventory, itemName);
     const buyerInventoryMoneyAmount = Math.min(buyerInventoryCapacity, Math.floor(buyer.money / itemPrice));
     const buyerAmount = requestedAmount !== undefined ? Math.min(buyerInventoryMoneyAmount, requestedAmount) : buyerInventoryMoneyAmount;
     const tradeAmount = Math.min(sellerAmount, buyerAmount);

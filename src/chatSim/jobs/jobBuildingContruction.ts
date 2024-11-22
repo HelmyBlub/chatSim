@@ -1,15 +1,16 @@
-import { Position, Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, CitizenStateInfo, getAvaiableInventoryCapacity, moveItemBetweenInventories, setCitizenThought } from "../citizen.js";
-import { buyItem, citizenChangeJob, CitizenJob, isCitizenInInteractDistance, sellItem } from "./job.js";
+import { Building, ChatSimState, BuildingType } from "../chatSimModels.js";
+import { addCitizenLogEntry, Citizen, CitizenStateInfo, setCitizenThought } from "../citizen.js";
+import { buyItem, citizenChangeJob, CitizenJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
+import { inventoryGetAvaiableCapacity, inventoryMoveItemBetween } from "../inventory.js";
 
-type JobContructionStateInfo = CitizenStateInfo & {
-    state?: "buyWood" | "buildHouse" | "searchBuildLocation" | "buyWoodFromMarket" | "carryWoodToSetupLocation",
+type JobContructionStateInfo = {
+    state: "buyWood" | "buildHouse" | "searchBuildLocation" | "buyWoodFromMarket" | "carryWoodToSetupLocation",
 }
 
 export type CitizenJobBuildingConstruction = CitizenJob & {
@@ -19,7 +20,7 @@ export type CitizenJobBuildingConstruction = CitizenJob & {
 }
 
 export const CITIZEN_JOB_BUILDING_CONSTRUCTION = "Building Construction";
-const BUILDING_DATA: { [key: string]: { woodAmount: number } } = {
+export const BUILDING_DATA: { [key: string]: { woodAmount: number } } = {
     "House": {
         woodAmount: 5,
     },
@@ -49,15 +50,16 @@ function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: Citizen
 }
 
 function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobContructionStateInfo;
-    if (stateInfo.state === undefined) {
+    if (citizen.stateInfo.stack.length === 0) {
         if (!citizen.home) {
             job.buildType = "House";
         } else {
             job.buildType = Math.random() < 0.5 ? "House" : "Market";
         }
-        stateInfo.state = "searchBuildLocation";
+        const citizenState: JobContructionStateInfo = { state: "searchBuildLocation" };
+        citizen.stateInfo.stack.push(citizenState);
     }
+    const stateInfo = citizen.stateInfo.stack[0] as JobContructionStateInfo;
     if (stateInfo.state === "searchBuildLocation") {
         let doIHaveAHouseBuildInProgress = false;
         for (let building of state.map.buildings) {
@@ -101,7 +103,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                 const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 const woodRequired = BUILDING_DATA[job.buildingInProgress.type].woodAmount;
                 if (inventoryWood && inventoryWood.counter >= woodRequired) {
-                    moveItemBetweenInventories(INVENTORY_WOOD, citizen.inventory, job.buildingInProgress.inventory, woodRequired);
+                    inventoryMoveItemBetween(INVENTORY_WOOD, citizen.inventory, job.buildingInProgress.inventory, woodRequired);
                     stateInfo.state = "buildHouse";
                 } else {
                     addCitizenLogEntry(citizen, `not enough wood. Buy some.`, state);
@@ -111,7 +113,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             } else {
                 addCitizenLogEntry(citizen, `no building in progress. But i should have? `, state);
                 debugger;
-                stateInfo.state = undefined;
+                citizen.stateInfo.stack.shift();
                 job.buildingInProgress = undefined;
             }
         }
@@ -144,7 +146,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                     job.buildType = undefined;
                 }
             } else {
-                stateInfo.state = undefined;
+                citizen.stateInfo.stack.shift();
             }
         }
     }
@@ -164,7 +166,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
         }
     }
     if (stateInfo.state === "buyWood") {
-        if (getAvaiableInventoryCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
+        if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
             if (citizen.money > 2) {
                 const woodMarket = findAWoodMarketWhichHasWood(citizen, state.map.citizens);
                 if (woodMarket) {
