@@ -60,7 +60,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
         return noSleep(citizen);
     }
 
-    const time = getTimeOfDay(state);
+    const time = getTimeOfDay(state.time, state);
     const goToBedTime = 0.9;
     const sleepDuration = 0.33;
     const wakeUpTime = (goToBedTime + sleepDuration) % 1;

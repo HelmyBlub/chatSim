@@ -1,4 +1,5 @@
 Tasks:
+- add timestamp to action log
 - restructure markets
     - dev steps:
         - new file jobMarket
@@ -67,6 +68,10 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- restructure markets
+    - dev steps:
+        - new file jobMarket
+        - setup inventory for what it wants to sell/buy
 - chat bubble
     - add new type "chat"
         - has participants, only care for two for now

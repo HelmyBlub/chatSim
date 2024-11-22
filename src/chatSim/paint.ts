@@ -57,7 +57,8 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(`    Action Log:`, offsetX, offsetY + lineSpacing * lineCounter++);
             for (let i = 0; i < Math.min(5, citizen.log.length); i++) {
                 const logEntry = citizen.log[i];
-                ctx.fillText(`        ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
+                const time = getTimeOfDayString(logEntry.time, state);
+                ctx.fillText(`        ${time}, ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
             }
         }
     } else if (selected.type === "building") {
@@ -121,7 +122,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     ctx.restore();
 
     //paint night darkness
-    const timeOfDay = getTimeOfDay(state);
+    const timeOfDay = getTimeOfDay(state.time, state);
     const transitionTime = 0.05;
 
     if (timeOfDay < state.sunriseAt + transitionTime || timeOfDay > state.sunsetAt - transitionTime) {
@@ -196,7 +197,7 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     ctx.fillStyle = "black";
     const offsetX = state.paintData.map.paintWidth + 20;
     const citizenCounter = state.map.citizens.length;
-    ctx.fillText(`${getTimeOfDayString(state)}, speed: ${state.gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
+    ctx.fillText(`${getTimeOfDayString(state.time, state)}, speed: ${state.gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
     if (state.inputData.selected === undefined) {
         for (let i = 0; i < Math.min(20, state.map.citizens.length); i++) {
             const citizen = state.map.citizens[i];

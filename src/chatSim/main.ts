@@ -40,13 +40,13 @@ export function calculateDirection(startPos: Position, targetPos: Position): num
 /**
  * @returns value between 0 and 1. midnight = 0. 
  */
-export function getTimeOfDay(state: ChatSimState): number {
-    return (state.time % state.timPerDay) / state.timPerDay;
+export function getTimeOfDay(time: number, state: ChatSimState): number {
+    return (time % state.timPerDay) / state.timPerDay;
 }
 
-export function getTimeOfDayString(state: ChatSimState): string {
-    const timeOfDayNumber = getTimeOfDay(state) * 24;
-    const days = Math.floor(state.time / state.timPerDay) + 1;
+export function getTimeOfDayString(time: number, state: ChatSimState): string {
+    const timeOfDayNumber = getTimeOfDay(time, state) * 24;
+    const days = Math.floor(time / state.timPerDay) + 1;
     const hours = Math.floor(timeOfDayNumber);
     const hoursString = hours >= 10 ? hours : `0${hours}`;
     const minutes = Math.floor((timeOfDayNumber - hours) * 60);
