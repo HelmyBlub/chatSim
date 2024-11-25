@@ -26,7 +26,7 @@ export type Building = {
 
 export type BuildingMarket = Building & {
     queue: Citizen[],
-    displayedItem: string,
+    displayedItem?: string,
 }
 
 export type PaintDataMap = {

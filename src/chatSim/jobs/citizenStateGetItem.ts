@@ -68,6 +68,11 @@ export function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: Cha
     }
 }
 
+export function setCitizenStateGetItemFromBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number) {
+    const data: CitizenStateGetItemFromBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
+}
+
 export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const item = citizenState.data as CitizenStateGetItemData;
@@ -84,8 +89,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
         const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved);
         if (availableAmountAtHome > 0) {
             const wantedAmount = Math.min(openAmount, availableAmountAtHome);
-            const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: wantedAmount, building: citizen.home };
-            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
+            setCitizenStateGetItemFromBuilding(citizen, citizen.home, item.name, wantedAmount);
             return;
         }
     }
@@ -94,8 +98,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
             const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
             if (availableAmount > 0) {
                 const wantedAmount = Math.min(openAmount, availableAmount);
-                const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: wantedAmount, building: building };
-                citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
+                setCitizenStateGetItemFromBuilding(citizen, building, item.name, wantedAmount);
                 return;
             }
         }

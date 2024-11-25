@@ -4,6 +4,7 @@ import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { chatSimAddInputEventListeners } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
+import { onLoadDisplayItemPaintData } from "./jobs/jobMarket.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
@@ -113,6 +114,7 @@ function initMyApp() {
     loadLocalStorageChatters(state);
     loadImages(state);
     onLoadCitizenStateDefaultTickFuntions();
+    onLoadDisplayItemPaintData();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === state.streamer) {
