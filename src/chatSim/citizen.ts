@@ -109,6 +109,7 @@ export function addCitizenThought(citizen: Citizen, thought: string, state: Chat
         addCitizenLogEntry(citizen, thought, state);
         citizen.stateInfo.thoughts.push(thought);
         if (citizen.stateInfo.thoughts.length > 4) {
+            citizen.stateInfo.actionStartTime = Math.min(CITIZEN_TIME_PER_THOUGHT_LINE + citizen.stateInfo.actionStartTime!, state.time);
             citizen.stateInfo.thoughts.shift();
         }
     } else {

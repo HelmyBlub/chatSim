@@ -1,41 +1,12 @@
 Tasks:
+- think about automated tests?
+    - i have struggle finding issues why my citizens behave in strange ways
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
         - try use new code structure ideas for all
-        - get new code strucutre for "need food"
-    - citizenHelperTasks:
-        - getItem
-            - wood, to build building
-            - wood, to repair building
-            - food, to not starve
-            - food, to store some at home
-            - item to stock up at market
-        - getBuilding
-            - home for home need
-            - market for job market
-    - job food market
-        - step1: need market
-            - getBuilding market
-                - check if building exists
-                    - does
-                        - done
-                    - else 
-                        - check if unfinished building exists
-                            - continue building
-                        - getItem wood
-                            - can buy
-                                - done
-                            - can not buy
-                                - lumberjack myself
-                                    - done
-                        - build market
-                            - done
-        - step2: fill up market inventory
-            - use only own inventories
-
-    
-    - finding one material and geting it into inventory
-        - make string to function mapping for stateInfo.state
+        - get new code strucutre for "need home"
+        - get new code structure for job wood market
+        - clean up lumberjack to use new code
 - restructure markets
     - dev steps:
         - new file jobMarket
@@ -108,6 +79,10 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- code rework with new code ideas for 
+    - need food
+    - food market
+    - others
 - get citizen behavior back to working
 - make canvas resize on window resize. Don't want to refresh browser for this
 
