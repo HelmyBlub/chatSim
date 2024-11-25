@@ -8,6 +8,7 @@ const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
 
 export function chatSimAddInputEventListeners(state: ChatSimState) {
+    window.addEventListener('resize', (e) => fitCanvasToWindow(state), false);
     document.addEventListener('keydown', (e) => keyDown(e, state));
     document.addEventListener('keyup', (e) => keyUp(e, state));
     state.canvas.addEventListener('wheel', (e) => mouseWheel(e, state));
@@ -37,6 +38,11 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
         paintDataMap.cameraPosition.y = maxBottom;
     }
     state.paintData.map.lockCameraToSelected = false;
+}
+
+function fitCanvasToWindow(state: ChatSimState) {
+    state.canvas.width = window.innerWidth - 10;
+    state.canvas.height = window.innerHeight - 10;
 }
 
 function mouseDown(event: MouseEvent, state: ChatSimState) {

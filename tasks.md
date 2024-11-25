@@ -71,6 +71,8 @@ Tasks:
 - food need should check market building for food
 - home need should also check job market building for repair
 - more images+animations
+    - death animation
+        - dig grave
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
             - can not be more than two people cutting?
