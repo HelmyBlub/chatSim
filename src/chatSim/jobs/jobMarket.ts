@@ -135,6 +135,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             citizen.stateInfo.stack.shift();
             return;
         }
+        setupReserved(job.marketBuilding as BuildingMarket, jobMarket);
         if (isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
             const market = job.marketBuilding as BuildingMarket;
             if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {
@@ -165,5 +166,13 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                 y: job.marketBuilding.position.y,
             }
         }
+    }
+}
+
+function setupReserved(building: BuildingMarket, job: CitizenJobMarket) {
+    building.inventory.reservedSpace = [];
+    const reservePerItem = Math.min(Math.floor((building.inventory.size - 10) / job.sellItemNames.length), 20);
+    for (let itemName of job.sellItemNames) {
+        building.inventory.reservedSpace.push({ counter: reservePerItem, name: itemName });
     }
 }

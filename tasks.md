@@ -2,10 +2,8 @@ Tasks:
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
         - try use new code structure ideas for all
+        - get new code strucutre for "need food"
     - citizenHelperTasks:
-        - sellItem:
-            - sell mushrooms
-            - sell wood
         - getItem
             - wood, to build building
             - wood, to repair building

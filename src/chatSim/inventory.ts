@@ -15,7 +15,6 @@ export type Inventory = {
 
 export function inventoryGetMissingReserved(inventory: Inventory, itemName: string): number {
     if (inventory.reservedSpace) {
-        let counter = 0;
         const reservedItem = inventory.reservedSpace.find(i => i.name === itemName);
         if (reservedItem) {
             const inventoryItem = inventory.items.find(i => i.name === itemName);
