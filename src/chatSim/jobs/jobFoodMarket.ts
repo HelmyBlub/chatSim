@@ -24,7 +24,7 @@ export function loadCitizenJobFoodMarket(state: ChatSimState) {
     };
 }
 
-export function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
+function findClosestFoodMarket(searcher: Citizen, citizens: Citizen[], shouldHaveFood: boolean): Citizen | undefined {
     let closest: Citizen | undefined;
     let distance = 0;
     for (let citizen of citizens) {

@@ -1,17 +1,20 @@
-import { Building, ChatSimState } from "../chatSimModels.js";
+import { Building, BuildingMarket, ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
+import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
+import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
 import { buyItemWithInventories, isCitizenInInteractDistance } from "./job.js";
 
 export type CitizenStateGetItemData = {
     name: string,
     amount: number,
     ignoreReserved?: boolean,
+    ignoreHome?: boolean,
 }
 
-export type CitizenStateGetItemFromBuildingData = {
+export type CitizenStateItemAndBuildingData = {
     itemName: string,
     itemAmount: number,
     building: Building,
@@ -20,15 +23,38 @@ export type CitizenStateGetItemFromBuildingData = {
 export const CITIZEN_STATE_GET_ITEM = "GetItem";
 export const CITIZEN_STATE_GET_ITEM_FROM_BUILDING = "GetItemFromBuilding";
 export const CITIZEN_STATE_BUY_ITEM_FROM_MARKET = "BuyItemFromMarket";
+export const CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING = "TransportItemToBuilding";
 
-export function setCitizenStateGetItem(citizen: Citizen, itemName: string, itemAmount: number, ignoreReserved: boolean = false) {
-    const data: CitizenStateGetItemData = { name: itemName, amount: itemAmount, ignoreReserved: ignoreReserved };
+export function onLoadCitizenStateDefaultTickGetItemFuntions() {
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM] = tickCititzenStateGetItem;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM_FROM_BUILDING] = tickCitizenStateGetItemFromBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUY_ITEM_FROM_MARKET] = tickCitizenStateBuyItemFromMarket;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING] = tickCitizenStateTransportItemToBuilding;
+}
+
+export function setCitizenStateGetItem(citizen: Citizen, itemName: string, itemAmount: number, ignoreReserved: boolean = false, ignoreHome: boolean = false) {
+    const data: CitizenStateGetItemData = { name: itemName, amount: itemAmount, ignoreReserved: ignoreReserved, ignoreHome: ignoreHome };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM, data: data });
 }
 
-export function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState) {
+export function setCitizenStateGetItemFromBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number) {
+    const data: CitizenStateItemAndBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
+}
+
+export function setCitizenStateBuyItemFromMarket(citizen: Citizen, market: BuildingMarket, itemName: string, itemAmount: number) {
+    const data: CitizenStateItemAndBuildingData = { itemName: itemName, itemAmount: itemAmount, building: market };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUY_ITEM_FROM_MARKET, data: data });
+}
+
+export function setCitizenStateTransportItemToBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number) {
+    const data: CitizenStateItemAndBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING, data: data });
+}
+
+function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
-        const data = citizen.stateInfo.stack[0].data as CitizenStateGetItemFromBuildingData;
+        const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (data.building.deterioration >= 1) {
             citizen.stateInfo.stack.shift();
             return;
@@ -48,9 +74,29 @@ export function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatS
     }
 }
 
-export function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
-        const data = citizen.stateInfo.stack[0].data as CitizenStateGetItemFromBuildingData;
+        const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
+        if (data.building.deterioration >= 1) {
+            citizen.stateInfo.stack.shift();
+            return;
+        }
+        if (isCitizenInInteractDistance(citizen, data.building.position)) {
+            inventoryMoveItemBetween(data.itemName, citizen.inventory, data.building.inventory, data.itemAmount);
+            citizen.stateInfo.stack.shift();
+            return;
+        } else {
+            citizen.moveTo = {
+                x: data.building.position.x,
+                y: data.building.position.y,
+            }
+        }
+    }
+}
+
+function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimState) {
+    if (citizen.moveTo === undefined) {
+        const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (data.building.deterioration >= 1) {
             citizen.stateInfo.stack.shift();
             return;
@@ -68,12 +114,7 @@ export function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: Cha
     }
 }
 
-export function setCitizenStateGetItemFromBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number) {
-    const data: CitizenStateGetItemFromBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
-}
-
-export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
+function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const item = citizenState.data as CitizenStateGetItemData;
     const citizenInventory = citizen.inventory.items.find(i => i.name === item.name);
@@ -85,7 +126,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
         }
         openAmount -= citizenInventory.counter;
     }
-    if (citizen.home) {
+    if (citizen.home && !item.ignoreHome) {
         const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved);
         if (availableAmountAtHome > 0) {
             addCitizenThought(citizen, `I do have ${item.name} at home. I go get it.`, state);
@@ -106,25 +147,24 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
         }
     }
     if (citizen.money >= 2) {
-        const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state);
+        const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state) as BuildingMarket;
         if (market) {
-            const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: openAmount, building: market };
             addCitizenThought(citizen, `I will buy ${item.name} at ${market.inhabitedBy!.name}.`, state);
-            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUY_ITEM_FROM_MARKET, data: data });
+            setCitizenStateBuyItemFromMarket(citizen, market, item.name, item.amount);
             return;
         }
     }
 
     if (item.name === INVENTORY_MUSHROOM) {
         addCitizenThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
-        setCitizenStateGatherMushroom(citizen, openAmount);
+        setCitizenStateGatherMushroom(citizen, item.amount);
         return;
     }
-    //TODO
-    // gather myself if possible
-    // how to gather item which could be anything?
-    //      only specific items get implementation: mushroom/wood
-    //      worry about other stuff in the future
+    if (item.name === INVENTORY_WOOD) {
+        addCitizenThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
+        setCitizenStateGatherWood(citizen, item.amount);
+        return;
+    }
 }
 
 function findClosestOpenMarketWhichSellsItem(citizen: Citizen, itemName: string, state: ChatSimState): Building | undefined {

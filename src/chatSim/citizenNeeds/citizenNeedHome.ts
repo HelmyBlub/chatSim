@@ -1,12 +1,12 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, setCitizenThought } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { setCitizenStateGetBuilding } from "../jobs/citizenStateGetBuilding.js";
 import { buyItem, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
-import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "../jobs/jobBuildingContruction.js";
-import { CITIZEN_JOB_HOUSE_MARKET } from "../jobs/jobHouseMarket.js";
 import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
 import { findClosestWoodMarket, CITIZEN_JOB_WOOD_MARKET } from "../jobs/jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../main.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
 export const CITIZEN_NEED_HOME = "need home";
 
@@ -24,19 +24,26 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
-    if (!citizen.home) {
-        const availableHouse = state.map.buildings.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
-        if (availableHouse) {
-            addCitizenLogEntry(citizen, `moved into a house from ${availableHouse.owner}`, state);
-            availableHouse.inhabitedBy = citizen;
-            citizen.home = availableHouse;
-        } else if (!isInHouseBuildingBusiness(citizen)) {
-            const reason = [
-                `I want a home.`,
-                `I do not see an available home.`,
-                `I become a ${CITIZEN_JOB_BUILDING_CONSTRUCTION} to build a home myself.`,
-            ];
-            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, reason);
+    if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
+        if (!citizen.home) {
+            const availableHouse = state.map.buildings.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
+            if (availableHouse) {
+                addCitizenLogEntry(citizen, `moved into a house from ${availableHouse.owner}`, state);
+                availableHouse.inhabitedBy = citizen;
+                citizen.home = availableHouse;
+            } else {
+                addCitizenLogEntry(citizen, `I want a home.`, state);
+                citizen.stateInfo = { type: CITIZEN_NEED_HOME, stack: [] };
+                setCitizenStateGetBuilding(citizen, "House");
+            }
+        }
+    } else {
+        if (citizen.stateInfo.stack.length > 0) {
+            const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
+            if (tickFunction) {
+                tickFunction(citizen, state);
+                return;
+            }
         }
     }
     if (!citizen.home || citizen.home.deterioration < 0.2) return;
@@ -137,13 +144,5 @@ function tick(citizen: Citizen, state: ChatSimState) {
             }
         }
     }
-}
-
-function isInHouseBuildingBusiness(citizen: Citizen) {
-    return (citizen.job.name === CITIZEN_JOB_HOUSE_MARKET
-        || citizen.job.name === CITIZEN_JOB_BUILDING_CONSTRUCTION
-        || citizen.job.name === CITIZEN_JOB_LUMBERJACK
-        || citizen.job.name === CITIZEN_JOB_WOOD_MARKET
-    )
 }
 

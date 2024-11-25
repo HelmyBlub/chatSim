@@ -3,6 +3,7 @@ import { addCitizenLogEntry, addCitizenThought, Citizen } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { isCitizenInInteractDistance } from "./job.js";
 import { BUILDING_DATA } from "./jobBuildingContruction.js";
@@ -11,23 +12,41 @@ export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
 export const CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS = "GetBuildingCheckRequirements";
 export const CITIZEN_STATE_BUILD_BUILDING = "BuildBuilding";
 
+export function onLoadCitizenStateDefaultTickGetBuildingFuntions() {
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING] = tickCititzenStateGetBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS] = tickCititzenStateGetBuildingCheckRequirements;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUILD_BUILDING] = tickCititzenStateBuildBuilding;
+}
+
+
 export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: BuildingType) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_BUILDING, data: buildingType });
 }
 
-export function tickCititzenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
+export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
+    for (let building of state.map.buildings) {
+        if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === buildingType) {
+            return building;
+        }
+    }
+    for (let building of state.map.buildings) {
+        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === buildingType) return building;
+    }
+    return undefined;
+}
+
+function tickCititzenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const buildingType = citizenState.data as BuildingType;
     const building = findBuilding(citizen, buildingType, state);
     if (building) {
-        if (!building.inhabitedBy) building.inhabitedBy = citizen;
         citizen.stateInfo.stack.shift();
     } else {
         citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS, data: buildingType });
     }
 }
 
-export function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: ChatSimState) {
+function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: ChatSimState) {
     const buildingType = citizen.stateInfo.stack[0].data as BuildingType;
     const building = findBuilding(citizen, buildingType, state);
     if (building) {
@@ -54,7 +73,7 @@ export function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, 
     }
 }
 
-export function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
+function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const building = citizen.stateInfo.stack[0].data as Building;
         if (isCitizenInInteractDistance(citizen, building.position)) {
@@ -88,6 +107,10 @@ export function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimS
             if (building.buildProgress >= 1) {
                 addCitizenLogEntry(citizen, `building finished.`, state);
                 building.buildProgress = undefined;
+                if (!citizen.home && building.type === "House") {
+                    citizen.home = building;
+                    building.inhabitedBy = citizen;
+                }
                 citizen.stateInfo.stack.shift();
             }
         } else {
@@ -97,18 +120,6 @@ export function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimS
             }
         }
     }
-}
-
-export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
-    for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === buildingType) {
-            return building;
-        }
-    }
-    for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === buildingType) return building;
-    }
-    return undefined;
 }
 
 function getCitizenUnfinishedBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {

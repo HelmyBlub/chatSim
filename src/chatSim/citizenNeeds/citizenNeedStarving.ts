@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, setCitizenThought } from "../citizen.js";
-import { CITIZEN_STATE_GET_ITEM, setCitizenStateGetItem, tickCititzenStateGetItem } from "../jobs/citizenStateGetItem.js";
+import { setCitizenStateGetItem } from "../jobs/citizenStateGetItem.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenEatMushroom } from "./citizenNeedFood.js";

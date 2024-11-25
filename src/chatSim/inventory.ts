@@ -20,6 +20,8 @@ export function inventoryGetMissingReserved(inventory: Inventory, itemName: stri
             const inventoryItem = inventory.items.find(i => i.name === itemName);
             if (inventoryItem) {
                 return Math.max(0, reservedItem.counter - inventoryItem.counter);
+            } else {
+                return reservedItem.counter;
             }
         }
     }

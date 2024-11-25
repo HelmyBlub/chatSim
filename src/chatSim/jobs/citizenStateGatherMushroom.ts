@@ -14,7 +14,6 @@ export function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSim
     const citizenState = citizen.stateInfo.stack[0];
     const amount: number = citizenState.data;
 
-
     if (citizen.moveTo === undefined) {
         const mushroomIndex = isCloseToMushroom(citizen, state);
         if (mushroomIndex !== undefined) {
