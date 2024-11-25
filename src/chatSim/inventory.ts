@@ -13,6 +13,20 @@ export type Inventory = {
     size: number,
 }
 
+export function inventoryGetMissingReserved(inventory: Inventory, itemName: string): number {
+    if (inventory.reservedSpace) {
+        let counter = 0;
+        const reservedItem = inventory.reservedSpace.find(i => i.name === itemName);
+        if (reservedItem) {
+            const inventoryItem = inventory.items.find(i => i.name === itemName);
+            if (inventoryItem) {
+                return Math.max(0, reservedItem.counter - inventoryItem.counter);
+            }
+        }
+    }
+    return 0;
+}
+
 export function inventoryGetAvaiableCapacity(inventory: Inventory, itemName: string) {
     if (inventory.reservedSpace) {
         let counter = 0;

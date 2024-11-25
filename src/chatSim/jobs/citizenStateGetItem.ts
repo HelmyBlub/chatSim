@@ -3,7 +3,7 @@ import { Citizen } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
-import { buyItem, isCitizenInInteractDistance } from "./job.js";
+import { buyItem, buyItemWithInventories, isCitizenInInteractDistance } from "./job.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -35,7 +35,7 @@ export function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatS
         }
         if (isCitizenInInteractDistance(citizen, data.building.position)) {
             if (data.building.inhabitedBy && isCitizenInInteractDistance(citizen, data.building.inhabitedBy.position)) {
-                buyItem(data.building.inhabitedBy, citizen, data.itemName, 2, state, data.itemAmount);
+                buyItemWithInventories(data.building.inhabitedBy, citizen, data.itemName, 2, data.building.inventory, citizen.inventory, state, data.itemAmount);
             }
             citizen.stateInfo.stack.shift();
             return;

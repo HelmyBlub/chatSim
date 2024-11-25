@@ -87,6 +87,10 @@ export function isCitizenInInteractDistance(citizen: Citizen, target: Position) 
     return distance <= citizen.speed;
 }
 
+export function buyItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: Inventory, buyerInventory: Inventory, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    sellItemWithInventories(seller, buyer, itemName, itemPrice, sellerInventory, buyerInventory, state, requestedAmount);
+}
+
 export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: Inventory, buyerInventory: Inventory, state: ChatSimState, requestedAmount: number | undefined = undefined) {
     const sellerItem = sellerInventory.items.find(i => i.name === itemName);
     if (!sellerItem) return;

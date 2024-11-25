@@ -1,7 +1,6 @@
 Tasks:
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
-        - get citizen behavior back to working
         - try use new code structure ideas for all
     - citizenHelperTasks:
         - sellItem:
@@ -111,6 +110,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- get citizen behavior back to working
 - make canvas resize on window resize. Don't want to refresh browser for this
 
 --------------------------------------------------

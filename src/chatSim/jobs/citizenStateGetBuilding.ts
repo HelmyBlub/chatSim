@@ -82,10 +82,8 @@ export function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimS
             building.buildProgress += progressPerTick;
             if (building.buildProgress >= 1) {
                 addCitizenLogEntry(citizen, `building finished.`, state);
-                if (!citizen.home) {
-                    building.buildProgress = undefined;
-                    citizen.stateInfo.stack.shift();
-                }
+                building.buildProgress = undefined;
+                citizen.stateInfo.stack.shift();
             }
         } else {
             citizen.moveTo = {

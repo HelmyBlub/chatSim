@@ -1,18 +1,20 @@
 import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
-import { Building, BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
+import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
 import { Citizen, CitizenStateInfo, isCitizenThinking, setCitizenThought } from "../citizen.js"
-import { inventoryGetAvaiableCapacity, inventoryMoveItemBetween } from "../inventory.js";
+import { inventoryGetAvaiableCapacity, inventoryGetMissingReserved, inventoryMoveItemBetween } from "../inventory.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { CitizenJob, findMarketBuilding } from "./job.js"
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { setCitizenStateGetBuilding } from "./citizenStateGetBuilding.js";
+import { CitizenJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js"
 
 export type CitizenJobMarket = CitizenJob & {
     sellItemNames: string[],
 }
 
-export type JobMarketStates = "checkInventory" | "getStuffFromHome" | "waitingForCustomers" | "getMarketBuilding" | "buildMarket";
+export type JobMarketStates = "checkInventory" | "getStuffFromHome" | "waitingForCustomers" | "getMarketBuilding";
 
 type JobMarketStateInfo = CitizenStateInfo & {
-    state?: JobMarketStates,
+    state: JobMarketStates,
 }
 
 const STRING_TO_STATE_MAPPING: { [key: string]: (citizen: Citizen, job: CitizenJob, state: ChatSimState) => void } = {
@@ -20,7 +22,6 @@ const STRING_TO_STATE_MAPPING: { [key: string]: (citizen: Citizen, job: CitizenJ
     "getStuffFromHome": stateGetStuffFromHome,
     "waitingForCustomers": stateWaitingForCustomers,
     "getMarketBuilding": stateGetMarketBuilding,
-    "buildMarket": stateBuildMarket,
 };
 
 const DISPLAY_ITEM_PAINT_DATA: { [key: string]: { size: number, path: string, max: number, offset: Position, offsetPerItem: Position } } = {
@@ -52,11 +53,10 @@ const DISPLAY_ITEM_PAINT_DATA: { [key: string]: { size: number, path: string, ma
     }
 };
 
-export function createMarket(state: ChatSimState, jobname: string, marketBuilding: Building, sellItemNames: string[]): CitizenJobMarket {
+export function createJobMarket(state: ChatSimState, jobname: string, sellItemNames: string[]): CitizenJobMarket {
     return {
         name: jobname,
         sellItemNames: sellItemNames,
-        marketBuilding: marketBuilding,
     }
 }
 
@@ -80,27 +80,25 @@ export function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: C
 }
 
 export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobMarketStateInfo;
-    if (stateInfo.state === undefined) {
+    if (citizen.stateInfo.stack.length === 0) {
         if (!job.marketBuilding || job.marketBuilding.deterioration >= 1) {
-            stateInfo.state = "getMarketBuilding";
+            citizen.stateInfo.stack.unshift({ state: "getMarketBuilding" });
         } else {
-            stateInfo.state = "checkInventory";
             setCitizenThought(citizen, ["Go to my market and check inventory."], state);
+            citizen.stateInfo.stack.unshift({ state: "checkInventory" });
             citizen.moveTo = {
                 x: job.marketBuilding.position.x,
                 y: job.marketBuilding.position.y,
             }
         }
     } else {
+        const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
         const stateFunction = STRING_TO_STATE_MAPPING[stateInfo.state];
-        stateFunction(citizen, job, state);
-    }
-}
-
-function stateBuildMarket(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    if (!isCitizenThinking(citizen, state)) {
-
+        if (stateFunction) {
+            stateFunction(citizen, job, state);
+        } else {
+            CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[stateInfo.state](citizen, state);
+        }
     }
 }
 
@@ -117,8 +115,8 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
             y: job.marketBuilding.position.y,
         }
     } else {
-        stateInfo.state = "buildMarket";
-        setCitizenThought(citizen, ["I do not have a market building. I build one myself."], state);
+        setCitizenThought(citizen, ["I do not have a market building. I need to get one."], state);
+        setCitizenStateGetBuilding(citizen, "Market");
     }
 }
 
@@ -128,82 +126,97 @@ function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: Chat
 function stateGetStuffFromHome(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
         const jobMarket = job as CitizenJobMarket;
-        const stateInfo = citizen.stateInfo as JobMarketStateInfo;
+        const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
         if (!jobMarket.marketBuilding) {
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
             return;
         }
         if (!citizen.home) {
             debugger;
+            citizen.stateInfo.stack.shift();
             return;
         }
-        for (let itemName of jobMarket.sellItemNames) {
-            let availableSpace = inventoryGetAvaiableCapacity(jobMarket.marketBuilding.inventory, itemName);
-            if (availableSpace > 5) {
-                const homeInventory = citizen.home.inventory.items.find(i => i.name = itemName);
-                if (homeInventory && homeInventory.counter > 0) {
-                    let amount = homeInventory.counter;
-                    if (citizen.home.inventory.reservedSpace) {
-                        let reserved = citizen.home.inventory.reservedSpace.find(i => i.name === itemName);
-                        if (reserved) {
-                            if (homeInventory.counter > reserved.counter) {
-                                amount -= reserved.counter;
+        if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
+            for (let itemName of jobMarket.sellItemNames) {
+                let availableSpace = inventoryGetAvaiableCapacity(jobMarket.marketBuilding.inventory, itemName);
+                if (availableSpace > 5) {
+                    const homeInventory = citizen.home.inventory.items.find(i => i.name = itemName);
+                    if (homeInventory && homeInventory.counter > 0) {
+                        let amount = homeInventory.counter;
+                        if (citizen.home.inventory.reservedSpace) {
+                            let reserved = citizen.home.inventory.reservedSpace.find(i => i.name === itemName);
+                            if (reserved) {
+                                if (homeInventory.counter > reserved.counter + 1) {
+                                    amount -= reserved.counter + 1;
+                                }
                             }
                         }
-                    }
-                    if (amount > 0) {
-                        inventoryMoveItemBetween(itemName, citizen.home.inventory, citizen.inventory, amount);
+                        if (amount > 0) {
+                            inventoryMoveItemBetween(itemName, citizen.home.inventory, citizen.inventory, amount);
+                        }
                     }
                 }
             }
+            stateInfo.state = "checkInventory";
+        } else {
+            citizen.moveTo = {
+                x: citizen.home.position.x,
+                y: citizen.home.position.y,
+            }
         }
-        stateInfo.state = "checkInventory";
     }
 }
 
 function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
         const jobMarket = job as CitizenJobMarket;
-        const stateInfo = citizen.stateInfo as JobMarketStateInfo;
+        const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
         if (!job.marketBuilding) {
-            stateInfo.state = undefined;
+            citizen.stateInfo.stack.shift();
             return;
         }
-        for (let itemName of jobMarket.sellItemNames) {
-            let availableSpace = inventoryGetAvaiableCapacity(job.marketBuilding.inventory, itemName);
-            if (availableSpace > 0) {
-                const citizenInventory = citizen.inventory.items.find(i => i.name = itemName);
-                if (citizenInventory && citizenInventory.counter > 0) {
-                    availableSpace -= inventoryMoveItemBetween(itemName, citizen.inventory, job.marketBuilding.inventory);
-                }
-                if (citizen.home && availableSpace > 5) {
-                    let canGetStuffFromHome = false;
-                    const homeInventory = citizen.home.inventory.items.find(i => i.name = itemName);
-                    if (homeInventory && homeInventory.counter > 0) {
-                        if (citizen.home.inventory.reservedSpace) {
-                            let reserved = citizen.home.inventory.reservedSpace.find(i => i.name === itemName);
-                            if (reserved) {
-                                if (homeInventory.counter > reserved.counter) {
+        if (isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
+            for (let itemName of jobMarket.sellItemNames) {
+                let availableSpace = inventoryGetMissingReserved(job.marketBuilding.inventory, itemName);
+                if (availableSpace > 0) {
+                    const citizenInventory = citizen.inventory.items.find(i => i.name = itemName);
+                    if (citizenInventory && citizenInventory.counter > 0) {
+                        availableSpace -= inventoryMoveItemBetween(itemName, citizen.inventory, job.marketBuilding.inventory);
+                    }
+                    if (citizen.home && availableSpace > 5) {
+                        let canGetStuffFromHome = false;
+                        const homeInventory = citizen.home.inventory.items.find(i => i.name = itemName);
+                        if (homeInventory && homeInventory.counter > 0) {
+                            if (citizen.home.inventory.reservedSpace) {
+                                let reserved = citizen.home.inventory.reservedSpace.find(i => i.name === itemName);
+                                if (reserved) {
+                                    if (homeInventory.counter > reserved.counter) {
+                                        canGetStuffFromHome = true;
+                                    }
+                                } else {
                                     canGetStuffFromHome = true;
                                 }
-                            } else {
-                                canGetStuffFromHome = true;
                             }
                         }
-                    }
-                    if (canGetStuffFromHome) {
-                        stateInfo.state = "getStuffFromHome";
-                        setCitizenThought(citizen, [`I want to add inventory to my market from home.`], state);
-                        citizen.moveTo = {
-                            x: citizen.home.position.x,
-                            y: citizen.home.position.y,
+                        if (canGetStuffFromHome) {
+                            stateInfo.state = "getStuffFromHome";
+                            setCitizenThought(citizen, [`I want to add inventory to my market from home.`], state);
+                            citizen.moveTo = {
+                                x: citizen.home.position.x,
+                                y: citizen.home.position.y,
+                            }
+                            return;
                         }
-                        return;
                     }
                 }
             }
+            stateInfo.state = "waitingForCustomers";
+            citizen.paintBehindBuildings = true;
+        } else {
+            citizen.moveTo = {
+                x: job.marketBuilding.position.x,
+                y: job.marketBuilding.position.y,
+            }
         }
-        stateInfo.state = "waitingForCustomers";
-        citizen.paintBehindBuildings = true;
     }
 }
