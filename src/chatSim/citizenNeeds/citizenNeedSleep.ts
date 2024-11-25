@@ -20,13 +20,13 @@ function tick(citizen: Citizen, state: ChatSimState) {
     }
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.home && citizen.energyPerCent > 0.1) {
-            citizen.stateInfo.stack.push({ state: "move home" });
+            citizen.stateInfo.stack.unshift({ state: "move home" });
             citizen.moveTo = {
                 x: citizen.home.position.x,
                 y: citizen.home.position.y,
             }
         } else {
-            citizen.stateInfo.stack.push({ state: CITIZEN_NEED_STATE_SLEEPING });
+            citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
             if (citizen.moveTo) citizen.moveTo = undefined;
         }
         return;

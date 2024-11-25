@@ -112,7 +112,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                 y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
             }
             const citizenState: JobFoodMarketStateInfo = { state: "selling" };
-            citizen.stateInfo.stack.push(citizenState);
+            citizen.stateInfo.stack.unshift(citizenState);
         } else {
             job.marketBuilding.inhabitedBy = citizen;
             citizen.moveTo = {
@@ -120,7 +120,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) 
                 y: job.marketBuilding.position.y,
             }
             const citizenState: JobFoodMarketStateInfo = { state: "selling" };
-            citizen.stateInfo.stack.push(citizenState);
+            citizen.stateInfo.stack.unshift(citizenState);
         }
     }
     const stateInfo = citizen.stateInfo.stack[0] as JobFoodMarketStateInfo;

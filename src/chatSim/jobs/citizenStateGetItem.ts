@@ -85,7 +85,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
         if (availableAmountAtHome > 0) {
             const wantedAmount = Math.min(openAmount, availableAmountAtHome);
             const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: wantedAmount, building: citizen.home };
-            citizen.stateInfo.stack.push({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
+            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
             return;
         }
     }
@@ -95,7 +95,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
             if (availableAmount > 0) {
                 const wantedAmount = Math.min(openAmount, availableAmount);
                 const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: wantedAmount, building: building };
-                citizen.stateInfo.stack.push({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
+                citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data });
                 return;
             }
         }
@@ -104,7 +104,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
         const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state);
         if (market) {
             const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: openAmount, building: market };
-            citizen.stateInfo.stack.push({ state: CITIZEN_STATE_BUY_ITEM_FROM_MARKET, data: data });
+            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUY_ITEM_FROM_MARKET, data: data });
             return;
         }
     }

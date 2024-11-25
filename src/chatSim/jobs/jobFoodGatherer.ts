@@ -72,11 +72,11 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
         if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_MUSHROOM) > 0) {
             moveToMushroom(citizen, state);
             const citizenState: JobFoodGathererStateInfo = { state: "gathering" };
-            citizen.stateInfo.stack.push(citizenState);
+            citizen.stateInfo.stack.unshift(citizenState);
         } else {
             if (citizen.home && inventoryGetUsedCapacity(citizen.home.inventory) < citizen.home.inventory.size) {
                 const citizenState: JobFoodGathererStateInfo = { state: "goHome" };
-                citizen.stateInfo.stack.push(citizenState);
+                citizen.stateInfo.stack.unshift(citizenState);
                 setCitizenThought(citizen, [
                     `I can not carry more ${INVENTORY_MUSHROOM}.`,
                     `I will store them at home.`
@@ -85,7 +85,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                 const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
                     const citizenState: JobFoodGathererStateInfo = { state: "selling" };
-                    citizen.stateInfo.stack.push(citizenState);
+                    citizen.stateInfo.stack.unshift(citizenState);
                 } else {
                     return;
                 }

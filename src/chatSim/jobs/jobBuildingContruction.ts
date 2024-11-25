@@ -57,7 +57,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             job.buildType = Math.random() < 0.5 ? "House" : "Market";
         }
         const citizenState: JobContructionStateInfo = { state: "searchBuildLocation" };
-        citizen.stateInfo.stack.push(citizenState);
+        citizen.stateInfo.stack.unshift(citizenState);
     }
     const stateInfo = citizen.stateInfo.stack[0] as JobContructionStateInfo;
     if (stateInfo.state === "searchBuildLocation") {

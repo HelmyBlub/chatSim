@@ -1,5 +1,4 @@
 Tasks:
-- make canvas resize on window resize. Don't want to refresh browser for this
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
         - get citizen behavior back to working
@@ -112,11 +111,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- resturcture citizen behavior to have some code i can use for every job
-    - nextstep?:   
-        - implement getItem
-        - fix all the code
-- add timestamp to action log
+- make canvas resize on window resize. Don't want to refresh browser for this
 
 --------------------------------------------------
 Big Idea:

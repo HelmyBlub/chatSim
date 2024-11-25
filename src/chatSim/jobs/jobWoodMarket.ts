@@ -98,7 +98,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                 y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
             }
             const citizenState: JobWoodMarketStateInfo = { state: "selling" };
-            citizen.stateInfo.stack.push(citizenState);
+            citizen.stateInfo.stack.unshift(citizenState);
         } else {
             job.marketBuilding.inhabitedBy = citizen;
             citizen.moveTo = {
@@ -106,7 +106,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                 y: job.marketBuilding.position.y,
             }
             const citizenState: JobWoodMarketStateInfo = { state: "selling" };
-            citizen.stateInfo.stack.push(citizenState);
+            citizen.stateInfo.stack.unshift(citizenState);
         }
     }
     if (citizen.stateInfo.stack.length === 0) return;

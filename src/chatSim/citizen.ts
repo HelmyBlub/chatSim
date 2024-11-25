@@ -326,8 +326,14 @@ function deleteCitizens(state: ChatSimState) {
         const outOfEngergy = state.map.citizens[i].energyPerCent < 0;
         if (starved || outOfEngergy) {
             let deceased = state.map.citizens.splice(i, 1)[0];
-            if (starved) console.log(`${deceased.name} died by starving`, deceased);
-            if (outOfEngergy) console.log(`${deceased.name} died by over working`, deceased);
+            if (starved) {
+                console.log(`${deceased.name} died by starving`, deceased);
+                addCitizenLogEntry(deceased, "starved to death", state);
+            }
+            if (outOfEngergy) {
+                console.log(`${deceased.name} died by over working`, deceased);
+                addCitizenLogEntry(deceased, "overworked to death", state);
+            };
             if (deceased.home) {
                 if (deceased.home.owner === deceased && state.map.citizens.length > 0) {
                     const randomNewOwnerIndex = Math.floor(Math.random() * state.map.citizens.length);

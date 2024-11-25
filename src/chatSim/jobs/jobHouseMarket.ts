@@ -48,6 +48,6 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
             y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
         }
         const citizenState: JobHouseMarketStateInfo = { state: "selling" };
-        citizen.stateInfo.stack.push(citizenState);
+        citizen.stateInfo.stack.unshift(citizenState);
     }
 }

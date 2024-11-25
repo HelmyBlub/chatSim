@@ -176,12 +176,12 @@ function decideNext(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimSt
     if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
         const lookingForTreeDuration = 1000;
         const citizenState: JobLumberjackStateInfo = { state: "searchingTree" };
-        citizen.stateInfo.stack.push(citizenState);
+        citizen.stateInfo.stack.unshift(citizenState);
         job.actionEndTime = state.time + lookingForTreeDuration;
     } else {
         if (citizen.home && inventoryGetAvaiableCapacity(citizen.home.inventory, INVENTORY_WOOD) > 5) {
             const citizenState: JobLumberjackStateInfo = { state: "goHome" };
-            citizen.stateInfo.stack.push(citizenState);
+            citizen.stateInfo.stack.unshift(citizenState);
             citizen.moveTo = {
                 x: citizen.home.position.x,
                 y: citizen.home.position.y,
@@ -190,7 +190,7 @@ function decideNext(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimSt
         } else {
             if (inventoryWood && inventoryWood.counter > 0) {
                 const citizenState: JobLumberjackStateInfo = { state: "selling" };
-                citizen.stateInfo.stack.push(citizenState);
+                citizen.stateInfo.stack.unshift(citizenState);
             }
         }
     }
