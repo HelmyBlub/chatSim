@@ -104,6 +104,18 @@ export function addCitizenLogEntry(citizen: Citizen, message: string, state: Cha
     }
 }
 
+export function addCitizenThought(citizen: Citizen, thought: string, state: ChatSimState) {
+    if (isCitizenThinking(citizen, state) && citizen.stateInfo.thoughts) {
+        addCitizenLogEntry(citizen, thought, state);
+        citizen.stateInfo.thoughts.push(thought);
+        if (citizen.stateInfo.thoughts.length > 4) {
+            citizen.stateInfo.thoughts.shift();
+        }
+    } else {
+        setCitizenThought(citizen, [thought], state);
+    }
+}
+
 export function setCitizenThought(citizen: Citizen, thoughts: string[], state: ChatSimState) {
     citizen.stateInfo.thoughts = thoughts;
     citizen.stateInfo.actionStartTime = state.time;

@@ -1,9 +1,9 @@
 import { Building, ChatSimState } from "../chatSimModels.js";
-import { Citizen } from "../citizen.js";
+import { addCitizenThought, Citizen } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance, INVENTORY_MUSHROOM } from "../main.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
-import { buyItem, buyItemWithInventories, isCitizenInInteractDistance } from "./job.js";
+import { buyItemWithInventories, isCitizenInInteractDistance } from "./job.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -88,6 +88,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
     if (citizen.home) {
         const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved);
         if (availableAmountAtHome > 0) {
+            addCitizenThought(citizen, `I do have ${item.name} at home. I go get it.`, state);
             const wantedAmount = Math.min(openAmount, availableAmountAtHome);
             setCitizenStateGetItemFromBuilding(citizen, citizen.home, item.name, wantedAmount);
             return;
@@ -98,6 +99,7 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
             const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
             if (availableAmount > 0) {
                 const wantedAmount = Math.min(openAmount, availableAmount);
+                addCitizenThought(citizen, `I do have ${item.name} at my ${building.type}. I go get it.`, state);
                 setCitizenStateGetItemFromBuilding(citizen, building, item.name, wantedAmount);
                 return;
             }
@@ -107,12 +109,14 @@ export function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) 
         const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state);
         if (market) {
             const data: CitizenStateGetItemFromBuildingData = { itemName: item.name, itemAmount: openAmount, building: market };
+            addCitizenThought(citizen, `I will buy ${item.name} at ${market.inhabitedBy!.name}.`, state);
             citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUY_ITEM_FROM_MARKET, data: data });
             return;
         }
     }
 
     if (item.name === INVENTORY_MUSHROOM) {
+        addCitizenThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
         setCitizenStateGatherMushroom(citizen, openAmount);
         return;
     }

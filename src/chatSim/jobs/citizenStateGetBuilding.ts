@@ -1,5 +1,5 @@
 import { Building, BuildingType, ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, addCitizenThought, Citizen } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
@@ -36,6 +36,7 @@ export function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, 
     }
     const unfinishedBuilding = getCitizenUnfinishedBuilding(citizen, buildingType, state);
     if (unfinishedBuilding) {
+        addCitizenThought(citizen, `I have an unfinished ${buildingType}. I go continue building it.`, state);
         citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: unfinishedBuilding });
         return;
     }
@@ -43,8 +44,12 @@ export function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, 
     const amountRequired = BUILDING_DATA[buildingType].woodAmount;
     if (inventoryWood && inventoryWood.counter >= amountRequired) {
         const building = createBuildingOnRandomTile(citizen, state, buildingType);
-        if (building) citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building });
+        if (building) {
+            addCitizenThought(citizen, `I have enough wood to build ${buildingType} myself.`, state);
+            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building })
+        };
     } else {
+        addCitizenThought(citizen, `I need ${INVENTORY_WOOD} to build ${buildingType}.`, state);
         setCitizenStateGetItem(citizen, INVENTORY_WOOD, amountRequired);
     }
 }
