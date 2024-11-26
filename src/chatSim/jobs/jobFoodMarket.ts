@@ -18,25 +18,6 @@ export function loadCitizenJobFoodMarket(state: ChatSimState) {
     };
 }
 
-//TODO clean up
-export function sellFoodToFoodMarket(foodMarket: Citizen, seller: Citizen, requestedAmount: number, state: ChatSimState) {
-    if (foodMarket.job.name !== CITIZEN_JOB_FOOD_MARKET) return false;
-    const job = foodMarket.job as CitizenJobFoodMarket;
-    const sellPrice = 1;
-    if (job.marketBuilding) {
-        const amount = sellItemWithInventories(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, seller.inventory, job.marketBuilding.inventory, state, requestedAmount);
-        if (amount !== undefined && amount > 0) {
-            const chat = createEmptyChat();
-            addChatMessage(chat, seller, `I want to sell ${requestedAmount}x${INVENTORY_MUSHROOM}`, state);
-            addChatMessage(chat, foodMarket, `I would buy ${amount}x${INVENTORY_MUSHROOM} for $${sellPrice * amount}`, state);
-            addChatMessage(chat, seller, `Yes please!`, state);
-            foodMarket.lastChat = chat;
-        }
-    } else {
-        sellItem(seller, foodMarket, INVENTORY_MUSHROOM, sellPrice, state, requestedAmount);
-    }
-}
-
 function create(state: ChatSimState): CitizenJobFoodMarket {
     return createJobMarket(state, CITIZEN_JOB_FOOD_MARKET, [INVENTORY_MUSHROOM]);
 }

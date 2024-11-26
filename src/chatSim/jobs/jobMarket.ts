@@ -62,18 +62,18 @@ export function onLoadDisplayItemPaintData() {
     }
 }
 
-export function sellItemToMarket(market: BuildingMarket, seller: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+export function sellItemToMarket(market: BuildingMarket, seller: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
     if (!market.inhabitedBy) return;
     const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
     jobMarket.customerCounter[0]++;
-    sellItemWithInventories(seller, market.inhabitedBy, itemName, 1, seller.inventory, market.inventory, state, requestedAmount);
+    return sellItemWithInventories(seller, market.inhabitedBy, itemName, 1, seller.inventory, market.inventory, state, requestedAmount);
 }
 
-export function buyItemFromMarket(market: BuildingMarket, buyer: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+export function buyItemFromMarket(market: BuildingMarket, buyer: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
     if (!market.inhabitedBy) return;
     const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
     jobMarket.customerCounter[0]++;
-    buyItemWithInventories(market.inhabitedBy, buyer, itemName, 2, market.inventory, buyer.inventory, state, requestedAmount);
+    return buyItemWithInventories(market.inhabitedBy, buyer, itemName, 2, market.inventory, buyer.inventory, state, requestedAmount);
 }
 
 export function createJobMarket(state: ChatSimState, jobname: string, sellItemNames: string[]): CitizenJobMarket {

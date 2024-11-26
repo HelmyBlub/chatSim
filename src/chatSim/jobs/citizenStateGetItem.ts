@@ -1,3 +1,4 @@
+import { addChatMessage, createEmptyChat } from "../chatBubble.js";
 import { Building, BuildingMarket, ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
@@ -62,7 +63,14 @@ function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState
         }
         if (isCitizenInInteractDistance(citizen, data.building.position)) {
             if (data.building.inhabitedBy && isCitizenInInteractDistance(citizen, data.building.inhabitedBy.position)) {
-                buyItemFromMarket(data.building as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
+                const finalAmount = buyItemFromMarket(data.building as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
+                if (finalAmount !== undefined && finalAmount > 0) {
+                    const chat = createEmptyChat();
+                    addChatMessage(chat, data.building.inhabitedBy, `I want to buy ${data.itemAmount}x${INVENTORY_MUSHROOM}`, state);
+                    addChatMessage(chat, citizen, `I would sell ${finalAmount}x${INVENTORY_MUSHROOM} for $${2 * finalAmount}`, state);
+                    addChatMessage(chat, data.building.inhabitedBy, `Yes please!`, state);
+                    data.building.inhabitedBy.lastChat = chat;
+                }
             }
             citizenStateStackTaskSuccess(citizen);
             return;

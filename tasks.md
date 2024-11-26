@@ -1,7 +1,6 @@
 Tasks:
-- check code after restructuring
-    - building construction
 - check thoughs and improve them
+    - use addThought more, not setThought. Better wait for thinking at right moments
 - check moveTo reset on behavior change
 - check citizen behind building
 - change: paint tools
@@ -12,6 +11,8 @@ Tasks:
             - a starving citizen in a small map with 1 mushroom
                 - he should survive, can he get his need fullfilled before death?
                 - execute test on some button press
+    - make seed for randomness
+    - check performance
 - restructure markets
     - dev steps:
         - add queue for customers
@@ -79,6 +80,8 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- check code after restructuring
+    - building construction
 - get new code strucutre for "need home" and other fixes
 - clean up food gatherer to use new code
 - new behavior for job changing for markets when no customers for x days

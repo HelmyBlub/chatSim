@@ -34,9 +34,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             type: CITIZEN_NEED_STARVING,
             stack: [],
         }
-        setCitizenThought(citizen, [
-            `I am starving. I need to find food.`
-        ], state);
+        setCitizenThought(citizen, [`I am starving. I need to find food.`], state);
         setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 1, true);
     }
 

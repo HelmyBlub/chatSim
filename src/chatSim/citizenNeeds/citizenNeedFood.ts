@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought, addCitizenThought } from "../citizen.js";
 import { InventoryItem } from "../inventory.js";
 import { setCitizenStateGetItem, setCitizenStateTransportItemToBuilding } from "../jobs/citizenStateGetItem.js";
 import { isCitizenInInteractDistance } from "../jobs/job.js";
@@ -65,10 +65,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED) {
                 citizen.stateInfo = { type: CITIZEN_NEED_FOOD, stack: [] };
-                setCitizenThought(citizen, [
-                    `I have enough ${INVENTORY_MUSHROOM}.`,
-                    `I will store them at home.`
-                ], state);
+                addCitizenThought(citizen, `I have enough ${INVENTORY_MUSHROOM}. I will store them at home.`, state);
                 setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM, CITIZEN_FOOD_AT_HOME_NEED);
                 return;
             }

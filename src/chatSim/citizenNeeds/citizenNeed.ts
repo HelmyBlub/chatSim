@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { CITIZEN_NEED_FOOD, loadCitizenNeedsFunctionsFood } from "./citizenNeedFood.js";
 import { CITIZEN_NEED_HOME, loadCitizenNeedsFunctionsHome } from "./citizenNeedHome.js";
 import { CITIZEN_NEED_SLEEP, loadCitizenNeedsFunctionsSleep } from "./citizenNeedSleep.js";
@@ -35,7 +35,12 @@ export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
     }
     if (needsFulfilled) {
         citizen.needs.lastSuccededCheckedNeedsTime = state.time;
-        if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+        if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
+            citizen.stateInfo = {
+                type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: []
+            };
+            addCitizenThought(citizen, `Back to work.`, state);
+        }
     }
 }
 
