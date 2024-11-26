@@ -24,6 +24,10 @@ export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: Build
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_BUILDING, data: buildingType });
 }
 
+export function setCitizenStateBuildBuilding(citizen: Citizen, building: Building) {
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building });
+}
+
 export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: building });
 }
@@ -94,7 +98,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
     const unfinishedBuilding = getCitizenUnfinishedBuilding(citizen, buildingType, state);
     if (unfinishedBuilding) {
         addCitizenThought(citizen, `I have an unfinished ${buildingType}. I go continue building it.`, state);
-        citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: unfinishedBuilding });
+        setCitizenStateBuildBuilding(citizen, unfinishedBuilding);
         return;
     }
     const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
@@ -103,7 +107,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
         const building = createBuildingOnRandomTile(citizen, state, buildingType);
         if (building) {
             addCitizenThought(citizen, `I have enough wood to build ${buildingType} myself.`, state);
-            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building })
+            setCitizenStateBuildBuilding(citizen, building);
         };
     } else {
         addCitizenThought(citizen, `I need ${INVENTORY_WOOD} to build ${buildingType}.`, state);
@@ -162,7 +166,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
 
 function getCitizenUnfinishedBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
     for (let building of state.map.buildings) {
-        if (building.buildProgress !== undefined && building.type === buildingType) {
+        if (building.buildProgress !== undefined && building.type === buildingType && citizen === building.owner) {
             return building;
         }
     }

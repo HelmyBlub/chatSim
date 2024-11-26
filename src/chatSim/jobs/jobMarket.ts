@@ -8,7 +8,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "./citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "./citizenStateGetItem.js";
 import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItemWithInventories } from "./job.js"
-import { BUILDING_DATA } from "./jobBuildingContruction.js";
+import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 
 export type CitizenJobMarket = CitizenJob & {
@@ -117,7 +117,8 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
                     const totalCustomerCount = job.customerCounter.reduce((p, c) => p += c);
                     if (totalCustomerCount === 0) {
                         const reason = [`I had no customers for ${job.maxCounterDays} days.`, `I change job.`];
-                        citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
+                        const newJob: string = Math.random() > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
+                        citizenChangeJob(citizen, newJob, state, reason);
                         return;
                     }
                 }

@@ -8,6 +8,7 @@ import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
 import { calculateDistance } from "../main.js";
 import { Inventory, inventoryGetAvaiableCapacity } from "../inventory.js";
+import { findBuilding } from "./citizenStateGetBuilding.js";
 
 export type CitizenJob = {
     name: string,
@@ -126,13 +127,8 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
 }
 
 export function findMarketBuilding(citizen: Citizen, state: ChatSimState): BuildingMarket | undefined {
-    for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === "Market") {
-            return building as BuildingMarket;
-        }
-    }
-    for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === "Market") return building as BuildingMarket;
-    }
+    const building = findBuilding(citizen, "Market", state);
+    if (building) return building as BuildingMarket;
     return undefined;
+
 }

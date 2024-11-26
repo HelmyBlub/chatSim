@@ -13,7 +13,7 @@ type Data = {
     amount?: number,
 }
 
-export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
+export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCititzenStateGatherWood;
 }
 
