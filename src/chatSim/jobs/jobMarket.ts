@@ -1,13 +1,14 @@
 import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
 import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
-import { Citizen, CitizenStateInfo, isCitizenThinking, setCitizenThought } from "../citizen.js"
+import { addCitizenThought, Citizen, CitizenStateInfo, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { inventoryGetAvaiableCapacity, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { setCitizenStateGetBuilding } from "./citizenStateGetBuilding.js";
+import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "./citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "./citizenStateGetItem.js";
 import { CitizenJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js"
+import { BUILDING_DATA } from "./jobBuildingContruction.js";
 
 export type CitizenJobMarket = CitizenJob & {
     sellItemNames: string[],
@@ -107,7 +108,7 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
 }
 
 function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo as JobMarketStateInfo;
+    const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
     const market = findMarketBuilding(citizen, state);
     if (market) {
         market.inhabitedBy = citizen;
@@ -157,6 +158,11 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                         }
                     }
                 }
+            }
+            if (market.deterioration > 1 / BUILDING_DATA[market.type].woodAmount) {
+                addCitizenThought(citizen, `I need to repair my market.`, state);
+                setCitizenStateRepairBuilding(citizen, market);
+                return;
             }
             stateInfo.state = "waitingForCustomers";
             citizen.paintBehindBuildings = true;

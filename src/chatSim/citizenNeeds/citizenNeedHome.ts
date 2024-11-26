@@ -1,11 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, setCitizenThought } from "../citizen.js";
-import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { setCitizenStateGetBuilding } from "../jobs/citizenStateGetBuilding.js";
-import { buyItem, citizenChangeJob, isCitizenInInteractDistance } from "../jobs/job.js";
-import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
-import { findClosestWoodMarket, CITIZEN_JOB_WOOD_MARKET } from "../jobs/jobWoodMarket.js";
-import { INVENTORY_WOOD } from "../main.js";
+import { addCitizenLogEntry, Citizen } from "../citizen.js";
+import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../jobs/citizenStateGetBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
 export const CITIZEN_NEED_HOME = "need home";
@@ -24,8 +19,8 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
-    if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
-        if (!citizen.home) {
+    if (!citizen.home) {
+        if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
             const availableHouse = state.map.buildings.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
             if (availableHouse) {
                 addCitizenLogEntry(citizen, `moved into a house from ${availableHouse.owner}`, state);
@@ -37,111 +32,18 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 setCitizenStateGetBuilding(citizen, "House");
             }
         }
-    } else {
-        if (citizen.stateInfo.stack.length > 0) {
-            const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
-            if (tickFunction) {
-                tickFunction(citizen, state);
-                return;
-            }
+    }
+    if (citizen.home && citizen.home.deterioration > 0.2) {
+        if (citizen.stateInfo.type !== CITIZEN_NEED_HOME || citizen.stateInfo.stack.length === 0) {
+            citizen.stateInfo = { type: CITIZEN_NEED_HOME, stack: [] };
+            setCitizenStateRepairBuilding(citizen, citizen.home);
         }
     }
-    if (!citizen.home || citizen.home.deterioration < 0.2) return;
-
-    if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
-        let foundWood = false;
-        const wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-        if (wood && wood.counter > 0) {
-            foundWood = true;
-        } else {
-            const homeWood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
-            if (homeWood && homeWood.counter > 0) {
-                foundWood = true;
-            }
-        }
-        if (foundWood) {
-            citizen.moveTo = {
-                x: citizen.home.position.x,
-                y: citizen.home.position.y,
-            }
-            citizen.stateInfo = {
-                type: CITIZEN_NEED_HOME,
-                stack: [{ state: `move to house to repair` }],
-            };
-            setCitizenThought(citizen, [
-                `I will go home to repair my house.`,
-            ], state);
-        } else {
-            if (citizen.job.name !== CITIZEN_JOB_LUMBERJACK) {
-                let canBuyWood = false;
-                if (citizen.money > 1) {
-                    const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
-                    if (woodMarket) {
-                        citizen.stateInfo = {
-                            type: CITIZEN_NEED_HOME,
-                            stack: [{ state: `buy wood` }],
-                        };
-                        setCitizenThought(citizen, [
-                            `My house needs repairs. I will go to ${woodMarket.name} to buy ${INVENTORY_WOOD}`,
-                        ], state);
-
-                        citizen.moveTo = {
-                            x: woodMarket.position.x,
-                            y: woodMarket.position.y,
-                        }
-                        canBuyWood = true;
-                    }
-                }
-                if (!canBuyWood) {
-                    const reason = [
-                        `I need ${INVENTORY_WOOD} to repair my home.`,
-                        `I did not find a way to get ${INVENTORY_WOOD}.`,
-                        `I become a ${CITIZEN_JOB_LUMBERJACK} to gather ${INVENTORY_WOOD} myself.`,
-                    ];
-                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
-                }
-            }
-        }
-    } else if (citizen.stateInfo.stack.length > 0) {
-        if (citizen.stateInfo.stack[0].state === `buy wood`) {
-            if (citizen.moveTo === undefined) {
-                if (citizen.money < 2) {
-                    const reason = [
-                        `I need ${INVENTORY_WOOD} to repair my home.`,
-                        `I do not have enough money to buy ${INVENTORY_WOOD}.`,
-                        `I become a ${CITIZEN_JOB_LUMBERJACK} to gather ${INVENTORY_WOOD} myself.`,
-                    ];
-                    citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
-                } else {
-                    const woodMarket = findClosestWoodMarket(citizen.position, state, true, false);
-                    if (woodMarket && isCitizenInInteractDistance(citizen, woodMarket.position)) {
-                        if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
-                            buyItem(woodMarket, citizen, INVENTORY_WOOD, 2, state, 1);
-                        }
-                    } else {
-                        addCitizenLogEntry(citizen, `${CITIZEN_JOB_WOOD_MARKET} not found at location`, state);
-                    }
-                    citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
-                    return;
-                }
-            }
-        }
-        if (citizen.stateInfo.stack[0].state === `move to house to repair`) {
-            if (citizen.moveTo === undefined) {
-                if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                    let wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-                    if (!wood || wood.counter <= 0) {
-                        wood = citizen.home.inventory.items.find(i => i.name === INVENTORY_WOOD);
-                    }
-                    if (wood && wood.counter > 0) {
-                        citizen.home.deterioration -= 0.2;
-                        wood.counter--;
-                        addCitizenLogEntry(citizen, `used ${INVENTORY_WOOD} to repair home. current deterioration: ${(citizen.home.deterioration * 100).toFixed()}%`, state);
-                    }
-                }
-                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
-                return;
-            }
+    if (citizen.stateInfo.stack.length > 0) {
+        const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
+        if (tickFunction) {
+            tickFunction(citizen, state);
+            return;
         }
     }
 }

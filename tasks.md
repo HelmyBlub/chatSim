@@ -1,12 +1,17 @@
 Tasks:
-- think about automated tests?
-    - i have struggle finding issues why my citizens behave in strange ways
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
         - try use new code structure ideas for all
         - get new code strucutre for "need home"
         - get new code structure for job wood market
         - clean up lumberjack to use new code
+- think about automated tests?
+    - i have struggle finding issues why my citizens behave in strange ways
+        - test for starving need:
+            - a starving citizen in a small map with 1 mushroom
+                - he should survive, can he get his need fullfilled before death?
+                - execute test on some button press
+- new behavior for job changing
 - restructure markets
     - dev steps:
         - new file jobMarket

@@ -37,6 +37,9 @@ function tick(citizen: Citizen, state: ChatSimState) {
         }
     }
 
+    if (citizen.energyPerCent < 0.03) {
+        debugger;
+    }
     if (citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
         const sleepDuration = 0.36;
         let sleepRegenerationFactor = 1;

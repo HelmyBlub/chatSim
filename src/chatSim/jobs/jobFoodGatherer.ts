@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET, sellFoodToFoodMarket } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
@@ -7,7 +7,7 @@ import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.
 import { removeMushroomFromMap } from "../map.js";
 import { IMAGE_PATH_BASKET, IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { inventoryEmptyCitizenToHomeInventory, inventoryGetAvaiableCapacity, inventoryGetUsedCapacity } from "../inventory.js";
+import { inventoryEmptyCitizenToHomeInventory, inventoryGetAvaiableCapacity } from "../inventory.js";
 
 
 export type CitizenJobFoodGatherer = CitizenJob & {
@@ -74,7 +74,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
             const citizenState: JobFoodGathererStateInfo = { state: "gathering" };
             citizen.stateInfo.stack.unshift(citizenState);
         } else {
-            if (citizen.home && inventoryGetUsedCapacity(citizen.home.inventory) < citizen.home.inventory.size) {
+            if (citizen.home && inventoryGetAvaiableCapacity(citizen.home.inventory, INVENTORY_MUSHROOM) > 0) {
                 const citizenState: JobFoodGathererStateInfo = { state: "goHome" };
                 citizen.stateInfo.stack.unshift(citizenState);
                 setCitizenThought(citizen, [

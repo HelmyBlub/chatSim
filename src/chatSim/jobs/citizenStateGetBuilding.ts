@@ -11,16 +11,21 @@ import { BUILDING_DATA } from "./jobBuildingContruction.js";
 export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
 export const CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS = "GetBuildingCheckRequirements";
 export const CITIZEN_STATE_BUILD_BUILDING = "BuildBuilding";
+export const CITIZEN_STATE_REPAIR_BUILDING = "RepairBuilding";
 
 export function onLoadCitizenStateDefaultTickGetBuildingFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING] = tickCititzenStateGetBuilding;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS] = tickCititzenStateGetBuildingCheckRequirements;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUILD_BUILDING] = tickCititzenStateBuildBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_REPAIR_BUILDING] = tickCititzenStateRepairBuilding;
 }
-
 
 export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: BuildingType) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_BUILDING, data: buildingType });
+}
+
+export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: building });
 }
 
 export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
@@ -34,6 +39,39 @@ export function findBuilding(citizen: Citizen, buildingType: BuildingType, state
     }
     return undefined;
 }
+
+function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) {
+    const citizenState = citizen.stateInfo.stack[0];
+    const building = citizenState.data as Building;
+
+    if (building.deterioration < 1 / BUILDING_DATA[building.type].woodAmount || building.deterioration > 1) {
+        citizen.stateInfo.stack.shift();
+        return;
+    }
+    if (citizen.moveTo === undefined) {
+        let inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
+        if (!inventoryWood || inventoryWood.counter <= 0) {
+            inventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
+        }
+        if (inventoryWood && inventoryWood.counter > 0) {
+            if (isCitizenInInteractDistance(citizen, building.position)) {
+                building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
+                inventoryWood.counter--;
+                addCitizenThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
+            } else {
+                citizen.moveTo = {
+                    x: building.position.x,
+                    y: building.position.y,
+                }
+                return;
+            }
+        } else {
+            setCitizenStateGetItem(citizen, INVENTORY_WOOD, 1, true);
+            return;
+        }
+    }
+}
+
 
 function tickCititzenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
