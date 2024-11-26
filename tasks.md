@@ -1,10 +1,4 @@
 Tasks:
-- new behavior for job changing
-    - food market
-        - if not enough customer
-        - change to random job
-            - only lumberjack to try out new code setup for lumberjack
-
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
         - clean up lumberjack to use new code
@@ -89,6 +83,8 @@ Tasks:
 Tasks done today:
 - get new code strucutre for "need home" and other fixes
 - clean up food gatherer to use new code
+- new behavior for job changing for markets when no customers for x days
+- new code structure for wood market
 
 --------------------------------------------------
 Big Idea:

@@ -9,10 +9,10 @@ import { isCitizenInInteractDistance } from "./job.js";
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
     actionStartTime?: number,
-    amount: number,
+    amount?: number,
 }
 
-export function setCitizenStateGatherWood(citizen: Citizen, amount: number) {
+export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {
     const data: Data = { amount: amount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data });
 }
@@ -22,10 +22,18 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
 
     if (citizen.moveTo === undefined) {
         const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-        const data: Data = citizenState.data;
-        if (inventoryWood && inventoryWood.counter >= data.amount) {
-            citizenStateStackTaskSuccess(citizen);
-            return;
+        if (inventoryWood) {
+            const data: Data = citizenState.data;
+            const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD);
+            const limit = inventoryWood.counter + available;
+            let amount: number = limit;
+            if (data.amount !== undefined) {
+                amount = Math.min(data.amount, limit);
+            }
+            if (inventoryWood.counter >= amount) {
+                citizenStateStackTaskSuccess(citizen);
+                return;
+            }
         }
         const tree = isCloseToTree(citizen, state);
         if (tree) {

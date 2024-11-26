@@ -182,7 +182,7 @@ function createBuilding(owner: Citizen, position: Position, type: BuildingType):
             items: [],
             reservedSpace: [
                 {
-                    counter: 3,
+                    counter: 6,
                     name: INVENTORY_MUSHROOM
                 },
                 {
