@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { Citizen, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenInInteractDistance } from "../jobs/job.js";
-import { calculateDistance, getTimeOfDay } from "../main.js";
+import { getTimeOfDay } from "../main.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
 export const CITIZEN_NEED_STATE_SLEEPING = "sleeping";

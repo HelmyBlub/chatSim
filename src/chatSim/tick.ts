@@ -1,8 +1,7 @@
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen, tickCitizens } from "./citizen.js";
 import { moveMapCameraBy } from "./input.js";
-import { CITIZEN_STATE_GATHER_MUSHROOM, tickCititzenStateGatherMushroom } from "./jobs/citizenStateGatherMushroom.js";
-import { CITIZEN_STATE_GATHER_WOOD, tickCititzenStateGatherWood } from "./jobs/citizenStateGatherWood.js";
+import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./jobs/citizenStateGatherMushroom.js";
 import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./jobs/citizenStateGetBuilding.js";
 import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./jobs/citizenStateGetItem.js";
 import { onLoadCitizenStateDefaultTickSellItemFuntions } from "./jobs/citizenStateSellItem.js";
@@ -15,8 +14,7 @@ export function onLoadCitizenStateDefaultTickFuntions() {
     onLoadCitizenStateDefaultTickGetItemFuntions();
     onLoadCitizenStateDefaultTickGetBuildingFuntions();
     onLoadCitizenStateDefaultTickSellItemFuntions();
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_MUSHROOM] = tickCititzenStateGatherMushroom;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCititzenStateGatherWood;
+    onLoadCitizenStateDefaultTickGatherMushroomsFuntions();
 }
 
 export function chatSimTick(state: ChatSimState) {

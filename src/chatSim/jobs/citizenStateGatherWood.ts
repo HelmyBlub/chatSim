@@ -3,6 +3,7 @@ import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../ci
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { INVENTORY_WOOD, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
 import { isCitizenInInteractDistance } from "./job.js";
 
@@ -10,6 +11,10 @@ export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
     actionStartTime?: number,
     amount?: number,
+}
+
+export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCititzenStateGatherWood;
 }
 
 export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {

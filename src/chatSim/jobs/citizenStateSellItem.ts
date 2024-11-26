@@ -1,11 +1,9 @@
-import { Building, BuildingMarket, ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
-import { inventoryGetAvaiableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
+import { BuildingMarket, ChatSimState } from "../chatSimModels.js";
+import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
+import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
-import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
-import { buyItemWithInventories, isCitizenInInteractDistance, sellItemWithInventories } from "./job.js";
+import { isCitizenInInteractDistance } from "./job.js";
 import { sellItemToMarket } from "./jobMarket.js";
 
 export type CitizenStateSellItemData = {

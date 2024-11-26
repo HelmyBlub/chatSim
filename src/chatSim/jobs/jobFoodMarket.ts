@@ -3,7 +3,7 @@ import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
 import { sellItem, sellItemWithInventories } from "./job.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { addChatMessage, createEmptyChat } from "../chatBubble.js";
-import { buyItemFromMarket, CitizenJobMarket, createJobMarket, paintInventoryOnMarket, tickMarket } from "./jobMarket.js";
+import { CitizenJobMarket, createJobMarket, paintInventoryOnMarket, tickMarket } from "./jobMarket.js";
 
 export type CitizenJobFoodMarket = CitizenJobMarket & {
 }
@@ -18,6 +18,7 @@ export function loadCitizenJobFoodMarket(state: ChatSimState) {
     };
 }
 
+//TODO clean up
 export function sellFoodToFoodMarket(foodMarket: Citizen, seller: Citizen, requestedAmount: number, state: ChatSimState) {
     if (foodMarket.job.name !== CITIZEN_JOB_FOOD_MARKET) return false;
     const job = foodMarket.job as CitizenJobFoodMarket;

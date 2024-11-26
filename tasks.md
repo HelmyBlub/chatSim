@@ -1,8 +1,11 @@
 Tasks:
-- resturcture citizen behavior to have some code i can use for every job
-    - nextstep?:   
-        - clean up lumberjack to use new code
-        - get new code structure for job wood market
+- check code after restructuring
+    - building construction
+- check thoughs and improve them
+- check moveTo reset on behavior change
+- check citizen behind building
+- change: paint tools
+
 - think about automated tests?
     - i have struggle finding issues why my citizens behave in strange ways
         - test for starving need:
@@ -11,12 +14,7 @@ Tasks:
                 - execute test on some button press
 - restructure markets
     - dev steps:
-        - new file jobMarket
-        - setup inventory for what it wants to sell/buy
-        - creating job change: requires market building
-            - 
         - add queue for customers
-        - add displayed items property
         - state for talking with customers
             - market:   "How can i help you?"
             - customer: "buy x" or "sell x"
@@ -85,6 +83,7 @@ Tasks done today:
 - clean up food gatherer to use new code
 - new behavior for job changing for markets when no customers for x days
 - new code structure for wood market
+- clean up lumberjack to use new code
 
 --------------------------------------------------
 Big Idea:

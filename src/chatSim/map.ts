@@ -69,10 +69,10 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     return house;
 }
 
-export function removeHouseFromMap(house: Building, map: ChatSimMap) {
-    const usedTileIndex = map.usedTiles.findIndex(t => t.object === house);
+export function removeBuildingFromMap(building: Building, map: ChatSimMap) {
+    const usedTileIndex = map.usedTiles.findIndex(t => t.object === building);
     if (usedTileIndex === -1) return;
-    const houseIndex = map.buildings.findIndex(h => h === house);
+    const houseIndex = map.buildings.findIndex(h => h === building);
     if (houseIndex === -1) return;
     map.buildings.splice(houseIndex, 1);
     const usedTile = map.usedTiles.splice(usedTileIndex, 1)[0];
@@ -164,7 +164,7 @@ function tickHouses(state: ChatSimState) {
         const house = state.map.buildings[i];
         house.deterioration += 0.00005;
         if (house.deterioration > 1) {
-            removeHouseFromMap(house, state.map);
+            removeBuildingFromMap(house, state.map);
             if (house.inhabitedBy && house.inhabitedBy.home === house) house.inhabitedBy.home = undefined;
         }
     }

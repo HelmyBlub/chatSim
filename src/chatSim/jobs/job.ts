@@ -1,4 +1,4 @@
-import { Building, BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
+import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, CITIZEN_STATE_THINKING, setCitizenThought } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";

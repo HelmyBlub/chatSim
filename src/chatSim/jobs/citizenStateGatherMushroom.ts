@@ -3,9 +3,14 @@ import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../ci
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { INVENTORY_MUSHROOM, SKILL_GATHERING } from "../main.js";
 import { removeMushroomFromMap } from "../map.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenInInteractDistance } from "./job.js";
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
+
+export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_MUSHROOM] = tickCititzenStateGatherMushroom;
+}
 
 export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: amount });
