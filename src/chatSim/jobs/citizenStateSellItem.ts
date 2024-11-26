@@ -6,6 +6,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
 import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
 import { buyItemWithInventories, isCitizenInInteractDistance, sellItemWithInventories } from "./job.js";
+import { sellItemToMarket } from "./jobMarket.js";
 
 export type CitizenStateSellItemData = {
     name: string,
@@ -51,7 +52,7 @@ function tickCitizenStateSellItemToMarket(citizen: Citizen, state: ChatSimState)
         }
         if (isCitizenInInteractDistance(citizen, data.market.position)) {
             if (data.market.inhabitedBy && isCitizenInInteractDistance(citizen, data.market.inhabitedBy.position)) {
-                sellItemWithInventories(citizen, data.market.inhabitedBy, data.itemName, 1, citizen.inventory, data.market.inventory, state, data.itemAmount);
+                sellItemToMarket(data.market, citizen, data.itemName, state, data.itemAmount);
             }
             citizenStateStackTaskSuccess(citizen);
             return;

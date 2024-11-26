@@ -45,6 +45,10 @@ export function getTimeOfDay(time: number, state: ChatSimState): number {
     return (time % state.timPerDay) / state.timPerDay;
 }
 
+export function getDay(state: ChatSimState): number {
+    return Math.floor(state.time / state.timPerDay) + 1;
+}
+
 export function getTimeOfDayString(time: number, state: ChatSimState): string {
     const timeOfDayNumber = getTimeOfDay(time, state) * 24;
     const days = Math.floor(time / state.timPerDay) + 1;

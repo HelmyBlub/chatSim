@@ -330,6 +330,9 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     tickCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);
+    if (citizen.inventory.items.length > 2) {
+        debugger;
+    }
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {

@@ -1,7 +1,12 @@
 Tasks:
+- new behavior for job changing
+    - food market
+        - if not enough customer
+        - change to random job
+            - only lumberjack to try out new code setup for lumberjack
+
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
-        - clean up food gatherer to use new code
         - clean up lumberjack to use new code
         - get new code structure for job wood market
 - think about automated tests?
@@ -10,7 +15,6 @@ Tasks:
             - a starving citizen in a small map with 1 mushroom
                 - he should survive, can he get his need fullfilled before death?
                 - execute test on some button press
-- new behavior for job changing
 - restructure markets
     - dev steps:
         - new file jobMarket
@@ -84,6 +88,7 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - get new code strucutre for "need home" and other fixes
+- clean up food gatherer to use new code
 
 --------------------------------------------------
 Big Idea:

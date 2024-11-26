@@ -2,16 +2,20 @@ import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js"
 import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { inventoryGetAvaiableCapacity, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
+import { getDay, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "./citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "./citizenStateGetItem.js";
-import { CitizenJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js"
+import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItemWithInventories } from "./job.js"
 import { BUILDING_DATA } from "./jobBuildingContruction.js";
+import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 
 export type CitizenJobMarket = CitizenJob & {
     sellItemNames: string[],
+    customerCounter: number[],
+    currentDayCounter: number,
+    maxCounterDays: number,
 }
 
 export type JobMarketStates = "checkInventory" | "waitingForCustomers" | "getMarketBuilding";
@@ -58,10 +62,27 @@ export function onLoadDisplayItemPaintData() {
     }
 }
 
+export function sellItemToMarket(market: BuildingMarket, seller: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    if (!market.inhabitedBy) return;
+    const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
+    jobMarket.customerCounter[0]++;
+    sellItemWithInventories(seller, market.inhabitedBy, itemName, 1, seller.inventory, market.inventory, state, requestedAmount);
+}
+
+export function buyItemFromMarket(market: BuildingMarket, buyer: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined) {
+    if (!market.inhabitedBy) return;
+    const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
+    jobMarket.customerCounter[0]++;
+    buyItemWithInventories(market.inhabitedBy, buyer, itemName, 2, market.inventory, buyer.inventory, state, requestedAmount);
+}
+
 export function createJobMarket(state: ChatSimState, jobname: string, sellItemNames: string[]): CitizenJobMarket {
     return {
         name: jobname,
         sellItemNames: sellItemNames,
+        customerCounter: [0],
+        currentDayCounter: getDay(state),
+        maxCounterDays: 3,
     }
 }
 
@@ -89,6 +110,20 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
         if (!job.marketBuilding || job.marketBuilding.deterioration >= 1) {
             citizen.stateInfo.stack.unshift({ state: "getMarketBuilding" });
         } else {
+            const day = getDay(state);
+            if (job.currentDayCounter !== day) {
+                if (job.customerCounter.length >= job.maxCounterDays) {
+                    job.customerCounter.pop();
+                    const totalCustomerCount = job.customerCounter.reduce((p, c) => p += c);
+                    if (totalCustomerCount === 0) {
+                        const reason = [`I had no customers for ${job.maxCounterDays} days.`, `I change job.`];
+                        citizenChangeJob(citizen, CITIZEN_JOB_LUMBERJACK, state, reason);
+                        return;
+                    }
+                }
+                job.currentDayCounter = day;
+                job.customerCounter.unshift(0);
+            }
             setCitizenThought(citizen, ["Go to my market and check inventory."], state);
             citizen.stateInfo.stack.unshift({ state: "checkInventory" });
             citizen.moveTo = {
@@ -145,7 +180,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             for (let itemName of jobMarket.sellItemNames) {
                 let availableSpace = inventoryGetMissingReserved(job.marketBuilding.inventory, itemName);
                 if (availableSpace > 0) {
-                    const citizenInventory = citizen.inventory.items.find(i => i.name = itemName);
+                    const citizenInventory = citizen.inventory.items.find(i => i.name === itemName);
                     if (citizenInventory && citizenInventory.counter > 0) {
                         availableSpace -= inventoryMoveItemBetween(itemName, citizen.inventory, job.marketBuilding.inventory);
                     }

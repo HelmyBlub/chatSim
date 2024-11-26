@@ -1,4 +1,4 @@
-import { Building, ChatSimState, Position } from "../chatSimModels.js";
+import { Building, BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, CITIZEN_STATE_THINKING, setCitizenThought } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
@@ -11,7 +11,7 @@ import { Inventory, inventoryGetAvaiableCapacity } from "../inventory.js";
 
 export type CitizenJob = {
     name: string,
-    marketBuilding?: Building,
+    marketBuilding?: BuildingMarket,
 }
 
 export type FunctionsCitizenJob = {
@@ -125,14 +125,14 @@ export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, item
     return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, state, requestedAmount);
 }
 
-export function findMarketBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {
+export function findMarketBuilding(citizen: Citizen, state: ChatSimState): BuildingMarket | undefined {
     for (let building of state.map.buildings) {
         if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === "Market") {
-            return building;
+            return building as BuildingMarket;
         }
     }
     for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === "Market") return building;
+        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === "Market") return building as BuildingMarket;
     }
     return undefined;
 }
