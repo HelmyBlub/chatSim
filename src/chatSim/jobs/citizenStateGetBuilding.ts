@@ -1,5 +1,5 @@
 import { Building, BuildingType, ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, addCitizenThought, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
@@ -45,7 +45,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
     const building = citizenState.data as Building;
 
     if (building.deterioration < 1 / BUILDING_DATA[building.type].woodAmount || building.deterioration > 1) {
-        citizen.stateInfo.stack.shift();
+        citizenStateStackTaskSuccess(citizen);
         return;
     }
     if (citizen.moveTo === undefined) {
@@ -78,7 +78,7 @@ function tickCititzenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
     const buildingType = citizenState.data as BuildingType;
     const building = findBuilding(citizen, buildingType, state);
     if (building) {
-        citizen.stateInfo.stack.shift();
+        citizenStateStackTaskSuccess(citizen);
     } else {
         citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS, data: buildingType });
     }
@@ -88,7 +88,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
     const buildingType = citizen.stateInfo.stack[0].data as BuildingType;
     const building = findBuilding(citizen, buildingType, state);
     if (building) {
-        citizen.stateInfo.stack.shift();
+        citizenStateStackTaskSuccess(citizen);
         return;
     }
     const unfinishedBuilding = getCitizenUnfinishedBuilding(citizen, buildingType, state);
@@ -116,7 +116,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
         const building = citizen.stateInfo.stack[0].data as Building;
         if (isCitizenInInteractDistance(citizen, building.position)) {
             if (building.buildProgress === undefined) {
-                citizen.stateInfo.stack.shift();
+                citizenStateStackTaskSuccess(citizen);
                 return;
             }
             const woodRequired = BUILDING_DATA[building.type].woodAmount;
@@ -149,7 +149,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                     citizen.home = building;
                     building.inhabitedBy = citizen;
                 }
-                citizen.stateInfo.stack.shift();
+                citizenStateStackTaskSuccess(citizen);
             }
         } else {
             citizen.moveTo = {

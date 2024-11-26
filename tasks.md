@@ -1,10 +1,9 @@
 Tasks:
 - resturcture citizen behavior to have some code i can use for every job
     - nextstep?:   
-        - try use new code structure ideas for all
-        - get new code strucutre for "need home"
-        - get new code structure for job wood market
+        - clean up food gatherer to use new code
         - clean up lumberjack to use new code
+        - get new code structure for job wood market
 - think about automated tests?
     - i have struggle finding issues why my citizens behave in strange ways
         - test for starving need:
@@ -84,12 +83,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- code rework with new code ideas for 
-    - need food
-    - food market
-    - others
-- get citizen behavior back to working
-- make canvas resize on window resize. Don't want to refresh browser for this
+- get new code strucutre for "need home" and other fixes
 
 --------------------------------------------------
 Big Idea:

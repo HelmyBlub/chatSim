@@ -1,6 +1,6 @@
 import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
 import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, CitizenStateInfo, isCitizenThinking, setCitizenThought } from "../citizen.js"
+import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { inventoryGetAvaiableCapacity, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
 import { mapPositionToPaintPosition } from "../paint.js";
@@ -133,7 +133,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
         const jobMarket = job as CitizenJobMarket;
         const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
         if (!job.marketBuilding) {
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         }
         setupReserved(job.marketBuilding as BuildingMarket, jobMarket);

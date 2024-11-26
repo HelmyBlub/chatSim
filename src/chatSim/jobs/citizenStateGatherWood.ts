@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { INVENTORY_WOOD, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
@@ -24,7 +24,7 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
         const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
         const data: Data = citizenState.data;
         if (inventoryWood && inventoryWood.counter >= data.amount) {
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         }
         const tree = isCloseToTree(citizen, state);

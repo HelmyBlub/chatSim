@@ -5,6 +5,7 @@ import { CITIZEN_STATE_GATHER_MUSHROOM, tickCititzenStateGatherMushroom } from "
 import { CITIZEN_STATE_GATHER_WOOD, tickCititzenStateGatherWood } from "./jobs/citizenStateGatherWood.js";
 import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./jobs/citizenStateGetBuilding.js";
 import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./jobs/citizenStateGetItem.js";
+import { onLoadCitizenStateDefaultTickSellItemFuntions } from "./jobs/citizenStateSellItem.js";
 import { tickChatSimMap } from "./map.js";
 
 export const CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
@@ -13,6 +14,7 @@ export const CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS: { [key: string]: (citizen: Ci
 export function onLoadCitizenStateDefaultTickFuntions() {
     onLoadCitizenStateDefaultTickGetItemFuntions();
     onLoadCitizenStateDefaultTickGetBuildingFuntions();
+    onLoadCitizenStateDefaultTickSellItemFuntions();
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_MUSHROOM] = tickCititzenStateGatherMushroom;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCititzenStateGatherWood;
 }

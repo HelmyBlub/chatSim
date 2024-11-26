@@ -1,21 +1,18 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, isCitizenThinking, setCitizenThought } from "../citizen.js";
-import { citizenChangeJob, CitizenJob, isCitizenInInteractDistance } from "./job.js";
-import { CITIZEN_JOB_FOOD_MARKET, sellFoodToFoodMarket } from "./jobFoodMarket.js";
-import { INVENTORY_MUSHROOM, calculateDistance, SKILL_GATHERING } from "../main.js";
-import { CITIZEN_FOOD_IN_INVENTORY_NEED } from "../citizenNeeds/citizenNeedFood.js";
-import { removeMushroomFromMap } from "../map.js";
+import { Citizen, setCitizenThought } from "../citizen.js";
+import { citizenChangeJob, CitizenJob } from "./job.js";
+import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
+import { INVENTORY_MUSHROOM } from "../main.js";
 import { IMAGE_PATH_BASKET, IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { inventoryEmptyCitizenToHomeInventory, inventoryGetAvaiableCapacity } from "../inventory.js";
+import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { setCitizenStateTransportItemToBuilding } from "./citizenStateGetItem.js";
+import { setCitizenStateSellItem } from "./citizenStateSellItem.js";
 
 
 export type CitizenJobFoodGatherer = CitizenJob & {
-    sellToFoodMarket?: Citizen,
-}
-
-type JobFoodGathererStateInfo = {
-    state: "gathering" | "selling" | "goHome" | "sellAtFoodMarket",
 }
 
 export const CITIZEN_JOB_FOOD_GATHERER = "Food Gatherer";
@@ -69,155 +66,38 @@ function getBasketClipPath(topLeft: Position, basketPaintSize: number): Path2D {
 
 function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
-        if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_MUSHROOM) > 0) {
-            moveToMushroom(citizen, state);
-            const citizenState: JobFoodGathererStateInfo = { state: "gathering" };
-            citizen.stateInfo.stack.unshift(citizenState);
+        const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_MUSHROOM);
+        if (available > 0) {
+            setCitizenStateGatherMushroom(citizen);
         } else {
             if (citizen.home && inventoryGetAvaiableCapacity(citizen.home.inventory, INVENTORY_MUSHROOM) > 0) {
-                const citizenState: JobFoodGathererStateInfo = { state: "goHome" };
-                citizen.stateInfo.stack.unshift(citizenState);
                 setCitizenThought(citizen, [
                     `I can not carry more ${INVENTORY_MUSHROOM}.`,
                     `I will store them at home.`
                 ], state);
+                setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM);
             } else {
-                const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-                if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                    const citizenState: JobFoodGathererStateInfo = { state: "selling" };
-                    citizen.stateInfo.stack.unshift(citizenState);
+                if (!citizen.stateInfo.previousTaskFailed) {
+                    setCitizenStateSellItem(citizen, INVENTORY_MUSHROOM);
+                    return;
                 } else {
+                    const reason = [
+                        `I can not carry more ${INVENTORY_MUSHROOM}.`,
+                        `There is no ${CITIZEN_JOB_FOOD_MARKET} to sell to.`,
+                        `I become a ${CITIZEN_JOB_FOOD_MARKET} myself,`,
+                        `so i can sell my ${INVENTORY_MUSHROOM}.`
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_FOOD_MARKET, state, reason);
                     return;
                 }
             }
         }
     }
-    const stateInfo = citizen.stateInfo.stack[0] as JobFoodGathererStateInfo;
-    if (stateInfo.state === "goHome") {
-        if (citizen.moveTo === undefined) {
-            if (citizen.home) {
-                if (isCitizenInInteractDistance(citizen, citizen.home.position)) {
-                    inventoryEmptyCitizenToHomeInventory(citizen, state);
-                    citizen.stateInfo.stack.shift();
-                } else {
-                    if (!isCitizenThinking(citizen, state)) {
-                        citizen.moveTo = {
-                            x: citizen.home.position.x,
-                            y: citizen.home.position.y,
-                        }
-                    }
-                }
-            } else {
-                citizen.stateInfo.stack.shift();
-            }
+    if (citizen.stateInfo.stack.length > 0) {
+        const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
+        if (tickFunction) {
+            tickFunction(citizen, state);
+            return;
         }
-    }
-    if (stateInfo.state === "gathering") {
-        if (citizen.moveTo === undefined) {
-            const isCloseToMushroomIndex = isCloseToMushroom(citizen, state);
-            if (isCloseToMushroomIndex !== undefined) {
-                addCitizenLogEntry(citizen, `picked up ${INVENTORY_MUSHROOM}`, state);
-                pickUpMushroom(citizen, state, isCloseToMushroomIndex);
-            } else if (citizen.moveTo === undefined) {
-                addCitizenLogEntry(citizen, `no ${INVENTORY_MUSHROOM} at pickup location. Search a new one`, state);
-            }
-            citizen.stateInfo.stack.shift();
-        }
-    }
-    if (stateInfo.state === "selling" && !isCitizenThinking(citizen, state)) {
-        const foodMarket = findAFoodMarketWhichHasMoneyAndCapacity(citizen, state.map.citizens);
-        if (foodMarket) {
-            job.sellToFoodMarket = foodMarket;
-            stateInfo.state = "sellAtFoodMarket";
-            setCitizenThought(citizen, [
-                `I can not carry more ${INVENTORY_MUSHROOM}.`,
-                `I will sell them to ${foodMarket.name}.`,
-            ], state);
-            citizen.moveTo = {
-                x: foodMarket.position.x,
-                y: foodMarket.position.y,
-            }
-        } else {
-            const reason = [
-                `I can not carry more ${INVENTORY_MUSHROOM}.`,
-                `There is no ${CITIZEN_JOB_FOOD_MARKET} to sell to.`,
-                `I become a ${CITIZEN_JOB_FOOD_MARKET} myself,`,
-                `so i can sell my ${INVENTORY_MUSHROOM}.`
-            ];
-            citizenChangeJob(citizen, CITIZEN_JOB_FOOD_MARKET, state, reason);
-        }
-    }
-    if (stateInfo.state === "sellAtFoodMarket") {
-        if (citizen.moveTo === undefined) {
-            if (job.sellToFoodMarket && isCitizenInInteractDistance(citizen, job.sellToFoodMarket.position)) {
-                const mushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-                if (mushroom && mushroom.counter > CITIZEN_FOOD_IN_INVENTORY_NEED) {
-                    const sellAmount = mushroom.counter - CITIZEN_FOOD_IN_INVENTORY_NEED;
-                    sellFoodToFoodMarket(job.sellToFoodMarket, citizen, sellAmount, state);
-                }
-                stateInfo.state = "gathering";
-            } else {
-                stateInfo.state = "selling";
-                setCitizenThought(citizen, [
-                    `I do not see the food market.`,
-                ], state);
-            }
-        }
-    }
-}
-
-function findAFoodMarketWhichHasMoneyAndCapacity(searcher: Citizen, citizens: Citizen[]): Citizen | undefined {
-    let closest: Citizen | undefined;
-    let distance = 0;
-    for (let citizen of citizens) {
-        if (citizen.job && citizen.job.name === CITIZEN_JOB_FOOD_MARKET && citizen.moveTo === undefined && citizen.money > 2 && canCitizenCarryMore(citizen)) {
-            if (closest === undefined) {
-                closest = citizen;
-                distance = calculateDistance(citizen.position, searcher.position);
-            } else {
-                const tempDistance = calculateDistance(citizen.position, searcher.position);
-                if (tempDistance < distance) {
-                    closest = citizen;
-                    distance = tempDistance;
-                }
-            }
-        }
-    }
-    return closest;
-}
-
-function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: number) {
-    removeMushroomFromMap(state.map.mushrooms[mushroomIndex], state.map);
-    let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-    if (inventoryMushroom === undefined) {
-        inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0 };
-        citizen.inventory.items.push(inventoryMushroom);
-    }
-    inventoryMushroom.counter++;
-    if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
-    const skillGathering = citizen.skills[SKILL_GATHERING];
-    if (Math.random() < skillGathering / 100) {
-        inventoryMushroom.counter++;
-    }
-    if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
-}
-
-function isCloseToMushroom(citizen: Citizen, state: ChatSimState): number | undefined {
-    for (let i = state.map.mushrooms.length - 1; i >= 0; i--) {
-        const mushroom = state.map.mushrooms[i];
-        const distance = calculateDistance(mushroom.position, citizen.position);
-        if (distance < 10) return i;
-    }
-    return undefined;
-}
-
-function moveToMushroom(citizen: Citizen, state: ChatSimState) {
-    if (state.map.mushrooms.length > 0) {
-        const mushroomIndex = Math.floor(Math.random() * state.map.mushrooms.length);
-        citizen.moveTo = {
-            x: state.map.mushrooms[mushroomIndex].position.x,
-            y: state.map.mushrooms[mushroomIndex].position.y,
-        }
-        addCitizenLogEntry(citizen, `move to ${INVENTORY_MUSHROOM} at x:${citizen.moveTo.x}, y:${citizen.moveTo.y}`, state);
     }
 }

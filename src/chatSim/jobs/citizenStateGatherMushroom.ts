@@ -1,18 +1,18 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { INVENTORY_MUSHROOM, SKILL_GATHERING } from "../main.js";
 import { removeMushroomFromMap } from "../map.js";
 import { isCitizenInInteractDistance } from "./job.js";
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
 
-export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number) {
+export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: amount });
 }
 
 export function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
-    const amount: number = citizenState.data;
 
     if (citizen.moveTo === undefined) {
         const mushroomIndex = isCloseToMushroom(citizen, state);
@@ -22,9 +22,17 @@ export function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSim
             moveToMushroom(citizen, state);
         }
         const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-        if (inventoryMushroom && inventoryMushroom.counter >= amount) {
-            citizen.stateInfo.stack.shift();
-            return;
+        if (inventoryMushroom) {
+            const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_MUSHROOM);
+            const limit = inventoryMushroom.counter + available;
+            let amount: number = limit;
+            if (citizenState.data !== undefined) {
+                amount = Math.min(citizenState.data, limit);
+            }
+            if (inventoryMushroom.counter >= amount) {
+                citizenStateStackTaskSuccess(citizen);
+                return;
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 import { Building, BuildingMarket, ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen } from "../citizen.js";
+import { addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -16,7 +16,7 @@ export type CitizenStateGetItemData = {
 
 export type CitizenStateItemAndBuildingData = {
     itemName: string,
-    itemAmount: number,
+    itemAmount?: number,
     building: Building,
 }
 
@@ -47,7 +47,7 @@ export function setCitizenStateBuyItemFromMarket(citizen: Citizen, market: Build
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUY_ITEM_FROM_MARKET, data: data });
 }
 
-export function setCitizenStateTransportItemToBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number) {
+export function setCitizenStateTransportItemToBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number | undefined = undefined) {
     const data: CitizenStateItemAndBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING, data: data });
 }
@@ -56,14 +56,14 @@ function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (data.building.deterioration >= 1) {
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         }
         if (isCitizenInInteractDistance(citizen, data.building.position)) {
             if (data.building.inhabitedBy && isCitizenInInteractDistance(citizen, data.building.inhabitedBy.position)) {
                 buyItemWithInventories(data.building.inhabitedBy, citizen, data.itemName, 2, data.building.inventory, citizen.inventory, state, data.itemAmount);
             }
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         } else {
             citizen.moveTo = {
@@ -78,12 +78,12 @@ function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSi
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (data.building.deterioration >= 1) {
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         }
         if (isCitizenInInteractDistance(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, citizen.inventory, data.building.inventory, data.itemAmount);
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         } else {
             citizen.moveTo = {
@@ -98,12 +98,12 @@ function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimSta
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (data.building.deterioration >= 1) {
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         }
         if (isCitizenInInteractDistance(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, data.building.inventory, citizen.inventory, data.itemAmount);
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         } else {
             citizen.moveTo = {
@@ -121,7 +121,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
     let openAmount = item.amount;
     if (citizenInventory) {
         if (citizenInventory.counter >= item.amount) {
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
             return;
         }
         openAmount -= citizenInventory.counter;

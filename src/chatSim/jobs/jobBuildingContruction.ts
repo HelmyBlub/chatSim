@@ -1,5 +1,5 @@
 import { Building, ChatSimState, BuildingType } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, CitizenStateInfo, setCitizenThought } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, setCitizenThought } from "../citizen.js";
 import { buyItem, citizenChangeJob, CitizenJob, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
@@ -113,7 +113,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             } else {
                 addCitizenLogEntry(citizen, `no building in progress. But i should have? `, state);
                 debugger;
-                citizen.stateInfo.stack.shift();
+                citizenStateStackTaskSuccess(citizen);
                 job.buildingInProgress = undefined;
             }
         }
@@ -146,7 +146,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
                     job.buildType = undefined;
                 }
             } else {
-                citizen.stateInfo.stack.shift();
+                citizenStateStackTaskSuccess(citizen);
             }
         }
     }

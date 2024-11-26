@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, setCitizenThought } from "../citizen.js";
+import { addCitizenLogEntry, canCitizenCarryMore, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { calculateDistance, INVENTORY_WOOD } from "../main.js";
@@ -123,7 +123,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
                     addCitizenLogEntry(citizen, `move ${actualAmount}x${INVENTORY_WOOD} from home inventory to inventory`, state);
                 }
             }
-            citizen.stateInfo.stack.shift();
+            citizenStateStackTaskSuccess(citizen);
         }
     }
 
@@ -131,7 +131,7 @@ function tick(citizen: Citizen, job: CitizenJobWoodMarket, state: ChatSimState) 
         if (citizen.moveTo === undefined) {
             citizen.paintBehindBuildings = true;
             if (job.marketBuilding && !isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
-                citizen.stateInfo.stack.shift();
+                citizenStateStackTaskSuccess(citizen);
             } else {
                 let wood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (job.marketBuilding) {

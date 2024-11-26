@@ -16,6 +16,7 @@ export type CitizenStateInfo = {
         state: string,
         data?: any,
     }[],
+    previousTaskFailed?: boolean,
     actionStartTime?: number,
     thoughts?: string[],
 }
@@ -92,6 +93,16 @@ export function addCitizen(user: string, state: ChatSimState) {
         log: [],
         maxLogLength: 100,
     })
+}
+
+export function citizenStateStackTaskSuccess(citizen: Citizen) {
+    citizen.stateInfo.stack.shift();
+    citizen.stateInfo.previousTaskFailed = undefined;
+}
+
+export function citizenStateStackTaskFailed(citizen: Citizen) {
+    citizen.stateInfo.stack.shift();
+    citizen.stateInfo.previousTaskFailed = true;
 }
 
 export function addCitizenLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
