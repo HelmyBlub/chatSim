@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought, addCitizenThought } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought, addCitizenThought, citizenResetStateTo } from "../citizen.js";
 import { InventoryItem } from "../inventory.js";
 import { setCitizenStateGetItem, setCitizenStateTransportItemToBuilding } from "../jobs/citizenStateGetItem.js";
 import { isCitizenInInteractDistance } from "../jobs/job.js";
@@ -64,7 +64,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.home) {
             const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED) {
-                citizen.stateInfo = { type: CITIZEN_NEED_FOOD, stack: [] };
+                citizenResetStateTo(citizen, CITIZEN_NEED_FOOD);
                 addCitizenThought(citizen, `I have enough ${INVENTORY_MUSHROOM}. I will store them at home.`, state);
                 setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM, CITIZEN_FOOD_AT_HOME_NEED);
                 return;
@@ -91,7 +91,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         let requiredAmount = CITIZEN_FOOD_IN_INVENTORY_NEED;
         const needData = getCitizenNeedData(CITIZEN_NEED_FOOD, citizen, state) as CitizenNeedFood;
         if (needData.gatherMoreFood) requiredAmount += 2;
-        citizen.stateInfo = { type: CITIZEN_NEED_FOOD, stack: [] };
+        citizenResetStateTo(citizen, CITIZEN_NEED_FOOD);
         setCitizenThought(citizen, [`I am low on ${INVENTORY_MUSHROOM}.`], state);
         setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, requiredAmount, true, true);
         return;
@@ -106,7 +106,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         }
                     }
                 }
-                citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+                citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
                 return;
             }
         } else {

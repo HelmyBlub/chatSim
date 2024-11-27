@@ -1,6 +1,4 @@
 Tasks:
-- check thoughs and improve them
-    - use addThought more, not setThought. Better wait for thinking at right moments
 - check moveTo reset on behavior change
 - check citizen behind building
 - change: paint tools
@@ -80,6 +78,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- check thoughs and improve them
 - check code after restructuring
     - building construction
 - get new code strucutre for "need home" and other fixes

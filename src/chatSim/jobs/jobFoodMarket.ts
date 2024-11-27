@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
 import { sellItem, sellItemWithInventories } from "./job.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { addChatMessage, createEmptyChat } from "../chatBubble.js";
@@ -24,7 +24,7 @@ function create(state: ChatSimState): CitizenJobFoodMarket {
 
 function tick(citizen: Citizen, job: CitizenJobFoodMarket, state: ChatSimState) {
     if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
-        citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+        citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
     }
     tickMarket(citizen, job, state);
 }

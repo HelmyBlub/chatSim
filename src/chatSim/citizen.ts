@@ -95,6 +95,11 @@ export function addCitizen(user: string, state: ChatSimState) {
     })
 }
 
+export function citizenResetStateTo(citizen: Citizen, type: string) {
+    citizen.stateInfo = { type: type, stack: [] };
+    citizen.moveTo = undefined;
+}
+
 export function citizenStateStackTaskSuccess(citizen: Citizen) {
     citizen.stateInfo.stack.shift();
     citizen.stateInfo.previousTaskFailed = undefined;
@@ -342,7 +347,7 @@ function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_THINKING) {
         const stateInfo = citizen.stateInfo;
         if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + CITIZEN_TIME_PER_THOUGHT_LINE * stateInfo.thoughts!.length < state.time) {
-            citizen.stateInfo = { type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: [] };
+            citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
         }
     }
 }
