@@ -46,7 +46,7 @@ export function startTests(app: App, visualizeTests: boolean = false) {
             const state = test.initTest();
             //            state.logger = testLogger;
             testLogger.log(`--- Started test ${test.description} ---`);
-            const maxNumberIterations = 100000;
+            const maxNumberIterations = 1000000;
             let counter = 0;
             while (!test.checkFinishCondition(state) && counter < maxNumberIterations) {
                 chatSimTick(state);
@@ -69,7 +69,7 @@ export function startTests(app: App, visualizeTests: boolean = false) {
             saveMetrics(metrics);
         }
         const testTimeMS = performance.now() - testStartTime;
-        console.log(`totalTime: ${testTimeMS.toFixed(2)}ms`);
+        console.log(`totalTime: ${testTimeMS.toFixed(2)}ms`, metrics);
     }
 }
 
@@ -152,6 +152,7 @@ function testCitizenShouldBuildHome(): Test {
 
 
 function testPerformance10Citizens(): Test {
+    const untilDay = 25;
     const test: Test = {
         name: "testPerformance10Citizens",
         description: "performance 10 citizens",
@@ -165,10 +166,11 @@ function testPerformance10Citizens(): Test {
             return state;
         },
         checkFinishCondition: (state) => {
-            return getDay(state) > 25;
+            return getDay(state) > untilDay;
         },
         checkSucceded: (state) => {
-            return true;
+            if (getDay(state) <= untilDay) console.log(`reached day ${getDay(state)}`);
+            return getDay(state) > untilDay;
         }
     }
     return test;

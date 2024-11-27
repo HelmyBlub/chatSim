@@ -1,7 +1,4 @@
 Tasks:
-- think about automated tests?
-    - save performance metrics for comparison of later runs
-        - as chrome performance varies a lot on first and second run, only care for second run?
 - analyse performance
 - restructure markets
     - dev steps:
@@ -70,6 +67,8 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- save performance metrics in tests for comparison of later runs
+    - as chrome performance varies a lot on first and second run, only care for second run?
 - some more test cases?
 - think about automated tests?
     - i have struggle finding issues why my citizens behave in strange ways
