@@ -26,6 +26,7 @@ export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: Build
 
 export function setCitizenStateBuildBuilding(citizen: Citizen, building: Building) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building });
+    citizen.displayedTool = { name: "Helmet" };
 }
 
 export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {

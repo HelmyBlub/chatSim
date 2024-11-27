@@ -32,6 +32,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 setCitizenStateGetBuilding(citizen, "House");
             }
         }
+    } else {
+        if (citizen.home.deterioration > 1) {
+            citizen.home = undefined;
+            return;
+        }
     }
     if (citizen.home && citizen.home.deterioration > 0.2) {
         if (citizen.stateInfo.type !== CITIZEN_NEED_HOME || citizen.stateInfo.stack.length === 0) {

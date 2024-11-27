@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, setCitizenThought } from "../citizen.js";
+import { Citizen, citizenResetStateTo, setCitizenThought } from "../citizen.js";
 import { setCitizenStateGetItem } from "../jobs/citizenStateGetItem.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -30,10 +30,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     }
 
     if (citizen.stateInfo.type !== CITIZEN_NEED_STARVING) {
-        citizen.stateInfo = {
-            type: CITIZEN_NEED_STARVING,
-            stack: [],
-        }
+        citizenResetStateTo(citizen, CITIZEN_NEED_STARVING);
         setCitizenThought(citizen, [`I am starving. I need to find food.`], state);
         setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 1, true);
     }

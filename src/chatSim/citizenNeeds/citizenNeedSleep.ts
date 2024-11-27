@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { Citizen, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenInInteractDistance } from "../jobs/job.js";
 import { getTimeOfDay } from "../main.js";
 
@@ -75,8 +75,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 
 function sleep(citizen: Citizen, reason: string[], state: ChatSimState) {
     if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP) return;
-    citizen.stateInfo.type = CITIZEN_NEED_SLEEP;
-    citizen.stateInfo.stack = [];
+    citizenResetStateTo(citizen, CITIZEN_NEED_SLEEP);
     setCitizenThought(citizen, reason, state);
 }
 

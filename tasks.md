@@ -1,5 +1,4 @@
 Tasks:
-- check citizen behind building
 - change: paint tools
 
 - think about automated tests?
@@ -78,6 +77,7 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - check moveTo reset on behavior change
+- check citizen behind building
 
 --------------------------------------------------
 Big Idea:

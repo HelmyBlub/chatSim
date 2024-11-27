@@ -4,10 +4,11 @@ import { ChatSimState, Building, Position, Mushroom, PaintDataMap } from "./chat
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { inventoryGetUsedCapacity, Inventory } from "./inventory.js";
-import { CitizenJob, createJob, isCitizenInInteractDistance, paintCitizenJobTool, tickCitizenJob } from "./jobs/job.js";
+import { CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { calculateDirection, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
+import { CitizenTool, paintCitizenTool } from "./paintCitizenTool.js";
 import { Tree } from "./tree.js";
 
 export type CitizenStateInfo = {
@@ -44,6 +45,10 @@ export type Citizen = {
     log: CitizenLogEntry[];
     lastChat?: Chat,
     maxLogLength: number,
+    displayedTool?: {
+        name: CitizenTool,
+        data?: any,
+    },
     paintBehindBuildings?: boolean,
 }
 
@@ -99,6 +104,7 @@ export function citizenResetStateTo(citizen: Citizen, type: string) {
     citizen.stateInfo = { type: type, stack: [] };
     citizen.moveTo = undefined;
     citizen.paintBehindBuildings = undefined;
+    citizen.displayedTool = undefined;
 }
 
 export function citizenStateStackTaskSuccess(citizen: Citizen) {
@@ -231,7 +237,7 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
                 CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
             );
         }
-        paintCitizenJobTool(ctx, citizen, state);
+        paintCitizenTool(ctx, citizen, state);
     }
 
     if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES) {

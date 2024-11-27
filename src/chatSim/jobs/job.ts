@@ -18,7 +18,6 @@ export type CitizenJob = {
 export type FunctionsCitizenJob = {
     create(state: ChatSimState): CitizenJob,
     tick(citizen: Citizen, job: CitizenJob, state: ChatSimState): void,
-    paintTool?(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState): void,
     paintInventoryOnMarket?(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState): void,
 }
 
@@ -58,18 +57,6 @@ export function paintCitizenJobInventoryOnMarket(ctx: CanvasRenderingContext2D, 
     }
     if (jobFunctions.paintInventoryOnMarket && citizen.job.marketBuilding !== undefined) {
         jobFunctions.paintInventoryOnMarket(ctx, citizen, citizen.job, state);
-    }
-}
-
-export function paintCitizenJobTool(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
-    if (!citizen.job) return;
-    const jobFunctions = state.functionsCitizenJobs[citizen.job.name];
-    if (jobFunctions === undefined) {
-        console.log("job functions missing for job " + citizen.job);
-        return;
-    }
-    if (jobFunctions.paintTool && citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
-        jobFunctions.paintTool(ctx, citizen, citizen.job, state);
     }
 }
 

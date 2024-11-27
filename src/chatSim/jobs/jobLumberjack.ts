@@ -24,7 +24,6 @@ export function loadCitizenJobLumberjack(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_LUMBERJACK] = {
         create: create,
         tick: tick,
-        paintTool: paintTool,
     };
 }
 
@@ -32,21 +31,6 @@ function create(state: ChatSimState): CitizenJobLuberjack {
     return {
         name: CITIZEN_JOB_LUMBERJACK,
     }
-}
-
-function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    const stateInfo = citizen.stateInfo.stack.length > 0 ? citizen.stateInfo.stack[0] : undefined;
-    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
-    const axeSize = 20;
-    ctx.save();
-    if (citizen.moveTo === undefined && (stateInfo && (stateInfo.state === "cutDownTree" || stateInfo.state === "cutTreeLogIntoPlanks"))) {
-        const rotation = (Math.sin(state.time / 100) + 1) / 2 * Math.PI / 2;
-        ctx.translate(paintPos.x, paintPos.y);
-        ctx.rotate(rotation)
-        ctx.translate(-paintPos.x, -paintPos.y);
-    }
-    ctx.drawImage(state.images[IMAGE_PATH_AXE], 0, 0, 100, 100, paintPos.x, paintPos.y - 15, axeSize, axeSize);
-    ctx.restore();
 }
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {

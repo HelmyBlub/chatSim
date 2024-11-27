@@ -29,7 +29,6 @@ export function loadCitizenJobHouseConstruction(state: ChatSimState) {
     state.functionsCitizenJobs[CITIZEN_JOB_BUILDING_CONSTRUCTION] = {
         create: create,
         tick: tick,
-        paintTool: paintTool,
     };
 }
 
@@ -37,12 +36,6 @@ function create(state: ChatSimState): CitizenJobBuildingConstruction {
     return {
         name: CITIZEN_JOB_BUILDING_CONSTRUCTION,
     }
-}
-
-function paintTool(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
-    const axeSize = 20;
-    ctx.drawImage(state.images[IMAGE_PATH_HELMET], 0, 0, 100, 100, paintPos.x - axeSize / 2, paintPos.y - 33, axeSize, axeSize);
 }
 
 function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: ChatSimState) {

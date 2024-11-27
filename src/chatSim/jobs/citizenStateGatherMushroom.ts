@@ -14,6 +14,7 @@ export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
 
 export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: amount });
+    citizen.displayedTool = { name: "Basket" };
 }
 
 export function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {

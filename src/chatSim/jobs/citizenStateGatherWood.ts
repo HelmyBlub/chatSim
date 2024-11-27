@@ -20,6 +20,7 @@ export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
 export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {
     const data: Data = { amount: amount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data });
+    citizen.displayedTool = { name: "Axe" };
 }
 
 export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimState) {
@@ -36,15 +37,18 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
                 amount = Math.min(data.amount, limit);
             }
             if (inventoryWood.counter >= amount) {
+                citizen.displayedTool = undefined;
                 citizenStateStackTaskSuccess(citizen);
                 return;
             }
         }
         const tree = isCloseToTree(citizen, state);
         if (tree) {
+            citizen.displayedTool!.data = true;
             const isCutDown = cutDownTree(citizen, tree, state);
             if (isCutDown) cutTreeLogIntoPlanks(citizen, tree, citizenState.data, state);
         } else {
+            citizen.displayedTool!.data = false;
             moveToTree(citizen, state);
         }
     }

@@ -202,6 +202,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                 return;
             }
             stateInfo.state = "waitingForCustomers";
+            citizen.displayedTool = undefined;
             citizen.paintBehindBuildings = true;
         } else {
             citizen.moveTo = {
