@@ -3,6 +3,7 @@ import { Citizen, createDefaultCitizen } from "../citizen.js";
 import { CITIZEN_STARVING_FOOD_PER_CENT } from "../citizenNeeds/citizenNeedStarving.js";
 import { createDefaultChatSimState } from "../main.js";
 import { ChatSimMap, createMap, tickChatSimMap } from "../map.js";
+import { chatSimTick } from "../tick.js";
 
 export type TestData = {
     currentTest?: Test,
@@ -27,17 +28,22 @@ export function startTests(app: App, visualizeTests: boolean = false) {
             openTests: [...activeTests],
         }
     } else {
+        const testStartTime = performance.now();
         for (let test of activeTests) {
+            const currentTestStartTime = performance.now();
             const state = test.initTest();
             const maxNumberIterations = 100000;
             let counter = 0;
             while (!test.checkFinishCondition(state) && counter < maxNumberIterations) {
-                tickChatSimMap(state);
+                chatSimTick(state);
                 counter++;
             }
             const result = test.checkSucceded(state);
-            console.log(`success: ${result}, testcase: ${test.description}`);
+            const currentTestTimeMS = performance.now() - currentTestStartTime;
+            console.log(`success: ${result}, testcase: ${test.description}, time: ${currentTestTimeMS.toFixed(2)}ms`);
         }
+        const testTimeMS = performance.now() - testStartTime;
+        console.log(`totalTime: ${testTimeMS.toFixed(2)}ms`);
     }
 }
 

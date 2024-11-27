@@ -1,9 +1,7 @@
 Tasks:
 - think about automated tests?
-    - inputs working for visualized tests
-    - make seed for randomness
-    - check performance
     - some more test cases?
+    - save performance metrics for comparison of later runs
 - restructure markets
     - dev steps:
         - add queue for customers
@@ -79,6 +77,9 @@ Tasks done today:
                 - execute test on some button press
     - make test be visible on canvas
         - stop real state and put teststate in for duration of test
+    - inputs working for visualized tests
+    - make seed for randomness
+    - check performance
 - check moveTo reset on behavior change
 - check citizen behind building
 - change: paint tools

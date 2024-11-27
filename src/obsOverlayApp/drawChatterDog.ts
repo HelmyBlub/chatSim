@@ -451,7 +451,6 @@ function drawChatterDogMouth(ctx: CanvasRenderingContext2D, chatter: Chatter, st
     }
 }
 
-
 function resetToSitting(chatter: Chatter, state: State) {
     chatter.draw.pawAnimation = "sit";
     chatter.draw.pawAnimationStart = undefined;
