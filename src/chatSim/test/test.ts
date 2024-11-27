@@ -11,12 +11,20 @@ export type TestData = {
 }
 
 type Test = {
+    name: string,
     description: string,
     initTest: () => ChatSimState,
     checkFinishCondition: (state: ChatSimState) => boolean,
     checkSucceded: (state: ChatSimState) => boolean,
 }
 
+type PerformanceEntry = { testName: string, pastRuntimes: number[] };
+type PastPerformanceMetrics = {
+    maxRuntimesKeepPerTest: number,
+    data: PerformanceEntry[],
+}
+
+const LOCALSTORAGE_PERFORMANCE_METRICS = "Test Performance Metrics";
 const activeTests: Test[] = [];
 
 export function startTests(app: App, visualizeTests: boolean = false) {
@@ -31,6 +39,7 @@ export function startTests(app: App, visualizeTests: boolean = false) {
         const testStartTime = performance.now();
         const logs: string[] = [];
         const testLogger: Logger = { log: (message) => logs.push(message) };
+        const metrics = loadMetrics();
 
         for (let test of activeTests) {
             const currentTestStartTime = performance.now();
@@ -45,7 +54,19 @@ export function startTests(app: App, visualizeTests: boolean = false) {
             }
             const result = test.checkSucceded(state);
             const currentTestTimeMS = performance.now() - currentTestStartTime;
-            console.log(`success: ${result}, testcase: ${test.description}, time: ${currentTestTimeMS.toFixed(2)}ms`);
+            let timeString = `time: ${currentTestTimeMS.toFixed(2)}`;
+            if (app.didFirstTestRun) {
+                const timeDiffernce = addMetricData(metrics, test.name, currentTestTimeMS);
+                if (timeDiffernce !== undefined) {
+                    timeString += `, time change: ${(timeDiffernce * 100).toFixed(2)}%`;
+                }
+            }
+            console.log(`success: ${result}, testcase: ${test.description}, ${timeString}`);
+        }
+        if (!app.didFirstTestRun) {
+            app.didFirstTestRun = true;
+        } else {
+            saveMetrics(metrics);
         }
         const testTimeMS = performance.now() - testStartTime;
         console.log(`totalTime: ${testTimeMS.toFixed(2)}ms`);
@@ -85,6 +106,7 @@ function initTests() {
 
 function testCitizenShouldNotStarve(): Test {
     const test: Test = {
+        name: "testCitizenShouldNotStarve",
         description: "citizen should not starve",
         initTest: () => {
             const state = createDefaultChatSimState("testStreamer", 0);
@@ -107,6 +129,7 @@ function testCitizenShouldNotStarve(): Test {
 
 function testCitizenShouldBuildHome(): Test {
     const test: Test = {
+        name: "testCitizenShouldBuildHome",
         description: "citizen should build home",
         initTest: () => {
             const state = createDefaultChatSimState("testStreamer", 0);
@@ -130,6 +153,7 @@ function testCitizenShouldBuildHome(): Test {
 
 function testPerformance10Citizens(): Test {
     const test: Test = {
+        name: "testPerformance10Citizens",
         description: "performance 10 citizens",
         initTest: () => {
             const state = createDefaultChatSimState("testStreamer", 0);
@@ -152,6 +176,7 @@ function testPerformance10Citizens(): Test {
 
 function testPerformance100Citizens(): Test {
     const test: Test = {
+        name: "testPerformance100Citizens",
         description: "performance 100 citizens",
         initTest: () => {
             const state = createDefaultChatSimState("testStreamer", 0);
@@ -188,4 +213,43 @@ function createTestMapMiddle(): ChatSimMap {
 
 function createTestMapBig(): ChatSimMap {
     return createMap(50, 50, 30, 16);
+}
+
+/**
+ * @returns time difference to last run or undefined when not previous time exists
+ */
+function addMetricData(metrics: PastPerformanceMetrics, testName: string, time: number): number | undefined {
+    let data: PerformanceEntry | undefined = metrics.data.find(e => e.testName === testName);
+    if (!data) {
+        data = { testName: testName, pastRuntimes: [] };
+        metrics.data.push(data);
+    }
+    data.pastRuntimes.push(time);
+    if (data.pastRuntimes.length > metrics.maxRuntimesKeepPerTest) {
+        data.pastRuntimes.shift();
+    }
+    if (data.pastRuntimes.length > 1) {
+        const lastTime = data.pastRuntimes[data.pastRuntimes.length - 2];
+        return (time - lastTime) / lastTime;
+    }
+    return undefined;
+}
+
+function loadMetrics(): PastPerformanceMetrics {
+    const storage = localStorage.getItem(LOCALSTORAGE_PERFORMANCE_METRICS);
+    let metrics: PastPerformanceMetrics;
+    if (storage === null) {
+        metrics = {
+            maxRuntimesKeepPerTest: 10,
+            data: [],
+        }
+    } else {
+        metrics = JSON.parse(storage);
+    }
+    return metrics;
+}
+
+function saveMetrics(metrics: PastPerformanceMetrics) {
+    const data = JSON.stringify(metrics);
+    localStorage.setItem(LOCALSTORAGE_PERFORMANCE_METRICS, data);
 }

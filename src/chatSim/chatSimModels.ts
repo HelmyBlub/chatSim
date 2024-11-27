@@ -26,6 +26,7 @@ export type App = {
     gameSpeedRemainder?: number,
     tempState?: ChatSimState,
     runningTests?: TestData,
+    didFirstTestRun?: boolean, // chrome somehow always is slower on the first run, which is bad for performance measures. So this exists to check for it
 }
 
 export type BuildingType = "Market" | "House";

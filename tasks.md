@@ -1,6 +1,8 @@
 Tasks:
 - think about automated tests?
     - save performance metrics for comparison of later runs
+        - as chrome performance varies a lot on first and second run, only care for second run?
+- analyse performance
 - restructure markets
     - dev steps:
         - add queue for customers
