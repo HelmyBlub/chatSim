@@ -1,5 +1,6 @@
 import { IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG } from "../drawHelper.js";
 import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
+import { IMAGES } from "./images.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
 export type Tree = {
@@ -21,7 +22,7 @@ export function paintTrees(ctx: CanvasRenderingContext2D, paintDataMap: PaintDat
                 ctx.translate(paintPos.x, paintPos.y);
                 ctx.rotate(rotation)
                 ctx.translate(-paintPos.x, -paintPos.y);
-                ctx.drawImage(state.images[IMAGE_PATH_TREE], 0, 0, 200, 200,
+                ctx.drawImage(IMAGES[IMAGE_PATH_TREE], 0, 0, 200, 200,
                     paintPos.x - treePaintSize / 2,
                     paintPos.y - treePaintSize / 2,
                     treePaintSize, treePaintSize
@@ -30,13 +31,13 @@ export function paintTrees(ctx: CanvasRenderingContext2D, paintDataMap: PaintDat
             } else {
                 const maxTreeWoodValue = 10;
                 const widthFactor = tree.woodValue / maxTreeWoodValue * 0.9 + 0.1;
-                ctx.drawImage(state.images[IMAGE_PATH_TREE_LOG], 0, 0, 200 * widthFactor, 200,
+                ctx.drawImage(IMAGES[IMAGE_PATH_TREE_LOG], 0, 0, 200 * widthFactor, 200,
                     paintPos.x - treePaintSize / 2 * widthFactor,
                     paintPos.y - treePaintSize / 2,
                     treePaintSize * widthFactor, treePaintSize);
             }
         } else {
-            ctx.drawImage(state.images[IMAGE_PATH_TREE], 0, 0, 200, 200,
+            ctx.drawImage(IMAGES[IMAGE_PATH_TREE], 0, 0, 200, 200,
                 paintPos.x - treePaintSize / 2,
                 paintPos.y - treePaintSize / 2,
                 treePaintSize, treePaintSize);

@@ -1,12 +1,13 @@
 Tasks:
-- change: paint tools
-
+- overlay: "!eat cookie" should work
 - think about automated tests?
     - i have struggle finding issues why my citizens behave in strange ways
         - test for starving need:
             - a starving citizen in a small map with 1 mushroom
                 - he should survive, can he get his need fullfilled before death?
                 - execute test on some button press
+    - make test be visible on canvas
+        - stop real state and put teststate in for duration of test
     - make seed for randomness
     - check performance
 - restructure markets
@@ -78,6 +79,8 @@ Tasks:
 Tasks done today:
 - check moveTo reset on behavior change
 - check citizen behind building
+- change: paint tools
+
 
 --------------------------------------------------
 Big Idea:

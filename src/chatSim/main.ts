@@ -1,12 +1,14 @@
 import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG, IMAGE_PATH_WOOD_PLANK, loadImage } from "../drawHelper.js";
-import { Position, ChatSimState } from "./chatSimModels.js";
+import { Position, ChatSimState, App } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
+import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
 import { onLoadDisplayItemPaintData } from "./jobs/jobMarket.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
+import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 
 export const SKILL_GATHERING = "Gathering";
@@ -59,13 +61,9 @@ export function getTimeOfDayString(time: number, state: ChatSimState): string {
     return `Time ${hoursString}:${minutesString}, Day:${days}`;
 }
 
-function chatSimStateInit(streamer: string): ChatSimState {
-    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.width = window.innerWidth - 10;
-    canvas.height = window.innerHeight - 10;
-    return {
-        canvas,
-        streamer: streamer,
+export function createDefaultChatSimState(streamerName: string): ChatSimState {
+    const state: ChatSimState = {
+        streamer: streamerName,
         time: 0,
         timPerDay: 100000,
         gameSpeed: 1,
@@ -74,7 +72,6 @@ function chatSimStateInit(streamer: string): ChatSimState {
         chatterNames: [],
         functionsCitizenJobs: {},
         functionsCitizenNeeds: {},
-        images: {},
         map: createDefaultMap(),
         paintData: {
             map: {
@@ -96,29 +93,29 @@ function chatSimStateInit(streamer: string): ChatSimState {
             }
         }
     }
+    loadCitizenJobsFunctions(state);
+    loadCitizenNeedsFunctions(state);
+    onLoadCitizenStateDefaultTickFuntions();
+    return state;
 }
 
-function loadImages(state: ChatSimState) {
-    state.images[IMAGE_PATH_TREE] = loadImage(IMAGE_PATH_TREE);
-    state.images[IMAGE_PATH_MUSHROOM] = loadImage(IMAGE_PATH_MUSHROOM);
-    state.images[IMAGE_PATH_CITIZEN] = loadImage(IMAGE_PATH_CITIZEN);
-    state.images[IMAGE_PATH_CITIZEN_HOUSE] = loadImage(IMAGE_PATH_CITIZEN_HOUSE);
-    state.images[IMAGE_PATH_BUILDING_MARKET] = loadImage(IMAGE_PATH_BUILDING_MARKET);
-    state.images[IMAGE_PATH_AXE] = loadImage(IMAGE_PATH_AXE);
-    state.images[IMAGE_PATH_BASKET] = loadImage(IMAGE_PATH_BASKET);
-    state.images[IMAGE_PATH_HELMET] = loadImage(IMAGE_PATH_HELMET);
-    state.images[IMAGE_PATH_TREE_LOG] = loadImage(IMAGE_PATH_TREE_LOG);
-    state.images[IMAGE_PATH_WOOD_PLANK] = loadImage(IMAGE_PATH_WOOD_PLANK);
+function chatSimStateInit(streamer: string): App {
+    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    canvas.width = window.innerWidth - 10;
+    canvas.height = window.innerHeight - 10;
+    const state = createDefaultChatSimState(streamer);
+    const app: App = { state: state };
+    state.canvas = canvas;
+    chatSimAddInputEventListeners(app, canvas);
+    return app;
 }
 
 function initMyApp() {
-    const state = chatSimStateInit("HelmiBlub");
-    loadCitizenJobsFunctions(state);
-    loadCitizenNeedsFunctions(state);
+    const app = chatSimStateInit("HelmiBlub");
+    const state = app.state;
     loadLocalStorageChatters(state);
-    loadImages(state);
-    onLoadCitizenStateDefaultTickFuntions();
     onLoadDisplayItemPaintData();
+    loadImages(state);
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === state.streamer) {
@@ -138,9 +135,8 @@ function initMyApp() {
     }
     //@ts-ignore
     ComfyJS.Init(state.streamer);
-    chatSimAddInputEventListeners(state);
 
-    runner(state);
+    runner(app);
 }
 
 function addChatter(user: string, state: ChatSimState) {
@@ -163,23 +159,24 @@ function loadLocalStorageChatters(state: ChatSimState) {
     }
 }
 
-async function runner(state: ChatSimState) {
+async function runner(app: App) {
     try {
         while (true) {
+            if (app.runningTests) testRunner(app);
             let startIndex = 0;
-            if (state.gameSpeed % 1 !== 0) {
+            if (app.state.gameSpeed % 1 !== 0) {
                 startIndex++;
-                if (state.gameSpeedRemainder === undefined) state.gameSpeedRemainder = 0;
-                state.gameSpeedRemainder += state.gameSpeed % 1;
-                if (state.gameSpeedRemainder >= 1) {
-                    state.gameSpeedRemainder--;
-                    chatSimTick(state);
+                if (app.state.gameSpeedRemainder === undefined) app.state.gameSpeedRemainder = 0;
+                app.state.gameSpeedRemainder += app.state.gameSpeed % 1;
+                if (app.state.gameSpeedRemainder >= 1) {
+                    app.state.gameSpeedRemainder--;
+                    chatSimTick(app.state);
                 }
             }
-            for (let i = startIndex; i < state.gameSpeed; i++) {
-                chatSimTick(state);
+            for (let i = startIndex; i < app.state.gameSpeed; i++) {
+                chatSimTick(app.state);
             }
-            paintChatSim(state);
+            paintChatSim(app.state);
             await sleep(16);
         }
     } catch (e) {

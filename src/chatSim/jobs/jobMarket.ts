@@ -1,6 +1,7 @@
 import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
 import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
+import { IMAGES } from "../images.js";
 import { inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
 import { mapPositionToPaintPosition } from "../paint.js";
@@ -95,7 +96,7 @@ export function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: C
     const paintPos = mapPositionToPaintPosition(job.marketBuilding.position, state.paintData.map);
     const item = job.marketBuilding.inventory.items.find(i => i.name === market.displayedItem);
     if (!item || item.counter === 0) return;
-    const image = state.images[data.path];
+    const image = IMAGES[data.path];
     for (let i = 0; i < Math.min(data.max, item.counter); i++) {
         ctx.drawImage(image, 0, 0, image.width, image.height,
             paintPos.x + i * data.offsetPerItem.x + data.offset.x,

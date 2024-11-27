@@ -2,6 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN_HOU
 import { Building, ChatSimState, Mushroom, PaintDataMap, Position } from "./chatSimModels.js";
 import { Citizen, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
+import { IMAGES } from "./images.js";
 import { paintCitizenJobInventoryOnMarket } from "./jobs/job.js";
 import { getTimeOfDay, getTimeOfDayString, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { paintTrees, Tree } from "./tree.js";
@@ -10,6 +11,7 @@ export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
 export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
 
 export function paintChatSim(state: ChatSimState) {
+    if (!state.canvas) return;
     const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     paintMap(ctx, state, state.paintData.map);
@@ -106,7 +108,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     ctx.fillRect(paintMapTopLeft.x, paintMapTopLeft.y, state.map.mapWidth, state.map.mapHeight);
 
     const mushroomPaintSize = 30;
-    const mushroomImage = state.images[IMAGE_PATH_MUSHROOM];
+    const mushroomImage = IMAGES[IMAGE_PATH_MUSHROOM];
     for (let mushroom of state.map.mushrooms) {
         const paintPos = mapPositionToPaintPosition(mushroom.position, paintDataMap);
         ctx.drawImage(mushroomImage, 0, 0, 200, 200,
@@ -141,8 +143,8 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
 }
 
 function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimState) {
-    const citizenHouseImage = state.images[IMAGE_PATH_CITIZEN_HOUSE];
-    const marketImage = state.images[IMAGE_PATH_BUILDING_MARKET];
+    const citizenHouseImage = IMAGES[IMAGE_PATH_CITIZEN_HOUSE];
+    const marketImage = IMAGES[IMAGE_PATH_BUILDING_MARKET];
     const buildingPaintSize = 80;
     const buildingImageSize = 200;
     const houseNameOffsetY = 90 * buildingPaintSize / buildingImageSize;
@@ -163,7 +165,7 @@ function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimState) {
                 const woodPaintSize = 30;
                 for (let i = 0; i < wood.counter; i++) {
                     const offsetY = buildingPaintSize / 2 - i * 2 - woodPaintSize;
-                    ctx.drawImage(state.images[IMAGE_PATH_WOOD_PLANK], 0, 0, 200, 200,
+                    ctx.drawImage(IMAGES[IMAGE_PATH_WOOD_PLANK], 0, 0, 200, 200,
                         paintPos.x,
                         paintPos.y + offsetY,
                         woodPaintSize, woodPaintSize);

@@ -3,6 +3,7 @@ import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Building, Position, Mushroom, PaintDataMap } from "./chatSimModels.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
+import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory } from "./inventory.js";
 import { CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
@@ -64,8 +65,13 @@ const CITIZEN_PAINT_SIZE = 40;
 
 export function addCitizen(user: string, state: ChatSimState) {
     if (state.map.citizens.find(c => c.name === user)) return;
-    state.map.citizens.push({
-        name: user,
+    const citizen = createDefaultCitizen(user, state);
+    state.map.citizens.push(citizen);
+}
+
+export function createDefaultCitizen(citizenName: string, state: ChatSimState): Citizen {
+    const citizen = {
+        name: citizenName,
         birthTime: state.time,
         speed: 2,
         foodPerCent: 1,
@@ -97,7 +103,8 @@ export function addCitizen(user: string, state: ChatSimState) {
         job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
         log: [],
         maxLogLength: 100,
-    })
+    };
+    return citizen;
 }
 
 export function citizenResetStateTo(citizen: Citizen, type: string) {
@@ -225,13 +232,13 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
             const imageIndexX = walkingFrameNumber === 3 ? 1 : walkingFrameNumber;
             const direction = calculateDirection(citizen.position, citizen.moveTo);
             const imageIndexY = Math.floor((direction + Math.PI * 2 - Math.PI / 4) % (Math.PI * 2) / (Math.PI / 2));
-            ctx.drawImage(state.images[IMAGE_PATH_CITIZEN], imageIndexX * 200, imageIndexY * 200, 200, 200,
+            ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN], imageIndexX * 200, imageIndexY * 200, 200, 200,
                 paintPos.x - CITIZEN_PAINT_SIZE / 2,
                 paintPos.y - CITIZEN_PAINT_SIZE / 2,
                 CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
             );
         } else {
-            ctx.drawImage(state.images[IMAGE_PATH_CITIZEN], 200, 0, 200, 200,
+            ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN], 200, 0, 200, 200,
                 paintPos.x - CITIZEN_PAINT_SIZE / 2,
                 paintPos.y - CITIZEN_PAINT_SIZE / 2,
                 CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE

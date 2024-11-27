@@ -7,7 +7,7 @@ import { citizenEatMushroom } from "./citizenNeedFood.js";
 
 export const CITIZEN_NEED_STARVING = "need starving";
 
-const STARVING_FOOD_PER_CENT = 0.2;
+export const CITIZEN_STARVING_FOOD_PER_CENT = 0.2;
 export function loadCitizenNeedsFunctionsStarving(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_STARVING] = {
         isFulfilled: isFulfilled,
@@ -16,13 +16,13 @@ export function loadCitizenNeedsFunctionsStarving(state: ChatSimState) {
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
-    if (citizen.foodPerCent < STARVING_FOOD_PER_CENT) return false;
+    if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) return false;
     return true;
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
     const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-    if (citizen.foodPerCent < STARVING_FOOD_PER_CENT) {
+    if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) {
         if (mushrooms && mushrooms.counter > 0) {
             citizenEatMushroom(citizen, mushrooms, state, "inventory");
             return;

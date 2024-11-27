@@ -3,6 +3,7 @@ import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
 import { Inventory } from "./inventory.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap } from "./map.js"
+import { TestData } from "./test/test.js"
 
 export type Position = {
     x: number,
@@ -11,6 +12,12 @@ export type Position = {
 
 export type Mushroom = {
     position: Position,
+}
+
+export type App = {
+    state: ChatSimState,
+    tempState?: ChatSimState,
+    runningTests?: TestData,
 }
 
 export type BuildingType = "Market" | "House";
@@ -39,7 +46,7 @@ export type PaintDataMap = {
 }
 
 export type ChatSimState = {
-    canvas: HTMLCanvasElement,
+    canvas?: HTMLCanvasElement,
     streamer: string,
     time: number,
     timPerDay: number,
@@ -66,6 +73,5 @@ export type ChatSimState = {
     }
     functionsCitizenJobs: FunctionsCitizenJobs,
     functionsCitizenNeeds: CitizenNeedsFunctions,
-    images: { [key: string]: HTMLImageElement },
     chatterNames: string[],
 }

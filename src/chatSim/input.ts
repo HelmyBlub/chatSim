@@ -1,20 +1,22 @@
-import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
+import { App, ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
+import { startTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
 
-export function chatSimAddInputEventListeners(state: ChatSimState) {
-    window.addEventListener('resize', (e) => fitCanvasToWindow(state), false);
-    document.addEventListener('keydown', (e) => keyDown(e, state));
+export function chatSimAddInputEventListeners(app: App, canvas: HTMLCanvasElement) {
+    const state = app.state;
+    window.addEventListener('resize', (e) => fitCanvasToWindow(canvas), false);
+    document.addEventListener('keydown', (e) => keyDown(e, app));
     document.addEventListener('keyup', (e) => keyUp(e, state));
-    state.canvas.addEventListener('wheel', (e) => mouseWheel(e, state));
-    state.canvas.addEventListener('mousedown', (e) => mouseDown(e, state));
-    state.canvas.addEventListener('mouseup', (e) => mouseUp(e, state));
-    state.canvas.addEventListener('mousemove', (e) => mouseMove(e, state));
+    canvas.addEventListener('wheel', (e) => mouseWheel(e, state));
+    canvas.addEventListener('mousedown', (e) => mouseDown(e, state));
+    canvas.addEventListener('mouseup', (e) => mouseUp(e, state));
+    canvas.addEventListener('mousemove', (e) => mouseMove(e, state));
 }
 
 export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimState) {
@@ -40,9 +42,9 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
     state.paintData.map.lockCameraToSelected = false;
 }
 
-function fitCanvasToWindow(state: ChatSimState) {
-    state.canvas.width = window.innerWidth - 10;
-    state.canvas.height = window.innerHeight - 10;
+function fitCanvasToWindow(canvas: HTMLCanvasElement) {
+    canvas.width = window.innerWidth - 10;
+    canvas.height = window.innerHeight - 10;
 }
 
 function mouseDown(event: MouseEvent, state: ChatSimState) {
@@ -54,6 +56,7 @@ function mouseDown(event: MouseEvent, state: ChatSimState) {
     }
 }
 function mouseUp(event: MouseEvent, state: ChatSimState) {
+    if (!state.canvas) return;
     state.inputData.map.mouseMoveMap = false;
     if (performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME) {
         const boundingRect = state.canvas.getBoundingClientRect();
@@ -108,6 +111,7 @@ function isClickInsideMapRelativ(relativMouseX: number, relativMouseY: number, p
 }
 
 function isClickInsideMap(clientX: number, clientY: number, state: ChatSimState) {
+    if (!state.canvas) return;
     const paintDataMap = state.paintData.map;
     const boundingRect = state.canvas.getBoundingClientRect();
     const relativMouseX = clientX - boundingRect.left;
@@ -166,7 +170,8 @@ function keyUp(event: KeyboardEvent, state: ChatSimState) {
     }
 }
 
-function keyDown(event: KeyboardEvent, state: ChatSimState) {
+function keyDown(event: KeyboardEvent, app: App) {
+    const state = app.state;
     const moveTickAmount = 4;
     const speedScaling = 0.2;
     switch (event.code) {
@@ -204,6 +209,12 @@ function keyDown(event: KeyboardEvent, state: ChatSimState) {
         case "KeyM":
             addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
             break
+        case "KeyT":
+            startTests(app);
+            break;
+        case "KeyU":
+            startTests(app, true);
+            break;
         default:
             console.log(event.key, event.code);
             break;

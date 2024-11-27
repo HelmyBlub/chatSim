@@ -1,6 +1,7 @@
 import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
+import { IMAGES } from "./images.js";
 import { INVENTORY_MUSHROOM } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
@@ -21,7 +22,7 @@ export function paintCitizenTool(ctx: CanvasRenderingContext2D, citizen: Citizen
 function paintToolHelmet(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const size = 20;
-    ctx.drawImage(state.images[IMAGE_PATH_HELMET], 0, 0, 100, 100, paintPos.x - size / 2, paintPos.y - 33, size, size);
+    ctx.drawImage(IMAGES[IMAGE_PATH_HELMET], 0, 0, 100, 100, paintPos.x - size / 2, paintPos.y - 33, size, size);
 }
 
 function paintToolAxe(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
@@ -36,14 +37,14 @@ function paintToolAxe(ctx: CanvasRenderingContext2D, citizen: Citizen, state: Ch
         ctx.rotate(rotation)
         ctx.translate(-paintPos.x, -paintPos.y);
     }
-    ctx.drawImage(state.images[IMAGE_PATH_AXE], 0, 0, 100, 100, paintPos.x, paintPos.y - 15, axeSize, axeSize);
+    ctx.drawImage(IMAGES[IMAGE_PATH_AXE], 0, 0, 100, 100, paintPos.x, paintPos.y - 15, axeSize, axeSize);
     ctx.restore();
 }
 
 function paintToolBasket(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const basketSize = 20;
-    ctx.drawImage(state.images[IMAGE_PATH_BASKET], 0, 0, 100, 100, paintPos.x, paintPos.y, basketSize, basketSize);
+    ctx.drawImage(IMAGES[IMAGE_PATH_BASKET], 0, 0, 100, 100, paintPos.x, paintPos.y, basketSize, basketSize);
 
     const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     const mushroomsPaintSize = 10;
@@ -53,7 +54,7 @@ function paintToolBasket(ctx: CanvasRenderingContext2D, citizen: Citizen, state:
         for (let i = Math.max(6 - mushrooms.counter, 0); i < 6; i++) {
             const mushroomX = paintPos.x + (i % 3) * mushroomsPaintSize / 2;
             const mushroomY = paintPos.y + Math.floor(i / 3) * mushroomsPaintSize / 3 + 2;
-            ctx.drawImage(state.images[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200, mushroomX, mushroomY, mushroomsPaintSize, mushroomsPaintSize);
+            ctx.drawImage(IMAGES[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200, mushroomX, mushroomY, mushroomsPaintSize, mushroomsPaintSize);
         }
     }
     ctx.restore();
