@@ -48,7 +48,9 @@ function initMyApp() {
     }
     //@ts-ignore
     ComfyJS.onCommand = (user, message, flags, self, extra) => {
-        addChatMessage(user, message, state);
+        let tempMessage = message;
+        if (flags !== undefined) tempMessage += ` ${flags}`;
+        addChatMessage(user, tempMessage, state);
     }
     //@ts-ignore
     ComfyJS.Init("HelmiBlub");
