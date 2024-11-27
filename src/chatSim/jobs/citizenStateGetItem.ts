@@ -1,5 +1,6 @@
 import { addChatMessage, createEmptyChat } from "../chatBubble.js";
-import { Building, BuildingMarket, ChatSimState } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { Building, BuildingMarket, marketGetQueueMapPosition, marketGetQueuePosition } from "../building.js";
 import { addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
@@ -20,17 +21,24 @@ export type CitizenStateItemAndBuildingData = {
     itemName: string,
     itemAmount?: number,
     building: Building,
+    stepState?: string,
+}
+
+export type CitizenStateMarketQueue = {
+    market: BuildingMarket,
 }
 
 export const CITIZEN_STATE_GET_ITEM = "GetItem";
 export const CITIZEN_STATE_GET_ITEM_FROM_BUILDING = "GetItemFromBuilding";
 export const CITIZEN_STATE_BUY_ITEM_FROM_MARKET = "BuyItemFromMarket";
+export const CITIZEN_STATE_ENTER_MARKET_QUEUE = "EnterMarketQueue";
 export const CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING = "TransportItemToBuilding";
 
 export function onLoadCitizenStateDefaultTickGetItemFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM] = tickCititzenStateGetItem;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM_FROM_BUILDING] = tickCitizenStateGetItemFromBuilding;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUY_ITEM_FROM_MARKET] = tickCitizenStateBuyItemFromMarket;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_ENTER_MARKET_QUEUE] = tickCitizenStateEnterMarketQueue;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING] = tickCitizenStateTransportItemToBuilding;
 }
 
@@ -54,6 +62,27 @@ export function setCitizenStateTransportItemToBuilding(citizen: Citizen, buildin
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING, data: data });
 }
 
+export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: BuildingMarket) {
+    const data: CitizenStateMarketQueue = { market: market };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_ENTER_MARKET_QUEUE, data: data });
+}
+
+function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState) {
+    if (citizen.moveTo === undefined) {
+        const citizenStateMarket = citizen.stateInfo.stack[0].data as CitizenStateMarketQueue;
+        const queuePosition = marketGetQueuePosition(citizen, citizenStateMarket.market);
+        const mapPosition = marketGetQueueMapPosition(citizen, citizenStateMarket.market);
+        if (queuePosition === 0 && isCitizenInInteractDistance(citizen, mapPosition)) {
+            citizenStateStackTaskSuccess(citizen);
+            if (citizenStateMarket.market.queue) {
+                citizenStateMarket.market.queue.shift();
+            }
+        } else {
+            citizen.moveTo = mapPosition;
+        }
+    }
+}
+
 function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
@@ -63,13 +92,19 @@ function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState
         }
         if (isCitizenInInteractDistance(citizen, data.building.position)) {
             if (data.building.inhabitedBy && isCitizenInInteractDistance(citizen, data.building.inhabitedBy.position)) {
-                const finalAmount = buyItemFromMarket(data.building as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
-                if (finalAmount !== undefined && finalAmount > 0) {
-                    const chat = createEmptyChat();
-                    addChatMessage(chat, data.building.inhabitedBy, `I want to buy ${data.itemAmount}x${INVENTORY_MUSHROOM}`, state);
-                    addChatMessage(chat, citizen, `I would sell ${finalAmount}x${INVENTORY_MUSHROOM} for $${2 * finalAmount}`, state);
-                    addChatMessage(chat, data.building.inhabitedBy, `Yes please!`, state);
-                    data.building.inhabitedBy.lastChat = chat;
+                if (data.stepState === undefined) {
+                    data.stepState = "queuing";
+                    setCitizenStateEnterMarketQueue(citizen, data.building as BuildingMarket);
+                    return;
+                } else {
+                    const finalAmount = buyItemFromMarket(data.building as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
+                    if (finalAmount !== undefined && finalAmount > 0) {
+                        const chat = createEmptyChat();
+                        addChatMessage(chat, data.building.inhabitedBy, `I want to buy ${data.itemAmount}x${INVENTORY_MUSHROOM}`, state);
+                        addChatMessage(chat, citizen, `I would sell ${finalAmount}x${INVENTORY_MUSHROOM} for $${2 * finalAmount}`, state);
+                        addChatMessage(chat, data.building.inhabitedBy, `Yes please!`, state);
+                        data.building.inhabitedBy.lastChat = chat;
+                    }
                 }
             }
             citizenStateStackTaskSuccess(citizen);

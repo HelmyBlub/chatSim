@@ -1,6 +1,8 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Building, Position, Mushroom, PaintDataMap } from "./chatSimModels.js";
+import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
+import { PaintDataMap } from "./map.js";
+import { Building } from "./building.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";

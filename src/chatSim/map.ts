@@ -1,6 +1,7 @@
-import { Mushroom, Building, ChatSimState, Position, BuildingType } from "./chatSimModels.js";
+import { Mushroom, ChatSimState, Position } from "./chatSimModels.js";
+import { Building, BuildingType, createBuilding, tickBuildings } from "./building.js";
 import { Citizen } from "./citizen.js";
-import { INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } from "./main.js";
+import { nextRandom } from "./main.js";
 import { createTree, Tree } from "./tree.js";
 
 export type TilePosition = {
@@ -12,6 +13,15 @@ export type Tile = {
     position: TilePosition,
     usedByType: string,
     object: any,
+}
+
+export type PaintDataMap = {
+    paintOffset: Position
+    paintHeight: number
+    paintWidth: number
+    zoom: number
+    cameraPosition: Position
+    lockCameraToSelected: boolean
 }
 
 export type ChatSimMap = {
@@ -126,7 +136,7 @@ export function tilePositionToMapPosition(tilePosition: TilePosition, map: ChatS
 export function tickChatSimMap(state: ChatSimState) {
     tickTreeSpawn(state);
     mushroomSpawnTick(state);
-    tickHouses(state);
+    tickBuildings(state);
 }
 
 function tickTreeSpawn(state: ChatSimState) {
@@ -167,46 +177,8 @@ function mushroomSpawnTick(state: ChatSimState) {
     state.map.mushrooms.push(mushroom);
 }
 
-function tickHouses(state: ChatSimState) {
-    for (let i = 0; i < state.map.buildings.length; i++) {
-        const house = state.map.buildings[i];
-        house.deterioration += 0.00005;
-        if (house.deterioration > 1) {
-            removeBuildingFromMap(house, state.map);
-            if (house.inhabitedBy && house.inhabitedBy.home === house) house.inhabitedBy.home = undefined;
-        }
-    }
-}
-
 function getRandomEmptyTileIndex(state: ChatSimState): number {
     return Math.floor(nextRandom(state.randomSeed) * state.map.emptyTiles.length);
-}
-
-function createBuilding(owner: Citizen, position: Position, type: BuildingType): Building {
-    return {
-        type: type,
-        owner: owner,
-        inventory: {
-            items: [],
-            reservedSpace: [
-                {
-                    counter: 6,
-                    name: INVENTORY_MUSHROOM
-                },
-                {
-                    counter: 3,
-                    name: INVENTORY_WOOD
-                },
-            ],
-            size: 50,
-        },
-        position: {
-            x: position.x,
-            y: position.y,
-        },
-        buildProgress: 0,
-        deterioration: 0,
-    }
 }
 
 function fillAllTilesAtStart(map: ChatSimMap) {

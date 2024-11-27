@@ -1,4 +1,5 @@
-import { Building, BuildingType, ChatSimState } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { Building, BuildingType } from "../building.js";
 import { addCitizenLogEntry, addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../main.js";

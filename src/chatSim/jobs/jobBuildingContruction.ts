@@ -1,4 +1,5 @@
-import { Building, ChatSimState, BuildingType } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { Building, BuildingType } from "../building.js";
 import { Citizen } from "../citizen.js";
 import { CitizenJob } from "./job.js";
 import { mapPositionToPaintPosition } from "../paint.js";

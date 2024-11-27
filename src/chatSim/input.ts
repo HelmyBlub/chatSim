@@ -1,8 +1,9 @@
-import { App, ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
+import { App, ChatSimState, Position } from "./chatSimModels.js";
+import { PaintDataMap } from "./map.js";
 import { addCitizen } from "./citizen.js";
 import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
-import { startTests } from "./test/test.js";
+import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
@@ -212,7 +213,11 @@ function keyDown(event: KeyboardEvent, app: App) {
             startTests(app);
             break;
         case "KeyU":
-            startTests(app, true);
+            if (app.runningTests) {
+                stopTests(app);
+            } else {
+                startTests(app, true);
+            }
             break;
         default:
             console.log(event.key, event.code);

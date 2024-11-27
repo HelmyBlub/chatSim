@@ -1,5 +1,6 @@
 import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
-import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { BuildingMarket } from "../building.js";
 import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { IMAGES } from "../images.js";
 import { inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";

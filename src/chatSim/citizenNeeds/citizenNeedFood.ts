@@ -11,8 +11,8 @@ type CitizenNeedFood = {
     gatherMoreFood: boolean,
 }
 
-export const CITIZEN_FOOD_IN_INVENTORY_NEED = 2;
-export const CITIZEN_FOOD_AT_HOME_NEED = 4;
+export const CITIZEN_NEED_FOOD_IN_INVENTORY = 2;
+export const CITIZEN_NEED_FOOD_AT_HOME = 4;
 export const CITIZEN_NEED_FOOD = "need food";
 export const MUSHROOM_FOOD_VALUE = 0.15;
 
@@ -37,10 +37,10 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     const needData = getCitizenNeedData(CITIZEN_NEED_FOOD, citizen, state) as CitizenNeedFood;
     if (citizen.home) {
         const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-        const hasEnoughFoodAtHome = homeMushrooms && homeMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED;
+        const hasEnoughFoodAtHome = homeMushrooms && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
         if (hasEnoughFoodAtHome) return true;
     } else {
-        let foodInInventoryRequired = CITIZEN_FOOD_IN_INVENTORY_NEED;
+        let foodInInventoryRequired = CITIZEN_NEED_FOOD_IN_INVENTORY;
         if (needData.gatherMoreFood) foodInInventoryRequired += 2;
 
         const hasEnoughFoodInInventory = inventoryMushroom && inventoryMushroom.counter >= foodInInventoryRequired;
@@ -63,14 +63,14 @@ function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_FOOD || citizen.stateInfo.stack.length === 0) {
         if (citizen.home) {
             const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-            if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_FOOD_AT_HOME_NEED) {
+            if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME) {
                 if (citizen.home.deterioration > 1) {
                     citizen.home = undefined;
                     return;
                 }
                 citizenResetStateTo(citizen, CITIZEN_NEED_FOOD);
                 addCitizenThought(citizen, `I have enough ${INVENTORY_MUSHROOM}. I will store them at home.`, state);
-                setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM, CITIZEN_FOOD_AT_HOME_NEED);
+                setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM, CITIZEN_NEED_FOOD_AT_HOME);
                 return;
             }
             if (citizen.foodPerCent < 0.5) {
@@ -90,7 +90,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 }
             }
         }
-        let requiredAmount = CITIZEN_FOOD_IN_INVENTORY_NEED;
+        let requiredAmount = CITIZEN_NEED_FOOD_IN_INVENTORY;
         const needData = getCitizenNeedData(CITIZEN_NEED_FOOD, citizen, state) as CitizenNeedFood;
         if (needData.gatherMoreFood) requiredAmount += 2;
         citizenResetStateTo(citizen, CITIZEN_NEED_FOOD);

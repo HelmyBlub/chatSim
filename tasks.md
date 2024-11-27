@@ -1,8 +1,11 @@
 Tasks:
-- analyse performance
-- restructure markets
+- imrpove markets
     - dev steps:
         - add queue for customers
+            - customer walks to market
+            - if reached market, take queue position
+            - can leave queue thorugh needs
+            - market interaction with first in queue takes time
         - state for talking with customers
             - market:   "How can i help you?"
             - customer: "buy x" or "sell x"
@@ -12,9 +15,6 @@ Tasks:
             - market: "this would cost z" | "i would pay z"
             - customer: "ok"
 
-    - market can sell multiple items
-    - change market jobs only possible with market building. 
-    - change markets to get a queue so citizens don't stack above each other
     - market inventory disapears if jobs swichted. Should market continue display these
         - can only change if citizen in market building
     - buy/sell animation
@@ -22,9 +22,6 @@ Tasks:
         - both seller and buyer should be visible
         - make chats happen not instantly
             - conversation takes time
-    - check behind building paint
-- food need should check market building for food
-- home need should also check job market building for repair
 - more images+animations
     - death animation
         - dig grave
@@ -67,6 +64,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- analyse performance
 - save performance metrics in tests for comparison of later runs
     - as chrome performance varies a lot on first and second run, only care for second run?
 - some more test cases?

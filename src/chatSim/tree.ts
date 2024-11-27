@@ -1,5 +1,6 @@
 import { IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG } from "../drawHelper.js";
-import { ChatSimState, PaintDataMap, Position } from "./chatSimModels.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
+import { PaintDataMap } from "./map.js";
 import { IMAGES } from "./images.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 

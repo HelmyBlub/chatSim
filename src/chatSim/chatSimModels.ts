@@ -1,8 +1,6 @@
-import { Citizen } from "./citizen.js"
 import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
-import { Inventory } from "./inventory.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
-import { ChatSimMap } from "./map.js"
+import { ChatSimMap, PaintDataMap } from "./map.js"
 import { TestData } from "./test/test.js"
 
 export type Position = {
@@ -27,31 +25,6 @@ export type App = {
     tempState?: ChatSimState,
     runningTests?: TestData,
     didFirstTestRun?: boolean, // chrome somehow always is slower on the first run, which is bad for performance measures. So this exists to check for it
-}
-
-export type BuildingType = "Market" | "House";
-export type Building = {
-    type: BuildingType,
-    owner: Citizen,
-    inhabitedBy?: Citizen,
-    position: Position,
-    buildProgress?: number,
-    deterioration: number,
-    inventory: Inventory,
-}
-
-export type BuildingMarket = Building & {
-    queue: Citizen[],
-    displayedItem?: string,
-}
-
-export type PaintDataMap = {
-    paintOffset: Position,
-    paintHeight: number,
-    paintWidth: number,
-    zoom: number,
-    cameraPosition: Position,
-    lockCameraToSelected: boolean,
 }
 
 export type ChatSimState = {
