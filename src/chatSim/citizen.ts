@@ -98,6 +98,7 @@ export function addCitizen(user: string, state: ChatSimState) {
 export function citizenResetStateTo(citizen: Citizen, type: string) {
     citizen.stateInfo = { type: type, stack: [] };
     citizen.moveTo = undefined;
+    citizen.paintBehindBuildings = undefined;
 }
 
 export function citizenStateStackTaskSuccess(citizen: Citizen) {
@@ -209,9 +210,8 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
 
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
-    const isAtHomeSleeping = citizen.home && citizen.stateInfo.type === CITIZEN_NEED_SLEEP && isCitizenInInteractDistance(citizen, citizen.home.position);
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintBehindBuildings);
-    if (!isAtHomeSleeping && paintInThisLayer) {
+    if (paintInThisLayer) {
         if (citizen.moveTo) {
             const frames = 4;
             const frameTime = 100;

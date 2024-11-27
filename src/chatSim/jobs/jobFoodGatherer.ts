@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { Citizen, setCitizenThought } from "../citizen.js";
+import { addCitizenThought, Citizen, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
@@ -78,6 +78,7 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                 setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM);
             } else {
                 if (!citizen.stateInfo.previousTaskFailed) {
+                    addCitizenThought(citizen, `I can not carry more. I need to sell.`, state);
                     setCitizenStateSellItem(citizen, INVENTORY_MUSHROOM);
                     return;
                 } else {

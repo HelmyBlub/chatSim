@@ -1,5 +1,4 @@
 Tasks:
-- check moveTo reset on behavior change
 - check citizen behind building
 - change: paint tools
 
@@ -78,14 +77,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- check thoughs and improve them
-- check code after restructuring
-    - building construction
-- get new code strucutre for "need home" and other fixes
-- clean up food gatherer to use new code
-- new behavior for job changing for markets when no customers for x days
-- new code structure for wood market
-- clean up lumberjack to use new code
+- check moveTo reset on behavior change
 
 --------------------------------------------------
 Big Idea:

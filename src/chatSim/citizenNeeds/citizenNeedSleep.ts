@@ -34,6 +34,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack[0].state === "move home") {
         if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
             citizen.stateInfo.stack[0].state = CITIZEN_NEED_STATE_SLEEPING;
+            citizen.paintBehindBuildings = true;
         }
     }
 

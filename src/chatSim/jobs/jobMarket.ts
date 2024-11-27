@@ -162,6 +162,7 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
 }
 
 function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    citizen.paintBehindBuildings = true;
 }
 
 function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimState) {

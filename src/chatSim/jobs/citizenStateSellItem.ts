@@ -102,6 +102,7 @@ function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, 
         if (building.type !== "Market") continue;
         const market = building as BuildingMarket;
         if (building.inhabitedBy === undefined) continue;
+        if (building.inhabitedBy.money <= 0) continue;
         if (inventoryGetAvaiableCapacity(building.inventory, itemName) <= 0) continue;
         if (!isCitizenInInteractDistance(building.inhabitedBy, building.position)) continue;
         if (!closest) {
