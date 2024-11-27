@@ -1,5 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen } from "../citizen.js";
+import { nextRandom } from "../main.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 
@@ -44,8 +45,8 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
     }
     if (citizen.stateInfo.stack.length === 0) {
         citizen.moveTo = {
-            x: Math.random() * state.map.mapWidth - state.map.mapWidth / 2,
-            y: Math.random() * state.map.mapHeight - state.map.mapHeight / 2,
+            x: nextRandom(state.randomSeed) * state.map.mapWidth - state.map.mapWidth / 2,
+            y: nextRandom(state.randomSeed) * state.map.mapHeight - state.map.mapHeight / 2,
         }
         const citizenState: JobHouseMarketStateInfo = { state: "selling" };
         citizen.stateInfo.stack.unshift(citizenState);

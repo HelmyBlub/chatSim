@@ -10,12 +10,16 @@ export type Position = {
     y: number,
 }
 
+export type RandomSeed = { seed: number };
+
 export type Mushroom = {
     position: Position,
 }
 
 export type App = {
     state: ChatSimState,
+    gameSpeed: number,
+    gameSpeedRemainder?: number,
     tempState?: ChatSimState,
     runningTests?: TestData,
 }
@@ -50,10 +54,9 @@ export type ChatSimState = {
     streamer: string,
     time: number,
     timPerDay: number,
-    gameSpeed: number,
-    gameSpeedRemainder?: number,
     sunriseAt: number,
     sunsetAt: number,
+    randomSeed: RandomSeed,
     map: ChatSimMap,
     paintData: {
         map: PaintDataMap,

@@ -3,7 +3,7 @@ import { BuildingMarket, ChatSimState, Position } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { IMAGES } from "../images.js";
 import { inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { getDay, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.js";
+import { getDay, INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } from "../main.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "./citizenStateGetBuilding.js";
@@ -118,7 +118,7 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
                     const totalCustomerCount = job.customerCounter.reduce((p, c) => p += c);
                     if (totalCustomerCount === 0) {
                         const reason = [`I had no customers for ${job.maxCounterDays} days.`, `I change job.`];
-                        const newJob: string = Math.random() > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
+                        const newJob: string = nextRandom(state.randomSeed) > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
                         citizenChangeJob(citizen, newJob, state, reason);
                         return;
                     }

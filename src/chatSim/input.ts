@@ -9,14 +9,13 @@ const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
 
 export function chatSimAddInputEventListeners(app: App, canvas: HTMLCanvasElement) {
-    const state = app.state;
     window.addEventListener('resize', (e) => fitCanvasToWindow(canvas), false);
     document.addEventListener('keydown', (e) => keyDown(e, app));
-    document.addEventListener('keyup', (e) => keyUp(e, state));
-    canvas.addEventListener('wheel', (e) => mouseWheel(e, state));
-    canvas.addEventListener('mousedown', (e) => mouseDown(e, state));
-    canvas.addEventListener('mouseup', (e) => mouseUp(e, state));
-    canvas.addEventListener('mousemove', (e) => mouseMove(e, state));
+    document.addEventListener('keyup', (e) => keyUp(e, app.state));
+    canvas.addEventListener('wheel', (e) => mouseWheel(e, app.state));
+    canvas.addEventListener('mousedown', (e) => mouseDown(e, app.state));
+    canvas.addEventListener('mouseup', (e) => mouseUp(e, app.state));
+    canvas.addEventListener('mousemove', (e) => mouseMove(e, app.state));
 }
 
 export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimState) {
@@ -176,16 +175,16 @@ function keyDown(event: KeyboardEvent, app: App) {
     const speedScaling = 0.2;
     switch (event.code) {
         case "Period":
-            if (state.gameSpeed !== 0) {
-                state.gameSpeed *= 1 + speedScaling;
-                if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
+            if (app.gameSpeed !== 0) {
+                app.gameSpeed *= 1 + speedScaling;
+                if (app.gameSpeed > 10 || Math.abs(app.gameSpeed - 1) < speedScaling / 2) app.gameSpeed = Math.round(app.gameSpeed);
             } else {
-                state.gameSpeed = 1;
+                app.gameSpeed = 1;
             }
             break;
         case "Comma":
-            state.gameSpeed /= 1 + speedScaling;
-            if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
+            app.gameSpeed /= 1 + speedScaling;
+            if (app.gameSpeed > 10 || Math.abs(app.gameSpeed - 1) < speedScaling / 2) app.gameSpeed = Math.round(app.gameSpeed);
             break
         case "KeyW":
             state.inputData.map.moveY = -moveTickAmount;
@@ -200,10 +199,10 @@ function keyDown(event: KeyboardEvent, app: App) {
             state.inputData.map.moveX = moveTickAmount;
             break;
         case "NumpadAdd":
-            if (state.gameSpeed === 0) chatSimTick(state);
+            if (app.gameSpeed === 0) chatSimTick(state);
             break;
         case "KeyK":
-            state.gameSpeed = 0;
+            app.gameSpeed = 0;
             console.log(state);
             break;
         case "KeyM":

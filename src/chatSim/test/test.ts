@@ -20,6 +20,7 @@ const activeTests: Test[] = [];
 
 export function startTests(app: App, visualizeTests: boolean = false) {
     if (activeTests.length === 0) initTests();
+    if (app.runningTests) return;
     if (visualizeTests) {
         app.tempState = app.state;
         app.runningTests = {
@@ -72,7 +73,7 @@ function testCitizenShouldNotStarve(): Test {
     const test: Test = {
         description: "citizen should not starve",
         initTest: () => {
-            const state = createDefaultChatSimState("testStreamer");
+            const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapSmall();
             const citizen = createStarvingCitizen("testCitizen1", state);
             state.map.citizens.push(citizen);

@@ -10,14 +10,14 @@ import { paintTrees, Tree } from "./tree.js";
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
 export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
 
-export function paintChatSim(state: ChatSimState) {
+export function paintChatSim(state: ChatSimState, gameSpeed: number) {
     if (!state.canvas) return;
     const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     paintMap(ctx, state, state.paintData.map);
     paintMapBorder(ctx, state.paintData.map);
     paintSelectedData(ctx, state);
-    paintData(ctx, state);
+    paintData(ctx, state, gameSpeed);
 }
 
 export function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: PaintDataMap): Position {
@@ -194,12 +194,12 @@ function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMa
     ctx.stroke();
 }
 
-function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState, gameSpeed: number) {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
     const offsetX = state.paintData.map.paintWidth + 20;
     const citizenCounter = state.map.citizens.length;
-    ctx.fillText(`${getTimeOfDayString(state.time, state)}, speed: ${state.gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
+    ctx.fillText(`${getTimeOfDayString(state.time, state)}, speed: ${gameSpeed.toFixed(2)},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
     if (state.inputData.selected === undefined) {
         for (let i = 0; i < Math.min(20, state.map.citizens.length); i++) {
             const citizen = state.map.citizens[i];

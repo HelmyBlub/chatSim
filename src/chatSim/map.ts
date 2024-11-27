@@ -1,6 +1,6 @@
 import { Mushroom, Building, ChatSimState, Position, BuildingType } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
-import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } from "./main.js";
 import { createTree, Tree } from "./tree.js";
 
 export type TilePosition = {
@@ -179,7 +179,7 @@ function tickHouses(state: ChatSimState) {
 }
 
 function getRandomEmptyTileIndex(state: ChatSimState): number {
-    return Math.floor(Math.random() * state.map.emptyTiles.length);
+    return Math.floor(nextRandom(state.randomSeed) * state.map.emptyTiles.length);
 }
 
 function createBuilding(owner: Citizen, position: Position, type: BuildingType): Building {

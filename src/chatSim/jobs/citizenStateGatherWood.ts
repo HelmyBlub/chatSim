@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { INVENTORY_WOOD, SKILL_GATHERING } from "../main.js";
+import { INVENTORY_WOOD, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
@@ -87,7 +87,7 @@ function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: C
 
 function moveToTree(citizen: Citizen, state: ChatSimState) {
     if (state.map.trees.length > 0) {
-        const treeIndex = Math.floor(Math.random() * state.map.trees.length);
+        const treeIndex = Math.floor(nextRandom(state.randomSeed) * state.map.trees.length);
         const tree = state.map.trees[treeIndex];
         citizen.moveTo = {
             x: tree.position.x,
@@ -117,7 +117,7 @@ function cutTreeForWood(citizen: Citizen, tree: Tree, state: ChatSimState) {
 
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
-    if (Math.random() < skillGathering / 100) {
+    if (nextRandom(state.randomSeed) < skillGathering / 100) {
         inventoryWood.counter++;
     }
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;

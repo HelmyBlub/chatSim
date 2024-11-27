@@ -4,7 +4,7 @@ import { CitizenJob } from "./job.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
 import { setCitizenStateBuildBuilding } from "./citizenStateGetBuilding.js";
-import { INVENTORY_WOOD } from "../main.js";
+import { INVENTORY_WOOD, nextRandom } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -48,7 +48,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             if (!citizen.home) {
                 buildType = "House";
             } else {
-                buildType = Math.random() < 0.5 ? "House" : "Market";
+                buildType = nextRandom(state.randomSeed) < 0.5 ? "House" : "Market";
             }
             const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             if (inventoryWood && inventoryWood.counter >= BUILDING_DATA[buildType].woodAmount) {

@@ -1,6 +1,6 @@
 Tasks:
-- overlay: "!eat cookie" should work
 - think about automated tests?
+    - inputs working for visualized tests
     - make seed for randomness
     - check performance
     - some more test cases?
@@ -82,6 +82,7 @@ Tasks done today:
 - check moveTo reset on behavior change
 - check citizen behind building
 - change: paint tools
+- overlay: "!eat cookie" should work
 
 
 --------------------------------------------------

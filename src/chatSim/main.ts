@@ -1,5 +1,4 @@
-import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG, IMAGE_PATH_WOOD_PLANK, loadImage } from "../drawHelper.js";
-import { Position, ChatSimState, App } from "./chatSimModels.js";
+import { Position, ChatSimState, App, RandomSeed } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
@@ -39,6 +38,11 @@ export function calculateDirection(startPos: Position, targetPos: Position): num
     return direction;
 }
 
+export function nextRandom(seed: RandomSeed) {
+    seed.seed++;
+    let a = seed.seed * 15485863;
+    return (a * a * a % 2038074743) / 2038074743;
+}
 
 /**
  * @returns value between 0 and 1. midnight = 0. 
@@ -61,17 +65,17 @@ export function getTimeOfDayString(time: number, state: ChatSimState): string {
     return `Time ${hoursString}:${minutesString}, Day:${days}`;
 }
 
-export function createDefaultChatSimState(streamerName: string): ChatSimState {
+export function createDefaultChatSimState(streamerName: string, seed: number): ChatSimState {
     const state: ChatSimState = {
         streamer: streamerName,
         time: 0,
         timPerDay: 100000,
-        gameSpeed: 1,
         sunriseAt: 0.22,
         sunsetAt: 0.88,
         chatterNames: [],
         functionsCitizenJobs: {},
         functionsCitizenNeeds: {},
+        randomSeed: { seed: seed },
         map: createDefaultMap(),
         paintData: {
             map: {
@@ -103,8 +107,8 @@ function chatSimStateInit(streamer: string): App {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth - 10;
     canvas.height = window.innerHeight - 10;
-    const state = createDefaultChatSimState(streamer);
-    const app: App = { state: state };
+    const state = createDefaultChatSimState(streamer, Math.random());
+    const app: App = { state: state, gameSpeed: 1 };
     state.canvas = canvas;
     chatSimAddInputEventListeners(app, canvas);
     return app;
@@ -164,19 +168,19 @@ async function runner(app: App) {
         while (true) {
             if (app.runningTests) testRunner(app);
             let startIndex = 0;
-            if (app.state.gameSpeed % 1 !== 0) {
+            if (app.gameSpeed % 1 !== 0) {
                 startIndex++;
-                if (app.state.gameSpeedRemainder === undefined) app.state.gameSpeedRemainder = 0;
-                app.state.gameSpeedRemainder += app.state.gameSpeed % 1;
-                if (app.state.gameSpeedRemainder >= 1) {
-                    app.state.gameSpeedRemainder--;
+                if (app.gameSpeedRemainder === undefined) app.gameSpeedRemainder = 0;
+                app.gameSpeedRemainder += app.gameSpeed % 1;
+                if (app.gameSpeedRemainder >= 1) {
+                    app.gameSpeedRemainder--;
                     chatSimTick(app.state);
                 }
             }
-            for (let i = startIndex; i < app.state.gameSpeed; i++) {
+            for (let i = startIndex; i < app.gameSpeed; i++) {
                 chatSimTick(app.state);
             }
-            paintChatSim(app.state);
+            paintChatSim(app.state, app.gameSpeed);
             await sleep(16);
         }
     } catch (e) {

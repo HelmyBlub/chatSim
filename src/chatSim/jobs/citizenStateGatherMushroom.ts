@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { INVENTORY_MUSHROOM, SKILL_GATHERING } from "../main.js";
+import { INVENTORY_MUSHROOM, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenInInteractDistance } from "./job.js";
@@ -53,7 +53,7 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: nu
     inventoryMushroom.counter++;
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
-    if (Math.random() < skillGathering / 100) {
+    if (nextRandom(state.randomSeed) < skillGathering / 100) {
         inventoryMushroom.counter++;
     }
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
@@ -61,7 +61,7 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: nu
 
 function moveToMushroom(citizen: Citizen, state: ChatSimState) {
     if (state.map.mushrooms.length > 0) {
-        const mushroomIndex = Math.floor(Math.random() * state.map.mushrooms.length);
+        const mushroomIndex = Math.floor(nextRandom(state.randomSeed) * state.map.mushrooms.length);
         citizen.moveTo = {
             x: state.map.mushrooms[mushroomIndex].position.x,
             y: state.map.mushrooms[mushroomIndex].position.y,
