@@ -111,6 +111,7 @@ function chatSimStateInit(streamer: string): App {
     const app: App = { state: state, gameSpeed: 1 };
     state.canvas = canvas;
     chatSimAddInputEventListeners(app, canvas);
+    state.logger = { log: (message, data) => console.log(message, data) };
     return app;
 }
 

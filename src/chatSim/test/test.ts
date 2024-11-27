@@ -1,7 +1,7 @@
-import { App, ChatSimState } from "../chatSimModels.js";
+import { App, ChatSimState, Logger } from "../chatSimModels.js";
 import { Citizen, createDefaultCitizen } from "../citizen.js";
 import { CITIZEN_STARVING_FOOD_PER_CENT } from "../citizenNeeds/citizenNeedStarving.js";
-import { createDefaultChatSimState } from "../main.js";
+import { createDefaultChatSimState, getDay } from "../main.js";
 import { ChatSimMap, createMap, tickChatSimMap } from "../map.js";
 import { chatSimTick } from "../tick.js";
 
@@ -29,9 +29,14 @@ export function startTests(app: App, visualizeTests: boolean = false) {
         }
     } else {
         const testStartTime = performance.now();
+        const logs: string[] = [];
+        const testLogger: Logger = { log: (message) => logs.push(message) };
+
         for (let test of activeTests) {
             const currentTestStartTime = performance.now();
             const state = test.initTest();
+            //            state.logger = testLogger;
+            testLogger.log(`--- Started test ${test.description} ---`);
             const maxNumberIterations = 100000;
             let counter = 0;
             while (!test.checkFinishCondition(state) && counter < maxNumberIterations) {
@@ -51,7 +56,7 @@ export function testRunner(app: App) {
     if (!app.runningTests) return;
     if (!app.runningTests.currentTest) {
         if (app.runningTests.openTests.length > 0) {
-            const firstTest: Test = app.runningTests.openTests.shift()!;
+            const firstTest: Test = app.runningTests.openTests.pop()!;
             app.runningTests.currentTest = firstTest;
             app.state = firstTest.initTest();
             app.state.canvas = app.tempState!.canvas;
@@ -73,6 +78,9 @@ export function testRunner(app: App) {
 
 function initTests() {
     activeTests.push(testCitizenShouldNotStarve());
+    activeTests.push(testCitizenShouldBuildHome());
+    activeTests.push(testPerformance10Citizens());
+    activeTests.push(testPerformance100Citizens());
 }
 
 function testCitizenShouldNotStarve(): Test {
@@ -97,6 +105,73 @@ function testCitizenShouldNotStarve(): Test {
     return test;
 }
 
+function testCitizenShouldBuildHome(): Test {
+    const test: Test = {
+        description: "citizen should build home",
+        initTest: () => {
+            const state = createDefaultChatSimState("testStreamer", 0);
+            state.map = createTestMapSmall();
+            const citizen = createStarvingCitizen("testCitizen1", state);
+            state.map.citizens.push(citizen);
+            return state;
+        },
+        checkFinishCondition: (state) => {
+            const citizen = state.map.citizens[0];
+            return citizen.home !== undefined || state.time > 50000;
+        },
+        checkSucceded: (state) => {
+            const citizen = state.map.citizens[0];
+            return citizen.home !== undefined;
+        }
+    }
+    return test;
+}
+
+
+function testPerformance10Citizens(): Test {
+    const test: Test = {
+        description: "performance 10 citizens",
+        initTest: () => {
+            const state = createDefaultChatSimState("testStreamer", 0);
+            state.map = createTestMapMiddle();
+            for (let i = 0; i < 10; i++) {
+                const citizen = createDefaultCitizen(`testCitizen${i + 1}`, state);
+                state.map.citizens.push(citizen);
+            }
+            return state;
+        },
+        checkFinishCondition: (state) => {
+            return getDay(state) > 25;
+        },
+        checkSucceded: (state) => {
+            return true;
+        }
+    }
+    return test;
+}
+
+function testPerformance100Citizens(): Test {
+    const test: Test = {
+        description: "performance 100 citizens",
+        initTest: () => {
+            const state = createDefaultChatSimState("testStreamer", 0);
+            state.map = createTestMapBig();
+            for (let i = 0; i < 100; i++) {
+                const citizen = createDefaultCitizen(`testCitizen${i + 1}`, state);
+                state.map.citizens.push(citizen);
+            }
+            return state;
+        },
+        checkFinishCondition: (state) => {
+            return getDay(state) > 5;
+        },
+        checkSucceded: (state) => {
+            return true;
+        }
+    }
+    return test;
+}
+
 function createStarvingCitizen(citizenName: string, testState: ChatSimState): Citizen {
     const citizen = createDefaultCitizen(citizenName, testState);
     citizen.foodPerCent = CITIZEN_STARVING_FOOD_PER_CENT;
@@ -105,4 +180,12 @@ function createStarvingCitizen(citizenName: string, testState: ChatSimState): Ci
 
 function createTestMapSmall(): ChatSimMap {
     return createMap(5, 5, 1, 1);
+}
+
+function createTestMapMiddle(): ChatSimMap {
+    return createMap(16, 9, 6, 3);
+}
+
+function createTestMapBig(): ChatSimMap {
+    return createMap(50, 50, 30, 16);
 }

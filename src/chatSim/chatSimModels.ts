@@ -10,6 +10,10 @@ export type Position = {
     y: number,
 }
 
+export type Logger = {
+    log: (message: string, data?: any) => void,
+}
+
 export type RandomSeed = { seed: number };
 
 export type Mushroom = {
@@ -51,6 +55,7 @@ export type PaintDataMap = {
 
 export type ChatSimState = {
     canvas?: HTMLCanvasElement,
+    logger?: Logger,
     streamer: string,
     time: number,
     timPerDay: number,

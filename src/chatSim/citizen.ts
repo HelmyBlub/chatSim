@@ -372,11 +372,11 @@ function deleteCitizens(state: ChatSimState) {
         if (starved || outOfEngergy) {
             let deceased = state.map.citizens.splice(i, 1)[0];
             if (starved) {
-                console.log(`${deceased.name} died by starving`, deceased);
+                if (state.logger) state.logger.log(`${deceased.name} died by starving`, deceased);
                 addCitizenLogEntry(deceased, "starved to death", state);
             }
             if (outOfEngergy) {
-                console.log(`${deceased.name} died by over working`, deceased);
+                if (state.logger) state.logger.log(`${deceased.name} died by over working`, deceased);
                 addCitizenLogEntry(deceased, "overworked to death", state);
             };
             if (deceased.home) {

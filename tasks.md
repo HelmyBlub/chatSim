@@ -1,6 +1,5 @@
 Tasks:
 - think about automated tests?
-    - some more test cases?
     - save performance metrics for comparison of later runs
 - restructure markets
     - dev steps:
@@ -69,6 +68,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- some more test cases?
 - think about automated tests?
     - i have struggle finding issues why my citizens behave in strange ways
         - test for starving need:
