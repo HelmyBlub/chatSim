@@ -1,49 +1,15 @@
 Tasks:
 - speech interaction
-    - as it involves two citizens, current code does not handle it correctly and just pretends => bad
-    - think about code sturcture for interaction between two citizens
-    - market buy interaction
-        - market state: "waitingForCustomer"
-        - customer reaches "inVisionDistance".
-            - customer is in state "need food"
-            - check if market is in "waitingForCustomer" state.
-                - if not joins queue
-            - opens "chat" with market
-                - customer: says "hello"
-                - goes into waiting for response state
-                - timer starts for max waiting time
-                - market changes state to "servingCustomer"
-            - market sees, someone chattet or now in servingCustomer state
-                - starts with starting sentence
-                    - "Hello, how can i help you?"
-                - timer starts for max waiting time
-            - customer sees response.
-                - continues with request
-                    -itemName, itemAmount
-            - market state price with maybe different amount
-            - customer accepts
-                - money and items is traded
+    - market queue & speech works for buying
+        - not yet totally happy with code structure
+    - make speech work for selling
+    - think about code imrpovements
+    - bug: long queue citizen moves to front and back again
+    - change: speech bubbles in front of thought bubbles?
+        - if customer thinks and talks at the same time, paint them separated?
 - improve markets
     - dev steps:
-        - add queue for customers
-            - customer walks to market
-            - if reached market, take queue position
-            - can leave queue through needs
-            - market interaction with first in queue takes time
-            - check selling also uses queue
-            - check customers leaving queue are removed from queue
-            - moving to market should not need to go into center
-                - maybe isCititzenInVisionDistane? then enter queue
-            -
-        - state for talking with customers
-            - market:   "How can i help you?"
-            - customer: "buy x" or "sell x"
-                case too much:
-                   - market:   "can only buy amount y"
-                   - customer:  "its fine"
-            - market: "this would cost z" | "i would pay z"
-            - customer: "ok"
-
+        - check selling also uses queue
     - market inventory disapears if jobs swichted. Should market continue display these
         - can only change if citizen in market building
     - buy/sell animation
@@ -86,10 +52,9 @@ Tasks:
 - chatter blacklist?, way to remove unwanted chatters like bots
 
 - use images
-    - citizen image with move 8 directions
-        - make top view image and rotate image => than just need some walking frames
     - hungry citizen visualized
     - starving citizen visualization
+    - sleepy
 
 ---------------------------------------------------
 Tasks done today:
