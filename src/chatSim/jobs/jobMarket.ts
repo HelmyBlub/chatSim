@@ -12,10 +12,10 @@ import { setCitizenStateGetItemFromBuilding } from "./citizenStateGetItem.js";
 import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance, sellItemWithInventories } from "./job.js"
 import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
+import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
-    tempStartTime?: number,
     sellItemNames: string[],
     customerCounter: number[],
     currentDayCounter: number,
@@ -72,7 +72,7 @@ export function marketServeCustomer(market: BuildingMarket, customer: Citizen): 
     const canServe = marketCanServeCustomer(market, customer);
     if (!canServe) return false;
     const servingState: JobMarketState = "servingCustomer";
-    market.inhabitedBy.stateInfo.stack[0].state = servingState;
+    market.inhabitedBy.stateInfo.stack.unshift({ state: servingState });
     const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
     jobMarket.currentCustomer = customer;
     return true;
@@ -188,13 +188,71 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
 
 function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     const jobMarket = job as CitizenJobMarket;
-    if (!jobMarket.currentCustomer) {
+    if (!jobMarket.currentCustomer || !jobMarket.marketBuilding) {
         citizenStateStackTaskSuccess(citizen);
         return;
     }
     if (!isCitizenInInteractionDistance(jobMarket.currentCustomer, citizen.position)) {
         citizenStateStackTaskSuccess(citizen);
         return;
+    }
+    if (!citizen.lastChat) return;
+    let customerMessage: ChatMessage | undefined;
+    for (let i = citizen.lastChat.messages.length - 1; i >= 0; i--) {
+        const message = citizen.lastChat.messages[i];
+        if (message.by === citizen) {
+            return;
+        }
+        if (message.by === jobMarket.currentCustomer) {
+            customerMessage = message;
+            break;
+        }
+    }
+
+    if (customerMessage && customerMessage.intention && customerMessage.intention.type === CHAT_MESSAGE_INTENTION_MARKET_TRADE) {
+        if (customerMessage.time + 1000 > state.time) return;
+        const customerIntention = customerMessage.intention as ChatMessageMarketTradeIntention;
+        if (customerIntention.intention === "initialGreeting") {
+            const intention: ChatMessageMarketTradeIntention = {
+                type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                intention: "whatDoYouWant",
+            }
+            addChatMessage(citizen.lastChat, citizen, `Hello. How can i help you?`, state, intention);
+        }
+        if (customerIntention.intention === "tradeRequestData") {
+            if (!customerIntention.sell) {
+                const inventoryItem = jobMarket.marketBuilding.inventory.items.find(i => i.name === customerIntention.itemName);
+                if (inventoryItem && inventoryItem.counter > 0) {
+                    let amount = customerIntention.itemAmount;
+                    if (amount === undefined || amount > inventoryItem.counter) {
+                        amount = inventoryItem.counter;
+                    }
+                    const itemPrice = 2;
+                    const intention: ChatMessageMarketTradeIntention = {
+                        type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                        intention: "priceResponse",
+                        singlePrice: itemPrice,
+                        itemName: customerIntention.itemName,
+                        itemAmount: amount,
+                    }
+                    addChatMessage(citizen.lastChat, citizen, `I can sell you ${amount}x${intention.itemName} for $${amount * itemPrice}.`, state, intention);
+                } else {
+                    const intention: ChatMessageMarketTradeIntention = {
+                        type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                        intention: "tradeCancelled",
+                    }
+                    addChatMessage(citizen.lastChat, citizen, `I do not have stock left for ${customerIntention.itemName}.`, state, intention);
+                }
+            }
+        }
+        if (customerIntention.intention === "accept") {
+            const intention: ChatMessageMarketTradeIntention = {
+                type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                intention: "tradeFullfiled",
+            }
+            buyItemFromMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
+            addChatMessage(citizen.lastChat, citizen, `Thanks for shopping!`, state, intention);
+        }
     }
 }
 

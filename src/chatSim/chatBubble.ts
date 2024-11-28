@@ -8,10 +8,25 @@ export type Chat = {
     lastMessageTime?: number,
 }
 
+export type ChatMessageIntention = {
+    type: string,
+}
+
+export const CHAT_MESSAGE_INTENTION_MARKET_TRADE = "MarketTrade";
+
+export type ChatMessageMarketTradeIntention = ChatMessageIntention & {
+    intention: "initialGreeting" | "whatDoYouWant" | "tradeRequestData" | "priceResponse" | "accept" | "tradeCancelled" | "tradeFullfiled",
+    sell?: boolean,
+    itemName?: string,
+    itemAmount?: number,
+    singlePrice?: number,
+}
+
 export type ChatMessage = {
     message: string,
     time: number,
     by: Citizen,
+    intention?: { type: string },
 }
 
 const CHAT_DISPLAY_DURATION = 4000;
@@ -23,8 +38,8 @@ export function createEmptyChat(): Chat {
     }
 }
 
-export function addChatMessage(chat: Chat, citizen: Citizen, message: string, state: ChatSimState) {
-    chat.messages.push({ by: citizen, message: message, time: state.time });
+export function addChatMessage(chat: Chat, citizen: Citizen, message: string, state: ChatSimState, intention: ChatMessageIntention | undefined = undefined) {
+    chat.messages.push({ by: citizen, message: message, time: state.time, intention: intention });
     addCitizenLogEntry(citizen, `I said: ${message}.`, state);
     chat.lastMessageTime = state.time;
     if (chat.messages.length > chat.maxMessages) {
@@ -39,11 +54,13 @@ export function paintChatBubbles(ctx: CanvasRenderingContext2D, chatOwner: Citiz
     const padding = 3;
     const margin = 2;
     for (let i = 0; i < chat.messages.length; i++) {
+        const message = chat.messages[i];
+        if (message.time + 4000 < state.time) continue;
         const offsetY = -(chat.messages.length - i - 1) * (fontSize + padding * 2 + margin);
-        let offsetX = (chat.messages[i].by.position.x - chatOwner.position.x);
+        let offsetX = (message.by.position.x - chatOwner.position.x);
         if (offsetX < -80) offsetX = -80;
         if (offsetX > 80) offsetX = 80;
-        paintChatBubble(ctx, chat.messages[i].message, { x: paintPos.x + offsetX, y: paintPos.y + offsetY }, fontSize, padding, i === chat.messages.length - 1);
+        paintChatBubble(ctx, message.message, { x: paintPos.x + offsetX, y: paintPos.y + offsetY }, fontSize, padding, i === chat.messages.length - 1);
     }
 }
 

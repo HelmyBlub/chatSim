@@ -1,4 +1,4 @@
-import { addChatMessage, createEmptyChat } from "../chatBubble.js";
+import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageIntention, ChatMessageMarketTradeIntention, createEmptyChat } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingMarket, marketGetQueueMapPosition, marketGetQueuePosition } from "../building.js";
 import { addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
@@ -31,6 +31,7 @@ export type CitizenStateMarketQueue = {
     market: BuildingMarket,
     stepState?: string,
     stepStartTime?: number,
+    sell?: boolean,
 }
 
 export const CITIZEN_STATE_GET_ITEM = "GetItem";
@@ -85,16 +86,37 @@ export function setCitizenStateMarketTradeInteraction(citizen: Citizen, market: 
 function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const citizenStateMarket = citizen.stateInfo.stack[0].data as CitizenStateMarketQueue;
-        const queuePosition = marketGetQueuePosition(citizen, citizenStateMarket.market);
-        const mapPosition = marketGetQueueMapPosition(citizen, citizenStateMarket.market);
-        if (queuePosition === 0 && isCitizenAtPosition(citizen, mapPosition)) {
-            if (marketCanServeCustomer(citizenStateMarket.market, citizen)) {
-                citizenStateStackTaskSuccess(citizen);
-                citizenStateMarket.market.queue?.shift();
-                return;
+        if (citizenStateMarket.market.inhabitedBy && isCitizenAtPosition(citizenStateMarket.market.inhabitedBy, citizenStateMarket.market.position)) {
+            const queuePosition = marketGetQueuePosition(citizen, citizenStateMarket.market);
+            const mapPosition = marketGetQueueMapPosition(citizen, citizenStateMarket.market);
+            if (queuePosition === 0) {
+                const data = citizen.stateInfo.stack[0].data as CitizenStateMarketQueue;
+                if (data.stepState === undefined) {
+                    if (isCitizenAtPosition(citizen, mapPosition)) {
+                        data.stepState = "waitingForMyTurn";
+                    } else {
+                        citizen.moveTo = mapPosition;
+                    }
+                } else {
+                    if (marketCanServeCustomer(citizenStateMarket.market, citizen)) {
+                        if (data.stepState === "waitingForMyTurn") {
+                            data.stepState = "movingUp";
+                            citizen.moveTo = {
+                                x: data.market.position.x + 20,
+                                y: data.market.position.y + 17,
+                            }
+                        } else {
+                            citizenStateStackTaskSuccess(citizen);
+                            citizenStateMarket.market.queue?.shift();
+                            return;
+                        }
+                    }
+                }
+            } else {
+                citizen.moveTo = mapPosition;
             }
         } else {
-            citizen.moveTo = mapPosition;
+            citizenStateStackTaskSuccess(citizen);
         }
     }
 }
@@ -108,27 +130,87 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
         }
         if (isCitizenInInteractionDistance(citizen, data.market.position)) {
             if (data.market.inhabitedBy && isCitizenAtPosition(data.market.inhabitedBy, data.market.position)) {
-                if (data.stepStartTime !== undefined && data.stepStartTime + 2000 > state.time) return;
-                if (data.stepState === undefined) {
-                    data.stepState = "speech1";
-                    data.stepStartTime = state.time;
-                    const chat = createEmptyChat();
-                    addChatMessage(chat, citizen, `I want to buy ${data.itemAmount}x${INVENTORY_MUSHROOM}`, state);
+                let chat = data.market.inhabitedBy.lastChat;
+                const marketCitizen = data.market.inhabitedBy;
+                if (!chat) {
+                    chat = createEmptyChat();
                     data.market.inhabitedBy.lastChat = chat;
-                } else if (data.stepState === "speech1") {
-                    const chat = data.market.inhabitedBy.lastChat!;
-                    data.stepState = "speech2";
-                    data.stepStartTime = state.time;
-                    addChatMessage(chat, data.market.inhabitedBy, `${data.itemAmount}x${INVENTORY_MUSHROOM} cost $${2 * data.itemAmount!}.`, state);
-                } else if (data.stepState === "speech2") {
-                    const chat = data.market.inhabitedBy.lastChat!;
-                    const finalAmount = buyItemFromMarket(data.market as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
-                    if (finalAmount !== undefined && finalAmount !== 0) {
-                        addChatMessage(chat, citizen, `Thank you!`, state);
-                    } else {
-                        addChatMessage(chat, citizen, `No!`, state);
+                }
+                let lastMarketMessage;
+                let possibleResponse: ChatMessage | undefined = undefined;
+                for (let i = chat.messages.length - 1; i >= 0; i--) {
+                    const message = chat.messages[i];
+                    if (lastMarketMessage === undefined && message.by === marketCitizen) {
+                        lastMarketMessage = message;
                     }
-                    citizenStateStackTaskSuccess(citizen);
+                    if (message.by === citizen) {
+                        if (lastMarketMessage !== undefined) {
+                            possibleResponse = lastMarketMessage;
+                        }
+                        break;
+                    }
+                }
+
+                if (possibleResponse && possibleResponse.intention) {
+                    if (possibleResponse.time + 1000 > state.time) return;
+                    const intention = possibleResponse.intention as ChatMessageMarketTradeIntention;
+                    if (intention.intention === "whatDoYouWant") {
+                        const myIntention: ChatMessageMarketTradeIntention = {
+                            type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                            intention: "tradeRequestData",
+                            itemName: data.itemName,
+                            itemAmount: data.itemAmount,
+                            sell: data.sell,
+                        }
+                        addChatMessage(chat, citizen, `I want to ${myIntention.sell ? "sell" : "buy"} ${myIntention.itemAmount}x${myIntention.itemName}.`, state, myIntention);
+                        data.stepState === "waitingForRespone";
+                        data.stepStartTime = state.time;
+                    }
+                    if (intention.intention === "priceResponse") {
+                        if (intention.itemAmount !== undefined && intention.singlePrice !== undefined) {
+                            const totalPrice = intention.itemAmount * intention.singlePrice;
+                            let amount = intention.itemAmount;
+                            if (citizen.money < totalPrice) {
+                                amount = Math.floor(citizen.money / intention.singlePrice);
+                            }
+                            const myIntention: ChatMessageMarketTradeIntention = {
+                                type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                                intention: "accept",
+                                itemName: intention.itemName,
+                                itemAmount: amount,
+                                singlePrice: intention.singlePrice,
+                                sell: intention.sell,
+                            }
+                            let message = ``;
+                            if (citizen.money < totalPrice) {
+                                message = `I will buy ${myIntention.itemAmount}x${myIntention.itemName} for $${myIntention.singlePrice! * amount}`;
+                            } else {
+                                message = `Yes please!`;
+                            }
+                            addChatMessage(chat, citizen, message, state, myIntention);
+                            data.stepState === "waitingForRespone";
+                            data.stepStartTime = state.time;
+                        }
+                    }
+                    if (intention.intention === "tradeFullfiled") {
+                        citizenStateStackTaskSuccess(citizen);
+                        return;
+                    }
+                } else {
+                    if (data.stepState === "waitingForRespone" && data.stepStartTime !== undefined) {
+                        if (data.stepStartTime + 2000 < state.time) {
+                            data.stepState = undefined;
+                            data.stepStartTime = undefined;
+                        }
+                    } else {
+                        const intention: ChatMessageMarketTradeIntention = {
+                            type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                            intention: "initialGreeting",
+                        }
+                        addChatMessage(chat, citizen, `Hello.`, state, intention);
+                        data.stepState = "waitingForRespone";
+                        data.stepStartTime = state.time;
+                    }
                 }
             } else {
                 citizenStateStackTaskSuccess(citizen);
