@@ -175,8 +175,8 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        setupReserved(job.marketBuilding as BuildingMarket, jobMarket);
         if (isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
+            setupReserved(job.marketBuilding as BuildingMarket, jobMarket);
             const market = job.marketBuilding as BuildingMarket;
             if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {
                 market.displayedItem = jobMarket.sellItemNames[0];
@@ -199,9 +199,15 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                 }
             }
             if (market.deterioration > 1 / BUILDING_DATA[market.type].woodAmount) {
-                addCitizenThought(citizen, `I need to repair my market.`, state);
-                setCitizenStateRepairBuilding(citizen, market);
-                return;
+                if (market.deterioration > 1) {
+                    jobMarket.marketBuilding = undefined;
+                    addCitizenThought(citizen, `My market broke down.`, state);
+                    citizenStateStackTaskSuccess(citizen);
+                } else {
+                    addCitizenThought(citizen, `I need to repair my market.`, state);
+                    setCitizenStateRepairBuilding(citizen, market);
+                    return;
+                }
             }
             stateInfo.state = "waitingForCustomers";
             citizen.displayedTool = undefined;

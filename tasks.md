@@ -1,11 +1,12 @@
 Tasks:
-- imrpove markets
+- improve markets
     - dev steps:
         - add queue for customers
             - customer walks to market
             - if reached market, take queue position
             - can leave queue thorugh needs
             - market interaction with first in queue takes time
+            - check selling also uses queue
         - state for talking with customers
             - market:   "How can i help you?"
             - customer: "buy x" or "sell x"
@@ -64,26 +65,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- analyse performance
-- save performance metrics in tests for comparison of later runs
-    - as chrome performance varies a lot on first and second run, only care for second run?
-- some more test cases?
-- think about automated tests?
-    - i have struggle finding issues why my citizens behave in strange ways
-        - test for starving need:
-            - a starving citizen in a small map with 1 mushroom
-                - he should survive, can he get his need fullfilled before death?
-                - execute test on some button press
-    - make test be visible on canvas
-        - stop real state and put teststate in for duration of test
-    - inputs working for visualized tests
-    - make seed for randomness
-    - check performance
-- check moveTo reset on behavior change
-- check citizen behind building
-- change: paint tools
-- overlay: "!eat cookie" should work
-
+- fixbug: broken market endless loop
 
 --------------------------------------------------
 Big Idea:
