@@ -1,12 +1,40 @@
 Tasks:
+- speech interaction
+    - as it involves two citizens, current code does not handle it correctly and just pretends => bad
+    - think about code sturcture for interaction between two citizens
+    - market buy interaction
+        - market state: "waitingForCustomer"
+        - customer reaches "inVisionDistance".
+            - customer is in state "need food"
+            - check if market is in "waitingForCustomer" state.
+                - if not joins queue
+            - opens "chat" with market
+                - customer: says "hello"
+                - goes into waiting for response state
+                - timer starts for max waiting time
+                - market changes state to "servingCustomer"
+            - market sees, someone chattet or now in servingCustomer state
+                - starts with starting sentence
+                    - "Hello, how can i help you?"
+                - timer starts for max waiting time
+            - customer sees response.
+                - continues with request
+                    -itemName, itemAmount
+            - market state price with maybe different amount
+            - customer accepts
+                - money and items is traded
 - improve markets
     - dev steps:
         - add queue for customers
             - customer walks to market
             - if reached market, take queue position
-            - can leave queue thorugh needs
+            - can leave queue through needs
             - market interaction with first in queue takes time
             - check selling also uses queue
+            - check customers leaving queue are removed from queue
+            - moving to market should not need to go into center
+                - maybe isCititzenInVisionDistane? then enter queue
+            -
         - state for talking with customers
             - market:   "How can i help you?"
             - customer: "buy x" or "sell x"

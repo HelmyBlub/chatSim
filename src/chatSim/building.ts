@@ -38,7 +38,7 @@ export function marketGetQueuePosition(citizen: Citizen, market: BuildingMarket)
 export function marketGetQueueMapPosition(citizen: Citizen, market: BuildingMarket): Position {
     const queueNumber = marketGetQueuePosition(citizen, market);
     return {
-        x: market.position.x + queueNumber * 25 + 20,
+        x: market.position.x + (queueNumber + 1) * 25 + 20,
         y: market.position.y + 17 - queueNumber,
     }
 }

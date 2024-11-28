@@ -6,7 +6,7 @@ import { INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
-import { isCitizenInInteractDistance } from "./job.js";
+import { isCitizenAtPosition } from "./job.js";
 import { BUILDING_DATA } from "./jobBuildingContruction.js";
 
 export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
@@ -60,7 +60,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
             inventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
         }
         if (inventoryWood && inventoryWood.counter > 0) {
-            if (isCitizenInInteractDistance(citizen, building.position)) {
+            if (isCitizenAtPosition(citizen, building.position)) {
                 building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
                 inventoryWood.counter--;
                 addCitizenThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
@@ -120,7 +120,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
 function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const building = citizen.stateInfo.stack[0].data as Building;
-        if (isCitizenInInteractDistance(citizen, building.position)) {
+        if (isCitizenAtPosition(citizen, building.position)) {
             if (building.buildProgress === undefined) {
                 citizenStateStackTaskSuccess(citizen);
                 return;

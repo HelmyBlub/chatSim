@@ -71,9 +71,17 @@ export function tickCitizenJob(citizen: Citizen, state: ChatSimState) {
     jobFunctions.tick(citizen, citizen.job, state);
 }
 
-export function isCitizenInInteractDistance(citizen: Citizen, target: Position) {
+export function isCitizenAtPosition(citizen: Citizen, target: Position) {
     const distance = calculateDistance(citizen.position, target);
     return distance <= citizen.speed;
+}
+export function isCitizenInInteractionDistance(citizen: Citizen, target: Position) {
+    const distance = calculateDistance(citizen.position, target);
+    return distance <= 40;
+}
+export function isCitizenInVisionDistance(citizen: Citizen, target: Position) {
+    const distance = calculateDistance(citizen.position, target);
+    return distance <= 120;
 }
 
 export function buyItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: Inventory, buyerInventory: Inventory, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {

@@ -9,27 +9,30 @@ import { mapPositionToPaintPosition } from "../paint.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "./citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "./citizenStateGetItem.js";
-import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenInInteractDistance, sellItemWithInventories } from "./job.js"
+import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance, sellItemWithInventories } from "./job.js"
 import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 
 export type CitizenJobMarket = CitizenJob & {
+    currentCustomer?: Citizen,
+    tempStartTime?: number,
     sellItemNames: string[],
     customerCounter: number[],
     currentDayCounter: number,
     maxCounterDays: number,
 }
 
-export type JobMarketStates = "checkInventory" | "waitingForCustomers" | "getMarketBuilding";
+export type JobMarketState = "checkInventory" | "waitingForCustomers" | "getMarketBuilding" | "servingCustomer";
 
 type JobMarketStateInfo = CitizenStateInfo & {
-    state: JobMarketStates,
+    state: JobMarketState,
 }
 
 const STRING_TO_STATE_MAPPING: { [key: string]: (citizen: Citizen, job: CitizenJob, state: ChatSimState) => void } = {
     "checkInventory": stateCheckInventory,
     "waitingForCustomers": stateWaitingForCustomers,
     "getMarketBuilding": stateGetMarketBuilding,
+    "servingCustomer": stateServingCustomer,
 };
 
 const DISPLAY_ITEM_PAINT_DATA: { [key: string]: { size: number, path: string, max: number, offset: Position, offsetPerItem: Position } } = {
@@ -62,6 +65,26 @@ export function onLoadDisplayItemPaintData() {
             y: -2,
         }
     }
+}
+
+export function marketServeCustomer(market: BuildingMarket, customer: Citizen): boolean {
+    if (!market.inhabitedBy) return false;
+    const canServe = marketCanServeCustomer(market, customer);
+    if (!canServe) return false;
+    const servingState: JobMarketState = "servingCustomer";
+    market.inhabitedBy.stateInfo.stack[0].state = servingState;
+    const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
+    jobMarket.currentCustomer = customer;
+    return true;
+}
+
+export function marketCanServeCustomer(market: BuildingMarket, customer: Citizen): boolean {
+    if (!market.inhabitedBy) return false;
+    if (market.inhabitedBy.stateInfo.stack.length === 0) return false;
+    const marketState: JobMarketState = market.inhabitedBy.stateInfo.stack[0].state as JobMarketState;
+    if (marketState !== "waitingForCustomers") return false;
+    return true;
+
 }
 
 export function sellItemToMarket(market: BuildingMarket, seller: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
@@ -163,6 +186,18 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
     }
 }
 
+function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    const jobMarket = job as CitizenJobMarket;
+    if (!jobMarket.currentCustomer) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+    if (!isCitizenInInteractionDistance(jobMarket.currentCustomer, citizen.position)) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+}
+
 function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     citizen.paintBehindBuildings = true;
 }
@@ -175,7 +210,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (isCitizenInInteractDistance(citizen, job.marketBuilding.position)) {
+        if (isCitizenAtPosition(citizen, job.marketBuilding.position)) {
             setupReserved(job.marketBuilding as BuildingMarket, jobMarket);
             const market = job.marketBuilding as BuildingMarket;
             if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {

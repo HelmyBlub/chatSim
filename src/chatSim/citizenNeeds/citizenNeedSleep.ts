@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
-import { isCitizenInInteractDistance } from "../jobs/job.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 import { getTimeOfDay } from "../main.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
@@ -41,7 +41,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
         const sleepDuration = 0.36;
         let sleepRegenerationFactor = 1;
-        if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
+        if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
             sleepRegenerationFactor *= 1.2;
         }
         citizen.energyPerCent += 16 / state.timPerDay / sleepDuration * sleepRegenerationFactor;

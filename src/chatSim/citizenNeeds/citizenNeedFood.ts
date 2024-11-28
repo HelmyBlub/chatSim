@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought, addCitizenThought, citizenResetStateTo } from "../citizen.js";
 import { InventoryItem } from "../inventory.js";
 import { setCitizenStateGetItem, setCitizenStateTransportItemToBuilding } from "../jobs/citizenStateGetItem.js";
-import { isCitizenInInteractDistance } from "../jobs/job.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { getCitizenNeedData } from "./citizenNeed.js";
@@ -100,7 +100,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     } else if (citizen.stateInfo.stack.length > 0) {
         if (citizen.stateInfo.stack[0].state === `go home to eat`) {
             if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
-                if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
+                if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
                     const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
                         while (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {

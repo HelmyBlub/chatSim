@@ -123,6 +123,7 @@ function testMarketQueue(): Test {
         description: "market queue",
         initTest: () => {
             const state = createDefaultChatSimState("testStreamer", 0);
+            state.time = 20000;
             state.map = createTestMapSmall();
             const marketOwner = createCitizenWithFullfiledNeeds("testCitizenMarket", state);
             state.map.citizens.push(marketOwner);
@@ -133,6 +134,7 @@ function testMarketQueue(): Test {
             marketBuilding.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 30 });
             for (let i = 0; i < 5; i++) {
                 const citizen = createDefaultCitizen("testCitizen" + i, state);
+                if (i % 3 === 0) citizen.energyPerCent = 0.94;
                 citizen.foodPerCent = 0.87;
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
                 citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_IN_INVENTORY });
@@ -141,7 +143,7 @@ function testMarketQueue(): Test {
             return state;
         },
         checkFinishCondition: (state) => {
-            return state.time > 10000;
+            return state.time > 500000;
         },
         checkSucceded: (state) => {
             return false;

@@ -4,7 +4,7 @@ import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { INVENTORY_MUSHROOM, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenInInteractDistance } from "./job.js";
+import { isCitizenAtPosition } from "./job.js";
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
 
@@ -73,7 +73,7 @@ function moveToMushroom(citizen: Citizen, state: ChatSimState) {
 function isCloseToMushroom(citizen: Citizen, state: ChatSimState): number | undefined {
     for (let i = state.map.mushrooms.length - 1; i >= 0; i--) {
         const mushroom = state.map.mushrooms[i];
-        if (isCitizenInInteractDistance(citizen, mushroom.position)) return i;
+        if (isCitizenAtPosition(citizen, mushroom.position)) return i;
     }
     return undefined;
 }

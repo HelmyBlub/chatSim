@@ -1,6 +1,6 @@
 import { ChatSimState } from "./chatSimModels.js";
 import { addCitizenLogEntry, Citizen } from "./citizen.js";
-import { isCitizenInInteractDistance } from "./jobs/job.js";
+import { isCitizenAtPosition } from "./jobs/job.js";
 
 export type InventoryItem = {
     name: string,
@@ -70,7 +70,7 @@ export function inventoryGetUsedCapacity(inventory: Inventory): number {
 }
 
 export function inventoryEmptyCitizenToHomeInventory(citizen: Citizen, state: ChatSimState) {
-    if (citizen.home && isCitizenInInteractDistance(citizen, citizen.home.position)) {
+    if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
         for (let item of citizen.inventory.items) {
             if (item.counter > 0) {
                 const amount = inventoryMoveItemBetween(item.name, citizen.inventory, citizen.home.inventory, item.counter);

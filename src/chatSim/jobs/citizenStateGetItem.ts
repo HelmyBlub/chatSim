@@ -7,8 +7,8 @@ import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.j
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
 import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
-import { isCitizenInInteractDistance } from "./job.js";
-import { buyItemFromMarket } from "./jobMarket.js";
+import { isCitizenAtPosition, isCitizenInInteractionDistance } from "./job.js";
+import { buyItemFromMarket, JobMarketState, marketCanServeCustomer, marketServeCustomer } from "./jobMarket.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -22,16 +22,22 @@ export type CitizenStateItemAndBuildingData = {
     itemAmount?: number,
     building: Building,
     stepState?: string,
+    stepStartTime?: number,
 }
 
 export type CitizenStateMarketQueue = {
+    itemName: string,
+    itemAmount?: number,
     market: BuildingMarket,
+    stepState?: string,
+    stepStartTime?: number,
 }
 
 export const CITIZEN_STATE_GET_ITEM = "GetItem";
 export const CITIZEN_STATE_GET_ITEM_FROM_BUILDING = "GetItemFromBuilding";
 export const CITIZEN_STATE_BUY_ITEM_FROM_MARKET = "BuyItemFromMarket";
 export const CITIZEN_STATE_ENTER_MARKET_QUEUE = "EnterMarketQueue";
+export const CITIZEN_STATE_MARKET_TRADE_INTERACTION = "MarketTradeInteraction";
 export const CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING = "TransportItemToBuilding";
 
 export function onLoadCitizenStateDefaultTickGetItemFuntions() {
@@ -40,6 +46,7 @@ export function onLoadCitizenStateDefaultTickGetItemFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUY_ITEM_FROM_MARKET] = tickCitizenStateBuyItemFromMarket;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_ENTER_MARKET_QUEUE] = tickCitizenStateEnterMarketQueue;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING] = tickCitizenStateTransportItemToBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_TRADE_INTERACTION] = tickCitizenStateMarketTradeInteraction;
 }
 
 export function setCitizenStateGetItem(citizen: Citizen, itemName: string, itemAmount: number, ignoreReserved: boolean = false, ignoreHome: boolean = false) {
@@ -62,9 +69,17 @@ export function setCitizenStateTransportItemToBuilding(citizen: Citizen, buildin
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING, data: data });
 }
 
-export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: BuildingMarket) {
-    const data: CitizenStateMarketQueue = { market: market };
+export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: BuildingMarket, itemName: string, itemAmount: number | undefined = undefined) {
+    const data: CitizenStateMarketQueue = { market: market, itemName: itemName, itemAmount: itemAmount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_ENTER_MARKET_QUEUE, data: data });
+}
+
+export function setCitizenStateMarketTradeInteraction(citizen: Citizen, market: BuildingMarket, itemName: string, itemAmount: number | undefined = undefined): boolean {
+    const canServe = marketServeCustomer(market, citizen);
+    if (!canServe) return false;
+    const data: CitizenStateMarketQueue = { market: market, itemName: itemName, itemAmount: itemAmount };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_INTERACTION, data: data });
+    return true;
 }
 
 function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState) {
@@ -72,13 +87,58 @@ function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState)
         const citizenStateMarket = citizen.stateInfo.stack[0].data as CitizenStateMarketQueue;
         const queuePosition = marketGetQueuePosition(citizen, citizenStateMarket.market);
         const mapPosition = marketGetQueueMapPosition(citizen, citizenStateMarket.market);
-        if (queuePosition === 0 && isCitizenInInteractDistance(citizen, mapPosition)) {
-            citizenStateStackTaskSuccess(citizen);
-            if (citizenStateMarket.market.queue) {
-                citizenStateMarket.market.queue.shift();
+        if (queuePosition === 0 && isCitizenAtPosition(citizen, mapPosition)) {
+            if (marketCanServeCustomer(citizenStateMarket.market, citizen)) {
+                citizenStateStackTaskSuccess(citizen);
+                citizenStateMarket.market.queue?.shift();
+                return;
             }
         } else {
             citizen.moveTo = mapPosition;
+        }
+    }
+}
+
+function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSimState) {
+    if (citizen.moveTo === undefined) {
+        const data = citizen.stateInfo.stack[0].data as CitizenStateMarketQueue;
+        if (data.market.deterioration >= 1) {
+            citizenStateStackTaskSuccess(citizen);
+            return;
+        }
+        if (isCitizenInInteractionDistance(citizen, data.market.position)) {
+            if (data.market.inhabitedBy && isCitizenAtPosition(data.market.inhabitedBy, data.market.position)) {
+                if (data.stepStartTime !== undefined && data.stepStartTime + 2000 > state.time) return;
+                if (data.stepState === undefined) {
+                    data.stepState = "speech1";
+                    data.stepStartTime = state.time;
+                    const chat = createEmptyChat();
+                    addChatMessage(chat, citizen, `I want to buy ${data.itemAmount}x${INVENTORY_MUSHROOM}`, state);
+                    data.market.inhabitedBy.lastChat = chat;
+                } else if (data.stepState === "speech1") {
+                    const chat = data.market.inhabitedBy.lastChat!;
+                    data.stepState = "speech2";
+                    data.stepStartTime = state.time;
+                    addChatMessage(chat, data.market.inhabitedBy, `${data.itemAmount}x${INVENTORY_MUSHROOM} cost $${2 * data.itemAmount!}.`, state);
+                } else if (data.stepState === "speech2") {
+                    const chat = data.market.inhabitedBy.lastChat!;
+                    const finalAmount = buyItemFromMarket(data.market as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
+                    if (finalAmount !== undefined && finalAmount !== 0) {
+                        addChatMessage(chat, citizen, `Thank you!`, state);
+                    } else {
+                        addChatMessage(chat, citizen, `No!`, state);
+                    }
+                    citizenStateStackTaskSuccess(citizen);
+                }
+            } else {
+                citizenStateStackTaskSuccess(citizen);
+                return;
+            }
+        } else {
+            citizen.moveTo = {
+                x: data.market.position.x,
+                y: data.market.position.y,
+            }
         }
     }
 }
@@ -90,20 +150,24 @@ function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (isCitizenInInteractDistance(citizen, data.building.position)) {
-            if (data.building.inhabitedBy && isCitizenInInteractDistance(citizen, data.building.inhabitedBy.position)) {
-                if (data.stepState === undefined) {
-                    data.stepState = "queuing";
-                    setCitizenStateEnterMarketQueue(citizen, data.building as BuildingMarket);
-                    return;
-                } else {
-                    const finalAmount = buyItemFromMarket(data.building as BuildingMarket, citizen, data.itemName, state, data.itemAmount);
-                    if (finalAmount !== undefined && finalAmount > 0) {
-                        const chat = createEmptyChat();
-                        addChatMessage(chat, data.building.inhabitedBy, `I want to buy ${data.itemAmount}x${INVENTORY_MUSHROOM}`, state);
-                        addChatMessage(chat, citizen, `I would sell ${finalAmount}x${INVENTORY_MUSHROOM} for $${2 * finalAmount}`, state);
-                        addChatMessage(chat, data.building.inhabitedBy, `Yes please!`, state);
-                        data.building.inhabitedBy.lastChat = chat;
+        if (data.stepState === "startedTrade") {
+            citizenStateStackTaskSuccess(citizen);
+            return;
+        }
+        if (isCitizenInInteractionDistance(citizen, data.building.position)) {
+            if (data.building.inhabitedBy && isCitizenAtPosition(data.building.inhabitedBy, data.building.position)) {
+                if (data.building.inhabitedBy.stateInfo.stack.length > 0) {
+                    const market = data.building as BuildingMarket;
+                    const marketState: JobMarketState = data.building.inhabitedBy.stateInfo.stack[0].state as JobMarketState;
+                    if (data.stepState !== "joinedQueue" && ((market.queue && market.queue.length > 0) || marketState !== "waitingForCustomers")) {
+                        data.stepState = "joinedQueue";
+                        addCitizenThought(citizen, `I have to join the queue.`, state);
+                        setCitizenStateEnterMarketQueue(citizen, data.building as BuildingMarket, data.itemName, data.itemAmount);
+                        return;
+                    } else {
+                        data.stepState = "startedTrade";
+                        setCitizenStateMarketTradeInteraction(citizen, data.building as BuildingMarket, data.itemName, data.itemAmount);
+                        return;
                     }
                 }
             }
@@ -111,8 +175,8 @@ function tickCitizenStateBuyItemFromMarket(citizen: Citizen, state: ChatSimState
             return;
         } else {
             citizen.moveTo = {
-                x: data.building.position.x,
-                y: data.building.position.y,
+                x: data.building.position.x + 20,
+                y: data.building.position.y + 17,
             }
         }
     }
@@ -125,7 +189,7 @@ function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSi
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (isCitizenInInteractDistance(citizen, data.building.position)) {
+        if (isCitizenAtPosition(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, citizen.inventory, data.building.inventory, data.itemAmount);
             citizenStateStackTaskSuccess(citizen);
             return;
@@ -145,7 +209,7 @@ function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimSta
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (isCitizenInInteractDistance(citizen, data.building.position)) {
+        if (isCitizenAtPosition(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, data.building.inventory, citizen.inventory, data.itemAmount);
             citizenStateStackTaskSuccess(citizen);
             return;
@@ -219,7 +283,7 @@ function findClosestOpenMarketWhichSellsItem(citizen: Citizen, itemName: string,
         if (building.inhabitedBy === undefined) continue;
         const inventory = building.inventory.items.find(i => i.name === itemName);
         if (!inventory || inventory.counter === 0) continue;
-        if (!isCitizenInInteractDistance(building.inhabitedBy, building.position)) continue;
+        if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
         if (!closest) {
             closest = building;
             closestDistance = calculateDistance(building.position, citizen.position);

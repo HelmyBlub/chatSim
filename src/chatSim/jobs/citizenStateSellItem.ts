@@ -5,7 +5,7 @@ import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } fr
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenInInteractDistance } from "./job.js";
+import { isCitizenAtPosition } from "./job.js";
 import { sellItemToMarket } from "./jobMarket.js";
 
 export type CitizenStateSellItemData = {
@@ -50,8 +50,8 @@ function tickCitizenStateSellItemToMarket(citizen: Citizen, state: ChatSimState)
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (isCitizenInInteractDistance(citizen, data.market.position)) {
-            if (data.market.inhabitedBy && isCitizenInInteractDistance(citizen, data.market.inhabitedBy.position)) {
+        if (isCitizenAtPosition(citizen, data.market.position)) {
+            if (data.market.inhabitedBy && isCitizenAtPosition(citizen, data.market.inhabitedBy.position)) {
                 const finalAmount = sellItemToMarket(data.market, citizen, data.itemName, state, data.itemAmount);
                 if (finalAmount !== undefined && finalAmount > 0) {
                     const chat = createEmptyChat();
@@ -105,7 +105,7 @@ function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, 
         if (building.inhabitedBy === undefined) continue;
         if (building.inhabitedBy.money <= 0) continue;
         if (inventoryGetAvaiableCapacity(building.inventory, itemName) <= 0) continue;
-        if (!isCitizenInInteractDistance(building.inhabitedBy, building.position)) continue;
+        if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
         if (!closest) {
             closest = market;
             closestDistance = calculateDistance(building.position, citizen.position);
