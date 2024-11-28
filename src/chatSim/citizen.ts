@@ -9,7 +9,7 @@ import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory } from "./inventory.js";
 import { CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
-import { calculateDirection, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
+import { calculateDirection, INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } from "./main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenTool, paintCitizenTool } from "./paintCitizenTool.js";
 import { Tree } from "./tree.js";
@@ -32,6 +32,8 @@ export type CitizenNeeds = {
 
 export type Citizen = {
     job: CitizenJob,
+    goToBedTime: number;
+    sleepDuration: number;
     birthTime: number,
     name: string,
     stateInfo: CitizenStateInfo,
@@ -72,8 +74,10 @@ export function addCitizen(user: string, state: ChatSimState) {
 }
 
 export function createDefaultCitizen(citizenName: string, state: ChatSimState): Citizen {
-    const citizen = {
+    const citizen: Citizen = {
         name: citizenName,
+        goToBedTime: (0.9 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1)) % 1,
+        sleepDuration: 0.36 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1),
         birthTime: state.time,
         speed: 2,
         foodPerCent: 1,

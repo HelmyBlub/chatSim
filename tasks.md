@@ -1,4 +1,5 @@
 Tasks:
+- randomize citizen wake and sleep time
 - speech interaction
     - as it involves two citizens, current code does not handle it correctly and just pretends => bad
     - think about code sturcture for interaction between two citizens

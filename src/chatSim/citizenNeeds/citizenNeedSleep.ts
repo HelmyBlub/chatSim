@@ -39,7 +39,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     }
 
     if (citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
-        const sleepDuration = 0.36;
+        const sleepDuration = citizen.sleepDuration;
         let sleepRegenerationFactor = 1;
         if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
             sleepRegenerationFactor *= 1.2;
@@ -63,11 +63,12 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     }
 
     const time = getTimeOfDay(state.time, state);
-    const goToBedTime = 0.9;
-    const sleepDuration = 0.33;
+    const goToBedTime = citizen.goToBedTime;
+    const sleepDuration = citizen.sleepDuration;
     const wakeUpTime = (goToBedTime + sleepDuration) % 1;
-    if (time > goToBedTime || time < wakeUpTime) {
-        sleep(citizen, [`It is dark outside and i want to sleep`], state);
+    if ((goToBedTime > wakeUpTime && (time > goToBedTime || time < wakeUpTime))
+        || (goToBedTime < wakeUpTime && (time > goToBedTime && time < wakeUpTime))) {
+        sleep(citizen, [`I am tired and i want to sleep`], state);
         return false;
     }
     return true;
