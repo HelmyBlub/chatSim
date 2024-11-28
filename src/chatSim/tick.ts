@@ -5,6 +5,7 @@ import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./jobs/cit
 import { onLoadCitizenStateDefaultTickGatherWoodFuntions } from "./jobs/citizenStateGatherWood.js";
 import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./jobs/citizenStateGetBuilding.js";
 import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./jobs/citizenStateGetItem.js";
+import { onLoadCitizenStateDefaultTickMarketFuntions } from "./jobs/citizenStateMarket.js";
 import { onLoadCitizenStateDefaultTickSellItemFuntions } from "./jobs/citizenStateSellItem.js";
 import { tickChatSimMap } from "./map.js";
 
@@ -17,6 +18,7 @@ export function onLoadCitizenStateDefaultTickFuntions() {
     onLoadCitizenStateDefaultTickSellItemFuntions();
     onLoadCitizenStateDefaultTickGatherMushroomsFuntions();
     onLoadCitizenStateDefaultTickGatherWoodFuntions();
+    onLoadCitizenStateDefaultTickMarketFuntions();
 }
 
 export function chatSimTick(state: ChatSimState) {
