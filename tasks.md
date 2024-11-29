@@ -1,9 +1,7 @@
 Tasks:
 - more images+animations
-    - visualize citizen transporting wood planks
-    - hammer for building/repairing
-        - repairing should take time
     - sleeping dog image
+    - repairing should take time
     - eating animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
@@ -42,6 +40,8 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- visualize citizen transporting wood planks
+- hammer for building/repairing
 - death image
     - disappear after time
     - on select display death reason

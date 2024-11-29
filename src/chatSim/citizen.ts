@@ -1,4 +1,4 @@
-import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_SLEEPING } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
@@ -268,11 +268,19 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
                 CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
             );
         } else {
-            ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN], 200, 0, 200, 200,
-                paintPos.x - CITIZEN_PAINT_SIZE / 2,
-                paintPos.y - CITIZEN_PAINT_SIZE / 2,
-                CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
-            );
+            if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
+                ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN_SLEEPING], 0, 0, 200, 200,
+                    paintPos.x - CITIZEN_PAINT_SIZE / 2,
+                    paintPos.y - CITIZEN_PAINT_SIZE / 2,
+                    CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+                );
+            } else {
+                ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN], 200, 0, 200, 200,
+                    paintPos.x - CITIZEN_PAINT_SIZE / 2,
+                    paintPos.y - CITIZEN_PAINT_SIZE / 2,
+                    CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+                );
+            }
         }
         paintCitizenEquipments(ctx, citizen, state);
     }
