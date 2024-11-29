@@ -3,7 +3,7 @@ Tasks:
     - market queue & speech works for buying
         - not yet totally happy with code structure
     - make speech work for selling
-    - think about code imrpovements
+    - think about code improvements
     - bug: long queue citizen moves to front and back again
     - change: speech bubbles in front of thought bubbles?
         - if customer thinks and talks at the same time, paint them separated?

@@ -4,7 +4,7 @@ import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { INVENTORY_MUSHROOM, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenAtPosition } from "./job.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
 

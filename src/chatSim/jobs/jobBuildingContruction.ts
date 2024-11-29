@@ -2,13 +2,11 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingType } from "../building.js";
 import { Citizen } from "../citizen.js";
 import { CitizenJob } from "./job.js";
-import { mapPositionToPaintPosition } from "../paint.js";
-import { IMAGE_PATH_HELMET } from "../../drawHelper.js";
-import { setCitizenStateBuildBuilding } from "./citizenStateGetBuilding.js";
 import { INVENTORY_WOOD, nextRandom } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
-import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { setCitizenStateBuildBuilding } from "../citizenState/citizenStateGetBuilding.js";
+import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 
 type JobContructionStateInfo = {
 }

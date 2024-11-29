@@ -9,7 +9,7 @@ import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
 import { calculateDistance } from "../main.js";
 import { Inventory, inventoryGetAvaiableCapacity } from "../inventory.js";
-import { findBuilding } from "./citizenStateGetBuilding.js";
+import { findBuilding } from "../citizenState/citizenStateGetBuilding.js";
 
 export type CitizenJob = {
     name: string,

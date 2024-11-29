@@ -1,13 +1,13 @@
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen, tickCitizens } from "./citizen.js";
 import { moveMapCameraBy } from "./input.js";
-import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./jobs/citizenStateGatherMushroom.js";
-import { onLoadCitizenStateDefaultTickGatherWoodFuntions } from "./jobs/citizenStateGatherWood.js";
-import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./jobs/citizenStateGetBuilding.js";
-import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./jobs/citizenStateGetItem.js";
-import { onLoadCitizenStateDefaultTickMarketFuntions } from "./jobs/citizenStateMarket.js";
-import { onLoadCitizenStateDefaultTickSellItemFuntions } from "./jobs/citizenStateSellItem.js";
+import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./citizenState/citizenStateGatherMushroom.js";
+import { onLoadCitizenStateDefaultTickGatherWoodFuntions } from "./citizenState/citizenStateGatherWood.js";
+import { onLoadCitizenStateDefaultTickMarketFuntions } from "./citizenState/citizenStateMarket.js";
+import { onLoadCitizenStateDefaultTickSellItemFuntions } from "./citizenState/citizenStateSellItem.js";
 import { tickChatSimMap } from "./map.js";
+import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./citizenState/citizenStateGetBuilding.js";
+import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./citizenState/citizenStateGetItem.js";
 
 export const CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
 };

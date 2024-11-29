@@ -4,10 +4,10 @@ import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
+import { setCitizenStateGatherMushroom } from "../citizenState/citizenStateGatherMushroom.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { setCitizenStateTransportItemToBuilding } from "./citizenStateGetItem.js";
-import { setCitizenStateSellItem } from "./citizenStateSellItem.js";
+import { setCitizenStateSellItem } from "../citizenState/citizenStateSellItem.js";
+import { setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
 
 
 export type CitizenJobFoodGatherer = CitizenJob & {

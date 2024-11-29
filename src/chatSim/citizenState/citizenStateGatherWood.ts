@@ -5,7 +5,7 @@ import { INVENTORY_WOOD, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
-import { isCitizenAtPosition } from "./job.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {

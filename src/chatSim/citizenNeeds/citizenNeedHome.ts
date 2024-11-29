@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
-import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../jobs/citizenStateGetBuilding.js";
+import { addCitizenThought, Citizen, citizenResetStateTo } from "../citizen.js";
+import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
 export const CITIZEN_NEED_HOME = "need home";

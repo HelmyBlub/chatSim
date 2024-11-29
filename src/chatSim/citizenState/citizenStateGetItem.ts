@@ -6,8 +6,8 @@ import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.j
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
 import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
-import { isCitizenAtPosition } from "./job.js";
 import { setCitizenStateBuyItemFromMarket } from "./citizenStateMarket.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 
 export type CitizenStateGetItemData = {
     name: string,

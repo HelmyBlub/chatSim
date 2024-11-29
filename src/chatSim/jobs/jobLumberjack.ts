@@ -3,14 +3,12 @@ import { Citizen, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../main.js";
-import { mapPositionToPaintPosition } from "../paint.js";
-import { IMAGE_PATH_AXE } from "../../drawHelper.js";
 import { Tree } from "../tree.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
-import { setCitizenStateTransportItemToBuilding } from "./citizenStateGetItem.js";
-import { setCitizenStateSellItem } from "./citizenStateSellItem.js";
+import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
+import { setCitizenStateSellItem } from "../citizenState/citizenStateSellItem.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     actionEndTime?: number,

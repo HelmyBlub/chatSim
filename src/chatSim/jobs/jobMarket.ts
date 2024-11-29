@@ -1,18 +1,15 @@
-import { IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../../drawHelper.js";
-import { ChatSimState, Position } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
 import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
-import { IMAGES } from "../images.js";
 import { inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { getDay, INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } from "../main.js";
-import { mapPositionToPaintPosition } from "../paint.js";
+import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "./citizenStateGetBuilding.js";
-import { setCitizenStateGetItemFromBuilding } from "./citizenStateGetItem.js";
 import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance, sellItemWithInventories } from "./job.js"
 import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";
+import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
+import { setCitizenStateGetItemFromBuilding } from "../citizenState/citizenStateGetItem.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,

@@ -5,8 +5,8 @@ import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } fr
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenAtPosition } from "./job.js";
-import { sellItemToMarket } from "./jobMarket.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
+import { sellItemToMarket } from "../jobs/jobMarket.js";
 
 export type CitizenStateSellItemData = {
     name: string,

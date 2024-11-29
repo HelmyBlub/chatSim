@@ -6,8 +6,8 @@ import { INVENTORY_WOOD } from "../main.js";
 import { createBuildingOnRandomTile } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
-import { isCitizenAtPosition } from "./job.js";
-import { BUILDING_DATA } from "./jobBuildingContruction.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
+import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 
 export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
 export const CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS = "GetBuildingCheckRequirements";

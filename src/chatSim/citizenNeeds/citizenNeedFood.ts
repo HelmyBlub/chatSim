@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought, addCitizenThought, citizenResetStateTo } from "../citizen.js";
+import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { InventoryItem } from "../inventory.js";
-import { setCitizenStateGetItem, setCitizenStateTransportItemToBuilding } from "../jobs/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";

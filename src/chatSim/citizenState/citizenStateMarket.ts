@@ -4,8 +4,8 @@ import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { CitizenStateItemAndBuildingData, CitizenStateMarketQueue } from "./citizenStateGetItem.js";
-import { isCitizenAtPosition, isCitizenInInteractionDistance } from "./job.js";
-import { JobMarketState, marketCanServeCustomer, marketServeCustomer } from "./jobMarket.js";
+import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
+import { JobMarketState, marketCanServeCustomer, marketServeCustomer } from "../jobs/jobMarket.js";
 
 export const CITIZEN_STATE_BUY_ITEM_FROM_MARKET = "BuyItemFromMarket";
 export const CITIZEN_STATE_ENTER_MARKET_QUEUE = "EnterMarketQueue";
