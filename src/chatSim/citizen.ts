@@ -221,10 +221,23 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
     for (let citizen of sortedForPaintCitizens) {
         paintCitizen(ctx, citizen, layer, paintDataMap, nameFontSize, nameLineWidth, state);
     }
-    if (state.inputData.selected && state.inputData.selected.type === "citizen") {
-        const citizen = state.inputData.selected.object as Citizen;
-        paintCitizen(ctx, citizen, layer, paintDataMap, nameFontSize, nameLineWidth, state);
+}
+
+export function paintCititzenSpeechBubbles(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    let sortedForPaintCitizens = state.map.citizens.toSorted((a, b) => a.position.y - b.position.y);
+    for (let citizen of sortedForPaintCitizens) {
+        const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+        paintChatBubbles(ctx, citizen, citizen.lastChat, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 4 }, state);
     }
+}
+
+export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
+    let nameFontSize = 16 / state.paintData.map.zoom;
+    let nameLineWidth = 2 / state.paintData.map.zoom;
+    paintCitizen(ctx, citizen, PAINT_LAYER_CITIZEN_BEFORE_HOUSES, state.paintData.map, nameFontSize, nameLineWidth, state);
+    paintCitizen(ctx, citizen, PAINT_LAYER_CITIZEN_AFTER_HOUSES, state.paintData.map, nameFontSize, nameLineWidth, state);
+    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+    paintChatBubbles(ctx, citizen, citizen.lastChat, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 4 }, state);
 }
 
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
@@ -256,7 +269,6 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
     if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES) {
         paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
         paintThoughtBubble(ctx, citizen, paintPos, state);
-        paintChatBubbles(ctx, citizen, citizen.lastChat, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 4 }, state);
 
         ctx.font = `${nameFontSize}px Arial`;
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);

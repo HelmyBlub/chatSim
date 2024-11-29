@@ -2,7 +2,7 @@ import { IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { ChatSimState, Mushroom, Position } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
 import { Building, paintBuildings } from "./building.js";
-import { Citizen, paintCitizens, paintSelectionBox } from "./citizen.js";
+import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { IMAGES } from "./images.js";
 import { getTimeOfDay, getTimeOfDayString, INVENTORY_MUSHROOM } from "./main.js";
@@ -122,6 +122,12 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     paintBuildings(ctx, state);
     paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
+    paintCititzenSpeechBubbles(ctx, state);
+    if (state.inputData.selected && state.inputData.selected.type === "citizen") {
+        const citizen = state.inputData.selected.object as Citizen;
+        paintCitizenComplete(ctx, citizen, state);
+    }
+
     ctx.restore();
 
     //paint night darkness

@@ -1,4 +1,3 @@
-import { createBuilding } from "../building.js";
 import { App, ChatSimState, Logger } from "../chatSimModels.js";
 import { Citizen, createDefaultCitizen } from "../citizen.js";
 import { CITIZEN_NEED_FOOD_AT_HOME, CITIZEN_NEED_FOOD_IN_INVENTORY } from "../citizenNeeds/citizenNeedFood.js";
@@ -132,7 +131,7 @@ function testMarketQueue(): Test {
             marketBuilding.buildProgress = undefined;
             marketBuilding.inhabitedBy = marketOwner;
             marketBuilding.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 30 });
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 const citizen = createDefaultCitizen("testBuyingCustomer" + i, state);
                 if (i % 3 === 0) citizen.energyPerCent = 0.94;
                 citizen.foodPerCent = 0.87;
