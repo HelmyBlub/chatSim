@@ -1,6 +1,5 @@
 Tasks:
 - more images+animations
-    - buildings in poor conditions
     - visualize citizen transporting wood planks
     - sleeping dog image
     - eating animation

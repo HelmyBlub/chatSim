@@ -93,6 +93,7 @@ export function removeBuildingFromMap(building: Building, map: ChatSimMap) {
     const houseIndex = map.buildings.findIndex(h => h === building);
     if (houseIndex === -1) return;
     map.buildings.splice(houseIndex, 1);
+    building.deletedFromMap = true;
     const usedTile = map.usedTiles.splice(usedTileIndex, 1)[0];
     map.emptyTiles.push({
         tileX: usedTile.position.tileX,

@@ -238,7 +238,13 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
     if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
         const jobMarket = job as CitizenJobMarket;
         const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
+
         if (!job.marketBuilding) {
+            citizenStateStackTaskSuccess(citizen);
+            return;
+        }
+        if (job.marketBuilding.deletedFromMap) {
+            job.marketBuilding = undefined;
             citizenStateStackTaskSuccess(citizen);
             return;
         }

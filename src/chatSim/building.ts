@@ -3,7 +3,7 @@ import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
 import { IMAGES } from "./images.js";
 import { Inventory } from "./inventory.js";
-import { isCitizenAtPosition, isCitizenInInteractionDistance } from "./jobs/job.js";
+import { isCitizenInInteractionDistance } from "./jobs/job.js";
 import { BUILDING_DATA } from "./jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { removeBuildingFromMap } from "./map.js";
@@ -18,6 +18,8 @@ export type Building = {
     buildProgress?: number
     deterioration: number
     inventory: Inventory
+    brokeDownTime?: number,
+    deletedFromMap?: boolean,
 }
 
 export type BuildingMarket = Building & {
@@ -112,6 +114,12 @@ export function tickBuildings(state: ChatSimState) {
             building.deterioration += 0.00005;
             if (building.deterioration >= 1) {
                 building.inventory.items = [];
+                building.brokeDownTime = state.time;
+            }
+        } else if (building.brokeDownTime !== undefined) {
+            const breakDownTime = BUILDING_DATA[building.type].woodAmount * 60000;
+            if (building.brokeDownTime + breakDownTime < state.time) {
+                removeBuildingFromMap(building, state.map);
             }
         }
     }

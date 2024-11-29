@@ -36,6 +36,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.home && citizen.home.deterioration > 0.2) {
         if (citizen.stateInfo.type !== CITIZEN_NEED_HOME || citizen.stateInfo.stack.length === 0) {
             if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) citizenResetStateTo(citizen, CITIZEN_NEED_HOME);
+            if (citizen.home.deletedFromMap) {
+                citizen.home = undefined;
+                return;
+            }
+
             addCitizenThought(citizen, `I need to repair my home.`, state);
             setCitizenStateRepairBuilding(citizen, citizen.home);
         }

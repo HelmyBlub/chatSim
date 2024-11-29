@@ -49,7 +49,10 @@ export function findBuilding(citizen: Citizen, buildingType: BuildingType, state
 function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const building = citizenState.data as Building;
-
+    if (building.deletedFromMap) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
     if (building.deterioration < 1 / BUILDING_DATA[building.type].woodAmount) {
         citizenStateStackTaskSuccess(citizen);
         return;
@@ -62,6 +65,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
         if (inventoryWood && inventoryWood.counter > 0) {
             if (isCitizenAtPosition(citizen, building.position)) {
                 building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
+                building.brokeDownTime = undefined;
                 inventoryWood.counter--;
                 addCitizenThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
             } else {
@@ -123,6 +127,11 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const building = citizen.stateInfo.stack[0].data as Building;
         if (isCitizenAtPosition(citizen, building.position)) {
+            if (building.deletedFromMap) {
+                citizenStateStackTaskSuccess(citizen);
+                return;
+            }
+
             if (building.buildProgress === undefined) {
                 citizenStateStackTaskSuccess(citizen);
                 return;
