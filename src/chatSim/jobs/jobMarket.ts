@@ -35,38 +35,6 @@ const STRING_TO_STATE_MAPPING: { [key: string]: (citizen: Citizen, job: CitizenJ
     "servingCustomer": stateServingCustomer,
 };
 
-const DISPLAY_ITEM_PAINT_DATA: { [key: string]: { size: number, path: string, max: number, offset: Position, offsetPerItem: Position } } = {
-};
-
-export function onLoadDisplayItemPaintData() {
-    DISPLAY_ITEM_PAINT_DATA[INVENTORY_MUSHROOM] = {
-        size: 14,
-        max: 13,
-        path: IMAGE_PATH_MUSHROOM,
-        offset: {
-            x: - 38,
-            y: -2,
-        },
-        offsetPerItem: {
-            x: 5,
-            y: 0
-        }
-    };
-    DISPLAY_ITEM_PAINT_DATA[INVENTORY_WOOD] = {
-        size: 30,
-        max: 10,
-        path: IMAGE_PATH_WOOD_PLANK,
-        offset: {
-            x: - 38,
-            y: -2,
-        },
-        offsetPerItem: {
-            x: 0,
-            y: -2,
-        }
-    }
-}
-
 export function marketServeCustomer(market: BuildingMarket, customer: Citizen): boolean {
     if (!market.inhabitedBy) return false;
     const canServe = marketCanServeCustomer(market, customer);
@@ -108,25 +76,6 @@ export function createJobMarket(state: ChatSimState, jobname: string, sellItemNa
         customerCounter: [0],
         currentDayCounter: getDay(state),
         maxCounterDays: 3,
-    }
-}
-
-export function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, citizen: Citizen, job: CitizenJobMarket, state: ChatSimState) {
-    if (!job.marketBuilding) return;
-    const market = job.marketBuilding as BuildingMarket;
-    if (!market.displayedItem) return;
-    const data = DISPLAY_ITEM_PAINT_DATA[market.displayedItem];
-
-    const paintPos = mapPositionToPaintPosition(job.marketBuilding.position, state.paintData.map);
-    const item = job.marketBuilding.inventory.items.find(i => i.name === market.displayedItem);
-    if (!item || item.counter === 0) return;
-    const image = IMAGES[data.path];
-    for (let i = 0; i < Math.min(data.max, item.counter); i++) {
-        ctx.drawImage(image, 0, 0, image.width, image.height,
-            paintPos.x + i * data.offsetPerItem.x + data.offset.x,
-            paintPos.y + i * data.offsetPerItem.y + data.offset.y,
-            data.size, data.size
-        );
     }
 }
 

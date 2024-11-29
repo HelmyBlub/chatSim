@@ -1,10 +1,10 @@
+import { onLoadDisplayItemPaintData } from "./building.js";
 import { Position, ChatSimState, App, RandomSeed } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
-import { onLoadDisplayItemPaintData } from "./jobs/jobMarket.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
 import { testRunner } from "./test/test.js";

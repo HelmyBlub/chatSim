@@ -58,7 +58,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         }
         if (citizen.log.length > 0) {
             ctx.fillText(`    Action Log:`, offsetX, offsetY + lineSpacing * lineCounter++);
-            for (let i = 0; i < Math.min(5, citizen.log.length); i++) {
+            for (let i = 0; i < Math.min(14, citizen.log.length); i++) {
                 const logEntry = citizen.log[i];
                 const time = getTimeOfDayString(logEntry.time, state);
                 ctx.fillText(`        ${time}, ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
