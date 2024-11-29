@@ -52,10 +52,6 @@ export function setCitizenStateTransportItemToBuilding(citizen: Citizen, buildin
 function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
-        if (data.building.deterioration >= 1) {
-            citizenStateStackTaskSuccess(citizen);
-            return;
-        }
         if (isCitizenAtPosition(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, citizen.inventory, data.building.inventory, data.itemAmount);
             citizenStateStackTaskSuccess(citizen);
@@ -72,10 +68,6 @@ function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSi
 function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
-        if (data.building.deterioration >= 1) {
-            citizenStateStackTaskSuccess(citizen);
-            return;
-        }
         if (isCitizenAtPosition(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, data.building.inventory, citizen.inventory, data.itemAmount);
             citizenStateStackTaskSuccess(citizen);
@@ -146,6 +138,7 @@ function findClosestOpenMarketWhichSellsItem(citizen: Citizen, itemName: string,
     let closest = undefined;
     let closestDistance: number = -1;
     for (let building of state.map.buildings) {
+        if (building.deterioration >= 1) continue;
         if (building.type !== "Market") continue;
         if (building.inhabitedBy === undefined) continue;
         const inventory = building.inventory.items.find(i => i.name === itemName);

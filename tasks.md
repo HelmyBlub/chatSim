@@ -1,15 +1,12 @@
 Tasks:
 - more images+animations
-    - death animation
-        - fall and disappear after time
-        - on select display death reason
-    - don't move directly to the middle
-        - lumberjack walks besides tree, (left and right)
-            - can not be more than two people cutting?
     - buildings in poor conditions
     - visualize citizen transporting wood planks
     - sleeping dog image
     - eating animation
+    - don't move directly to the middle
+        - lumberjack walks besides tree, (left and right)
+            - can not be more than two people cutting?
     - trading animation
 
 - selecting click should select closest not first
@@ -37,6 +34,9 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- death image
+    - disappear after time
+    - on select display death reason
 - speech interaction
     - make speech work for selling
 - more action log displays

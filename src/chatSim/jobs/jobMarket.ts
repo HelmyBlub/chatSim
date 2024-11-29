@@ -248,6 +248,17 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {
                 market.displayedItem = jobMarket.sellItemNames[0];
             }
+            if (market.deterioration > 1 / BUILDING_DATA[market.type].woodAmount) {
+                if (market.deterioration > 1) {
+                    addCitizenThought(citizen, `My market broke down. I need to repair`, state);
+                    setCitizenStateRepairBuilding(citizen, market);
+                    return;
+                } else {
+                    addCitizenThought(citizen, `I need to repair my market.`, state);
+                    setCitizenStateRepairBuilding(citizen, market);
+                    return;
+                }
+            }
             for (let itemName of jobMarket.sellItemNames) {
                 let availableSpace = inventoryGetMissingReserved(job.marketBuilding.inventory, itemName);
                 if (availableSpace > 0) {
@@ -263,17 +274,6 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                             return;
                         }
                     }
-                }
-            }
-            if (market.deterioration > 1 / BUILDING_DATA[market.type].woodAmount) {
-                if (market.deterioration > 1) {
-                    jobMarket.marketBuilding = undefined;
-                    addCitizenThought(citizen, `My market broke down.`, state);
-                    citizenStateStackTaskSuccess(citizen);
-                } else {
-                    addCitizenThought(citizen, `I need to repair my market.`, state);
-                    setCitizenStateRepairBuilding(citizen, market);
-                    return;
                 }
             }
             stateInfo.state = "waitingForCustomers";

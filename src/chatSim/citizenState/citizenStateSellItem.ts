@@ -64,6 +64,7 @@ function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, 
     let closest = undefined;
     let closestDistance: number = -1;
     for (let building of state.map.buildings) {
+        if (building.deterioration >= 1) continue;
         if (building.type !== "Market") continue;
         const market = building as BuildingMarket;
         if (building.inhabitedBy === undefined) continue;

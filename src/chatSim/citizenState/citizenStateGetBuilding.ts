@@ -50,7 +50,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
     const citizenState = citizen.stateInfo.stack[0];
     const building = citizenState.data as Building;
 
-    if (building.deterioration < 1 / BUILDING_DATA[building.type].woodAmount || building.deterioration > 1) {
+    if (building.deterioration < 1 / BUILDING_DATA[building.type].woodAmount) {
         citizenStateStackTaskSuccess(citizen);
         return;
     }
@@ -72,7 +72,9 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                 return;
             }
         } else {
-            setCitizenStateGetItem(citizen, INVENTORY_WOOD, 1, true);
+            const totalWood = BUILDING_DATA[building.type].woodAmount;
+            const repairAmount = Math.floor(totalWood * building.deterioration);
+            setCitizenStateGetItem(citizen, INVENTORY_WOOD, repairAmount, true);
             return;
         }
     }
@@ -132,7 +134,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                 if (!buildingInventoryWood || buildingInventoryWood.counter < 1) {
                     const amountRequiredLeft = Math.floor(woodRequired * (1 - building.buildProgress));
                     const citizenInventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-                    if (citizenInventoryWood && citizenInventoryWood.counter > 1) {
+                    if (citizenInventoryWood && citizenInventoryWood.counter > 0) {
                         inventoryMoveItemBetween(INVENTORY_WOOD, citizen.inventory, building.inventory, amountRequiredLeft);
                         buildingInventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
                         if (!buildingInventoryWood) {
@@ -148,6 +150,8 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                 if (buildingInventoryWood.counter > 0) buildingInventoryWood.counter--;
             }
             building.buildProgress += progressPerTick;
+            building.deterioration -= progressPerTick;
+            if (building.deterioration < 0) building.deterioration = 0;
             if (building.buildProgress >= 1) {
                 addCitizenLogEntry(citizen, `building finished.`, state);
                 building.buildProgress = undefined;

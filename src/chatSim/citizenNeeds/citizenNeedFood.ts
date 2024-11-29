@@ -64,10 +64,6 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.home) {
             const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME) {
-                if (citizen.home.deterioration > 1) {
-                    citizen.home = undefined;
-                    return;
-                }
                 citizenResetStateTo(citizen, CITIZEN_NEED_FOOD);
                 addCitizenThought(citizen, `I have enough ${INVENTORY_MUSHROOM}. I will store them at home.`, state);
                 setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_MUSHROOM, CITIZEN_NEED_FOOD_AT_HOME);
