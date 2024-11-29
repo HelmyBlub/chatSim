@@ -8,7 +8,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
-import { citizenSetEquipment } from "../paintCitizenEquipment.js";
+import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 
 export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
 export const CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS = "GetBuildingCheckRequirements";
@@ -28,12 +28,12 @@ export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: Build
 
 export function setCitizenStateBuildBuilding(citizen: Citizen, building: Building) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building });
-    citizenSetEquipment(citizen, ["Helmet", "WoodPlanks"]);
+    citizenSetEquipment(citizen, ["Helmet", "WoodPlanks", "Hammer"]);
 }
 
 export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: building });
-    citizenSetEquipment(citizen, ["WoodPlanks"]);
+    citizenSetEquipment(citizen, ["WoodPlanks", "Hammer"]);
 }
 
 export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
@@ -60,6 +60,8 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
         return;
     }
     if (citizen.moveTo === undefined) {
+        const hammer = citizenGetEquipmentData(citizen, "Hammer")!;
+        hammer.data = true;
         let inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
         if (!inventoryWood || inventoryWood.counter <= 0) {
             inventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
@@ -80,6 +82,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
         } else {
             const totalWood = BUILDING_DATA[building.type].woodAmount;
             const repairAmount = Math.floor(totalWood * building.deterioration);
+            hammer.data = false;
             setCitizenStateGetItem(citizen, INVENTORY_WOOD, repairAmount, true);
             return;
         }
@@ -139,6 +142,8 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                 citizenStateStackTaskSuccess(citizen);
                 return;
             }
+            const hammer = citizenGetEquipmentData(citizen, "Hammer")!;
+            hammer.data = true;
             const woodRequired = BUILDING_DATA[building.type].woodAmount;
             const progressPerTick = 0.008 / woodRequired;
             if ((building.buildProgress * woodRequired) % 1 < progressPerTick * woodRequired) {
