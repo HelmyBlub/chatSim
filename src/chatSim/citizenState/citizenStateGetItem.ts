@@ -6,7 +6,7 @@ import { calculateDistance, INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../main.j
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
 import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
-import { setCitizenStateBuyItemFromMarket } from "./citizenStateMarket.js";
+import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 
 export type CitizenStateGetItemData = {
@@ -22,15 +22,6 @@ export type CitizenStateItemAndBuildingData = {
     building: Building,
     stepState?: string,
     stepStartTime?: number,
-}
-
-export type CitizenStateMarketQueue = {
-    itemName: string,
-    itemAmount?: number,
-    market: BuildingMarket,
-    stepState?: string,
-    stepStartTime?: number,
-    sell?: boolean,
 }
 
 export const CITIZEN_STATE_GET_ITEM = "GetItem";
@@ -134,7 +125,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
         const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state) as BuildingMarket;
         if (market) {
             addCitizenThought(citizen, `I will buy ${item.name} at ${market.inhabitedBy!.name}.`, state);
-            setCitizenStateBuyItemFromMarket(citizen, market, item.name, item.amount);
+            setCitizenStateTradeItemWithMarket(citizen, market, false, item.name, item.amount);
             return;
         }
     }

@@ -16,7 +16,7 @@ export const CHAT_MESSAGE_INTENTION_MARKET_TRADE = "MarketTrade";
 
 export type ChatMessageMarketTradeIntention = ChatMessageIntention & {
     intention: "initialGreeting" | "whatDoYouWant" | "tradeRequestData" | "priceResponse" | "accept" | "tradeCancelled" | "tradeFullfiled",
-    sell?: boolean,
+    sellToMarket?: boolean,
     itemName?: string,
     itemAmount?: number,
     singlePrice?: number,

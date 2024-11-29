@@ -132,12 +132,19 @@ function testMarketQueue(): Test {
             marketBuilding.buildProgress = undefined;
             marketBuilding.inhabitedBy = marketOwner;
             marketBuilding.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 30 });
-            for (let i = 0; i < 5; i++) {
-                const citizen = createDefaultCitizen("testCitizen" + i, state);
+            for (let i = 0; i < 3; i++) {
+                const citizen = createDefaultCitizen("testBuyingCustomer" + i, state);
                 if (i % 3 === 0) citizen.energyPerCent = 0.94;
                 citizen.foodPerCent = 0.87;
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
                 citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_IN_INVENTORY });
+                state.map.citizens.push(citizen);
+            }
+            for (let i = 0; i < 2; i++) {
+                const citizen = createCitizenWithFullfiledNeeds("testSellingCustomer", state);
+                const homeMushrooms = citizen.home!.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+                homeMushrooms!.counter = 50;
+                citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 8 });
                 state.map.citizens.push(citizen);
             }
             return state;

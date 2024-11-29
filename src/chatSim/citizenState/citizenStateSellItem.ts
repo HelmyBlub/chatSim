@@ -6,7 +6,7 @@ import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
-import { sellItemToMarket } from "../jobs/jobMarket.js";
+import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
 
 export type CitizenStateSellItemData = {
     name: string,
@@ -20,11 +20,9 @@ export type CitizenStateItemAndMarketData = {
 }
 
 export const CITIZEN_STATE_SELL_ITEM = "SellItem";
-export const CITIZEN_STATE_SELL_ITEM_TO_MARKET = "SellItemToMarket";
 
 export function onLoadCitizenStateDefaultTickSellItemFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SELL_ITEM] = tickCititzenStateSellItem;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SELL_ITEM_TO_MARKET] = tickCitizenStateSellItemToMarket;
 }
 
 export function setCitizenStateSellItem(citizen: Citizen, itemName: string, itemAmount: number | undefined = undefined) {
@@ -36,40 +34,6 @@ export function setCitizenStateSellItem(citizen: Citizen, itemName: string, item
     }
     const data: CitizenStateSellItemData = { name: itemName, amount: amount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SELL_ITEM, data: data });
-}
-
-function setCitizenStateSellItemToMarket(citizen: Citizen, itemName: string, itemAmount: number, market: BuildingMarket) {
-    const data: CitizenStateItemAndMarketData = { itemName: itemName, itemAmount: itemAmount, market: market };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SELL_ITEM_TO_MARKET, data: data });
-}
-
-function tickCitizenStateSellItemToMarket(citizen: Citizen, state: ChatSimState) {
-    if (citizen.moveTo === undefined) {
-        const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndMarketData;
-        if (data.market.deterioration >= 1) {
-            citizenStateStackTaskSuccess(citizen);
-            return;
-        }
-        if (isCitizenAtPosition(citizen, data.market.position)) {
-            if (data.market.inhabitedBy && isCitizenAtPosition(citizen, data.market.inhabitedBy.position)) {
-                const finalAmount = sellItemToMarket(data.market, citizen, data.itemName, state, data.itemAmount);
-                if (finalAmount !== undefined && finalAmount > 0) {
-                    const chat = createEmptyChat();
-                    addChatMessage(chat, data.market.inhabitedBy, `I want to sell ${data.itemAmount}x${data.itemName}`, state);
-                    addChatMessage(chat, citizen, `I would buy ${finalAmount}x${data.itemName} for $${finalAmount}`, state);
-                    addChatMessage(chat, data.market.inhabitedBy, `Yes please!`, state);
-                    data.market.inhabitedBy.lastChat = chat;
-                }
-            }
-            citizenStateStackTaskSuccess(citizen);
-            return;
-        } else {
-            citizen.moveTo = {
-                x: data.market.position.x,
-                y: data.market.position.y,
-            }
-        }
-    }
 }
 
 function tickCititzenStateSellItem(citizen: Citizen, state: ChatSimState) {
@@ -88,7 +52,7 @@ function tickCititzenStateSellItem(citizen: Citizen, state: ChatSimState) {
     }
     const market = findClosestOpenMarketWhichBuysItem(citizen, item.name, state);
     if (market) {
-        setCitizenStateSellItemToMarket(citizen, item.name, sellAmount, market);
+        setCitizenStateTradeItemWithMarket(citizen, market, true, item.name, item.amount);
         return;
     } else {
         citizenStateStackTaskFailed(citizen);

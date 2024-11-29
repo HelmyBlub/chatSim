@@ -166,7 +166,7 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
             addChatMessage(citizen.lastChat, citizen, `Hello. How can i help you?`, state, intention);
         }
         if (customerIntention.intention === "tradeRequestData") {
-            if (!customerIntention.sell) {
+            if (!customerIntention.sellToMarket) {
                 const inventoryItem = jobMarket.marketBuilding.inventory.items.find(i => i.name === customerIntention.itemName);
                 if (inventoryItem && inventoryItem.counter > 0) {
                     let amount = customerIntention.itemAmount;
@@ -189,6 +189,30 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
                     }
                     addChatMessage(citizen.lastChat, citizen, `I do not have stock left for ${customerIntention.itemName}.`, state, intention);
                 }
+            } else {
+                let amount = customerIntention.itemAmount;
+                const itemPrice = 1;
+                const moneyMaxAmount = Math.floor(citizen.money / itemPrice);
+                if (moneyMaxAmount === 0) {
+                    const intention: ChatMessageMarketTradeIntention = {
+                        type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                        intention: "tradeCancelled",
+                    }
+                    addChatMessage(citizen.lastChat, citizen, `I do not have money left to buy ${customerIntention.itemName}.`, state, intention);
+                    return;
+                }
+                if (!amount || amount > moneyMaxAmount) {
+                    amount = moneyMaxAmount;
+                }
+                const intention: ChatMessageMarketTradeIntention = {
+                    type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+                    intention: "priceResponse",
+                    singlePrice: itemPrice,
+                    itemName: customerIntention.itemName,
+                    itemAmount: amount,
+                    sellToMarket: customerIntention.sellToMarket,
+                }
+                addChatMessage(citizen.lastChat, citizen, `I can buy ${amount}x${intention.itemName} for $${amount * itemPrice}.`, state, intention);
             }
         }
         if (customerIntention.intention === "accept") {
@@ -196,7 +220,11 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
                 type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
                 intention: "tradeFullfiled",
             }
-            buyItemFromMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
+            if (customerIntention.sellToMarket) {
+                sellItemToMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
+            } else {
+                buyItemFromMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
+            }
             addChatMessage(citizen.lastChat, citizen, `Thanks for shopping!`, state, intention);
         }
     }
