@@ -40,6 +40,9 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (selected.type === "citizen") {
         const citizen: Citizen = selected.object;
         ctx.fillText(`Citizen: ${citizen.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizen.isDead) {
+            ctx.fillText(`    Death Reason: ${citizen.isDead.reason}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
         ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);

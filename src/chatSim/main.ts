@@ -120,7 +120,7 @@ function initMyApp() {
     const state = app.state;
     loadLocalStorageChatters(state);
     onLoadDisplayItemPaintData();
-    loadImages(state);
+    loadImages();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === state.streamer) {

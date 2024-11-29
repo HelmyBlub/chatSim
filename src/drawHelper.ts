@@ -2,6 +2,7 @@
 export const IMAGE_PATH_TREE = "images/tree.png";
 export const IMAGE_PATH_MUSHROOM = "images/mushroom.png";
 export const IMAGE_PATH_CITIZEN = "images/citizen.png";
+export const IMAGE_PATH_CITIZEN_DEAD = "images/citizenDead.png";
 export const IMAGE_PATH_CITIZEN_HOUSE = "images/citizenHouse.png";
 export const IMAGE_PATH_AXE = "images/axe.png";
 export const IMAGE_PATH_BASKET = "images/basket.png";

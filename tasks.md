@@ -1,22 +1,17 @@
 Tasks:
-- speech interaction
-    - think about code improvements
 - more images+animations
     - death animation
-        - dig grave
+        - fall and disappear after time
+        - on select display death reason
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
             - can not be more than two people cutting?
     - buildings in poor conditions
-    - think about: inventory consitency
-        - just switching jobs and the basket with mushrooms disapears. Should stay as long as mushrooms in inventory?
     - visualize citizen transporting wood planks
     - sleeping dog image
-    - death animation
-
-    - visaulize interactions between citizens better
-        - like a chat bubble when requesting to sell or buy
     - eating animation
+    - trading animation
+
 - selecting click should select closest not first
 - mushroom pickup behavior
     - vision radius different for night and day
@@ -57,18 +52,15 @@ Big Idea:
         - command "throw ball"
     - chatter are a type of input for a game i build
         - idea: chatSim
-            start steps/MVP:
-                - when new chatter writes something in chat -> add chatter as citizen to world
-                    - starts with no house/food, getInitial money.Total game money limited by this?
-                    - automatically search for starting job:
-                        - first two jobs are for food and wood
-                - automatically decides to get food if low on food
-                    - if market has food -> buy it with money
-                        - if no money and job-> steal food?
-                    - if no food and no job -> get job for creating food like farmer
-                - automatically decides to get house if no house
-                    - if no house to rent available -> get job to build houses
-                    - if house avaiable -> rent it
+            next vision step:
+                first chat interactions
+                - "citizen traits"
+                    - something which makes citizen behave differently. Which can be modified by chatters
+                        - like trait: "earlybird", wakes up early
+                        - trait "nightowl". goes to bed late
+                -  chatter can input dream job
+                    - dream job will be saved. Citizen will do this job if possible
+                    - dream job could be something not yet implemented as a way for me to see what i could implement in the future                    
             big vision:
                 - each chatter becomes a citizen of a game world
                     - moves mostly by itself but chatter can influence his citizen

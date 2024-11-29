@@ -1,4 +1,4 @@
-import { drawTextWithOutline, IMAGE_PATH_CITIZEN } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
@@ -32,6 +32,10 @@ export type CitizenNeeds = {
 
 export type Citizen = {
     job: CitizenJob,
+    isDead?: {
+        reason: string,
+        time: number,
+    },
     goToBedTime: number;
     sleepDuration: number;
     birthTime: number,
@@ -243,6 +247,15 @@ export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Cit
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintBehindBuildings);
+    if (citizen.isDead) {
+        ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN_DEAD], 0, 0, 200, 200,
+            paintPos.x - CITIZEN_PAINT_SIZE / 2,
+            paintPos.y - CITIZEN_PAINT_SIZE / 2,
+            CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+        );
+        paintCitizenName(ctx, citizen, paintPos, nameFontSize, nameLineWidth);
+        return;
+    }
     if (paintInThisLayer) {
         if (citizen.moveTo) {
             const frames = 4;
@@ -269,12 +282,19 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
     if (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES) {
         paintSleeping(ctx, citizen, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 10 }, state.time);
         paintThoughtBubble(ctx, citizen, paintPos, state);
-
+        paintCitizenName(ctx, citizen, paintPos, nameFontSize, nameLineWidth);
         ctx.font = `${nameFontSize}px Arial`;
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
         const nameYSpacing = 5;
         drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
     }
+}
+
+function paintCitizenName(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, nameFontSize: number, nameLineWidth: number) {
+    ctx.font = `${nameFontSize}px Arial`;
+    const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
+    const nameYSpacing = 5;
+    drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
 }
 
 function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
@@ -361,6 +381,7 @@ function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos
 }
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
+    if (citizen.isDead) return;
     citizen.foodPerCent -= 0.0002;
     citizen.energyPerCent -= 16 / state.timPerDay;
     tickCitizenNeeds(citizen, state);
@@ -385,26 +406,35 @@ function deleteCitizens(state: ChatSimState) {
         const starved = state.map.citizens[i].foodPerCent < 0;
         const outOfEngergy = state.map.citizens[i].energyPerCent < 0;
         if (starved || outOfEngergy) {
-            let deceased = state.map.citizens.splice(i, 1)[0];
-            if (starved) {
-                if (state.logger) state.logger.log(`${deceased.name} died by starving`, deceased);
-                addCitizenLogEntry(deceased, "starved to death", state);
-            }
-            if (outOfEngergy) {
-                if (state.logger) state.logger.log(`${deceased.name} died by over working`, deceased);
-                addCitizenLogEntry(deceased, "overworked to death", state);
-            };
-            if (deceased.home) {
-                if (deceased.home.owner === deceased && state.map.citizens.length > 0) {
-                    const randomNewOwnerIndex = Math.floor(Math.random() * state.map.citizens.length);
-                    const randomNewOwner = state.map.citizens[randomNewOwnerIndex];
-                    deceased.home.owner = randomNewOwner;
-                    if (!randomNewOwner.home) {
-                        randomNewOwner.home = deceased.home;
+            let deceased = state.map.citizens[i];
+            if (!deceased.isDead) {
+                deceased.moveTo = undefined;
+                if (starved) {
+                    if (state.logger) state.logger.log(`${deceased.name} died by starving`, deceased);
+                    addCitizenLogEntry(deceased, "starved to death", state);
+                    deceased.isDead = { reason: "starved to death", time: state.time };
+                }
+                if (outOfEngergy) {
+                    if (state.logger) state.logger.log(`${deceased.name} died by over working`, deceased);
+                    addCitizenLogEntry(deceased, "overworked to death", state);
+                    deceased.isDead = { reason: "overworked to death", time: state.time };
+                };
+                if (deceased.home) {
+                    if (deceased.home.owner === deceased && state.map.citizens.length > 0) {
+                        const randomNewOwnerIndex = Math.floor(Math.random() * state.map.citizens.length);
+                        const randomNewOwner = state.map.citizens[randomNewOwnerIndex];
+                        deceased.home.owner = randomNewOwner;
+                        if (!randomNewOwner.home) {
+                            randomNewOwner.home = deceased.home;
+                        }
+                    }
+                    if (deceased.home.inhabitedBy === deceased) {
+                        deceased.home.inhabitedBy = undefined;
                     }
                 }
-                if (deceased.home.inhabitedBy === deceased) {
-                    deceased.home.inhabitedBy = undefined;
+            } else {
+                if (deceased.isDead.time + 30000 < state.time) {
+                    state.map.citizens.splice(i, 1);
                 }
             }
         }
