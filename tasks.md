@@ -1,12 +1,21 @@
 Tasks:
 - more images+animations
     - visualize citizen transporting wood planks
+    - hammer for building/repairing
+        - repairing should take time
     - sleeping dog image
     - eating animation
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
             - can not be more than two people cutting?
     - trading animation
+- add first sounds?
+    - tree cutting
+    - tree falling
+    - building construction
+    - repairing
+    - dog sounds when interacting?
+    - sleep sound?
 
 - selecting click should select closest not first
 - mushroom pickup behavior

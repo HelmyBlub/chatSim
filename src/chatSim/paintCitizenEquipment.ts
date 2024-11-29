@@ -1,33 +1,66 @@
-import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
+import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
 import { IMAGES } from "./images.js";
-import { INVENTORY_MUSHROOM } from "./main.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
-export type CitizenTool = "Helmet" | "Axe" | "Basket";
+export type CitizenEquipment = "Helmet" | "Axe" | "Basket" | "Hammer" | "WoodPlanks";
+export type CitizenEquipmentData = {
+    name: CitizenEquipment,
+    data?: any,
+}
 type DataAxeIsSwinging = boolean;
-const CITIZEN_TOOL_PAINT_FUNCTIONS: { [key: string]: (ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) => void } = {
+
+const CITIZEN_EQUIPMENT_PAINT_FUNCTIONS: { [key: string]: (ctx: CanvasRenderingContext2D, citizen: Citizen, equipment: CitizenEquipmentData, state: ChatSimState) => void } = {
     "Helmet": paintToolHelmet,
     "Axe": paintToolAxe,
     "Basket": paintToolBasket,
+    "WoodPlanks": paintCarryingWoodPlanks,
 }
 
-export function paintCitizenTool(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
-    if (citizen.displayedTool === undefined) return;
-    const toolPaintFunction = CITIZEN_TOOL_PAINT_FUNCTIONS[citizen.displayedTool.name];
-    if (toolPaintFunction) toolPaintFunction(ctx, citizen, state);
+export function citizenGetEquipmentData(citizen: Citizen, equipment: CitizenEquipment): CitizenEquipmentData | undefined {
+    return citizen.displayedEquipments.find(i => i.name === equipment);
 }
 
-function paintToolHelmet(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
+export function citizenAddEquipment(citizen: Citizen, equipment: CitizenEquipment) {
+    if (citizen.displayedEquipments.find(i => i.name === equipment)) return;
+    citizen.displayedEquipments.push({ name: equipment });
+}
+
+export function citizenSetEquipment(citizen: Citizen, equipments: CitizenEquipment[]) {
+    citizen.displayedEquipments = [];
+    for (let equip of equipments) {
+        citizenAddEquipment(citizen, equip)
+    }
+}
+
+export function paintCitizenEquipments(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
+    if (citizen.displayedEquipments.length === 0) return;
+    for (let equipment of citizen.displayedEquipments) {
+        const toolPaintFunction = CITIZEN_EQUIPMENT_PAINT_FUNCTIONS[equipment.name];
+        if (toolPaintFunction) toolPaintFunction(ctx, citizen, equipment, state);
+    }
+}
+
+function paintCarryingWoodPlanks(ctx: CanvasRenderingContext2D, citizen: Citizen, equipment: CitizenEquipmentData, state: ChatSimState) {
+    const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
+    const size = 20;
+    const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
+    if (!inventoryWood || inventoryWood.counter === 0) return;
+    for (let i = 0; i < Math.min(inventoryWood.counter, 10); i++) {
+        ctx.drawImage(IMAGES[IMAGE_PATH_WOOD_PLANK], 0, 0, 200, 200, paintPos.x - size / 2, paintPos.y - 33 - i, size, size);
+    }
+}
+
+function paintToolHelmet(ctx: CanvasRenderingContext2D, citizen: Citizen, equipment: CitizenEquipmentData, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const size = 20;
     ctx.drawImage(IMAGES[IMAGE_PATH_HELMET], 0, 0, 100, 100, paintPos.x - size / 2, paintPos.y - 33, size, size);
 }
 
-function paintToolAxe(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
-    if (!citizen.displayedTool) return;
-    const isSwinging: DataAxeIsSwinging = citizen.displayedTool.data;
+function paintToolAxe(ctx: CanvasRenderingContext2D, citizen: Citizen, equipment: CitizenEquipmentData, state: ChatSimState) {
+    const isSwinging: DataAxeIsSwinging = equipment.data;
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const axeSize = 20;
     ctx.save();
@@ -41,7 +74,7 @@ function paintToolAxe(ctx: CanvasRenderingContext2D, citizen: Citizen, state: Ch
     ctx.restore();
 }
 
-function paintToolBasket(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
+function paintToolBasket(ctx: CanvasRenderingContext2D, citizen: Citizen, equipment: CitizenEquipmentData, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
     const basketSize = 20;
     ctx.drawImage(IMAGES[IMAGE_PATH_BASKET], 0, 0, 100, 100, paintPos.x, paintPos.y, basketSize, basketSize);

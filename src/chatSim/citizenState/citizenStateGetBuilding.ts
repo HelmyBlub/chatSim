@@ -8,6 +8,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
+import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 
 export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
 export const CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS = "GetBuildingCheckRequirements";
@@ -27,11 +28,12 @@ export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: Build
 
 export function setCitizenStateBuildBuilding(citizen: Citizen, building: Building) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building });
-    citizen.displayedTool = { name: "Helmet" };
+    citizenSetEquipment(citizen, ["Helmet", "WoodPlanks"]);
 }
 
 export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: building });
+    citizenSetEquipment(citizen, ["WoodPlanks"]);
 }
 
 export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
@@ -119,6 +121,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
         };
     } else {
         addCitizenThought(citizen, `I need ${INVENTORY_WOOD} to build ${buildingType}.`, state);
+        citizenSetEquipment(citizen, ["WoodPlanks"]);
         setCitizenStateGetItem(citizen, INVENTORY_WOOD, amountRequired);
     }
 }

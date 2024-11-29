@@ -6,6 +6,7 @@ import { removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
+import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
@@ -20,7 +21,7 @@ export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
 export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {
     const data: Data = { amount: amount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data });
-    citizen.displayedTool = { name: "Axe" };
+    citizenSetEquipment(citizen, ["Axe", "WoodPlanks"]);
 }
 
 export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimState) {
@@ -28,6 +29,7 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
 
     if (citizen.moveTo === undefined) {
         const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
+        const axe = citizenGetEquipmentData(citizen, "Axe");
         if (inventoryWood) {
             const data: Data = citizenState.data;
             const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD);
@@ -37,18 +39,18 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
                 amount = Math.min(data.amount, limit);
             }
             if (inventoryWood.counter >= amount) {
-                citizen.displayedTool = undefined;
+                axe!.data = undefined;
                 citizenStateStackTaskSuccess(citizen);
                 return;
             }
         }
         const tree = isCloseToTree(citizen, state);
         if (tree) {
-            citizen.displayedTool!.data = true;
+            axe!.data = true;
             const isCutDown = cutDownTree(citizen, tree, state);
             if (isCutDown) cutTreeLogIntoPlanks(citizen, tree, citizenState.data, state);
         } else {
-            citizen.displayedTool!.data = false;
+            axe!.data = false;
             moveToTree(citizen, state);
         }
     }

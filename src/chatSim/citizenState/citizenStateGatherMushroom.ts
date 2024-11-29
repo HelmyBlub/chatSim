@@ -5,6 +5,7 @@ import { INVENTORY_MUSHROOM, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
+import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
 
@@ -14,7 +15,7 @@ export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
 
 export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: amount });
-    citizen.displayedTool = { name: "Basket" };
+    citizenSetEquipment(citizen, ["Basket"]);
 }
 
 export function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
