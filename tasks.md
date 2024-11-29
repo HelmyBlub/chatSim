@@ -1,9 +1,7 @@
 Tasks:
 - speech interaction
-    - market queue & speech works for buying
-        - not yet totally happy with code structure
-    - make speech work for selling
     - think about code improvements
+    - bug: ghost queues
     - bug: long queue citizen moves to front and back again
     - change: speech bubbles in front of thought bubbles?
         - if customer thinks and talks at the same time, paint them separated?
@@ -58,9 +56,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- randomize citizen wake and sleep time
-- restructure/redesign speech interactions of citizens
-- fixbug: broken market endless loop
+- speech interaction
+    - make speech work for selling
+- more action log displays
+- changed: market invetory display 
+
 
 --------------------------------------------------
 Big Idea:

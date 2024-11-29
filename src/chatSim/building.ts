@@ -3,6 +3,7 @@ import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
 import { IMAGES } from "./images.js";
 import { Inventory } from "./inventory.js";
+import { isCitizenAtPosition, isCitizenInInteractionDistance } from "./jobs/job.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
 import { removeBuildingFromMap } from "./map.js";
 import { mapPositionToPaintPosition } from "./paint.js";
@@ -54,19 +55,49 @@ export function onLoadDisplayItemPaintData() {
     }
 }
 
+export function marketHasQueue(market: BuildingMarket) {
+    if (!market.queue || market.queue.length === 0) return false;
+    let index = market.queue.length;
+    do {
+        index--;
+        const customer = market.queue[index];
+        const queueMapPosition = marketGetQueueMapPosition(customer, market, index);
+        if (!isCitizenInInteractionDistance(customer, queueMapPosition)) {
+            market.queue.splice(index, 1);
+        } else {
+            return true;
+        }
+    } while (index > 0);
+    return false;
+}
+
 export function marketGetQueuePosition(citizen: Citizen, market: BuildingMarket): number {
     if (!market.queue) market.queue = [];
     const queueIndex = market.queue.findIndex(c => c === citizen);
     if (queueIndex === -1) {
         market.queue.push(citizen);
+        if (market.queue.length > 1) {
+            let index = market.queue.length - 1;
+            do {
+                index--;
+                const customerAheadInQueue = market.queue[index];
+                const queueMapPosition = marketGetQueueMapPosition(customerAheadInQueue, market, index);
+                if (!isCitizenInInteractionDistance(customerAheadInQueue, queueMapPosition)) {
+                    market.queue.splice(index, 1);
+                } else {
+                    break;
+                }
+            } while (index > 0);
+        }
         return market.queue.length - 1;
     } else {
         return queueIndex;
     }
 }
 
-export function marketGetQueueMapPosition(citizen: Citizen, market: BuildingMarket): Position {
-    const queueNumber = marketGetQueuePosition(citizen, market);
+export function marketGetQueueMapPosition(citizen: Citizen, market: BuildingMarket, queuePosition: number | undefined = undefined): Position {
+    let queueNumber = queuePosition;
+    if (queueNumber === undefined) queueNumber = marketGetQueuePosition(citizen, market);
     return {
         x: market.position.x + (queueNumber + 1) * 25 + 20,
         y: market.position.y + 17 - queueNumber,
