@@ -1,7 +1,10 @@
 Tasks:
 - more images+animations
-    - repairing should take time
     - eating animation
+        - stay still
+        - one image paws up to mouth
+        - paint mushroom in hands over mouth
+        - takes one second to eat
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
             - can not be more than two people cutting?
@@ -39,17 +42,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- building breaking down
-- sleeping dog image
-- visualize citizen transporting wood planks
-- hammer for building/repairing
-- death image
-    - disappear after time
-    - on select display death reason
-- speech interaction
-    - make speech work for selling
-- more action log displays
-- changed: market invetory display 
+- repairing should take time
 
 
 --------------------------------------------------

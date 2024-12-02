@@ -1,4 +1,4 @@
-import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_SLEEPING } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
@@ -13,6 +13,7 @@ import { calculateDirection, INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } fr
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
 import { Tree } from "./tree.js";
+import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -268,17 +269,29 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
                 CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
             );
         } else {
-            if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
-                ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN_SLEEPING], 0, 0, 200, 200,
-                    paintPos.x - CITIZEN_PAINT_SIZE / 2,
-                    paintPos.y - CITIZEN_PAINT_SIZE / 2,
-                    CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
-                );
-            } else {
-                ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN], 200, 0, 200, 200,
-                    paintPos.x - CITIZEN_PAINT_SIZE / 2,
-                    paintPos.y - CITIZEN_PAINT_SIZE / 2,
-                    CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+            let imagePath = IMAGE_PATH_CITIZEN;
+            let index = 1;
+            if (citizen.stateInfo.stack.length > 0) {
+                if (citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
+                    imagePath = IMAGE_PATH_CITIZEN_SLEEPING;
+                    index = 0;
+                }
+                if (citizen.stateInfo.stack[0].state === CITIZEN_STATE_EAT) {
+                    imagePath = IMAGE_PATH_CITIZEN_EAT;
+                    index = 0;
+                }
+            }
+            ctx.drawImage(IMAGES[imagePath], 200 * index, 0, 200, 200,
+                paintPos.x - CITIZEN_PAINT_SIZE / 2,
+                paintPos.y - CITIZEN_PAINT_SIZE / 2,
+                CITIZEN_PAINT_SIZE, CITIZEN_PAINT_SIZE
+            );
+            if (imagePath === IMAGE_PATH_CITIZEN_EAT) {
+                const mushroomSize = 10;
+                ctx.drawImage(IMAGES[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200,
+                    paintPos.x - mushroomSize / 2,
+                    paintPos.y - 8,
+                    mushroomSize, mushroomSize
                 );
             }
         }

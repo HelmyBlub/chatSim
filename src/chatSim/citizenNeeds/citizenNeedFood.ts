@@ -1,5 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, addCitizenLogEntry, CITIZEN_STATE_TYPE_WORKING_JOB, isCitizenThinking, setCitizenThought, addCitizenThought, citizenResetStateTo } from "../citizen.js";
+import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { InventoryItem } from "../inventory.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -31,7 +32,10 @@ function createDefaultData(): CitizenNeedFood {
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && inventoryMushroom && inventoryMushroom.counter > 0) {
-        citizenEatMushroom(citizen, inventoryMushroom, state, "inventory");
+        if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state !== CITIZEN_STATE_EAT) {
+            setCitizenStateEat(citizen, inventoryMushroom, "inventory");
+        }
+        return false;
     }
     if (citizen.foodPerCent < 0.5) return false;
     const needData = getCitizenNeedData(CITIZEN_NEED_FOOD, citizen, state) as CitizenNeedFood;
@@ -51,12 +55,6 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     }
     needData.gatherMoreFood = true;
     return false;
-}
-
-export function citizenEatMushroom(citizen: Citizen, inventoryMushroom: InventoryItem, state: ChatSimState, inventoryName: string) {
-    citizen.foodPerCent = Math.min(citizen.foodPerCent + MUSHROOM_FOOD_VALUE, 1);
-    inventoryMushroom.counter--;
-    addCitizenLogEntry(citizen, `eat ${INVENTORY_MUSHROOM} from ${inventoryName}, ${inventoryMushroom.counter}x${INVENTORY_MUSHROOM} left`, state);
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
@@ -100,7 +98,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
                     const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
                         while (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
-                            citizenEatMushroom(citizen, homeMushrooms, state, "home");
+                            setCitizenStateEat(citizen, homeMushrooms, "home");
                         }
                     }
                 }
@@ -110,5 +108,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         } else {
             CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state](citizen, state);
         }
+    } else {
+        citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
     }
 }

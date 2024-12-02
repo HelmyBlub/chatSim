@@ -1,9 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, citizenResetStateTo, setCitizenThought } from "../citizen.js";
+import { setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenEatMushroom } from "./citizenNeedFood.js";
 
 export const CITIZEN_NEED_STARVING = "need starving";
 
@@ -24,7 +24,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) {
         if (mushrooms && mushrooms.counter > 0) {
-            citizenEatMushroom(citizen, mushrooms, state, "inventory");
+            setCitizenStateEat(citizen, mushrooms, "inventory");
             return;
         }
     }

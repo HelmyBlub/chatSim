@@ -1,4 +1,3 @@
-import { addChatMessage, createEmptyChat } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
 import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
