@@ -1,9 +1,23 @@
 Tasks:
 - more images+animations
-    - don't move directly to the middle
-        - lumberjack walks besides tree, (left and right)
-            - can not be more than two people cutting?
     - trading animation
+        - money image
+        - after successfull "negotiation" do "trade"
+        - on trade move money and item between citizens
+            - successfull trade steps
+                - customer put money on counter for marketCitizen
+                - and takes item from market inventory
+                - marketCitizen takes money from counter into own inventory
+
+            - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
+            - currently happes instantly and code relies on it, which makes it hard to put animation between
+            - item or money move should have some generall code
+            - "setStatePutMoney" from citizen to building (counter) of market.
+                - animate
+                - marketCitizen takes from counter into his inventory
+            - "setStateTradeItem" from citizen to citizen
+                - animate
+            - 
 - add first sounds?
     - tree cutting
     - tree falling
@@ -39,6 +53,8 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- don't move directly to the middle
+    - lumberjack walks besides tree
 - eating animation
     - stay still
     - one image paws up to mouth

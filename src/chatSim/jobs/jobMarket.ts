@@ -220,6 +220,7 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
                 type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
                 intention: "tradeFullfiled",
             }
+
             if (customerIntention.sellToMarket) {
                 sellItemToMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
             } else {
