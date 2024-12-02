@@ -1,6 +1,5 @@
 Tasks:
 - more images+animations
-    - sleeping dog image
     - repairing should take time
     - eating animation
     - don't move directly to the middle
@@ -40,6 +39,8 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- building breaking down
+- sleeping dog image
 - visualize citizen transporting wood planks
 - hammer for building/repairing
 - death image

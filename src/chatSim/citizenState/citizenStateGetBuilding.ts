@@ -10,6 +10,10 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 
+export type RepairBuildingData = {
+    building: Building,
+    tempStartTime?: number,
+}
 export const CITIZEN_STATE_GET_BUILDING = "GetBuilding";
 export const CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS = "GetBuildingCheckRequirements";
 export const CITIZEN_STATE_BUILD_BUILDING = "BuildBuilding";
@@ -32,7 +36,8 @@ export function setCitizenStateBuildBuilding(citizen: Citizen, building: Buildin
 }
 
 export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: building });
+    const data: RepairBuildingData = { building: building };
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: data });
     citizenSetEquipment(citizen, ["WoodPlanks", "Hammer"]);
 }
 
@@ -50,7 +55,8 @@ export function findBuilding(citizen: Citizen, buildingType: BuildingType, state
 
 function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
-    const building = citizenState.data as Building;
+    const data: RepairBuildingData = citizenState.data;
+    const building = data.building;
     if (building.deletedFromMap) {
         citizenStateStackTaskSuccess(citizen);
         return;
@@ -67,11 +73,16 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
             inventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
         }
         if (inventoryWood && inventoryWood.counter > 0) {
+            const repairDuration = 1000;
             if (isCitizenAtPosition(citizen, building.position)) {
-                building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
-                building.brokeDownTime = undefined;
-                inventoryWood.counter--;
-                addCitizenThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
+                if (data.tempStartTime === undefined) data.tempStartTime = state.time;
+                if (data.tempStartTime + repairDuration < state.time) {
+                    data.tempStartTime = undefined;
+                    building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
+                    building.brokeDownTime = undefined;
+                    inventoryWood.counter--;
+                    addCitizenThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
+                }
             } else {
                 citizen.moveTo = {
                     x: building.position.x,
