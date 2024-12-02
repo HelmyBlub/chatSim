@@ -5,7 +5,7 @@ import { INVENTORY_WOOD, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
-import { isCitizenAtPosition } from "../jobs/job.js";
+import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
@@ -57,7 +57,7 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
 }
 
 function cutDownTree(citizen: Citizen, tree: Tree, state: ChatSimState): boolean {
-    if (!isCitizenAtPosition(citizen, tree.position)) {
+    if (!isCitizenInInteractionDistance(citizen, tree.position)) {
         return false;
     }
     if (tree.trunkDamagePerCent < 1) {
@@ -73,7 +73,7 @@ function cutDownTree(citizen: Citizen, tree: Tree, state: ChatSimState): boolean
 
 function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: ChatSimState) {
     if (tree.woodValue === 0
-        || !isCitizenAtPosition(citizen, tree.position)
+        || !isCitizenInInteractionDistance(citizen, tree.position)
     ) {
         return;
     }
@@ -91,9 +91,10 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
     if (state.map.trees.length > 0) {
         const treeIndex = Math.floor(nextRandom(state.randomSeed) * state.map.trees.length);
         const tree = state.map.trees[treeIndex];
+        const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
         citizen.moveTo = {
-            x: tree.position.x,
-            y: tree.position.y,
+            x: tree.position.x + Math.sin(randomDirection) * 10,
+            y: tree.position.y + Math.cos(randomDirection) * 10,
         };
     }
 }
@@ -101,7 +102,7 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
 function isCloseToTree(citizen: Citizen, state: ChatSimState): Tree | undefined {
     for (let i = state.map.trees.length - 1; i >= 0; i--) {
         const tree = state.map.trees[i];
-        if (isCitizenAtPosition(citizen, tree.position)) return tree;
+        if (isCitizenInInteractionDistance(citizen, tree.position)) return tree;
     }
     return undefined;
 }

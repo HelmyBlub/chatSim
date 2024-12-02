@@ -1,10 +1,5 @@
 Tasks:
 - more images+animations
-    - eating animation
-        - stay still
-        - one image paws up to mouth
-        - paint mushroom in hands over mouth
-        - takes one second to eat
     - don't move directly to the middle
         - lumberjack walks besides tree, (left and right)
             - can not be more than two people cutting?
@@ -16,6 +11,8 @@ Tasks:
     - repairing
     - dog sounds when interacting?
     - sleep sound?
+- refactor "need food", "need starving"
+    - not using new state stack properly?
 
 - selecting click should select closest not first
 - mushroom pickup behavior
@@ -42,6 +39,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- eating animation
+    - stay still
+    - one image paws up to mouth
+    - paint mushroom in hands over mouth
+    - takes one second to eat
 - repairing should take time
 
 

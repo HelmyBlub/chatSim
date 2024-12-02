@@ -97,8 +97,9 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
                     const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                     if (homeMushrooms) {
-                        while (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
+                        if (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
                             setCitizenStateEat(citizen, homeMushrooms, "home");
+                            return;
                         }
                     }
                 }
