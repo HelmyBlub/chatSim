@@ -1,4 +1,31 @@
 Tasks:
+- add first sounds?
+    - do i download sounds from the interner or create them myself
+        - internet:
+            - a lot of free sounds available
+            - maybe hard to get all sounds witht he same "vibe", like belonging to the same game?
+        - doing myself
+            - does maybe not sound good?
+            - all has the same vibe as done by myself?
+    - idea: start with sounds by myself. can consider them placeholders, can be easily replaced with new sound files
+        - if my own voiced sound is to bad, i can take a placeholder sound from the internet
+    - how does sound...
+        - work on higher speeds 
+            - if sound can be speed up, play until some speed cap. 
+            - if speed faster, play speed up sound
+        - How does sound work if i am zoomed in or out
+            - volume depends on zoom level. Play louder if close to "sound source"
+            - sounds have loudness: higher value -> can be heared from further away
+        - if i have a lot of citizens doing stuff, too many sound could play
+            - i can only see many citizen on certain zoom level. And on high zoom level sounds might be no longer played
+    - required sounds
+        - tree cutting
+        - tree falling
+        - hammer sound
+            - building construction
+            - repairing
+        - dog sounds when interacting
+        - sleep sound
 - more images+animations
     - trading animation
         - money image
@@ -18,13 +45,6 @@ Tasks:
             - "setStateTradeItem" from citizen to citizen
                 - animate
             - 
-- add first sounds?
-    - tree cutting
-    - tree falling
-    - building construction
-    - repairing
-    - dog sounds when interacting?
-    - sleep sound?
 - refactor "need food", "need starving"
     - not using new state stack properly?
 
