@@ -4,13 +4,8 @@ Tasks:
         - work on higher speeds 
             - if sound can be speed up, play until some speed cap. 
             - if speed faster, play speed up sound
-        - How does sound work if i am zoomed in or out
-            - volume depends on zoom level. Play louder if close to "sound source"
-            - sounds have loudness: higher value -> can be heared from further away
         - if i have a lot of citizens doing stuff, too many sound could play
             - i can only see many citizen on certain zoom level. And on high zoom level sounds might be no longer played
-        - on automated tests
-            - prevent sounds from playing if running in the background
         - virtual machine has sound delay. Should i care?
     - required sounds
         - tree cutting
@@ -69,6 +64,12 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - fix starving
+- sounds
+    - How does sound work if i am zoomed in or out
+        - volume depends on zoom level. Play louder if close to "sound source"
+        - sounds have loudness: higher value -> can be heared from further away
+    - on automated tests
+        - prevent sounds from playing if running in the background
 
 
 --------------------------------------------------

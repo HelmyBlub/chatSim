@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { calculateDistance, calculateDistance3D } from "./main.js";
+import { calculateDistance3D } from "./main.js";
 import { mapGetVisionBorderPositionClosestToPoint, mapIsPositionVisible, PaintDataMap } from "./map.js";
 
 export const SOUNDS: { [key: string]: HTMLAudioElement } = {
@@ -34,12 +34,12 @@ export function playChatSimSound(audioPath: string, soundMapLocation: Position, 
     if (distance > maxHearingDistance) return;
     const distanceVolumeFactor = 1 - Math.log(adjustedDistance) / Math.log(maxHearingDistance);
     const volume = 1 * distanceVolumeFactor * state.soundVolume;
-    playSound(SOUNDS[audioPath], 1, volume);
+    playSound(SOUNDS[audioPath], state.gameSpeed, volume);
 }
 
 export function playSound(audio: HTMLAudioElement, playbackRate: number, volume: number) {
     if (volume <= 0) return;
-    if (playbackRate > 3) return;
+    if (playbackRate > 5) return;
     const tempAudio = audio.cloneNode() as HTMLAudioElement;
     tempAudio.playbackRate = playbackRate;
     tempAudio.volume = volume;

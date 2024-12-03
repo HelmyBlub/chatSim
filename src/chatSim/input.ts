@@ -176,16 +176,16 @@ function keyDown(event: KeyboardEvent, app: App) {
     const speedScaling = 0.2;
     switch (event.code) {
         case "Period":
-            if (app.gameSpeed !== 0) {
-                app.gameSpeed *= 1 + speedScaling;
-                if (app.gameSpeed > 10 || Math.abs(app.gameSpeed - 1) < speedScaling / 2) app.gameSpeed = Math.round(app.gameSpeed);
+            if (state.gameSpeed !== 0) {
+                state.gameSpeed *= 1 + speedScaling;
+                if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
             } else {
-                app.gameSpeed = 1;
+                state.gameSpeed = 1;
             }
             break;
         case "Comma":
-            app.gameSpeed /= 1 + speedScaling;
-            if (app.gameSpeed > 10 || Math.abs(app.gameSpeed - 1) < speedScaling / 2) app.gameSpeed = Math.round(app.gameSpeed);
+            state.gameSpeed /= 1 + speedScaling;
+            if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
             break
         case "KeyW":
             state.inputData.map.moveY = -moveTickAmount;
@@ -200,10 +200,10 @@ function keyDown(event: KeyboardEvent, app: App) {
             state.inputData.map.moveX = moveTickAmount;
             break;
         case "NumpadAdd":
-            if (app.gameSpeed === 0) chatSimTick(state);
+            if (state.gameSpeed === 0) chatSimTick(state);
             break;
         case "KeyK":
-            app.gameSpeed = 0;
+            state.gameSpeed = 0;
             console.log(state);
             break;
         case "KeyM":

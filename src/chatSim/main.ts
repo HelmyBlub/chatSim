@@ -79,6 +79,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
     const state: ChatSimState = {
         streamer: streamerName,
         time: 0,
+        gameSpeed: 1,
         timPerDay: 100000,
         sunriseAt: 0.22,
         sunsetAt: 0.88,
@@ -119,7 +120,7 @@ function chatSimStateInit(streamer: string): App {
     canvas.height = window.innerHeight - 10;
     const state = createDefaultChatSimState(streamer, Math.random());
     state.soundVolume = 1;
-    const app: App = { state: state, gameSpeed: 1 };
+    const app: App = { state: state };
     state.canvas = canvas;
     chatSimAddInputEventListeners(app, canvas);
     state.logger = { log: (message, data) => console.log(message, data) };
@@ -181,19 +182,19 @@ async function runner(app: App) {
         while (true) {
             if (app.runningTests) testRunner(app);
             let startIndex = 0;
-            if (app.gameSpeed % 1 !== 0) {
+            if (app.state.gameSpeed % 1 !== 0) {
                 startIndex++;
                 if (app.gameSpeedRemainder === undefined) app.gameSpeedRemainder = 0;
-                app.gameSpeedRemainder += app.gameSpeed % 1;
+                app.gameSpeedRemainder += app.state.gameSpeed % 1;
                 if (app.gameSpeedRemainder >= 1) {
                     app.gameSpeedRemainder--;
                     chatSimTick(app.state);
                 }
             }
-            for (let i = startIndex; i < app.gameSpeed; i++) {
+            for (let i = startIndex; i < app.state.gameSpeed; i++) {
                 chatSimTick(app.state);
             }
-            paintChatSim(app.state, app.gameSpeed);
+            paintChatSim(app.state, app.state.gameSpeed);
             await sleep(16);
         }
     } catch (e) {

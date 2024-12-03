@@ -115,7 +115,6 @@ function initTests() {
     activeTests.push(testMarketQueue());
 }
 
-
 function testMarketQueue(): Test {
     const test: Test = {
         name: "testMarketQueue",

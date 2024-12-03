@@ -20,7 +20,6 @@ export type Mushroom = {
 
 export type App = {
     state: ChatSimState,
-    gameSpeed: number,
     gameSpeedRemainder?: number,
     tempState?: ChatSimState,
     runningTests?: TestData,
@@ -31,6 +30,7 @@ export type ChatSimState = {
     canvas?: HTMLCanvasElement,
     logger?: Logger,
     soundVolume?: number,
+    gameSpeed: number,
     streamer: string,
     time: number,
     timPerDay: number,
