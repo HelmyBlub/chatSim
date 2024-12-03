@@ -1,4 +1,5 @@
 Tasks:
+- fix starving
 - add first sounds?
     - do i download sounds from the interner or create them myself
         - internet:
@@ -18,6 +19,8 @@ Tasks:
             - sounds have loudness: higher value -> can be heared from further away
         - if i have a lot of citizens doing stuff, too many sound could play
             - i can only see many citizen on certain zoom level. And on high zoom level sounds might be no longer played
+        - on automated tests
+            - prevent sounds from playing if running in the background
     - required sounds
         - tree cutting
         - tree falling

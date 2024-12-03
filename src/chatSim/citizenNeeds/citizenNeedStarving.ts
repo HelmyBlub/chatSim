@@ -24,14 +24,14 @@ function tick(citizen: Citizen, state: ChatSimState) {
     const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) {
         if (mushrooms && mushrooms.counter > 0) {
-            if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state !== CITIZEN_STATE_EAT) {
+            if (citizen.stateInfo.stack.length === 0 || citizen.stateInfo.stack[0].state !== CITIZEN_STATE_EAT) {
                 setCitizenStateEat(citizen, mushrooms, "inventory");
                 return;
             }
         }
     }
 
-    if (citizen.stateInfo.type !== CITIZEN_NEED_STARVING) {
+    if (citizen.stateInfo.type !== CITIZEN_NEED_STARVING || citizen.stateInfo.stack.length === 0) {
         citizenResetStateTo(citizen, CITIZEN_NEED_STARVING);
         setCitizenThought(citizen, [`I am starving. I need to find food.`], state);
         setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 1, true);
