@@ -1,15 +1,5 @@
 Tasks:
-- fix starving
 - add first sounds?
-    - do i download sounds from the interner or create them myself
-        - internet:
-            - a lot of free sounds available
-            - maybe hard to get all sounds witht he same "vibe", like belonging to the same game?
-        - doing myself
-            - does maybe not sound good?
-            - all has the same vibe as done by myself?
-    - idea: start with sounds by myself. can consider them placeholders, can be easily replaced with new sound files
-        - if my own voiced sound is to bad, i can take a placeholder sound from the internet
     - how does sound...
         - work on higher speeds 
             - if sound can be speed up, play until some speed cap. 
@@ -21,6 +11,7 @@ Tasks:
             - i can only see many citizen on certain zoom level. And on high zoom level sounds might be no longer played
         - on automated tests
             - prevent sounds from playing if running in the background
+        - virtual machine has sound delay. Should i care?
     - required sounds
         - tree cutting
         - tree falling
@@ -29,6 +20,7 @@ Tasks:
             - repairing
         - dog sounds when interacting
         - sleep sound
+        - background music
 - more images+animations
     - trading animation
         - money image
@@ -76,14 +68,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- don't move directly to the middle
-    - lumberjack walks besides tree
-- eating animation
-    - stay still
-    - one image paws up to mouth
-    - paint mushroom in hands over mouth
-    - takes one second to eat
-- repairing should take time
+- fix starving
 
 
 --------------------------------------------------

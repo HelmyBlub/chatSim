@@ -87,6 +87,63 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     return house;
 }
 
+export function mapIsPositionVisible(position: Position, mapPaint: PaintDataMap) {
+    const visionWidth = mapPaint.paintWidth / mapPaint.zoom;
+    const visionHeight = mapPaint.paintHeight / mapPaint.zoom;
+    const mapVisionTopLeft: Position = {
+        x: mapPaint.cameraPosition.x - visionWidth / 2,
+        y: mapPaint.cameraPosition.y - visionHeight / 2,
+    };
+    if (mapVisionTopLeft.x <= position.x && mapVisionTopLeft.x + visionWidth >= position.x
+        && mapVisionTopLeft.y <= position.y && mapVisionTopLeft.y + visionHeight >= position.y
+    ) {
+        return true;
+    }
+    return false;
+}
+
+export function mapGetVisionBorderPositionClosestToPoint(position: Position, mapPaint: PaintDataMap) {
+    const visionWidth = mapPaint.paintWidth / mapPaint.zoom;
+    const visionHeight = mapPaint.paintHeight / mapPaint.zoom;
+    const mapVisionTopLeft: Position = {
+        x: mapPaint.cameraPosition.x - visionWidth / 2,
+        y: mapPaint.cameraPosition.y - visionHeight / 2,
+    };
+    const distanceLeft = position.x - mapVisionTopLeft.x;
+    const distanceRight = mapVisionTopLeft.x + visionWidth - position.x;
+    const distanceTop = position.y - mapVisionTopLeft.y;
+    const distanceBottom = mapVisionTopLeft.y + visionHeight - position.y;
+    if (distanceLeft > 0 && distanceRight > 0) {
+        if (distanceTop > 0 && distanceBottom > 0) {
+            const min = Math.min(distanceLeft, distanceRight, distanceBottom, distanceTop);
+            if (min === distanceLeft) return { x: mapVisionTopLeft.x, y: position.y };
+            if (min === distanceRight) return { x: mapVisionTopLeft.x + visionWidth, y: position.y };
+            if (min === distanceTop) return { x: position.x, y: mapVisionTopLeft.y };
+            if (min === distanceBottom) return { x: position.x, y: mapVisionTopLeft.y + visionHeight };
+        } else {
+            if (distanceTop < distanceBottom) {
+                return { x: position.x, y: mapVisionTopLeft.y };
+            } else {
+                return { x: position.x, y: mapVisionTopLeft.y + visionHeight }
+            }
+        }
+    } else {
+        if (distanceTop > 0 && distanceBottom > 0) {
+            if (distanceLeft < distanceRight) {
+                return { x: mapVisionTopLeft.x, y: position.y };
+            } else {
+                return { x: mapVisionTopLeft.x + visionWidth, y: position.y };
+            }
+        } else {
+            if (distanceTop < 0 && distanceLeft < 0) return { x: mapVisionTopLeft.x, y: mapVisionTopLeft.y };
+            if (distanceTop < 0 && distanceRight < 0) return { x: mapVisionTopLeft.x + visionWidth, y: mapVisionTopLeft.y };
+            if (distanceBottom < 0 && distanceLeft < 0) return { x: mapVisionTopLeft.x, y: mapVisionTopLeft.y + visionHeight };
+            if (distanceBottom < 0 && distanceRight < 0) return { x: mapVisionTopLeft.x + visionWidth, y: mapVisionTopLeft.y + visionHeight };
+        }
+    }
+    throw "should not happen";
+}
+
 export function removeBuildingFromMap(building: Building, map: ChatSimMap) {
     const usedTileIndex = map.usedTiles.findIndex(t => t.object === building);
     if (usedTileIndex === -1) return;

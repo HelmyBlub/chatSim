@@ -5,12 +5,14 @@ import { INVENTORY_WOOD, nextRandom, SKILL_GATHERING } from "../main.js";
 import { removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
-import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
+import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
+import { playChatSimSound, SOUND_PATH_CUT } from "../sounds.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
     actionStartTime?: number,
+    soundPlayedTime?: number,
     amount?: number,
 }
 
@@ -30,8 +32,8 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
     if (citizen.moveTo === undefined) {
         const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
         const axe = citizenGetEquipmentData(citizen, "Axe");
+        const data: Data = citizenState.data;
         if (inventoryWood) {
-            const data: Data = citizenState.data;
             const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD);
             const limit = inventoryWood.counter + available;
             let amount: number = limit;
@@ -46,6 +48,10 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
         }
         const tree = isCloseToTree(citizen, state);
         if (tree) {
+            if (data.soundPlayedTime === undefined) {
+                data.soundPlayedTime = state.time;
+                playChatSimSound(SOUND_PATH_CUT, citizen.position, state);
+            }
             axe!.data = true;
             const isCutDown = cutDownTree(citizen, tree, state);
             if (isCutDown) cutTreeLogIntoPlanks(citizen, tree, citizenState.data, state);

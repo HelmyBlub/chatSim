@@ -7,6 +7,7 @@ import { chatSimAddInputEventListeners } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
+import { loadChatSimSounds } from "./sounds.js";
 import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 
@@ -14,6 +15,15 @@ export const SKILL_GATHERING = "Gathering";
 export const INVENTORY_MUSHROOM = "Mushroom";
 export const INVENTORY_WOOD = "Wood";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
+
+export type Position3D = Position & { z: number };
+
+export function calculateDistance3D(position1: Position3D, position2: Position3D): number {
+    const diffX = position1.x - position2.x;
+    const diffY = position1.y - position2.y;
+    const diffZ = position1.z - position2.z;
+    return Math.sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
+}
 
 export function calculateDistance(position1: Position, position2: Position): number {
     const diffX = position1.x - position2.x;
@@ -108,6 +118,7 @@ function chatSimStateInit(streamer: string): App {
     canvas.width = window.innerWidth - 10;
     canvas.height = window.innerHeight - 10;
     const state = createDefaultChatSimState(streamer, Math.random());
+    state.soundVolume = 1;
     const app: App = { state: state, gameSpeed: 1 };
     state.canvas = canvas;
     chatSimAddInputEventListeners(app, canvas);
@@ -121,6 +132,7 @@ function initMyApp() {
     loadLocalStorageChatters(state);
     onLoadDisplayItemPaintData();
     loadImages();
+    loadChatSimSounds();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         if (user === state.streamer) {

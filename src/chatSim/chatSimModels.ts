@@ -30,6 +30,7 @@ export type App = {
 export type ChatSimState = {
     canvas?: HTMLCanvasElement,
     logger?: Logger,
+    soundVolume?: number,
     streamer: string,
     time: number,
     timPerDay: number,

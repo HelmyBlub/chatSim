@@ -6,6 +6,7 @@ import { removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
+import { playChatSimSound, SOUND_PATH_PICKUP } from "../sounds.js";
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
 
@@ -52,6 +53,7 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: nu
         citizen.inventory.items.push(inventoryMushroom);
     }
     inventoryMushroom.counter++;
+    playChatSimSound(SOUND_PATH_PICKUP, citizen.position, state);
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
     if (nextRandom(state.randomSeed) < skillGathering / 100) {
