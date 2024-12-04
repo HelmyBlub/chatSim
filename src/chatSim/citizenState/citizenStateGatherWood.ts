@@ -7,7 +7,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
-import { playChatSimSound, SOUND_PATH_CUT } from "../sounds.js";
+import { playChatSimSound, SOUND_PATH_CUT, SOUND_PATH_TREE_FALL } from "../sounds.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
@@ -73,6 +73,7 @@ function cutDownTree(citizen: Citizen, tree: Tree, state: ChatSimState): boolean
         tree.trunkDamagePerCent += progressPerTick;
         if (tree.trunkDamagePerCent >= 1) {
             tree.fallTime = state.time;
+            playChatSimSound(SOUND_PATH_TREE_FALL, tree.position, state);
         }
         return false;
     }

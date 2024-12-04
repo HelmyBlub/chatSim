@@ -1,8 +1,6 @@
 Tasks:
 - add first sounds?
     - required sounds
-        - tree cutting
-        - multiple hammering sounds
         - tree falling
         - dog sounds when interacting
         - sleep sound
@@ -58,6 +56,7 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - sound:
+    - tree cutting with variations
     - pickup mushroom: 
         - make account off stream for freesound. Download on stream?
         - option: https://freesound.org/people/edsward/sounds/343097/?

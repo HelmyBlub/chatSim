@@ -13,14 +13,16 @@ export const SOUNDS: { [key: string]: SoundData } = {
 export const SOUND_PATH_CUT = "sounds/553254__t-man95__axe-cutting-wood_chop";
 export const SOUND_PATH_HAMMER = "sounds/496262__16gpanskatoman_kristian__hammer-wood_shortened.mp3";
 export const SOUND_PATH_PICKUP = "sounds/343097__edsward__plopenhanced.wav";
+export const SOUND_PATH_TREE_FALL = "sounds/441617__danielajq__38-arbol-cayendo.wav";
 
 export function loadChatSimSounds() {
-    SOUNDS[SOUND_PATH_CUT] = loadAudio(SOUND_PATH_CUT, 1.5, 5, "mp3");
-    SOUNDS[SOUND_PATH_HAMMER] = loadAudio(SOUND_PATH_HAMMER, 1.5);
-    SOUNDS[SOUND_PATH_PICKUP] = loadAudio(SOUND_PATH_PICKUP);
+    loadAudio(SOUND_PATH_CUT, 1, 5, "mp3");
+    loadAudio(SOUND_PATH_HAMMER, 1.2);
+    loadAudio(SOUND_PATH_PICKUP, 0.6);
+    loadAudio(SOUND_PATH_TREE_FALL, 1);
 }
 
-function loadAudio(path: string, volumeFactor: number = 1, soundVariations: number = 1, format: string | undefined = undefined): SoundData {
+function loadAudio(path: string, volumeFactor: number = 1, soundVariations: number = 1, format: string | undefined = undefined) {
     const data: SoundData = {
         audio: [],
         volumeFactor: volumeFactor,
@@ -32,7 +34,7 @@ function loadAudio(path: string, volumeFactor: number = 1, soundVariations: numb
             data.audio.push(new Audio(`${path}_${i + 1}.${format}`));
         }
     }
-    return data;
+    SOUNDS[path] = data;
 }
 
 export function playChatSimSound(audioPath: string, soundMapLocation: Position, state: ChatSimState, volumeAmplify: number = 1) {
