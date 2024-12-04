@@ -7,7 +7,8 @@ export const SOUNDS: { [key: string]: HTMLAudioElement } = {
 
 export const SOUND_PATH_CUT = "sounds/cut.mp3";
 export const SOUND_PATH_HAMMER = "sounds/hammer.mp3";
-export const SOUND_PATH_PICKUP = "sounds/pickup.mp3";
+export const SOUND_PATH_PICKUP = "sounds/343097__edsward__plopenhanced.wav";
+
 
 export function loadChatSimSounds() {
     SOUNDS[SOUND_PATH_CUT] = new Audio(SOUND_PATH_CUT);

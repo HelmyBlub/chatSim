@@ -1,0 +1,12 @@
+{
+    "sounds": {
+        "mushroom pickup": {
+            "sound_url": "https://freesound.org/people/edsward/sounds/343097/",
+            "sound_name": "PlopEnhanced.wav",
+            "author_url": "https://freesound.org/people/edsward/",
+            "author_name": "edsward",
+            "license_url": "http://creativecommons.org/publicdomain/zero/1.0/",
+            "license_name": "Creative Commons 0"
+        }
+    }
+}

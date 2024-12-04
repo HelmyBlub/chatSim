@@ -1,13 +1,10 @@
 Tasks:
 - add first sounds?
-    - how does sound...
-        - work on higher speeds 
-            - if sound can be speed up, play until some speed cap. 
-            - if speed faster, play speed up sound
-        - if i have a lot of citizens doing stuff, too many sound could play
-            - i can only see many citizen on certain zoom level. And on high zoom level sounds might be no longer played
-        - virtual machine has sound delay. Should i care?
     - required sounds
+        - pickup mushroom: 
+            - make account off stream for freesound. Download on stream?
+            - option: https://freesound.org/people/edsward/sounds/343097/?
+            - credit file
         - tree cutting
         - tree falling
         - hammer sound
@@ -16,6 +13,9 @@ Tasks:
         - dog sounds when interacting
         - sleep sound
         - background music
+    - how does sound...
+        - virtual machine has sound delay. Should i care?
+            - check if can be avoided. Game should not care about it, but could be fixed by some VM setting?
 - more images+animations
     - trading animation
         - money image
@@ -70,6 +70,9 @@ Tasks done today:
         - sounds have loudness: higher value -> can be heared from further away
     - on automated tests
         - prevent sounds from playing if running in the background
+    - work on higher speeds 
+        - if sound can be speed up, play until some speed cap. 
+        - if speed faster, play speed up sound
 
 
 --------------------------------------------------
