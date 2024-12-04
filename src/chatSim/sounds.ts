@@ -11,12 +11,14 @@ export const SOUNDS: { [key: string]: SoundData } = {
 }
 
 export const SOUND_PATH_CUT = "sounds/553254__t-man95__axe-cutting-wood_chop";
+export const SOUND_PATH_SNORE = "sounds/500803__khenshom__light-snores-of-a-man-sleeping_snore";
 export const SOUND_PATH_HAMMER = "sounds/496262__16gpanskatoman_kristian__hammer-wood_shortened.mp3";
 export const SOUND_PATH_PICKUP = "sounds/343097__edsward__plopenhanced.wav";
 export const SOUND_PATH_TREE_FALL = "sounds/441617__danielajq__38-arbol-cayendo.wav";
 
 export function loadChatSimSounds() {
     loadAudio(SOUND_PATH_CUT, 1, 5, "mp3");
+    loadAudio(SOUND_PATH_SNORE, 1, 3, "mp3");
     loadAudio(SOUND_PATH_HAMMER, 1.2);
     loadAudio(SOUND_PATH_PICKUP, 0.6);
     loadAudio(SOUND_PATH_TREE_FALL, 1);
@@ -37,7 +39,7 @@ function loadAudio(path: string, volumeFactor: number = 1, soundVariations: numb
     SOUNDS[path] = data;
 }
 
-export function playChatSimSound(audioPath: string, soundMapLocation: Position, state: ChatSimState, volumeAmplify: number = 1) {
+export function playChatSimSound(audioPath: string, soundMapLocation: Position, state: ChatSimState, volumeAmplify: number = 1, maxHearingDistance: number = 300) {
     if (state.soundVolume === undefined || state.soundVolume <= 0) return;
     const zoom = state.paintData.map.zoom;
     const zoomZ = (1 / zoom) * 200;
@@ -52,7 +54,6 @@ export function playChatSimSound(audioPath: string, soundMapLocation: Position, 
         distance = calculateDistance3D({ ...soundMapLocation, z: 0 }, visionTempMiddle);
     }
     const adjustedDistance = Math.max(distance, 1);
-    const maxHearingDistance = 300;
     if (distance > maxHearingDistance) return;
     const distanceVolumeFactor = 1 - Math.log(adjustedDistance) / Math.log(maxHearingDistance);
     const soundData = SOUNDS[audioPath];

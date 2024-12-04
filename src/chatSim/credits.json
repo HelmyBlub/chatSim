@@ -33,6 +33,15 @@
             "author_name": "Danielajq",
             "license_url": "http://creativecommons.org/publicdomain/zero/1.0/",
             "license_name": "Creative Commons 0"
+        },
+        "sleeping snores": {
+            "sound_url": "https://freesound.org/people/khenshom/sounds/500803/",
+            "sound_name": "Light snores of a man sleeping",
+            "author_url": "https://freesound.org/people/khenshom/",
+            "author_name": "khenshom",
+            "license_url": "http://creativecommons.org/publicdomain/zero/1.0/",
+            "license_name": "Creative Commons 0",
+            "helmiBlubComment": "took out multiple single snores to play randomly"
         }
     }
 }

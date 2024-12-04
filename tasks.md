@@ -1,7 +1,6 @@
 Tasks:
 - add first sounds?
     - required sounds
-        - tree falling
         - dog sounds when interacting
         - sleep sound
         - background music
@@ -56,6 +55,7 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - sound:
+    - tree falling
     - tree cutting with variations
     - pickup mushroom: 
         - make account off stream for freesound. Download on stream?

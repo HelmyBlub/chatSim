@@ -2,6 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { getTimeOfDay } from "../main.js";
+import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
 export const CITIZEN_NEED_STATE_SLEEPING = "sleeping";
@@ -43,6 +44,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
         let sleepRegenerationFactor = 1;
         if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
             sleepRegenerationFactor *= 1.2;
+        }
+        const divider = 200 * Math.PI * 2;
+        const animationPerCent = (state.time / divider) % 1;
+        const animationDuration1Tick = state.tickInterval / divider;
+        if (animationPerCent < animationDuration1Tick) {
+            playChatSimSound(SOUND_PATH_SNORE, citizen.position, state, 1, 75);
         }
         citizen.energyPerCent += 16 / state.timPerDay / sleepDuration * sleepRegenerationFactor;
         if (citizen.energyPerCent > 1) citizen.energyPerCent = 1;
