@@ -2,10 +2,8 @@ Tasks:
 - add first sounds?
     - required sounds
         - tree cutting
+        - multiple hammering sounds
         - tree falling
-        - hammer sound
-            - building construction
-            - repairing
         - dog sounds when interacting
         - sleep sound
         - background music
@@ -64,6 +62,9 @@ Tasks done today:
         - make account off stream for freesound. Download on stream?
         - option: https://freesound.org/people/edsward/sounds/343097/?
         - credit file
+    - hammer sound
+        - building construction
+        - repairing
 
 
 --------------------------------------------------
