@@ -1,18 +1,38 @@
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { calculateDistance3D } from "./main.js";
+import { calculateDistance3D, nextRandom } from "./main.js";
 import { mapGetVisionBorderPositionClosestToPoint, mapIsPositionVisible, PaintDataMap } from "./map.js";
 
-export const SOUNDS: { [key: string]: HTMLAudioElement } = {
+type SoundData = {
+    audio: HTMLAudioElement[],
+    volumeFactor: number,
 }
 
-export const SOUND_PATH_CUT = "sounds/cut.mp3";
+export const SOUNDS: { [key: string]: SoundData } = {
+}
+
+export const SOUND_PATH_CUT = "sounds/553254__t-man95__axe-cutting-wood_chop";
 export const SOUND_PATH_HAMMER = "sounds/496262__16gpanskatoman_kristian__hammer-wood_shortened.mp3";
 export const SOUND_PATH_PICKUP = "sounds/343097__edsward__plopenhanced.wav";
 
 export function loadChatSimSounds() {
-    SOUNDS[SOUND_PATH_CUT] = new Audio(SOUND_PATH_CUT);
-    SOUNDS[SOUND_PATH_HAMMER] = new Audio(SOUND_PATH_HAMMER);
-    SOUNDS[SOUND_PATH_PICKUP] = new Audio(SOUND_PATH_PICKUP);
+    SOUNDS[SOUND_PATH_CUT] = loadAudio(SOUND_PATH_CUT, 1.5, 5, "mp3");
+    SOUNDS[SOUND_PATH_HAMMER] = loadAudio(SOUND_PATH_HAMMER, 1.5);
+    SOUNDS[SOUND_PATH_PICKUP] = loadAudio(SOUND_PATH_PICKUP);
+}
+
+function loadAudio(path: string, volumeFactor: number = 1, soundVariations: number = 1, format: string | undefined = undefined): SoundData {
+    const data: SoundData = {
+        audio: [],
+        volumeFactor: volumeFactor,
+    }
+    if (soundVariations === 1 && format === undefined) {
+        data.audio.push(new Audio(path));
+    } else {
+        for (let i = 0; i < soundVariations; i++) {
+            data.audio.push(new Audio(`${path}_${i + 1}.${format}`));
+        }
+    }
+    return data;
 }
 
 export function playChatSimSound(audioPath: string, soundMapLocation: Position, state: ChatSimState, volumeAmplify: number = 1) {
@@ -33,8 +53,14 @@ export function playChatSimSound(audioPath: string, soundMapLocation: Position, 
     const maxHearingDistance = 300;
     if (distance > maxHearingDistance) return;
     const distanceVolumeFactor = 1 - Math.log(adjustedDistance) / Math.log(maxHearingDistance);
-    const volume = 1 * distanceVolumeFactor * state.soundVolume * volumeAmplify;
-    playSound(SOUNDS[audioPath], state.gameSpeed, volume);
+    const soundData = SOUNDS[audioPath];
+    const volume = 1 * distanceVolumeFactor * state.soundVolume * volumeAmplify * soundData.volumeFactor;
+    if (soundData.audio.length === 1) {
+        playSound(soundData.audio[0], state.gameSpeed, volume);
+    } else {
+        const randomSoundVariation = Math.floor(Math.random() * soundData.audio.length);
+        playSound(soundData.audio[randomSoundVariation], state.gameSpeed, volume);
+    }
 }
 
 export function playSound(audio: HTMLAudioElement, playbackRate: number, volume: number) {

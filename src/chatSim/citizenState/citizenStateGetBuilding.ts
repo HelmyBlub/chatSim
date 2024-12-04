@@ -79,7 +79,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                 if (data.tempStartTime === undefined) data.tempStartTime = state.time;
                 const soundCounter = 3;
                 if (((state.time - data.tempStartTime) / repairDuration * soundCounter) % 1 < (state.tickInterval / repairDuration) * soundCounter) {
-                    playChatSimSound(SOUND_PATH_HAMMER, citizen.position, state, 1.2);
+                    playChatSimSound(SOUND_PATH_HAMMER, citizen.position, state);
                 }
                 if (data.tempStartTime + repairDuration < state.time) {
                     data.tempStartTime = undefined;
@@ -186,7 +186,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
             }
             const soundCounter = 18;
             if ((building.buildProgress * soundCounter) % 1 < progressPerTick * soundCounter) {
-                playChatSimSound(SOUND_PATH_HAMMER, citizen.position, state, 1.2);
+                playChatSimSound(SOUND_PATH_HAMMER, citizen.position, state);
             }
             building.buildProgress += progressPerTick;
             building.deterioration -= progressPerTick;

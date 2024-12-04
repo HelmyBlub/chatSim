@@ -48,8 +48,10 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
         }
         const tree = isCloseToTree(citizen, state);
         if (tree) {
-            if (data.soundPlayedTime === undefined) {
-                data.soundPlayedTime = state.time;
+            const divider = 100 * Math.PI * 2;
+            const animationPerCent = (state.time / divider) % 1;
+            const animationDuration1Tick = state.tickInterval / divider;
+            if (animationPerCent < animationDuration1Tick) {
                 playChatSimSound(SOUND_PATH_CUT, citizen.position, state);
             }
             axe!.data = true;
