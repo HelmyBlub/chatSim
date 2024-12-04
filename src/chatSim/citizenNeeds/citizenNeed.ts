@@ -21,29 +21,17 @@ export function loadCitizenNeedsFunctions(state: ChatSimState) {
 }
 
 export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
-    const checkInterval = 1000;
-    if (citizen.needs.lastSuccededCheckedNeedsTime !== undefined && citizen.needs.lastSuccededCheckedNeedsTime + checkInterval > state.time) return;
-    const needs = [CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME];
-    let needsFulfilled = true;
-    for (let need of needs) {
-        const needFunctions = state.functionsCitizenNeeds[need];
-        if (!needFunctions.isFulfilled(citizen, state)) {
+    const isTimeToCheckAllNeeds = citizen.needs.nextCompleteNeedCheckStartTime === undefined || citizen.needs.nextCompleteNeedCheckStartTime <= state.time;
+    if (isTimeToCheckAllNeeds) {
+        checkAllNeeds(citizen, state);
+    } else {
+        const hasToTickFailingNeed = citizen.needs.lastFailingNeed !== undefined && citizen.stateInfo.type === citizen.needs.lastFailingNeed;
+        if (hasToTickFailingNeed) {
+            const needFunctions = state.functionsCitizenNeeds[citizen.needs.lastFailingNeed!];
             needFunctions.tick(citizen, state);
-            needsFulfilled = false;
-            break;
-        }
-    }
-    if (needsFulfilled) {
-        citizen.needs.lastSuccededCheckedNeedsTime = state.time;
-        if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
-            citizen.stateInfo = {
-                type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: []
-            };
-            addCitizenThought(citizen, `Back to work.`, state);
         }
     }
 }
-
 export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSimState) {
     let needData = citizen.needs.needsData[need];
     if (!needData) {
@@ -55,3 +43,31 @@ export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSi
     }
     return needData;
 }
+
+function checkAllNeeds(citizen: Citizen, state: ChatSimState) {
+    const checkInterval = 1000;
+    citizen.needs.nextCompleteNeedCheckStartTime = state.time + checkInterval;
+    const needs = [CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME];
+    let failingNeed: string | undefined = undefined;
+    for (let need of needs) {
+        const needFunctions = state.functionsCitizenNeeds[need];
+        if (!needFunctions.isFulfilled(citizen, state)) {
+            failingNeed = need;
+            break;
+        }
+    }
+    if (failingNeed) {
+        const needFunctions = state.functionsCitizenNeeds[failingNeed];
+        citizen.needs.lastFailingNeed = failingNeed;
+        needFunctions.tick(citizen, state);
+    } else {
+        citizen.needs.lastFailingNeed = undefined;
+        if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
+            citizen.stateInfo = {
+                type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: []
+            };
+            addCitizenThought(citizen, `Back to work.`, state);
+        }
+    }
+}
+

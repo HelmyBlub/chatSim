@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
@@ -52,7 +52,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
             playChatSimSound(SOUND_PATH_SNORE, citizen.position, state, 1, 75);
         }
         citizen.energyPerCent += 16 / state.timPerDay / sleepDuration * sleepRegenerationFactor;
-        if (citizen.energyPerCent > 1) citizen.energyPerCent = 1;
+        if (citizen.energyPerCent > 1) {
+            citizen.energyPerCent = 1;
+            citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
+            addCitizenThought(citizen, `Waking up. Back to work.`, state);
+            return;
+        }
     }
 }
 

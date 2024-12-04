@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenResetStateTo, setCitizenThought } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo, setCitizenThought } from "../citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
@@ -21,20 +21,24 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
-    const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-    if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) {
-        if (mushrooms && mushrooms.counter > 0) {
-            if (citizen.stateInfo.stack.length === 0 || citizen.stateInfo.stack[0].state !== CITIZEN_STATE_EAT) {
+    if (citizen.stateInfo.type !== CITIZEN_NEED_STARVING) {
+        citizenResetStateTo(citizen, CITIZEN_NEED_STARVING);
+    }
+    if (citizen.stateInfo.stack.length === 0) {
+        if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) {
+            const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+            if (mushrooms && mushrooms.counter > 0) {
+                setCitizenThought(citizen, [`I am starving.`], state);
                 setCitizenStateEat(citizen, mushrooms, "inventory");
                 return;
             }
+            setCitizenThought(citizen, [`I am starving. I need to find food.`], state);
+            setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 1, true);
+            return;
+        } else {
+            citizen.needs.nextCompleteNeedCheckStartTime = state.time;
+            return;
         }
-    }
-
-    if (citizen.stateInfo.type !== CITIZEN_NEED_STARVING || citizen.stateInfo.stack.length === 0) {
-        citizenResetStateTo(citizen, CITIZEN_NEED_STARVING);
-        setCitizenThought(citizen, [`I am starving. I need to find food.`], state);
-        setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 1, true);
     }
 
     if (citizen.stateInfo.stack.length > 0) {

@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, citizenResetStateTo } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
@@ -51,6 +51,8 @@ function tick(citizen: Citizen, state: ChatSimState) {
             tickFunction(citizen, state);
             return;
         }
+    } else {
+        citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
     }
 }
 

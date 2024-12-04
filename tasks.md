@@ -1,12 +1,16 @@
 Tasks:
-- add first sounds?
-    - required sounds
-        - dog sounds when interacting
-        - sleep sound
-        - background music
-    - how does sound...
-        - virtual machine has sound delay. Should i care?
-            - check if can be avoided. Game should not care about it, but could be fixed by some VM setting?
+- refactor needs (wip)
+    - food need is still broken
+    - check all needs
+        - starving (looks good?)
+        - sleep
+        - food
+        - home
+    - do some performance measure to compare
+        - brefore times
+            - 10 citizen ~1050ms
+            - 100 citizen ~370ms
+
 - more images+animations
     - trading animation
         - money image
@@ -26,8 +30,6 @@ Tasks:
             - "setStateTradeItem" from citizen to citizen
                 - animate
             - 
-- refactor "need food", "need starving"
-    - not using new state stack properly?
 
 - selecting click should select closest not first
 - mushroom pickup behavior
@@ -54,7 +56,10 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- refactor needs:
+    - starving started
 - sound:
+    - sleep sound
     - tree falling
     - tree cutting with variations
     - pickup mushroom: 

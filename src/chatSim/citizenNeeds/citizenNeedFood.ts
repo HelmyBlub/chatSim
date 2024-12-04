@@ -35,7 +35,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
         if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state !== CITIZEN_STATE_EAT) {
             setCitizenStateEat(citizen, inventoryMushroom, "inventory");
         }
-        return false;
+        return true;
     }
     if (citizen.foodPerCent < 0.5) return false;
     const needData = getCitizenNeedData(CITIZEN_NEED_FOOD, citizen, state) as CitizenNeedFood;
@@ -59,6 +59,11 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 
 function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_FOOD || citizen.stateInfo.stack.length === 0) {
+        if (citizen.foodPerCent > 1 - MUSHROOM_FOOD_VALUE) {
+            citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
+            addCitizenThought(citizen, `I am no longer hungry.`, state);
+            return;
+        }
         if (citizen.home) {
             const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (inventoryMushrooms && inventoryMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME) {
@@ -80,6 +85,14 @@ function tick(citizen: Citizen, state: ChatSimState) {
                         x: citizen.home.position.x,
                         y: citizen.home.position.y,
                     }
+                    return;
+                }
+            }
+        } else {
+            const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+            if (inventoryMushroom && inventoryMushroom.counter > 0) {
+                if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state !== CITIZEN_STATE_EAT) {
+                    setCitizenStateEat(citizen, inventoryMushroom, "inventory");
                     return;
                 }
             }

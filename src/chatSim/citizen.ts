@@ -28,7 +28,8 @@ export type CitizenStateInfo = {
 
 export type CitizenNeeds = {
     needsData: { [key: string]: any };
-    lastSuccededCheckedNeedsTime?: number,
+    lastFailingNeed?: string,
+    nextCompleteNeedCheckStartTime?: number,
 }
 
 export type Citizen = {
