@@ -9,6 +9,7 @@ import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
+import { playChatSimSound, SOUND_PATH_HAMMER } from "../sounds.js";
 
 export type RepairBuildingData = {
     building: Building,
@@ -73,9 +74,13 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
             inventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
         }
         if (inventoryWood && inventoryWood.counter > 0) {
-            const repairDuration = 1000;
+            const repairDuration = 2000;
             if (isCitizenAtPosition(citizen, building.position)) {
                 if (data.tempStartTime === undefined) data.tempStartTime = state.time;
+                const soundCounter = 3;
+                if (((state.time - data.tempStartTime) / repairDuration * soundCounter) % 1 < (state.tickInterval / repairDuration) * soundCounter) {
+                    playChatSimSound(SOUND_PATH_HAMMER, citizen.position, state, 1.2);
+                }
                 if (data.tempStartTime + repairDuration < state.time) {
                     data.tempStartTime = undefined;
                     building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
@@ -175,7 +180,13 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 addCitizenLogEntry(citizen, `building in Progress ${building.buildProgress} `, state);
-                if (buildingInventoryWood.counter > 0) buildingInventoryWood.counter--;
+                if (buildingInventoryWood.counter > 0) {
+                    buildingInventoryWood.counter--;
+                }
+            }
+            const soundCounter = 18;
+            if ((building.buildProgress * soundCounter) % 1 < progressPerTick * soundCounter) {
+                playChatSimSound(SOUND_PATH_HAMMER, citizen.position, state, 1.2);
             }
             building.buildProgress += progressPerTick;
             building.deterioration -= progressPerTick;

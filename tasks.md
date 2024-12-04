@@ -1,10 +1,6 @@
 Tasks:
 - add first sounds?
     - required sounds
-        - pickup mushroom: 
-            - make account off stream for freesound. Download on stream?
-            - option: https://freesound.org/people/edsward/sounds/343097/?
-            - credit file
         - tree cutting
         - tree falling
         - hammer sound
@@ -63,16 +59,11 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- fix starving
-- sounds
-    - How does sound work if i am zoomed in or out
-        - volume depends on zoom level. Play louder if close to "sound source"
-        - sounds have loudness: higher value -> can be heared from further away
-    - on automated tests
-        - prevent sounds from playing if running in the background
-    - work on higher speeds 
-        - if sound can be speed up, play until some speed cap. 
-        - if speed faster, play speed up sound
+- sound:
+    - pickup mushroom: 
+        - make account off stream for freesound. Download on stream?
+        - option: https://freesound.org/people/edsward/sounds/343097/?
+        - credit file
 
 
 --------------------------------------------------

@@ -7,6 +7,15 @@
             "author_name": "edsward",
             "license_url": "http://creativecommons.org/publicdomain/zero/1.0/",
             "license_name": "Creative Commons 0"
+        },
+        "hammer base sound": {
+            "sound_url": "https://freesound.org/people/16GPanskaToman_Kristian/sounds/496262/",
+            "sound_name": "Hammer, wood",
+            "author_url": "https://freesound.org/people/16GPanskaToman_Kristian/",
+            "author_name": "16GPanskaToman_Kristian",
+            "license_url": "http://creativecommons.org/publicdomain/zero/1.0/",
+            "license_name": "Creative Commons 0",
+            "helmiBlubComment": "shortened to single hit"
         }
     }
 }

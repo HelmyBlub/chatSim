@@ -24,7 +24,7 @@ export function onLoadCitizenStateDefaultTickFuntions() {
 }
 
 export function chatSimTick(state: ChatSimState) {
-    state.time += 16;
+    state.time += state.tickInterval;
     tickCitizens(state);
     tickChatSimMap(state);
     if (state.paintData.map.lockCameraToSelected && state.inputData.selected) {

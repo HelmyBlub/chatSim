@@ -79,6 +79,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
     const state: ChatSimState = {
         streamer: streamerName,
         time: 0,
+        tickInterval: 16,
         gameSpeed: 1,
         timPerDay: 100000,
         sunriseAt: 0.22,

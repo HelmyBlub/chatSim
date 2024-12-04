@@ -6,9 +6,8 @@ export const SOUNDS: { [key: string]: HTMLAudioElement } = {
 }
 
 export const SOUND_PATH_CUT = "sounds/cut.mp3";
-export const SOUND_PATH_HAMMER = "sounds/hammer.mp3";
+export const SOUND_PATH_HAMMER = "sounds/496262__16gpanskatoman_kristian__hammer-wood_shortened.mp3";
 export const SOUND_PATH_PICKUP = "sounds/343097__edsward__plopenhanced.wav";
-
 
 export function loadChatSimSounds() {
     SOUNDS[SOUND_PATH_CUT] = new Audio(SOUND_PATH_CUT);
@@ -34,7 +33,7 @@ export function playChatSimSound(audioPath: string, soundMapLocation: Position, 
     const maxHearingDistance = 300;
     if (distance > maxHearingDistance) return;
     const distanceVolumeFactor = 1 - Math.log(adjustedDistance) / Math.log(maxHearingDistance);
-    const volume = 1 * distanceVolumeFactor * state.soundVolume;
+    const volume = 1 * distanceVolumeFactor * state.soundVolume * volumeAmplify;
     playSound(SOUNDS[audioPath], state.gameSpeed, volume);
 }
 
