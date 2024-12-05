@@ -13,6 +13,8 @@ export type CitizenNeedFunctions = {
 
 export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
 
+const NEED_ORDER = [CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME];
+
 export function loadCitizenNeedsFunctions(state: ChatSimState) {
     loadCitizenNeedsFunctionsStarving(state);
     loadCitizenNeedsFunctionsFood(state);
@@ -44,12 +46,23 @@ export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSi
     return needData;
 }
 
-function checkAllNeeds(citizen: Citizen, state: ChatSimState) {
+export function citizenNeedFailingNeedFulfilled(citizen: Citizen, state: ChatSimState) {
+    if (citizen.needs.lastFailingNeed === undefined) return;
+    const startingNeedOrderIndex = NEED_ORDER.findIndex(n => n === citizen.needs.lastFailingNeed) + 1;
+    citizen.needs.lastFailingNeed = undefined;
+    checkAllNeeds(citizen, state, startingNeedOrderIndex);
+}
+
+function checkAllNeeds(citizen: Citizen, state: ChatSimState, startingNeedOrderIndex: number = 0) {
     const checkInterval = 1000;
-    citizen.needs.nextCompleteNeedCheckStartTime = state.time + checkInterval;
-    const needs = [CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME];
+    if (startingNeedOrderIndex === 0) citizen.needs.nextCompleteNeedCheckStartTime = state.time + checkInterval;
     let failingNeed: string | undefined = undefined;
-    for (let need of needs) {
+    for (let i = startingNeedOrderIndex; i < NEED_ORDER.length; i++) {
+        const need = NEED_ORDER[i];
+        if (need === citizen.needs.lastFailingNeed) {
+            failingNeed = need;
+            break;
+        }
         const needFunctions = state.functionsCitizenNeeds[need];
         if (!needFunctions.isFulfilled(citizen, state)) {
             failingNeed = need;

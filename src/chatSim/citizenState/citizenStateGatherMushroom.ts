@@ -53,6 +53,7 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroomIndex: nu
         citizen.inventory.items.push(inventoryMushroom);
     }
     inventoryMushroom.counter++;
+    addCitizenLogEntry(citizen, `picked up ${INVENTORY_MUSHROOM}. ${inventoryMushroom.counter} in inventory.`, state);
     playChatSimSound(SOUND_PATH_PICKUP, citizen.position, state);
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];

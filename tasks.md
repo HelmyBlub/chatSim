@@ -1,15 +1,12 @@
 Tasks:
 - refactor needs (wip)
-    - food need is still broken
+    - bug: food need is broken
     - check all needs
         - starving (looks good?)
         - sleep
         - food
         - home
-    - do some performance measure to compare
-        - brefore times
-            - 10 citizen ~1050ms
-            - 100 citizen ~370ms
+- bug: sound play more often on slower speeds
 
 - more images+animations
     - trading animation

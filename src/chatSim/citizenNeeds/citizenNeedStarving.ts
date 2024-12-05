@@ -4,6 +4,7 @@ import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenSt
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { INVENTORY_MUSHROOM } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_STARVING = "need starving";
 
@@ -28,7 +29,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.foodPerCent < CITIZEN_STARVING_FOOD_PER_CENT) {
             const mushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             if (mushrooms && mushrooms.counter > 0) {
-                setCitizenThought(citizen, [`I am starving.`], state);
+                setCitizenThought(citizen, [`Start Eating.`], state);
                 setCitizenStateEat(citizen, mushrooms, "inventory");
                 return;
             }
@@ -36,7 +37,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 1, true);
             return;
         } else {
-            citizen.needs.nextCompleteNeedCheckStartTime = state.time;
+            citizenNeedFailingNeedFulfilled(citizen, state);
             return;
         }
     }

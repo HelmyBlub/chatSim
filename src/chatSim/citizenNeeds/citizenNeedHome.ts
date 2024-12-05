@@ -2,6 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_HOME = "need home";
 
@@ -19,8 +20,16 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 }
 
 function tick(citizen: Citizen, state: ChatSimState) {
-    if (!citizen.home) {
-        if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
+    if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
+        citizenResetStateTo(citizen, CITIZEN_NEED_HOME);
+    }
+
+    if (citizen.stateInfo.stack.length === 0) {
+        if (citizen.home && citizen.home.deterioration <= 0.2) {
+            citizenNeedFailingNeedFulfilled(citizen, state);
+            return;
+        }
+        if (!citizen.home) {
             const availableHouse = state.map.buildings.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
             if (availableHouse) {
                 addCitizenThought(citizen, `I moved into a house from ${availableHouse.owner}`, state);
@@ -32,15 +41,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
                 setCitizenStateGetBuilding(citizen, "House");
             }
         }
-    }
-    if (citizen.home && citizen.home.deterioration > 0.2) {
-        if (citizen.stateInfo.type !== CITIZEN_NEED_HOME || citizen.stateInfo.stack.length === 0) {
-            if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) citizenResetStateTo(citizen, CITIZEN_NEED_HOME);
+        if (citizen.home && citizen.home.deterioration > 0.2) {
             if (citizen.home.deletedFromMap) {
                 citizen.home = undefined;
                 return;
             }
-
             addCitizenThought(citizen, `I need to repair my home.`, state);
             setCitizenStateRepairBuilding(citizen, citizen.home);
         }
@@ -51,8 +56,6 @@ function tick(citizen: Citizen, state: ChatSimState) {
             tickFunction(citizen, state);
             return;
         }
-    } else {
-        citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
     }
 }
 

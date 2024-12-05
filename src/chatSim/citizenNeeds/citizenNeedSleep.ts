@@ -3,6 +3,7 @@ import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRese
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
+import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
 export const CITIZEN_NEED_STATE_SLEEPING = "sleeping";
@@ -14,10 +15,25 @@ export function loadCitizenNeedsFunctionsSleep(state: ChatSimState) {
     }
 }
 
+function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
+    if (citizen.energyPerCent < 0.1) return false;
+    if (citizen.energyPerCent > 0.85) return true;
+
+    const time = getTimeOfDay(state.time, state);
+    const goToBedTime = citizen.goToBedTime;
+    const sleepDuration = citizen.sleepDuration;
+    const wakeUpTime = (goToBedTime + sleepDuration) % 1;
+    if ((goToBedTime > wakeUpTime && (time > goToBedTime || time < wakeUpTime))
+        || (goToBedTime < wakeUpTime && (time > goToBedTime && time < wakeUpTime))) {
+        sleep(citizen, [`I am tired and i want to sleep`], state);
+        return false;
+    }
+    return true;
+}
+
 function tick(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) {
-        citizen.stateInfo.type = CITIZEN_NEED_SLEEP;
-        citizen.stateInfo.stack = [];
+        citizenResetStateTo(citizen, CITIZEN_NEED_SLEEP);
     }
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.home && citizen.energyPerCent > 0.1) {
@@ -54,36 +70,11 @@ function tick(citizen: Citizen, state: ChatSimState) {
         citizen.energyPerCent += 16 / state.timPerDay / sleepDuration * sleepRegenerationFactor;
         if (citizen.energyPerCent > 1) {
             citizen.energyPerCent = 1;
-            citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
-            addCitizenThought(citizen, `Waking up. Back to work.`, state);
+            addCitizenThought(citizen, `Waking up.`, state);
+            citizenNeedFailingNeedFulfilled(citizen, state);
             return;
         }
     }
-}
-
-function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
-    if (citizen.energyPerCent < 0.1) {
-        sleep(citizen, ["I am falling asleep."], state);
-        return false;
-    }
-    if (citizen.energyPerCent < 0.3 && citizen.stateInfo.type === CITIZEN_NEED_SLEEP) return false;
-    if (citizen.energyPerCent > 0.99) {
-        return true;
-    }
-    if (citizen.energyPerCent > 0.9 && citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) {
-        return true;
-    }
-
-    const time = getTimeOfDay(state.time, state);
-    const goToBedTime = citizen.goToBedTime;
-    const sleepDuration = citizen.sleepDuration;
-    const wakeUpTime = (goToBedTime + sleepDuration) % 1;
-    if ((goToBedTime > wakeUpTime && (time > goToBedTime || time < wakeUpTime))
-        || (goToBedTime < wakeUpTime && (time > goToBedTime && time < wakeUpTime))) {
-        sleep(citizen, [`I am tired and i want to sleep`], state);
-        return false;
-    }
-    return true;
 }
 
 function sleep(citizen: Citizen, reason: string[], state: ChatSimState) {
