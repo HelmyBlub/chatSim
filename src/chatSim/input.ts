@@ -5,6 +5,7 @@ import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
+import { playSound, SOUND_PATH_HAMMER, SOUNDS } from "./sounds.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -220,6 +221,7 @@ function keyDown(event: KeyboardEvent, app: App) {
             }
             break;
         default:
+            playSound(SOUNDS[SOUND_PATH_HAMMER].audio[0], 1, 1);
             console.log(event.key, event.code);
             break;
     }

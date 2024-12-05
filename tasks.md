@@ -1,12 +1,7 @@
 Tasks:
-- refactor needs (wip)
-    - bug: food need is broken
-    - check all needs
-        - starving (looks good?)
-        - sleep
-        - food
-        - home
 - bug: sound play more often on slower speeds
+    - slowed downed sound sounds like played more times
+    - changed minimal playbackrate to 1. If gamespeed is slower, sound is still played back in speed 1
 
 - more images+animations
     - trading animation
@@ -53,19 +48,13 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- refactor needs:
-    - starving started
-- sound:
-    - sleep sound
-    - tree falling
-    - tree cutting with variations
-    - pickup mushroom: 
-        - make account off stream for freesound. Download on stream?
-        - option: https://freesound.org/people/edsward/sounds/343097/?
-        - credit file
-    - hammer sound
-        - building construction
-        - repairing
+- refactor needs (wip)
+    - bug: food need is broken
+    - check all needs
+        - starving (looks good?)
+        - sleep
+        - food
+        - home
 
 
 --------------------------------------------------

@@ -41,6 +41,7 @@ function loadAudio(path: string, volumeFactor: number = 1, soundVariations: numb
 
 export function playChatSimSound(audioPath: string, soundMapLocation: Position, state: ChatSimState, volumeAmplify: number = 1, maxHearingDistance: number = 300) {
     if (state.soundVolume === undefined || state.soundVolume <= 0) return;
+    if (state.gameSpeed < 0.1) return;
     const zoom = state.paintData.map.zoom;
     const zoomZ = (1 / zoom) * 200;
     //everything i see is distance 0 without z
@@ -58,11 +59,12 @@ export function playChatSimSound(audioPath: string, soundMapLocation: Position, 
     const distanceVolumeFactor = 1 - Math.log(adjustedDistance) / Math.log(maxHearingDistance);
     const soundData = SOUNDS[audioPath];
     const volume = 1 * distanceVolumeFactor * state.soundVolume * volumeAmplify * soundData.volumeFactor;
+    const playbackRate = Math.max(state.gameSpeed, 1);
     if (soundData.audio.length === 1) {
-        playSound(soundData.audio[0], state.gameSpeed, volume);
+        playSound(soundData.audio[0], playbackRate, volume);
     } else {
         const randomSoundVariation = Math.floor(Math.random() * soundData.audio.length);
-        playSound(soundData.audio[randomSoundVariation], state.gameSpeed, volume);
+        playSound(soundData.audio[randomSoundVariation], playbackRate, volume);
     }
 }
 
