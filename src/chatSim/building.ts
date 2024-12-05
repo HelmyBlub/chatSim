@@ -2,10 +2,10 @@ import { IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_WOOD_P
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
 import { IMAGES } from "./images.js";
-import { Inventory } from "./inventory.js";
+import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } from "./inventory.js";
 import { isCitizenInInteractionDistance } from "./jobs/job.js";
 import { BUILDING_DATA } from "./jobs/jobBuildingContruction.js";
-import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { removeBuildingFromMap } from "./map.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
@@ -24,37 +24,17 @@ export type Building = {
 
 export type BuildingMarket = Building & {
     queue?: Citizen[]
-    displayedItem?: string
+    displayedItem?: string,
+    counter: {
+        items: InventoryItem[],
+        money: number,
+    }
 }
-const DISPLAY_ITEM_PAINT_DATA: { [key: string]: { size: number, path: string, max: number, offset: Position, offsetPerItem: Position } } = {
-};
 
-export function onLoadDisplayItemPaintData() {
-    DISPLAY_ITEM_PAINT_DATA[INVENTORY_MUSHROOM] = {
-        size: 14,
-        max: 13,
-        path: IMAGE_PATH_MUSHROOM,
-        offset: {
-            x: - 38,
-            y: -2,
-        },
-        offsetPerItem: {
-            x: 5,
-            y: 0
-        }
-    };
-    DISPLAY_ITEM_PAINT_DATA[INVENTORY_WOOD] = {
-        size: 30,
-        max: 10,
-        path: IMAGE_PATH_WOOD_PLANK,
-        offset: {
-            x: - 38,
-            y: -2,
-        },
-        offsetPerItem: {
-            x: 0,
-            y: -2,
-        }
+export function marketGetCounterPosition(market: BuildingMarket): Position {
+    return {
+        x: market.position.x,
+        y: market.position.y - 2,
     }
 }
 
@@ -126,7 +106,7 @@ export function tickBuildings(state: ChatSimState) {
 }
 
 export function createBuilding(owner: Citizen, position: Position, type: BuildingType): Building {
-    return {
+    const building: Building = {
         type: type,
         owner: owner,
         inventory: {
@@ -150,6 +130,17 @@ export function createBuilding(owner: Citizen, position: Position, type: Buildin
         buildProgress: 0,
         deterioration: 0,
     };
+    if (type === "Market") {
+        const market: BuildingMarket = {
+            ...building,
+            counter: {
+                items: [],
+                money: 0
+            }
+        }
+        return market;
+    }
+    return building;
 }
 
 export function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimState) {
@@ -202,28 +193,33 @@ export function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimStat
                     drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX, paintPos.y - buildingPaintSize / 2 + houseNameOffsetY);
                 }
             } else if (building.type === "Market") {
+                const market = building as BuildingMarket;
                 const jobOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.job.name).width / 2);
                 drawTextWithOutline(ctx, building.inhabitedBy.job.name, paintPos.x - jobOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketJobOffsetY);
                 drawTextWithOutline(ctx, building.inhabitedBy.name, paintPos.x - nameOffsetX - 2, paintPos.y - buildingPaintSize / 2 + marketNameOffsetY);
-                paintInventoryOnMarket(ctx, building, state);
+                paintInventoryOnMarket(ctx, market, state);
             }
         }
     }
 }
 
 function paintInventoryOnMarket(ctx: CanvasRenderingContext2D, market: BuildingMarket, state: ChatSimState) {
-    if (!market.displayedItem) return;
-    const data = DISPLAY_ITEM_PAINT_DATA[market.displayedItem];
-
-    const paintPos = mapPositionToPaintPosition(market.position, state.paintData.map);
-    const item = market.inventory.items.find(i => i.name === market.displayedItem);
-    if (!item || item.counter === 0) return;
-    const image = IMAGES[data.path];
-    for (let i = 0; i < Math.min(data.max, item.counter); i++) {
-        ctx.drawImage(image, 0, 0, image.width, image.height,
-            paintPos.x + i * data.offsetPerItem.x + data.offset.x,
-            paintPos.y + i * data.offsetPerItem.y + data.offset.y,
-            data.size, data.size
-        );
+    if (market.displayedItem) {
+        const marketPaintPos = mapPositionToPaintPosition(market.position, state.paintData.map);
+        const marketDisplayPosition = { x: marketPaintPos.x - 38, y: marketPaintPos.y - 2 };
+        const item = market.inventory.items.find(i => i.name === market.displayedItem);
+        if (!item || item.counter === 0) return;
+        paintInventoryItem(ctx, item, marketDisplayPosition);
+    }
+    if (market.counter.items.length > 0) {
+        const item = market.counter.items[0];
+        const marketCounterPosition = marketGetCounterPosition(market);
+        const paintPos = mapPositionToPaintPosition(marketCounterPosition, state.paintData.map);
+        paintInventoryItem(ctx, item, paintPos);
+    }
+    if (market.counter.money > 0) {
+        const marketCounterPosition = marketGetCounterPosition(market);
+        const paintPos = mapPositionToPaintPosition(marketCounterPosition, state.paintData.map);
+        paintInventoryMoney(ctx, market.counter.money, paintPos);
     }
 }

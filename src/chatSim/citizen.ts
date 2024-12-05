@@ -2,28 +2,39 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
-import { Building } from "./building.js";
+import { Building, marketGetCounterPosition } from "./building.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
-import { inventoryGetUsedCapacity, Inventory } from "./inventory.js";
+import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney } from "./inventory.js";
 import { CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
-import { calculateDirection, INVENTORY_MUSHROOM, INVENTORY_WOOD, nextRandom } from "./main.js";
+import { calculateDirection, nextRandom } from "./main.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
 import { Tree } from "./tree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
+import { CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER, CitizenStateMarketTradeBuyerData, CitizenStateMarketTradeData, CitizenStateMarketTradeSellerData } from "./citizenState/citizenStateMarket.js";
 
 export type CitizenStateInfo = {
     type: string,
-    stack: {
-        state: string,
-        data?: any,
-    }[],
+    stack: CitizenState[],
     previousTaskFailed?: boolean,
     actionStartTime?: number,
     thoughts?: string[],
+}
+
+export type CitizenState = {
+    state: string,
+    data?: any,
+    returnedData?: CitizenStateSuccessData,
+    subState?: string,
+    subStateStartTime?: number,
+}
+
+export type CitizenStateSuccessData = {
+    type: string,
 }
 
 export type CitizenNeeds = {
@@ -126,6 +137,13 @@ export function citizenResetStateTo(citizen: Citizen, type: string) {
 
 export function citizenStateStackTaskSuccess(citizen: Citizen) {
     citizen.stateInfo.stack.shift();
+    citizen.stateInfo.previousTaskFailed = undefined;
+    if (citizen.stateInfo.stack.length > 0) citizen.stateInfo.stack[0].returnedData = undefined;
+}
+
+export function citizenStateStackTaskSuccessWithData(citizen: Citizen, data: CitizenStateSuccessData) {
+    citizen.stateInfo.stack.shift();
+    if (citizen.stateInfo.stack.length > 0) citizen.stateInfo.stack[0].returnedData = data;
     citizen.stateInfo.previousTaskFailed = undefined;
 }
 
@@ -307,6 +325,32 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
         const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
         const nameYSpacing = 5;
         drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
+    }
+    if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER) {
+        const citizenState = citizen.stateInfo.stack[0];
+        if (citizenState.subState === "putOnCounter") {
+            const timePerCent = (state.time - citizenState.subStateStartTime!) / 1000;
+            const data = citizenState.data as CitizenStateMarketTradeData;
+            if (data.seller) {
+                const sellerData = citizenState.data as CitizenStateMarketTradeSellerData;
+            } else {
+                const moneySize = 10;
+                const buyerData = citizenState.data as CitizenStateMarketTradeBuyerData;
+                const animationStartPaintPosition = {
+                    x: paintPos.x - moneySize / 2,
+                    y: paintPos.y - 8,
+                }
+                const marketCoutnerPosition = marketGetCounterPosition(data.market);
+                const animationEndOffset = {
+                    x: marketCoutnerPosition.x - citizen.position.x + moneySize / 2,
+                    y: marketCoutnerPosition.y - citizen.position.y + 8,
+                }
+                paintInventoryMoney(ctx, buyerData.money, {
+                    x: animationStartPaintPosition.x + animationEndOffset.x * timePerCent,
+                    y: animationStartPaintPosition.y + animationEndOffset.y * timePerCent,
+                });
+            }
+        }
     }
 }
 

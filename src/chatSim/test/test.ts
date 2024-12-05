@@ -6,7 +6,8 @@ import { createJob } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
 import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
 import { createJobMarket } from "../jobs/jobMarket.js";
-import { createDefaultChatSimState, getDay, INVENTORY_MUSHROOM } from "../main.js";
+import { createDefaultChatSimState, getDay } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { ChatSimMap, createBuildingOnRandomTile, createMap, tickChatSimMap } from "../map.js";
 import { chatSimTick } from "../tick.js";
 

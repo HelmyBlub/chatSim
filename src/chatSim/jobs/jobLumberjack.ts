@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, setCitizenThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
-import { INVENTORY_WOOD } from "../main.js";
+import { INVENTORY_WOOD } from "../inventory.js";
 import { Tree } from "../tree.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";

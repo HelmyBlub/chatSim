@@ -1,7 +1,8 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { INVENTORY_WOOD, nextRandom, SKILL_GATHERING } from "../main.js";
+import { nextRandom, SKILL_GATHERING } from "../main.js";
+import { INVENTORY_WOOD } from "../inventory.js";
 import { removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";

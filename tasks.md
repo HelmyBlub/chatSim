@@ -1,17 +1,23 @@
 Tasks:
-- bug: sound play more often on slower speeds
-    - slowed downed sound sounds like played more times
-    - changed minimal playbackrate to 1. If gamespeed is slower, sound is still played back in speed 1
-
 - more images+animations
     - trading animation
-        - money image
         - after successfull "negotiation" do "trade"
+        - next: implement function stateTradingWithCustomer
+            - citizenState needs to return some result 
+            - next steps should be able to use it
+            - case:
+                - customer negotiation of price and amount
+                - trade animation for negotatiated values
         - on trade move money and item between citizens
-            - successfull trade steps
+            - successfull customer buy trade steps
                 - customer put money on counter for marketCitizen
                 - and takes item from market inventory
                 - marketCitizen takes money from counter into own inventory
+            - successfull customer sell trade steps
+                - customer put item on counter for marketCitizen
+                - marketCitizen puts money on counter
+                    - and takes item from coutner and puts it into market inventory
+                - citizen takes money from counter
 
             - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
             - currently happes instantly and code relies on it, which makes it hard to put animation between
@@ -48,6 +54,9 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- bug: sound play more often on slower speeds
+    - slowed downed sound sounds like played more times
+    - changed minimal playbackrate to 1. If gamespeed is slower, sound is still played back in speed 1
 - refactor needs (wip)
     - bug: food need is broken
     - check all needs

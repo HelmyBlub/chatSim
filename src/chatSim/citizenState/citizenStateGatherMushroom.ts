@@ -1,7 +1,8 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
-import { INVENTORY_MUSHROOM, nextRandom, SKILL_GATHERING } from "../main.js";
+import { nextRandom, SKILL_GATHERING } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";

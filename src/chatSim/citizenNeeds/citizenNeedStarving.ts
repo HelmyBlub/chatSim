@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo, setCitizenThought } from "../citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
-import { INVENTORY_MUSHROOM } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 

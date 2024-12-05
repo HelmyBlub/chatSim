@@ -1,11 +1,12 @@
 import { IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { ChatSimState, Mushroom, Position } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
-import { Building, paintBuildings } from "./building.js";
+import { Building, BuildingMarket, paintBuildings } from "./building.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { IMAGES } from "./images.js";
-import { getTimeOfDay, getTimeOfDayString, INVENTORY_MUSHROOM } from "./main.js";
+import { getTimeOfDay, getTimeOfDayString } from "./main.js";
+import { INVENTORY_MUSHROOM } from "./inventory.js";
 import { paintTrees, Tree } from "./tree.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
@@ -48,7 +49,10 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        if (citizen.stateInfo.stack.length > 0) ctx.fillText(`        ${citizen.stateInfo.stack[0].state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizen.stateInfo.stack.length > 0) {
+            ctx.fillText(`        ${citizen.stateInfo.stack[0].state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            if (citizen.stateInfo.stack[0].subState) ctx.fillText(`            ${citizen.stateInfo.stack[0].subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
         for (let item of citizen.inventory.items) {
             ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
@@ -77,6 +81,15 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
         for (let item of building.inventory.items) {
             ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+        if (building.type === "Market") {
+            const market = building as BuildingMarket;
+            ctx.fillText(`    Counter:`, offsetX, offsetY + lineSpacing * lineCounter++);
+            ctx.fillText(`        money: ${market.counter.money}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            ctx.fillText(`        items:`, offsetX, offsetY + lineSpacing * lineCounter++);
+            for (let item of market.counter.items) {
+                ctx.fillText(`            ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            }
         }
     } else if (selected.type === "tree") {
         const tree: Tree = selected.object;

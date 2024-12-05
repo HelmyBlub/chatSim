@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingType } from "../building.js";
 import { addCitizenLogEntry, addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
-import { INVENTORY_WOOD } from "../main.js";
+import { INVENTORY_WOOD } from "../inventory.js";
 import { createBuildingOnRandomTile } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";

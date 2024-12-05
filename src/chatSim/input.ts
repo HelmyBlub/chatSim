@@ -221,7 +221,6 @@ function keyDown(event: KeyboardEvent, app: App) {
             }
             break;
         default:
-            playSound(SOUNDS[SOUND_PATH_HAMMER].audio[0], 1, 1);
             console.log(event.key, event.code);
             break;
     }

@@ -13,9 +13,10 @@ export type CitizenNeedFunctions = {
 
 export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
 
-const NEED_ORDER = [CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME];
+const NEED_ORDER: string[] = [];
 
 export function loadCitizenNeedsFunctions(state: ChatSimState) {
+    NEED_ORDER.push(CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME);
     loadCitizenNeedsFunctionsStarving(state);
     loadCitizenNeedsFunctionsFood(state);
     loadCitizenNeedsFunctionsHome(state);

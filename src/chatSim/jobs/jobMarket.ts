@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
-import { addCitizenThought, Citizen, CitizenStateInfo, citizenStateStackTaskSuccess, isCitizenThinking, setCitizenThought } from "../citizen.js"
+import { addCitizenThought, Citizen, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -10,6 +10,7 @@ import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "../citizenState/citizenStateGetItem.js";
+import { setCitizenStatePutItemOnMarketCounter } from "../citizenState/citizenStateMarket.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
@@ -19,17 +20,28 @@ export type CitizenJobMarket = CitizenJob & {
     maxCounterDays: number,
 }
 
-export type JobMarketState = "checkInventory" | "waitingForCustomers" | "getMarketBuilding" | "servingCustomer";
+export type JobMarketState = "checkInventory" | "waitingForCustomers" | "getMarketBuilding" | "servingCustomer" | "negotiationWithCustomer" | "tradingWithCustomer";
 
-type JobMarketStateInfo = CitizenStateInfo & {
+type TradeData = CitizenStateSuccessData & {
+    itemName: string,
+    itemAmount: number,
+    price: number,
+    sellToMarket: boolean,
+}
+
+type JobMarketStateInfo = CitizenState & {
     state: JobMarketState,
 }
+
+const TRADE_DATA = "tradeData";
 
 const STRING_TO_STATE_MAPPING: { [key: string]: (citizen: Citizen, job: CitizenJob, state: ChatSimState) => void } = {
     "checkInventory": stateCheckInventory,
     "waitingForCustomers": stateWaitingForCustomers,
     "getMarketBuilding": stateGetMarketBuilding,
     "servingCustomer": stateServingCustomer,
+    "negotiationWithCustomer": stateNegotiationWithCustomer,
+    "tradingWithCustomer": stateTradingWithCustomer,
 };
 
 export function marketServeCustomer(market: BuildingMarket, customer: Citizen): boolean {
@@ -79,7 +91,8 @@ export function createJobMarket(state: ChatSimState, jobname: string, sellItemNa
 export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
         if (!job.marketBuilding || job.marketBuilding.deterioration >= 1) {
-            citizen.stateInfo.stack.unshift({ state: "getMarketBuilding" });
+            const state: JobMarketState = "getMarketBuilding";
+            citizen.stateInfo.stack.unshift({ state: state });
         } else {
             const day = getDay(state);
             if (job.currentDayCounter !== day) {
@@ -133,6 +146,71 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
 }
 
 function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    const jobMarket = job as CitizenJobMarket;
+    if (!jobMarket.currentCustomer || !jobMarket.marketBuilding) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+    if (!isCitizenInInteractionDistance(jobMarket.currentCustomer, citizen.position)) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+    const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
+    if (stateInfo.returnedData === undefined) {
+        if (stateInfo.subState === "startedTrade") {
+            citizenStateStackTaskSuccess(citizen);
+            return;
+        }
+        const state: JobMarketState = "negotiationWithCustomer";
+        citizen.stateInfo.stack.unshift({ state: state });
+        return;
+    } else {
+        if (stateInfo.returnedData.type === TRADE_DATA) {
+            stateInfo.subState = "startedTrade";
+            const tradeData: TradeData = stateInfo.returnedData as TradeData;
+            const state: JobMarketState = "tradingWithCustomer";
+            citizen.stateInfo.stack.unshift({ state: state, data: tradeData });
+            return;
+        }
+    }
+}
+
+function stateTradingWithCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
+    const jobMarket = job as CitizenJobMarket;
+    if (!jobMarket.currentCustomer || !jobMarket.marketBuilding) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+    if (!isCitizenInInteractionDistance(jobMarket.currentCustomer, citizen.position)) {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+    const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
+    const data = stateInfo.data as TradeData;
+
+    if (stateInfo.subState === undefined) {
+        if (data.sellToMarket) {
+            setCitizenStatePutItemOnMarketCounter(citizen, jobMarket.marketBuilding, false, data.itemName, data.itemAmount, data.price, true, jobMarket.marketBuilding.inventory);
+            stateInfo.subState = "trading";
+            return;
+        } else {
+            setCitizenStatePutItemOnMarketCounter(citizen, jobMarket.marketBuilding, true, data.itemName, data.itemAmount, data.price, true, jobMarket.marketBuilding.inventory);
+            stateInfo.subState = "trading";
+            return;
+        }
+    }
+
+    if (stateInfo.subState === "trading") {
+        const intention: ChatMessageMarketTradeIntention = {
+            type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
+            intention: "tradeFullfiled",
+        }
+        addChatMessage(citizen.lastChat!, citizen, `Thanks for shopping!`, state, intention);
+        citizenStateStackTaskSuccess(citizen);
+    }
+}
+
+function stateNegotiationWithCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     const jobMarket = job as CitizenJobMarket;
     if (!jobMarket.currentCustomer || !jobMarket.marketBuilding) {
         citizenStateStackTaskSuccess(citizen);
@@ -216,17 +294,14 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
             }
         }
         if (customerIntention.intention === "accept") {
-            const intention: ChatMessageMarketTradeIntention = {
-                type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
-                intention: "tradeFullfiled",
+            const data: TradeData = {
+                type: TRADE_DATA,
+                itemName: customerIntention.itemName!,
+                itemAmount: customerIntention.itemAmount!,
+                price: customerIntention.singlePrice! * customerIntention.itemAmount!,
+                sellToMarket: customerIntention.sellToMarket === true,
             }
-
-            if (customerIntention.sellToMarket) {
-                sellItemToMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
-            } else {
-                buyItemFromMarket(jobMarket.marketBuilding, jobMarket.currentCustomer, customerIntention.itemName!, state, customerIntention.itemAmount);
-            }
-            addChatMessage(citizen.lastChat, citizen, `Thanks for shopping!`, state, intention);
+            citizenStateStackTaskSuccessWithData(citizen, data);
         }
     }
 }

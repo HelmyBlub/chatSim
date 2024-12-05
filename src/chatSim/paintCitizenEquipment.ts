@@ -2,7 +2,7 @@ import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_HAMMER, IMAGE_PATH_HELMET
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { Citizen } from "./citizen.js";
 import { IMAGES } from "./images.js";
-import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./main.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
 export type CitizenEquipment = "Helmet" | "Axe" | "Basket" | "Hammer" | "WoodPlanks";

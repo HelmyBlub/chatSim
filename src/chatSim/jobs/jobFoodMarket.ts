@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
-import { INVENTORY_MUSHROOM } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CitizenJobMarket, createJobMarket, tickMarket } from "./jobMarket.js";
 
 export type CitizenJobFoodMarket = CitizenJobMarket & {

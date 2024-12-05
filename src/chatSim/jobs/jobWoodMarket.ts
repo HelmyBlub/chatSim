@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
-import { INVENTORY_WOOD } from "../main.js";
+import { INVENTORY_WOOD } from "../inventory.js";
 import { CitizenJobMarket, createJobMarket, tickMarket } from "./jobMarket.js";
 
 export type CitizenJobWoodMarket = CitizenJobMarket & {

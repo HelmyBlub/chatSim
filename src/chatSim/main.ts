@@ -1,4 +1,3 @@
-import { onLoadDisplayItemPaintData } from "./building.js";
 import { Position, ChatSimState, App, RandomSeed } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
@@ -12,8 +11,6 @@ import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 
 export const SKILL_GATHERING = "Gathering";
-export const INVENTORY_MUSHROOM = "Mushroom";
-export const INVENTORY_WOOD = "Wood";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
 
 export type Position3D = Position & { z: number };
@@ -132,7 +129,6 @@ function initMyApp() {
     const app = chatSimStateInit("HelmiBlub");
     const state = app.state;
     loadLocalStorageChatters(state);
-    onLoadDisplayItemPaintData();
     loadImages();
     loadChatSimSounds();
     //@ts-ignore

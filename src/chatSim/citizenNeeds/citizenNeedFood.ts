@@ -3,7 +3,7 @@ import { Citizen, isCitizenThinking, setCitizenThought, addCitizenThought, citiz
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
-import { INVENTORY_MUSHROOM } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 

@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "../citizenNeeds/citizenNeedFood.js";
 import { InventoryItem } from "../inventory.js";
-import { INVENTORY_MUSHROOM } from "../main.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
 export type CitizenStateEatData = {

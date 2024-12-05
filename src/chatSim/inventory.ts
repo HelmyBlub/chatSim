@@ -1,5 +1,7 @@
-import { ChatSimState } from "./chatSimModels.js";
+import { IMAGE_PATH_MONEY, IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
 import { addCitizenLogEntry, Citizen } from "./citizen.js";
+import { IMAGES } from "./images.js";
 import { isCitizenAtPosition } from "./jobs/job.js";
 
 export type InventoryItem = {
@@ -11,6 +13,31 @@ export type Inventory = {
     items: InventoryItem[],
     reservedSpace?: InventoryItem[],
     size: number,
+}
+
+export const INVENTORY_MUSHROOM = "Mushroom";
+export const INVENTORY_WOOD = "Wood";
+
+export function paintInventoryMoney(ctx: CanvasRenderingContext2D, money: number, paintPosition: Position) {
+    const moneySize = 10;
+    for (let i = 0; i < money; i++) {
+        ctx.drawImage(IMAGES[IMAGE_PATH_MONEY], 0, 0, 100, 100,
+            paintPosition.x + moneySize / 2,
+            paintPosition.y - i * 0.5 + moneySize / 2,
+            moneySize, moneySize
+        );
+    }
+}
+
+export function paintInventoryItem(ctx: CanvasRenderingContext2D, item: InventoryItem, paintPosition: Position) {
+    switch (item.name) {
+        case INVENTORY_MUSHROOM:
+            paintMushroom(ctx, item, paintPosition);
+            break;
+        case INVENTORY_WOOD:
+            paintWoodPlanks(ctx, item, paintPosition);
+            break;
+    }
 }
 
 export function inventoryGetMissingReserved(inventory: Inventory, itemName: string): number {
@@ -114,4 +141,26 @@ export function inventoryPutItemInto(itemName: string, inventory: Inventory, amo
     }
     item.counter += actualAmount;
     return actualAmount;
+}
+
+function paintMushroom(ctx: CanvasRenderingContext2D, item: InventoryItem, paintPosition: Position) {
+    for (let i = 0; i < Math.min(item.counter, 10); i++) {
+        const mushroomSize = 14;
+        ctx.drawImage(IMAGES[IMAGE_PATH_MUSHROOM], 0, 0, 200, 200,
+            paintPosition.x + i * 2,
+            paintPosition.y,
+            mushroomSize, mushroomSize
+        );
+    }
+}
+
+function paintWoodPlanks(ctx: CanvasRenderingContext2D, item: InventoryItem, paintPosition: Position) {
+    for (let i = 0; i < Math.min(item.counter, 10); i++) {
+        const woodPlankSize = 30;
+        ctx.drawImage(IMAGES[IMAGE_PATH_WOOD_PLANK], 0, 0, 200, 200,
+            paintPosition.x,
+            paintPosition.y - i * 2,
+            woodPlankSize, woodPlankSize
+        );
+    }
 }
