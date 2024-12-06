@@ -1,5 +1,4 @@
 Tasks:
-- bug: camera move keys not working
 - zoom in to mouse cursor not map middle
 - mushroom pickup behavior
     - vision radius different for night and day
@@ -24,6 +23,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- bug: camera move keys not working
 - tab to switch between selected visible citizens?
 - selecting click should select closest not first
 - improved code

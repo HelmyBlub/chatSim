@@ -174,10 +174,24 @@ function mouseWheel(event: WheelEvent, state: ChatSimState) {
     const maxZoom = 10;
     const minZoom = 0.1;
     event.preventDefault();
+    const relativeCanvasMap = browserWindowPositionToCanvasMapPosition({ x: event.clientX, y: event.clientY }, state.canvas, state.paintData.map);
+    const previouseMouseMapPosition = mapCanvasPositionToMapPosition(relativeCanvasMap, state.paintData.map);
     state.paintData.map.zoom *= event.deltaY < 0 ? 1 + zoomFactor : 1 / (1 + zoomFactor);
-    if (Math.abs(1 - state.paintData.map.zoom) < zoomFactor * 0.80) state.paintData.map.zoom = 1;
+    if (Math.abs(1 - state.paintData.map.zoom) < zoomFactor * (1 - zoomFactor)) state.paintData.map.zoom = 1;
     if (state.paintData.map.zoom > maxZoom) state.paintData.map.zoom = maxZoom;
     if (state.paintData.map.zoom < minZoom) state.paintData.map.zoom = minZoom;
+    const newMouseMapPosition = mapCanvasPositionToMapPosition(relativeCanvasMap, state.paintData.map);
+    state.paintData.map.cameraPosition.x += previouseMouseMapPosition.x - newMouseMapPosition.x;
+    state.paintData.map.cameraPosition.y += previouseMouseMapPosition.y - newMouseMapPosition.y;
+}
+
+function browserWindowPositionToCanvasMapPosition(mousePosition: Position, canvas: HTMLCanvasElement | undefined, paintDataMap: PaintDataMap): Position {
+    if (canvas === undefined) throw "should not happen";
+    const boundingRect = canvas.getBoundingClientRect();
+    return {
+        x: mousePosition.x - boundingRect.left - paintDataMap.paintOffset.x,
+        y: mousePosition.y - boundingRect.top - paintDataMap.paintOffset.y,
+    }
 }
 
 function keyUp(event: KeyboardEvent, state: ChatSimState) {
