@@ -1,10 +1,10 @@
 import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, CitizenState, citizenStateStackTaskSuccess } from "../citizen.js";
+import { addCitizenThought, Citizen, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
-import { JobMarketState, marketCanServeCustomer, marketServeCustomer } from "../jobs/jobMarket.js";
+import { JobMarketState, marketCanServeCustomer, marketServeCustomer, TRADE_DATA, TradeData } from "../jobs/jobMarket.js";
 import { Inventory, InventoryItem, inventoryPutItemInto } from "../inventory.js";
 
 export type CitizenStateMarketQueue = {
@@ -41,14 +41,14 @@ type CitizenStateMarketTradeStart = {
 
 export const CITIZEN_STATE_MARKET_TRADE_ITEM_WITH = "MarketTradeItemWith";
 export const CITIZEN_STATE_MARKET_ENTER_QUEUE = "MarketEnterQueue";
-export const CITIZEN_STATE_MARKET_TRADE_INTERACTION = "MarketTradeInteraction";
-export const CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER = "MarketPutItemOnCounter";
+export const CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION = "MarketTradeNegotiation";
+export const CITIZEN_STATE_MARKET_ITEM_EXCHANGE = "MarketItemExchange";
 
 export function onLoadCitizenStateDefaultTickMarketFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_TRADE_ITEM_WITH] = tickCitizenStateTradeItemWithMarket;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_ENTER_QUEUE] = tickCitizenStateEnterMarketQueue;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_TRADE_INTERACTION] = tickCitizenStateMarketTradeInteraction;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER] = tickCitizenStateMarketPutItemOnCounter;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION] = tickCitizenStateMarketTradeCustomerNegotiation;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_MARKET_ITEM_EXCHANGE] = tickCitizenStateMarketItemExchange;
 }
 
 export function setCitizenStateTradeItemWithMarket(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number) {
@@ -61,15 +61,15 @@ export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: Buildi
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data });
 }
 
-export function setCitizenStateMarketTradeInteraction(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number | undefined = undefined): boolean {
+export function setCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number | undefined = undefined): boolean {
     const canServe = marketServeCustomer(market, citizen);
     if (!canServe) return false;
     const data: CitizenStateMarketTradeStart = { market: market, itemName: itemName, itemAmount: itemAmount, sellToMarket: sellToMarket };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_INTERACTION, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION, data: data });
     return true;
 }
 
-export function setCitizenStatePutItemOnMarketCounter(citizen: Citizen, market: BuildingMarket, seller: boolean, itemName: string, itemAmount: number, money: number, waiting: boolean, inventory: Inventory) {
+export function setCitizenStateMarketItemExchange(citizen: Citizen, market: BuildingMarket, seller: boolean, itemName: string, itemAmount: number, money: number, waiting: boolean, inventory: Inventory) {
     let data: CitizenStateMarketTradeData;
     if (seller) {
         const tempData: CitizenStateMarketTradeSellerData = {
@@ -94,10 +94,10 @@ export function setCitizenStatePutItemOnMarketCounter(citizen: Citizen, market: 
         }
         data = tempData;
     }
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ITEM_EXCHANGE, data: data });
 }
 
-function tickCitizenStateMarketPutItemOnCounter(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0] as CitizenState;
     const data = citizenState.data as CitizenStateMarketTradeData;
     if (citizenState.subState === undefined) {
@@ -269,7 +269,7 @@ function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState)
     }
 }
 
-function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const citizenState = citizen.stateInfo.stack[0] as CitizenState;
         const data = citizenState.data as CitizenStateMarketTradeStart;
@@ -330,9 +330,14 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                                     sellToMarket: intention.sellToMarket,
                                 }
                                 addChatMessage(chat, citizen, `Yes please!`, state, myIntention);
-                                citizenState.subState = "putOnCounter";
-                                citizenState.subStateStartTime = state.time;
-                                setCitizenStatePutItemOnMarketCounter(citizen, data.market, true, intention.itemName!, amount, amount * intention.singlePrice, false, citizen.inventory);
+                                const tradeData: TradeData = {
+                                    type: TRADE_DATA,
+                                    itemAmount: amount,
+                                    itemName: intention.itemName!,
+                                    price: amount * intention.singlePrice,
+                                    sellToMarket: true,
+                                }
+                                citizenStateStackTaskSuccessWithData(citizen, tradeData);
                                 return;
                             } else {
                                 if (citizen.money < totalPrice) {
@@ -354,9 +359,14 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                                     message = `Yes please!`;
                                 }
                                 addChatMessage(chat, citizen, message, state, myIntention);
-                                citizenState.subState = "putOnCounter";
-                                citizenState.subStateStartTime = state.time;
-                                setCitizenStatePutItemOnMarketCounter(citizen, data.market, false, intention.itemName!, amount, finalPrice, false, citizen.inventory);
+                                const tradeData: TradeData = {
+                                    type: TRADE_DATA,
+                                    itemAmount: amount,
+                                    itemName: intention.itemName!,
+                                    price: finalPrice,
+                                    sellToMarket: false,
+                                }
+                                citizenStateStackTaskSuccessWithData(citizen, tradeData);
                                 return;
                             }
                         }
@@ -371,8 +381,6 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                             citizenState.subState = undefined;
                             citizenState.subStateStartTime = undefined;
                         }
-                    } else if (citizenState.subState === "putOnCounter" && citizenState.subStateStartTime !== undefined) {
-                        citizenStateStackTaskSuccess(citizen);
                     } else {
                         const intention: ChatMessageMarketTradeIntention = {
                             type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
@@ -404,7 +412,7 @@ function tickCitizenStateTradeItemWithMarket(citizen: Citizen, state: ChatSimSta
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (citizenState.subState === "startedTrade") {
+        if (citizenState.subState === "itemExchange") {
             citizenStateStackTaskSuccess(citizen);
             return;
         }
@@ -412,14 +420,22 @@ function tickCitizenStateTradeItemWithMarket(citizen: Citizen, state: ChatSimSta
             if (data.market.inhabitedBy && isCitizenAtPosition(data.market.inhabitedBy, data.market.position)) {
                 if (data.market.inhabitedBy.stateInfo.stack.length > 0) {
                     const marketState: JobMarketState = data.market.inhabitedBy.stateInfo.stack[0].state as JobMarketState;
-                    if (citizenState.subState !== "joinedQueue" && (marketHasQueue(data.market) || marketState !== "waitingForCustomers")) {
+                    if (citizenState.subState === "startedTrade") {
+                        if (citizenState.returnedData && citizenState.returnedData.type === TRADE_DATA) {
+                            const tradeData = citizenState.returnedData as TradeData;
+                            setCitizenStateMarketItemExchange(citizen, data.market, tradeData.sellToMarket, tradeData.itemName, tradeData.itemAmount, tradeData.price, false, citizen.inventory);
+                            citizenState.subState = "itemExchange";
+                            return;
+                        }
+                    }
+                    if (citizenState.subState === undefined && (marketHasQueue(data.market) || marketState !== "waitingForCustomers")) {
                         citizenState.subState = "joinedQueue";
                         addCitizenThought(citizen, `I have to join the queue.`, state);
                         setCitizenStateEnterMarketQueue(citizen, data.market);
                         return;
                     } else {
                         citizenState.subState = "startedTrade";
-                        setCitizenStateMarketTradeInteraction(citizen, data.market, data.sellToMarket, data.itemName, data.itemAmount);
+                        setCitizenStateMarketTradeCustomerNegotiation(citizen, data.market, data.sellToMarket, data.itemName, data.itemAmount);
                         return;
                     }
                 }

@@ -113,6 +113,7 @@ function initTests() {
     activeTests.push(testCitizenShouldBuildHome());
     activeTests.push(testPerformance10Citizens());
     activeTests.push(testPerformance100Citizens());
+    activeTests.push(testPerformance10000Citizens());
     activeTests.push(testMarketQueue());
 }
 
@@ -252,6 +253,32 @@ function testPerformance100Citizens(): Test {
     }
     return test;
 }
+
+function testPerformance10000Citizens(): Test {
+    const untilTime = 10000;
+    const test: Test = {
+        name: "testPerformance10000Citizens",
+        description: "performance 10000 citizens",
+        initTest: () => {
+            const state = createDefaultChatSimState("testStreamer", 0);
+            state.map = createTestMapBig();
+            for (let i = 0; i < 10000; i++) {
+                const citizen = createDefaultCitizen(`testCitizen${i + 1}`, state);
+                state.map.citizens.push(citizen);
+            }
+            return state;
+        },
+        checkFinishCondition: (state) => {
+            return state.time > untilTime;
+        },
+        checkSucceded: (state) => {
+            if (state.time <= untilTime) console.log(`reached time ${state.time}`);
+            return state.time > untilTime;
+        }
+    }
+    return test;
+}
+
 
 function createStarvingCitizen(citizenName: string, testState: ChatSimState): Citizen {
     const citizen = createDefaultCitizen(citizenName, testState);

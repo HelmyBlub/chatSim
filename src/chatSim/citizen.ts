@@ -15,7 +15,7 @@ import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAY
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
 import { Tree } from "./tree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
-import { CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER, CitizenStateMarketTradeBuyerData, CitizenStateMarketTradeData, CitizenStateMarketTradeSellerData } from "./citizenState/citizenStateMarket.js";
+import { CITIZEN_STATE_MARKET_ITEM_EXCHANGE, CitizenStateMarketTradeBuyerData, CitizenStateMarketTradeData, CitizenStateMarketTradeSellerData } from "./citizenState/citizenStateMarket.js";
 
 export type CitizenStateInfo = {
     type: string,

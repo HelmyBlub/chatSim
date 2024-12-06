@@ -10,7 +10,7 @@ import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "../citizenState/citizenStateGetItem.js";
-import { setCitizenStatePutItemOnMarketCounter } from "../citizenState/citizenStateMarket.js";
+import { setCitizenStateMarketItemExchange } from "../citizenState/citizenStateMarket.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
@@ -22,7 +22,7 @@ export type CitizenJobMarket = CitizenJob & {
 
 export type JobMarketState = "checkInventory" | "waitingForCustomers" | "getMarketBuilding" | "servingCustomer" | "negotiationWithCustomer" | "tradingWithCustomer";
 
-type TradeData = CitizenStateSuccessData & {
+export type TradeData = CitizenStateSuccessData & {
     itemName: string,
     itemAmount: number,
     price: number,
@@ -33,7 +33,7 @@ type JobMarketStateInfo = CitizenState & {
     state: JobMarketState,
 }
 
-const TRADE_DATA = "tradeData";
+export const TRADE_DATA = "tradeData";
 
 const STRING_TO_STATE_MAPPING: { [key: string]: (citizen: Citizen, job: CitizenJob, state: ChatSimState) => void } = {
     "checkInventory": stateCheckInventory,
@@ -52,6 +52,7 @@ export function marketServeCustomer(market: BuildingMarket, customer: Citizen): 
     market.inhabitedBy.stateInfo.stack.unshift({ state: servingState });
     const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
     jobMarket.currentCustomer = customer;
+    jobMarket.customerCounter[0]++;
     return true;
 }
 
@@ -62,20 +63,6 @@ export function marketCanServeCustomer(market: BuildingMarket, customer: Citizen
     if (marketState !== "waitingForCustomers") return false;
     return true;
 
-}
-
-export function sellItemToMarket(market: BuildingMarket, seller: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
-    if (!market.inhabitedBy) return;
-    const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
-    jobMarket.customerCounter[0]++;
-    return sellItemWithInventories(seller, market.inhabitedBy, itemName, 1, seller.inventory, market.inventory, state, requestedAmount);
-}
-
-export function buyItemFromMarket(market: BuildingMarket, buyer: Citizen, itemName: string, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
-    if (!market.inhabitedBy) return;
-    const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
-    jobMarket.customerCounter[0]++;
-    return buyItemWithInventories(market.inhabitedBy, buyer, itemName, 2, market.inventory, buyer.inventory, state, requestedAmount);
 }
 
 export function createJobMarket(state: ChatSimState, jobname: string, sellItemNames: string[]): CitizenJobMarket {
@@ -190,11 +177,11 @@ function stateTradingWithCustomer(citizen: Citizen, job: CitizenJob, state: Chat
 
     if (stateInfo.subState === undefined) {
         if (data.sellToMarket) {
-            setCitizenStatePutItemOnMarketCounter(citizen, jobMarket.marketBuilding, false, data.itemName, data.itemAmount, data.price, true, jobMarket.marketBuilding.inventory);
+            setCitizenStateMarketItemExchange(citizen, jobMarket.marketBuilding, false, data.itemName, data.itemAmount, data.price, true, jobMarket.marketBuilding.inventory);
             stateInfo.subState = "trading";
             return;
         } else {
-            setCitizenStatePutItemOnMarketCounter(citizen, jobMarket.marketBuilding, true, data.itemName, data.itemAmount, data.price, true, jobMarket.marketBuilding.inventory);
+            setCitizenStateMarketItemExchange(citizen, jobMarket.marketBuilding, true, data.itemName, data.itemAmount, data.price, true, jobMarket.marketBuilding.inventory);
             stateInfo.subState = "trading";
             return;
         }
@@ -325,21 +312,19 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             return;
         }
         if (isCitizenAtPosition(citizen, job.marketBuilding.position)) {
-            setupReserved(job.marketBuilding as BuildingMarket, jobMarket);
             const market = job.marketBuilding as BuildingMarket;
+            setupReserved(market, jobMarket);
             if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {
                 market.displayedItem = jobMarket.sellItemNames[0];
             }
             if (market.deterioration > 1 / BUILDING_DATA[market.type].woodAmount) {
                 if (market.deterioration > 1) {
                     addCitizenThought(citizen, `My market broke down. I need to repair`, state);
-                    setCitizenStateRepairBuilding(citizen, market);
-                    return;
                 } else {
                     addCitizenThought(citizen, `I need to repair my market.`, state);
-                    setCitizenStateRepairBuilding(citizen, market);
-                    return;
                 }
+                setCitizenStateRepairBuilding(citizen, market);
+                return;
             }
             for (let itemName of jobMarket.sellItemNames) {
                 let availableSpace = inventoryGetMissingReserved(job.marketBuilding.inventory, itemName);

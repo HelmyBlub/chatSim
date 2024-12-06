@@ -1,29 +1,10 @@
 Tasks:
 - more images+animations
     - trading animation
-        - a lot of teleporting of stuff still in. Fix to animate as well
-        - think about refactoring code?
-
-        - on trade move money and item between citizens
-            - successfull customer buy trade steps
-                - customer put money on counter for marketCitizen
-                - and takes item from market inventory
-                - marketCitizen takes money from counter into own inventory
-            - successfull customer sell trade steps
-                - customer put item on counter for marketCitizen
-                - marketCitizen puts money on counter
-                    - and takes item from coutner and puts it into market inventory
-                - citizen takes money from counter
-
-            - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
-            - currently happes instantly and code relies on it, which makes it hard to put animation between
-            - item or money move should have some generall code
-            - "setStatePutMoney" from citizen to building (counter) of market.
-                - animate
-                - marketCitizen takes from counter into his inventory
-            - "setStateTradeItem" from citizen to citizen
-                - animate
-            - 
+        - check code quality?
+        - check edge cases?
+            - customer/cashier falling asleep
+            - customer/cashier interupting trade with some need
 
 - selecting click should select closest not first
 - mushroom pickup behavior
@@ -50,17 +31,28 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-- a lot of code changes to be able to animate trades
-- bug: sound play more often on slower speeds
-    - slowed downed sound sounds like played more times
-    - changed minimal playbackrate to 1. If gamespeed is slower, sound is still played back in speed 1
-- refactor needs (wip)
-    - bug: food need is broken
-    - check all needs
-        - starving (looks good?)
-        - sleep
-        - food
-        - home
+    - trading animation
+        - a lot of teleporting of stuff still in. Fix to animate as well
+
+        - on trade move money and item between citizens
+            - successfull customer buy trade steps
+                - customer put money on counter for marketCitizen
+                - and takes item from market inventory
+                - marketCitizen takes money from counter into own inventory
+            - successfull customer sell trade steps
+                - customer put item on counter for marketCitizen
+                - marketCitizen puts money on counter
+                    - and takes item from coutner and puts it into market inventory
+                - citizen takes money from counter
+
+            - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
+            - currently happes instantly and code relies on it, which makes it hard to put animation between
+            - item or money move should have some generall code
+            - "setStatePutMoney" from citizen to building (counter) of market.
+                - animate
+                - marketCitizen takes from counter into his inventory
+            - "setStateTradeItem" from citizen to citizen
+                - animate
 
 
 --------------------------------------------------
