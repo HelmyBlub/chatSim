@@ -1,5 +1,4 @@
 Tasks:
-- tab to switch between selected visible citizens?
 - bug: camera move keys not working
 - zoom in to mouse cursor not map middle
 - mushroom pickup behavior
@@ -25,6 +24,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- tab to switch between selected visible citizens?
 - selecting click should select closest not first
 - improved code
 - trading animation

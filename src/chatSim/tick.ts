@@ -31,6 +31,5 @@ export function chatSimTick(state: ChatSimState) {
         const position = state.inputData.selected.object.position as Position;
         state.paintData.map.cameraPosition = { x: position.x, y: position.y };
     }
-    if (state.inputData.map.moveX || state.inputData.map.moveY) moveMapCameraBy(state.inputData.map.moveX, state.inputData.map.moveY, state);
 }
 

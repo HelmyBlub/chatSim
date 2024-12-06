@@ -24,8 +24,8 @@ export function paintChatSim(state: ChatSimState, gameSpeed: number) {
 
 export function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: PaintDataMap): Position {
     return {
-        x: Math.floor(mapPosition.x - paintDataMap.cameraPosition.x + paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2),
-        y: Math.floor(mapPosition.y - paintDataMap.cameraPosition.y + paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2),
+        x: mapPosition.x - paintDataMap.cameraPosition.x + paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2,
+        y: mapPosition.y - paintDataMap.cameraPosition.y + paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2,
     };
 }
 

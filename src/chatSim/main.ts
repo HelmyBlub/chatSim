@@ -2,7 +2,7 @@ import { Position, ChatSimState, App, RandomSeed } from "./chatSimModels.js";
 import { addCitizen } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
-import { chatSimAddInputEventListeners } from "./input.js";
+import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
@@ -178,20 +178,22 @@ async function runner(app: App) {
     try {
         while (true) {
             if (app.runningTests) testRunner(app);
+            const state = app.state;
             let startIndex = 0;
-            if (app.state.gameSpeed % 1 !== 0) {
+            if (state.gameSpeed % 1 !== 0) {
                 startIndex++;
                 if (app.gameSpeedRemainder === undefined) app.gameSpeedRemainder = 0;
-                app.gameSpeedRemainder += app.state.gameSpeed % 1;
+                app.gameSpeedRemainder += state.gameSpeed % 1;
                 if (app.gameSpeedRemainder >= 1) {
                     app.gameSpeedRemainder--;
-                    chatSimTick(app.state);
+                    chatSimTick(state);
                 }
             }
-            for (let i = startIndex; i < app.state.gameSpeed; i++) {
-                chatSimTick(app.state);
+            for (let i = startIndex; i < state.gameSpeed; i++) {
+                chatSimTick(state);
             }
-            paintChatSim(app.state, app.state.gameSpeed);
+            paintChatSim(app.state, state.gameSpeed);
+            if (state.inputData.map.moveX || state.inputData.map.moveY) moveMapCameraBy(state.inputData.map.moveX, state.inputData.map.moveY, state);
             await sleep(16);
         }
     } catch (e) {

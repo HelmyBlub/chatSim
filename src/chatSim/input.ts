@@ -193,7 +193,7 @@ function keyUp(event: KeyboardEvent, state: ChatSimState) {
 
 function keyDown(event: KeyboardEvent, app: App) {
     const state = app.state;
-    const moveTickAmount = 4;
+    const moveAmount = 8;
     const speedScaling = 0.2;
     switch (event.code) {
         case "Period":
@@ -209,16 +209,16 @@ function keyDown(event: KeyboardEvent, app: App) {
             if (state.gameSpeed > 10 || Math.abs(state.gameSpeed - 1) < speedScaling / 2) state.gameSpeed = Math.round(state.gameSpeed);
             break
         case "KeyW":
-            state.inputData.map.moveY = -moveTickAmount;
+            state.inputData.map.moveY = -moveAmount;
             break;
         case "KeyS":
-            state.inputData.map.moveY = moveTickAmount;
+            state.inputData.map.moveY = moveAmount;
             break;
         case "KeyA":
-            state.inputData.map.moveX = -moveTickAmount;
+            state.inputData.map.moveX = -moveAmount;
             break;
         case "KeyD":
-            state.inputData.map.moveX = moveTickAmount;
+            state.inputData.map.moveX = moveAmount;
             break;
         case "NumpadAdd":
             if (state.gameSpeed === 0) chatSimTick(state);
