@@ -1,28 +1,22 @@
 Tasks:
-- zoom in to mouse cursor not map middle
 - mushroom pickup behavior
-    - vision radius different for night and day
-
-- pathing, citizen can not move over "private property"
-- job "food market"
-    - if many mushrooms on stock, buy them for less
-    - if low on mushrooms, sell for more
-    - can eat their own mushrooms
-- job "food gatherer"
-    - try to sell for highest price
-- chatter can fix their prices?
-- citizen can decide to go buy mushrooms from food market
-- streamer can set limits which citizen are not allowed to break
-    - only allowed to break if they flag themselfes as criminal
-- chatter blacklist?, way to remove unwanted chatters like bots
-
-- use images
-    - hungry citizen visualized
-    - starving citizen visualization
-    - sleepy
+    - citizens do not know where mushrooms are if they are to far away
+        - because they can only see a certain distance
+    - citizen can see further at day than at night
+    - citizen move in random directions hopeing to find a mushroom
+    - citizen thinking steps:
+        - i gather mushroom
+            - i look if i see one in my vision distance
+                - if i see one move to
+                 - if i am first pick up
+            - if i do not see one
+                - pick random direction and move to position
+                    - remember last direction. to keep walking direction somewhat consistently
+                - consider beeing to close to edge/corner of map
 
 ---------------------------------------------------
 Tasks done today:
+- zoom in to mouse cursor not camera middle
 - bug: camera move keys not working
 - tab to switch between selected visible citizens?
 - selecting click should select closest not first

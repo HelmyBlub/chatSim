@@ -91,7 +91,7 @@ export function tickBuildings(state: ChatSimState) {
     for (let i = 0; i < state.map.buildings.length; i++) {
         const building = state.map.buildings[i];
         if (building.deterioration < 1) {
-            building.deterioration += 0.00005;
+            building.deterioration += 0.00004;
             if (building.deterioration >= 1) {
                 building.inventory.items = [];
                 building.brokeDownTime = state.time;

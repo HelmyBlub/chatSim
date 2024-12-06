@@ -165,7 +165,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
             if ((building.buildProgress * woodRequired) % 1 < progressPerTick * woodRequired) {
                 let buildingInventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
                 if (!buildingInventoryWood || buildingInventoryWood.counter < 1) {
-                    const amountRequiredLeft = Math.floor(woodRequired * (1 - building.buildProgress));
+                    const amountRequiredLeft = Math.floor(woodRequired * (1 - building.buildProgress) + 0.01);
                     const citizenInventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
                     if (citizenInventoryWood && citizenInventoryWood.counter > 0) {
                         inventoryMoveItemBetween(INVENTORY_WOOD, citizen.inventory, building.inventory, amountRequiredLeft);

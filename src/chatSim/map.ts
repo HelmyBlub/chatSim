@@ -102,6 +102,15 @@ export function mapIsPositionVisible(position: Position, mapPaint: PaintDataMap)
     return false;
 }
 
+export function mapIsPositionOutOfBounds(position: Position, map: ChatSimMap): boolean {
+    if (- map.mapWidth / 2 > position.x || map.mapWidth / 2 < position.x
+        || - map.mapHeight / 2 > position.y || map.mapHeight / 2 < position.y
+    ) {
+        return true;
+    }
+    return false;
+}
+
 export function mapCanvasPositionToMapPosition(canvasPosition: Position, mapPaint: PaintDataMap) {
     const visionWidth = mapPaint.paintWidth / mapPaint.zoom;
     const visionHeight = mapPaint.paintHeight / mapPaint.zoom;
