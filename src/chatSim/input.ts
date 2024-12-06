@@ -1,5 +1,5 @@
 import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
-import { mapCanvasPositionToMapPosition, PaintDataMap } from "./map.js";
+import { mapCanvasPositionToMapPosition, mapIsPositionVisible, PaintDataMap } from "./map.js";
 import { addCitizen } from "./citizen.js";
 import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
@@ -65,36 +65,40 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
             x: event.clientX - boundingRect.left,
             y: event.clientY - boundingRect.top,
         }
-        if (isClickInsideMapRelative(relativeMouse.x, relativeMouse.y, state.paintData.map)) {
-            let closest: SelectedObject | undefined = undefined;
-            let closestDistance = 0;
-            let toCheckObjects = [
-                { objects: state.map.citizens, type: "citizen" },
-                { objects: state.map.buildings, type: "building" },
-                { objects: state.map.trees, type: "tree" },
-                { objects: state.map.mushrooms, type: "mushroom" },
-            ];
-            for (let toCheck of toCheckObjects) {
-                const closestObject = getClosestObject(toCheck.objects, relativeMouse, state);
-                if (closestObject) {
-                    if (closest === undefined || closestObject.distance < closestDistance) {
-                        closest = {
-                            object: closestObject.object,
-                            type: toCheck.type,
-                        }
-                        closestDistance = closestObject.distance;
+        selectObject(relativeMouse, state);
+    }
+}
+
+function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
+    if (isClickInsideMapRelative(relativeMouseToCanvas.x, relativeMouseToCanvas.y, state.paintData.map)) {
+        let closest: SelectedObject | undefined = undefined;
+        let closestDistance = 0;
+        let toCheckObjects = [
+            { objects: state.map.citizens, type: "citizen" },
+            { objects: state.map.buildings, type: "building" },
+            { objects: state.map.trees, type: "tree" },
+            { objects: state.map.mushrooms, type: "mushroom" },
+        ];
+        for (let toCheck of toCheckObjects) {
+            const closestObject = getClosestObject(toCheck.objects, relativeMouseToCanvas, state);
+            if (closestObject) {
+                if (closest === undefined || closestObject.distance < closestDistance) {
+                    closest = {
+                        object: closestObject.object,
+                        type: toCheck.type,
                     }
+                    closestDistance = closestObject.distance;
                 }
             }
-            if (closest) {
-                state.inputData.selected = closest;
-                if (closest.type === "citizen") {
-                    state.paintData.map.lockCameraToSelected = true;
-                }
-                return;
-            }
-            state.inputData.selected = undefined;
         }
+        if (closest) {
+            state.inputData.selected = closest;
+            if (closest.type === "citizen") {
+                state.paintData.map.lockCameraToSelected = true;
+            }
+            return;
+        }
+        state.inputData.selected = undefined;
     }
 }
 
@@ -236,8 +240,31 @@ function keyDown(event: KeyboardEvent, app: App) {
                 startTests(app, true);
             }
             break;
+        case "Tab":
+            event.preventDefault();
+            switchThroughVisibleCitizens(app.state);
+            break;
         default:
             console.log(event.key, event.code);
             break;
+    }
+}
+
+function switchThroughVisibleCitizens(state: ChatSimState) {
+    let startIndex = 0;
+    const selected = state.inputData.selected;
+    if (selected && selected.type === "citizen") {
+        startIndex = state.map.citizens.findIndex(c => c === selected.object) + 1;
+        if (startIndex === -1) startIndex = 0;
+    }
+    for (let i = 0; i < state.map.citizens.length; i++) {
+        const citizen = state.map.citizens[(i + startIndex) % state.map.citizens.length];
+        if (mapIsPositionVisible(citizen.position, state.paintData.map)) {
+            state.inputData.selected = {
+                object: citizen,
+                type: "citizen",
+            };
+            return;
+        }
     }
 }

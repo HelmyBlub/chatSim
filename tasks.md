@@ -1,7 +1,6 @@
 Tasks:
-- selecting click should select closest not first
-    - work in progress: i need a function to turn relative mouse position to map position to calculate distance
-    - tab to switch between visible citizens?
+- tab to switch between selected visible citizens?
+- bug: camera move keys not working
 - zoom in to mouse cursor not map middle
 - mushroom pickup behavior
     - vision radius different for night and day
@@ -26,29 +25,30 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
-    - improved code
-    - trading animation
-        - a lot of teleporting of stuff still in. Fix to animate as well
+- selecting click should select closest not first
+- improved code
+- trading animation
+    - a lot of teleporting of stuff still in. Fix to animate as well
 
-        - on trade move money and item between citizens
-            - successfull customer buy trade steps
-                - customer put money on counter for marketCitizen
-                - and takes item from market inventory
-                - marketCitizen takes money from counter into own inventory
-            - successfull customer sell trade steps
-                - customer put item on counter for marketCitizen
-                - marketCitizen puts money on counter
-                    - and takes item from coutner and puts it into market inventory
-                - citizen takes money from counter
+    - on trade move money and item between citizens
+        - successfull customer buy trade steps
+            - customer put money on counter for marketCitizen
+            - and takes item from market inventory
+            - marketCitizen takes money from counter into own inventory
+        - successfull customer sell trade steps
+            - customer put item on counter for marketCitizen
+            - marketCitizen puts money on counter
+                - and takes item from coutner and puts it into market inventory
+            - citizen takes money from counter
 
-            - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
-            - currently happes instantly and code relies on it, which makes it hard to put animation between
-            - item or money move should have some generall code
-            - "setStatePutMoney" from citizen to building (counter) of market.
-                - animate
-                - marketCitizen takes from counter into his inventory
-            - "setStateTradeItem" from citizen to citizen
-                - animate
+        - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
+        - currently happes instantly and code relies on it, which makes it hard to put animation between
+        - item or money move should have some generall code
+        - "setStatePutMoney" from citizen to building (counter) of market.
+            - animate
+            - marketCitizen takes from counter into his inventory
+        - "setStateTradeItem" from citizen to citizen
+            - animate
 
 
 --------------------------------------------------
