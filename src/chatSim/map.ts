@@ -102,6 +102,19 @@ export function mapIsPositionVisible(position: Position, mapPaint: PaintDataMap)
     return false;
 }
 
+export function mapCanvasPositionToMapPosition(canvasPosition: Position, mapPaint: PaintDataMap) {
+    const visionWidth = mapPaint.paintWidth / mapPaint.zoom;
+    const visionHeight = mapPaint.paintHeight / mapPaint.zoom;
+    const mapVisionTopLeft: Position = {
+        x: mapPaint.cameraPosition.x - visionWidth / 2,
+        y: mapPaint.cameraPosition.y - visionHeight / 2,
+    };
+    return {
+        x: mapVisionTopLeft.x + canvasPosition.x / mapPaint.zoom,
+        y: mapVisionTopLeft.y + canvasPosition.y / mapPaint.zoom,
+    }
+}
+
 export function mapGetVisionBorderPositionClosestToPoint(position: Position, mapPaint: PaintDataMap) {
     const visionWidth = mapPaint.paintWidth / mapPaint.zoom;
     const visionHeight = mapPaint.paintHeight / mapPaint.zoom;

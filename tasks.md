@@ -1,15 +1,10 @@
 Tasks:
-- more images+animations
-    - trading animation
-        - check code quality?
-        - check edge cases?
-            - customer/cashier falling asleep
-            - customer/cashier interupting trade with some need
-
 - selecting click should select closest not first
+    - work in progress: i need a function to turn relative mouse position to map position to calculate distance
+    - tab to switch between visible citizens?
+- zoom in to mouse cursor not map middle
 - mushroom pickup behavior
     - vision radius different for night and day
-- zoom in to mouse cursor not map middle
 
 - pathing, citizen can not move over "private property"
 - job "food market"
@@ -31,6 +26,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+    - improved code
     - trading animation
         - a lot of teleporting of stuff still in. Fix to animate as well
 

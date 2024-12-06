@@ -26,6 +26,11 @@ export type App = {
     didFirstTestRun?: boolean, // chrome somehow always is slower on the first run, which is bad for performance measures. So this exists to check for it
 }
 
+export type SelectedObject = {
+    type: string,
+    object: any,
+}
+
 export type ChatSimState = {
     canvas?: HTMLCanvasElement,
     logger?: Logger,
@@ -45,10 +50,7 @@ export type ChatSimState = {
     inputData: {
         lastMouseDownTime: number,
         lastMouseDownPosition: Position,
-        selected?: {
-            type: string,
-            object: any,
-        },
+        selected?: SelectedObject,
         map: {
             mouseMoveMap: boolean,
             moveX: number,

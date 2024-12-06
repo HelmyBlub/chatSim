@@ -1,5 +1,5 @@
-import { App, ChatSimState, Position } from "./chatSimModels.js";
-import { PaintDataMap } from "./map.js";
+import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
+import { mapCanvasPositionToMapPosition, PaintDataMap } from "./map.js";
 import { addCitizen } from "./citizen.js";
 import { calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
@@ -61,52 +61,68 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
     state.inputData.map.mouseMoveMap = false;
     if (performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME) {
         const boundingRect = state.canvas.getBoundingClientRect();
-        const relativMouseX = event.clientX - boundingRect.left;
-        const relativMouseY = event.clientY - boundingRect.top;
-        if (isClickInsideMapRelativ(relativMouseX, relativMouseY, state.paintData.map)) {
-            for (let citizen of state.map.citizens) {
-                if (isObjectClicked(citizen.position, 40, relativMouseX, relativMouseY, state)) {
-                    state.inputData.selected = {
-                        object: citizen,
-                        type: "citizen"
+        const relativeMouse = {
+            x: event.clientX - boundingRect.left,
+            y: event.clientY - boundingRect.top,
+        }
+        if (isClickInsideMapRelative(relativeMouse.x, relativeMouse.y, state.paintData.map)) {
+            let closest: SelectedObject | undefined = undefined;
+            let closestDistance = 0;
+            let toCheckObjects = [
+                { objects: state.map.citizens, type: "citizen" },
+                { objects: state.map.buildings, type: "building" },
+                { objects: state.map.trees, type: "tree" },
+                { objects: state.map.mushrooms, type: "mushroom" },
+            ];
+            for (let toCheck of toCheckObjects) {
+                const closestObject = getClosestObject(toCheck.objects, relativeMouse, state);
+                if (closestObject) {
+                    if (closest === undefined || closestObject.distance < closestDistance) {
+                        closest = {
+                            object: closestObject.object,
+                            type: toCheck.type,
+                        }
+                        closestDistance = closestObject.distance;
                     }
+                }
+            }
+            if (closest) {
+                state.inputData.selected = closest;
+                if (closest.type === "citizen") {
                     state.paintData.map.lockCameraToSelected = true;
-                    return;
                 }
-            }
-            for (let building of state.map.buildings) {
-                if (isObjectClicked(building.position, 60, relativMouseX, relativMouseY, state)) {
-                    state.inputData.selected = {
-                        object: building,
-                        type: "building"
-                    }
-                    return;
-                }
-            }
-            for (let tree of state.map.trees) {
-                if (isObjectClicked(tree.position, 60, relativMouseX, relativMouseY, state)) {
-                    state.inputData.selected = {
-                        object: tree,
-                        type: "tree"
-                    }
-                    return;
-                }
-            }
-            for (let mushroom of state.map.mushrooms) {
-                if (isObjectClicked(mushroom.position, 20, relativMouseX, relativMouseY, state)) {
-                    state.inputData.selected = {
-                        object: mushroom,
-                        type: "mushroom"
-                    }
-                    return;
-                }
+                return;
             }
             state.inputData.selected = undefined;
         }
     }
 }
 
-function isClickInsideMapRelativ(relativMouseX: number, relativMouseY: number, paintDataMap: PaintDataMap) {
+function getClosestObject(objects: { position: Position }[], relativeClickPosition: Position, state: ChatSimState): { object: any, distance: number } | undefined {
+    let closest = undefined;
+    let closestDistance = 0;
+    const mapClickPosition = mapCanvasPositionToMapPosition(relativeClickPosition, state.paintData.map);
+    for (let object of objects) {
+        if (isObjectClicked(object.position, 40, relativeClickPosition.x, relativeClickPosition.y, state)) {
+            if (closest === undefined) {
+                closest = object;
+                closestDistance = calculateDistance(object.position, mapClickPosition);
+            } else {
+                const distance = calculateDistance(object.position, mapClickPosition);
+                if (distance < closestDistance) {
+                    closest = object;
+                    closestDistance = distance;
+                }
+            }
+        }
+    }
+    if (closest) {
+        return { object: closest, distance: closestDistance };
+    }
+    return undefined;
+}
+
+function isClickInsideMapRelative(relativMouseX: number, relativMouseY: number, paintDataMap: PaintDataMap) {
     return relativMouseX >= paintDataMap.paintOffset.x && relativMouseX <= paintDataMap.paintOffset.x + paintDataMap.paintWidth
         && relativMouseY >= paintDataMap.paintOffset.y && relativMouseY <= paintDataMap.paintOffset.y + paintDataMap.paintHeight;
 }
