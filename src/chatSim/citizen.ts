@@ -6,7 +6,7 @@ import { Building, marketGetCounterPosition } from "./building.js";
 import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
-import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney } from "./inventory.js";
+import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
 import { CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { calculateDirection, nextRandom } from "./main.js";
@@ -45,6 +45,14 @@ export type CitizenNeeds = {
 
 export type Citizen = {
     job: CitizenJob,
+    tradePaw?: {
+        item?: InventoryItem,
+        moveFrom: Position,
+        moveTo: Position,
+        startTime: number,
+        duration: number,
+        money: number,
+    }
     isDead?: {
         reason: string,
         time: number,
@@ -326,30 +334,28 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
         const nameYSpacing = 5;
         drawTextWithOutline(ctx, citizen.name, paintPos.x - nameOffsetX, paintPos.y - CITIZEN_PAINT_SIZE / 2 - nameYSpacing, "white", "black", nameLineWidth);
     }
-    if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_MARKET_PUT_ITEM_ON_COUNTER) {
-        const citizenState = citizen.stateInfo.stack[0];
-        if (citizenState.subState === "putOnCounter") {
-            const timePerCent = (state.time - citizenState.subStateStartTime!) / 1000;
-            const data = citizenState.data as CitizenStateMarketTradeData;
-            if (data.seller) {
-                const sellerData = citizenState.data as CitizenStateMarketTradeSellerData;
-            } else {
-                const moneySize = 10;
-                const buyerData = citizenState.data as CitizenStateMarketTradeBuyerData;
-                const animationStartPaintPosition = {
-                    x: paintPos.x - moneySize / 2,
-                    y: paintPos.y - 8,
-                }
-                const marketCoutnerPosition = marketGetCounterPosition(data.market);
-                const animationEndOffset = {
-                    x: marketCoutnerPosition.x - citizen.position.x + moneySize / 2,
-                    y: marketCoutnerPosition.y - citizen.position.y + 8,
-                }
-                paintInventoryMoney(ctx, buyerData.money, {
-                    x: animationStartPaintPosition.x + animationEndOffset.x * timePerCent,
-                    y: animationStartPaintPosition.y + animationEndOffset.y * timePerCent,
-                });
-            }
+    if (citizen.tradePaw && citizen.tradePaw.startTime + citizen.tradePaw.duration >= state.time) {
+        const timePerCent = (state.time - citizen.tradePaw.startTime) / citizen.tradePaw.duration;
+        const startingPaintPos = mapPositionToPaintPosition(citizen.tradePaw.moveFrom, paintDataMap);
+        const animationStartPaintPosition = {
+            x: startingPaintPos.x,
+            y: startingPaintPos.y,
+        }
+        const animationEndOffset = {
+            x: citizen.tradePaw.moveTo.x - citizen.tradePaw.moveFrom.x,
+            y: citizen.tradePaw.moveTo.y - citizen.tradePaw.moveFrom.y,
+        }
+        if (citizen.tradePaw.money > 0) {
+            paintInventoryMoney(ctx, citizen.tradePaw.money, {
+                x: animationStartPaintPosition.x + animationEndOffset.x * timePerCent,
+                y: animationStartPaintPosition.y + animationEndOffset.y * timePerCent,
+            });
+        }
+        if (citizen.tradePaw.item) {
+            paintInventoryItem(ctx, citizen.tradePaw.item, {
+                x: animationStartPaintPosition.x + animationEndOffset.x * timePerCent,
+                y: animationStartPaintPosition.y + animationEndOffset.y * timePerCent,
+            });
         }
     }
 }

@@ -1,11 +1,11 @@
-import { BuildingMarket, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
+import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CitizenState, citizenStateStackTaskSuccess } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
 import { JobMarketState, marketCanServeCustomer, marketServeCustomer } from "../jobs/jobMarket.js";
-import { Inventory, inventoryPutItemInto } from "../inventory.js";
+import { Inventory, InventoryItem, inventoryPutItemInto } from "../inventory.js";
 
 export type CitizenStateMarketQueue = {
     market: BuildingMarket;
@@ -105,7 +105,7 @@ function tickCitizenStateMarketPutItemOnCounter(citizen: Citizen, state: ChatSim
             citizenState.subState = "waitingForItemsOrMoneyOnCounter";
             citizenState.subStateStartTime = state.time;
         } else {
-            citizenState.subState = "putOnCounter";
+            citizenState.subState = "putItemForCounterInPaw";
             citizenState.subStateStartTime = state.time;
         }
     }
@@ -114,72 +114,111 @@ function tickCitizenStateMarketPutItemOnCounter(citizen: Citizen, state: ChatSim
         if (data.seller) {
             const sellerData = data as CitizenStateMarketTradeSellerData;
             if (counter.money >= sellerData.expectedMoney) {
-                citizen.money += sellerData.expectedMoney;
-                counter.money -= sellerData.expectedMoney;
-
-                const sellerInventoryItem = sellerData.inventory.items.find(i => i.name === sellerData.itemName);
-                if (sellerInventoryItem && sellerInventoryItem.counter >= sellerData.itemAmount) {
-                    sellerInventoryItem.counter -= sellerData.itemAmount;
-                    counter.items.push({ name: sellerData.itemName, counter: sellerData.itemAmount });
-                }
-
-                citizenStateStackTaskSuccess(citizen);
+                citizenState.subState = "putItemForCounterInPaw";
+                citizenState.subStateStartTime = state.time;
             }
         } else {
             const buyerData = data as CitizenStateMarketTradeBuyerData;
             const counterItemIndex = counter.items.findIndex(i => i.name === buyerData.expectedItemName && i.counter === buyerData.expectedItemAmount);
             if (counterItemIndex > -1) {
-                const counterItem = counter.items.splice(counterItemIndex, 1)[0];
-                inventoryPutItemInto(counterItem.name, buyerData.inventory, counterItem.counter);
-
-                if (citizen.money >= buyerData.money) {
-                    citizen.money -= buyerData.money;
-                    counter.money += buyerData.money;
-                }
-
-                citizenStateStackTaskSuccess(citizen);
+                citizenState.subState = "putItemForCounterInPaw";
+                citizenState.subStateStartTime = state.time;
             }
         }
         return;
     }
-
-    if (citizenState.subState === "putOnCounter" && citizenState.subStateStartTime! + 1000 < state.time) {
-        const market = data.market;
+    if (citizenState.subState === "putItemForCounterInPaw") {
+        citizenState.subState = "putOnCounter";
+        citizenState.subStateStartTime = state.time;
+        let item: InventoryItem | undefined = undefined;
+        let money: number = 0;
         if (data.seller) {
             const sellerData = data as CitizenStateMarketTradeSellerData;
             const sellerInventoryItem = sellerData.inventory.items.find(i => i.name === sellerData.itemName);
             if (sellerInventoryItem && sellerInventoryItem.counter >= sellerData.itemAmount) {
                 sellerInventoryItem.counter -= sellerData.itemAmount;
-                market.counter.items.push({ name: sellerData.itemName, counter: sellerData.itemAmount });
+                item = { name: sellerData.itemName, counter: sellerData.itemAmount };
             }
         } else {
             const buyerData = data as CitizenStateMarketTradeBuyerData;
             if (citizen.money >= buyerData.money) {
                 citizen.money -= buyerData.money;
-                market.counter.money += buyerData.money;
+                money = buyerData.money;
             }
         }
-        citizenState.subState = "waiting";
-        citizenState.subStateStartTime = state.time;
+        citizen.tradePaw = {
+            item: item,
+            money: money,
+            startTime: state.time,
+            duration: 1000,
+            moveFrom: { x: citizen.position.x, y: citizen.position.y },
+            moveTo: marketGetCounterPosition(data.market),
+        }
+    }
+
+    if (citizenState.subState === "putOnCounter") {
+        if (citizen.tradePaw && citizen.tradePaw.startTime + citizen.tradePaw.duration <= state.time) {
+            const market = data.market;
+            if (citizen.tradePaw.item) {
+                market.counter.items.push(citizen.tradePaw.item);
+                citizen.tradePaw.item = undefined;
+            }
+            if (citizen.tradePaw.money > 0) {
+                market.counter.money = citizen.tradePaw.money;
+                citizen.tradePaw.money = 0;
+            }
+            citizen.tradePaw = undefined;
+            citizenState.subState = "waitingToTake";
+            citizenState.subStateStartTime = state.time;
+        }
         return;
     }
-    if (citizenState.subState === "waiting") {
+    if (citizenState.subState === "waitingToTake") {
         const counter = data.market.counter;
         if (data.seller) {
             const sellerData = data as CitizenStateMarketTradeSellerData;
             if (counter.money >= sellerData.expectedMoney) {
-                citizen.money += sellerData.expectedMoney;
+                citizen.tradePaw = {
+                    money: counter.money,
+                    startTime: state.time,
+                    duration: 1000,
+                    moveFrom: marketGetCounterPosition(data.market),
+                    moveTo: { x: citizen.position.x, y: citizen.position.y },
+                }
                 counter.money -= sellerData.expectedMoney;
-                citizenStateStackTaskSuccess(citizen);
+                citizenState.subState = "takeFromCounter";
             }
         } else {
             const buyerData = data as CitizenStateMarketTradeBuyerData;
             const counterItemIndex = counter.items.findIndex(i => i.name === buyerData.expectedItemName && i.counter === buyerData.expectedItemAmount);
             if (counterItemIndex > -1) {
                 const counterItem = counter.items.splice(counterItemIndex, 1)[0];
-                inventoryPutItemInto(counterItem.name, buyerData.inventory, counterItem.counter);
-                citizenStateStackTaskSuccess(citizen);
+                citizen.tradePaw = {
+                    money: 0,
+                    item: counterItem,
+                    startTime: state.time,
+                    duration: 1000,
+                    moveFrom: marketGetCounterPosition(data.market),
+                    moveTo: { x: citizen.position.x, y: citizen.position.y },
+                }
+                citizenState.subState = "takeFromCounter";
             }
+        }
+        return;
+    }
+
+    if (citizenState.subState === "takeFromCounter") {
+        if (citizen.tradePaw && citizen.tradePaw.startTime + citizen.tradePaw.duration <= state.time) {
+            if (citizen.tradePaw.money > 0) {
+                citizen.money += citizen.tradePaw.money;
+                citizen.tradePaw.money = 0;
+            }
+            if (citizen.tradePaw.item) {
+                inventoryPutItemInto(citizen.tradePaw.item.name, data.inventory, citizen.tradePaw.item.counter);
+                citizen.tradePaw.item = undefined;
+            }
+            citizen.tradePaw = undefined;
+            citizenStateStackTaskSuccess(citizen);
         }
         return;
     }
@@ -274,7 +313,7 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                             sellToMarket: data.sellToMarket,
                         }
                         addChatMessage(chat, citizen, `I want to ${myIntention.sellToMarket ? "sell" : "buy"} ${myIntention.itemAmount}x${myIntention.itemName}.`, state, myIntention);
-                        citizenState.subState === "waitingForRespone";
+                        citizenState.subState = "waitingForRespone";
                         citizenState.subStateStartTime = state.time;
                     }
                     if (intention.intention === "priceResponse") {
@@ -291,7 +330,7 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                                     sellToMarket: intention.sellToMarket,
                                 }
                                 addChatMessage(chat, citizen, `Yes please!`, state, myIntention);
-                                citizenState.subState === "putOnCounter";
+                                citizenState.subState = "putOnCounter";
                                 citizenState.subStateStartTime = state.time;
                                 setCitizenStatePutItemOnMarketCounter(citizen, data.market, true, intention.itemName!, amount, amount * intention.singlePrice, false, citizen.inventory);
                                 return;
@@ -315,7 +354,7 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                                     message = `Yes please!`;
                                 }
                                 addChatMessage(chat, citizen, message, state, myIntention);
-                                citizenState.subState === "putOnCounter";
+                                citizenState.subState = "putOnCounter";
                                 citizenState.subStateStartTime = state.time;
                                 setCitizenStatePutItemOnMarketCounter(citizen, data.market, false, intention.itemName!, amount, finalPrice, false, citizen.inventory);
                                 return;
@@ -333,6 +372,7 @@ function tickCitizenStateMarketTradeInteraction(citizen: Citizen, state: ChatSim
                             citizenState.subStateStartTime = undefined;
                         }
                     } else if (citizenState.subState === "putOnCounter" && citizenState.subStateStartTime !== undefined) {
+                        citizenStateStackTaskSuccess(citizen);
                     } else {
                         const intention: ChatMessageMarketTradeIntention = {
                             type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,

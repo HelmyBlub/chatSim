@@ -25,7 +25,6 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     const wakeUpTime = (goToBedTime + sleepDuration) % 1;
     if ((goToBedTime > wakeUpTime && (time > goToBedTime || time < wakeUpTime))
         || (goToBedTime < wakeUpTime && (time > goToBedTime && time < wakeUpTime))) {
-        sleep(citizen, [`I am tired and i want to sleep`], state);
         return false;
     }
     return true;
@@ -37,6 +36,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
     }
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.home && citizen.energyPerCent > 0.1) {
+            addCitizenThought(citizen, `I am tired. I go home to sleep.`, state);
             citizen.stateInfo.stack.unshift({ state: "move home" });
             citizen.moveTo = {
                 x: citizen.home.position.x,
@@ -44,12 +44,14 @@ function tick(citizen: Citizen, state: ChatSimState) {
             }
         } else {
             citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
+            addCitizenThought(citizen, `I am falling asleep.`, state);
             if (citizen.moveTo) citizen.moveTo = undefined;
         }
         return;
     }
     if (citizen.stateInfo.stack[0].state === "move home") {
         if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
+            addCitizenThought(citizen, `I am falling asleep.`, state);
             citizen.stateInfo.stack[0].state = CITIZEN_NEED_STATE_SLEEPING;
             citizen.paintBehindBuildings = true;
         }
@@ -76,10 +78,3 @@ function tick(citizen: Citizen, state: ChatSimState) {
         }
     }
 }
-
-function sleep(citizen: Citizen, reason: string[], state: ChatSimState) {
-    if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP) return;
-    citizenResetStateTo(citizen, CITIZEN_NEED_SLEEP);
-    setCitizenThought(citizen, reason, state);
-}
-

@@ -1,13 +1,9 @@
 Tasks:
 - more images+animations
     - trading animation
-        - after successfull "negotiation" do "trade"
-        - next: implement function stateTradingWithCustomer
-            - citizenState needs to return some result 
-            - next steps should be able to use it
-            - case:
-                - customer negotiation of price and amount
-                - trade animation for negotatiated values
+        - a lot of teleporting of stuff still in. Fix to animate as well
+        - think about refactoring code?
+
         - on trade move money and item between citizens
             - successfull customer buy trade steps
                 - customer put money on counter for marketCitizen
@@ -54,6 +50,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- a lot of code changes to be able to animate trades
 - bug: sound play more often on slower speeds
     - slowed downed sound sounds like played more times
     - changed minimal playbackrate to 1. If gamespeed is slower, sound is still played back in speed 1
