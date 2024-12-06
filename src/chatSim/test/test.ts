@@ -33,6 +33,15 @@ type PastPerformanceMetrics = {
 const LOCALSTORAGE_PERFORMANCE_METRICS = "Test Performance Metrics";
 const activeTests: Test[] = [];
 
+function initTests() {
+    activeTests.push(testCitizenShouldNotStarve());
+    activeTests.push(testCitizenShouldBuildHome());
+    activeTests.push(testPerformance10Citizens());
+    activeTests.push(testPerformance100Citizens());
+    activeTests.push(testPerformance10000Citizens());
+    activeTests.push(testMarketQueue());
+}
+
 export function stopTests(app: App) {
     if (!app.runningTests) return;
     app.runningTests = undefined;
@@ -106,15 +115,6 @@ export function testRunner(app: App) {
         console.log(`success: ${result}, testcase: ${currentTest.description}`);
         app.runningTests.currentTest = undefined;
     }
-}
-
-function initTests() {
-    activeTests.push(testCitizenShouldNotStarve());
-    activeTests.push(testCitizenShouldBuildHome());
-    activeTests.push(testPerformance10Citizens());
-    activeTests.push(testPerformance100Citizens());
-    activeTests.push(testPerformance10000Citizens());
-    activeTests.push(testMarketQueue());
 }
 
 function testMarketQueue(): Test {
@@ -195,7 +195,7 @@ function testCitizenShouldBuildHome(): Test {
         },
         checkFinishCondition: (state) => {
             const citizen = state.map.citizens[0];
-            return citizen.home !== undefined || state.time > 50000;
+            return citizen.home !== undefined || state.time > 75000;
         },
         checkSucceded: (state) => {
             const citizen = state.map.citizens[0];
@@ -297,7 +297,7 @@ function createCitizenWithFullfiledNeeds(citizenName: string, testState: ChatSim
 }
 
 function createTestMapSmall(): ChatSimMap {
-    return createMap(5, 5, 1, 1);
+    return createMap(5, 5, 2, 1);
 }
 
 function createTestMapMiddle(): ChatSimMap {

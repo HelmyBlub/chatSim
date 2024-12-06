@@ -1,4 +1,29 @@
 Tasks:
+- first chat interactions
+    - choose dream job
+        - citizen will try to become it
+        - dream job is displayed when selected
+        - stored at chatter
+        - if citizen inizialized in new run, should remember
+        - should allow unvalid choices
+            - future feature to implement job
+        - command could be: !job <choise>
+    - choose trait
+        - command could be !trait <choise>
+            - early bird or night owl
+                - otherwise will be randomised
+            - only one can be choosen
+                - overwrites each other
+
+    - don't just consider commands. Set stuff based on chat messages
+        - if ceraint words are seen in chat => set traits/jobs
+        - advertisment bots messages -> make citizen want to be food market
+        
+            
+    
+
+---------------------------------------------------
+Tasks done today:
 - mushroom pickup behavior
     - citizens do not know where mushrooms are if they are to far away
         - because they can only see a certain distance
@@ -13,9 +38,6 @@ Tasks:
                 - pick random direction and move to position
                     - remember last direction. to keep walking direction somewhat consistently
                 - consider beeing to close to edge/corner of map
-
----------------------------------------------------
-Tasks done today:
 - zoom in to mouse cursor not camera middle
 - bug: camera move keys not working
 - tab to switch between selected visible citizens?
