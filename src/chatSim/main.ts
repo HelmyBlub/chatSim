@@ -9,7 +9,7 @@ import { paintChatSim } from "./paint.js";
 import { loadChatSimSounds } from "./sounds.js";
 import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
-import { addCitizenTrait, handleChatterAddTraitMessage, loadTraits } from "./traits/trait.js";
+import { addCitizenTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits } from "./traits/trait.js";
 
 export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
@@ -180,6 +180,13 @@ function handleChatMessage(user: string, message: string, state: ChatSimState) {
             handleChatterAddTraitMessage(chatter, citizen, trait, state);
             saveLocalStorageChatter(state.chatterData);
         }
+    }
+
+    if (message.indexOf("add me on discord") > -1
+        || message.indexOf("Cheap viewers") > -1
+    ) {
+        handleChatterAddTraitMessage(chatter, citizen, CITIZEN_TRAIT_ROBOT, state);
+        saveLocalStorageChatter(state.chatterData);
     }
 }
 

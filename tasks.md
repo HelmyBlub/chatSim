@@ -1,5 +1,16 @@
 Tasks:
 - first chat interactions
+    - don't just consider commands. Set stuff based on chat messages
+        - if ceraint words are seen in chat => set traits/jobs
+            - check in message: "add me on discord"
+                - trait "robot"
+            - check in message: "cheap viewers"
+    - how to visualize to chatter what he can do to change his citizen behavior?
+        - what jobs do exist?
+    
+
+---------------------------------------------------
+Tasks done today:
     - choose trait
         - command could be !trait <choise>
             - steps:
@@ -23,20 +34,6 @@ Tasks:
             - only one can be choosen
                 - overwrites each other
             - check: is stored at chatter
-    - how to visualize to chatter what he can do to change his citizen behavior?
-        - what jobs do exist?
-    - don't just consider commands. Set stuff based on chat messages
-        - if ceraint words are seen in chat => set traits/jobs
-        - advertisment bots messages -> make citizen want to be food market
-            - check in message: "add me on discord"
-                -> set dream job "food market"
-                - trait ideas: "idiot", "scammer", "robot"
-            - check in message: "cheap viewers"
-                -> to decide
-    
-
----------------------------------------------------
-Tasks done today:
     - choose "dream job"
         - steps:
             - make property for citizen
