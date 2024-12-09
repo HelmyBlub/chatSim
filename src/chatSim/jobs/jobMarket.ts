@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
 import { addCitizenThought, Citizen, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
-import { inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
+import { INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance, sellItemWithInventories } from "./job.js"
@@ -11,6 +11,7 @@ import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatM
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding } from "../citizenState/citizenStateGetItem.js";
 import { setCitizenStateMarketItemExchange } from "../citizenState/citizenStateMarket.js";
+import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
@@ -85,12 +86,14 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
             if (job.currentDayCounter !== day) {
                 if (job.customerCounter.length >= job.maxCounterDays) {
                     job.customerCounter.pop();
-                    const totalCustomerCount = job.customerCounter.reduce((p, c) => p += c);
-                    if (totalCustomerCount === 0) {
-                        const reason = [`I had no customers for ${job.maxCounterDays} days.`, `I change job.`];
-                        const newJob: string = nextRandom(state.randomSeed) > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
-                        citizenChangeJob(citizen, newJob, state, reason);
-                        return;
+                    if (citizen.dreamJob !== job.name) {
+                        const totalCustomerCount = job.customerCounter.reduce((p, c) => p += c);
+                        if (totalCustomerCount === 0) {
+                            const reason = [`I had no customers for ${job.maxCounterDays} days.`, `I change job.`];
+                            const newJob: string = nextRandom(state.randomSeed) > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
+                            citizenChangeJob(citizen, newJob, state, reason);
+                            return;
+                        }
                     }
                 }
                 job.currentDayCounter = day;
@@ -338,6 +341,10 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                         if (availableAtHome > 5) {
                             setCitizenThought(citizen, [`I want to add inventory to my market from home.`], state);
                             setCitizenStateGetItemFromBuilding(citizen, citizen.home, itemName, availableAtHome);
+                            return;
+                        } else if (itemName === INVENTORY_WOOD) {
+                            setCitizenThought(citizen, [`I am low on ${INVENTORY_WOOD} in my market. I gather some myself.`], state);
+                            setCitizenStateGatherWood(citizen);
                             return;
                         }
                     }

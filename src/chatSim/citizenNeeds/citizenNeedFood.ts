@@ -54,7 +54,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
             const hasEnoughFoodAtHome = homeMushrooms !== undefined && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
             if (hasEnoughFoodAtHome && citizen.foodPerCent >= 0.5) {
-                addCitizenThought(citizen, `I have good on food.`, state);
+                addCitizenThought(citizen, `I am good on food.`, state);
                 citizenNeedFailingNeedFulfilled(citizen, state);
                 return;
             }

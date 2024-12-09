@@ -136,7 +136,7 @@ function testMarketQueue(): Test {
                 const citizen = createDefaultCitizen("testBuyingCustomer" + i, state);
                 if (i % 3 === 0) citizen.energyPerCent = 0.94;
                 citizen.foodPerCent = 0.87;
-                citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state);
+                citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state)!;
                 citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_IN_INVENTORY });
                 state.map.citizens.push(citizen);
             }

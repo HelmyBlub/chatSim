@@ -34,7 +34,9 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
 }
 
 export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string[]) {
-    citizen.job = createJob(jobName, state);
+    const newJob = createJob(jobName, state);
+    if (!newJob) return;
+    citizen.job = newJob;
     citizen.moveTo = undefined;
     citizen.stateInfo = {
         type: CITIZEN_STATE_TYPE_CHANGE_JOB,
@@ -43,8 +45,9 @@ export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatS
     setCitizenThought(citizen, reason, state);
 }
 
-export function createJob(jobname: string, state: ChatSimState): CitizenJob {
+export function createJob(jobname: string, state: ChatSimState): CitizenJob | undefined {
     const jobFunctions = state.functionsCitizenJobs[jobname];
+    if (!jobFunctions) return undefined;
     return jobFunctions.create(state);
 }
 

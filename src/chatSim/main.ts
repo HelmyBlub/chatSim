@@ -1,9 +1,9 @@
-import { Position, ChatSimState, App, RandomSeed } from "./chatSimModels.js";
-import { addCitizen } from "./citizen.js";
+import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
+import { addCitizen, citizenSetDreamJob } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
-import { loadCitizenJobsFunctions } from "./jobs/job.js";
+import { citizenChangeJob, loadCitizenJobsFunctions } from "./jobs/job.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
 import { loadChatSimSounds } from "./sounds.js";
@@ -81,7 +81,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
         timPerDay: 100000,
         sunriseAt: 0.22,
         sunsetAt: 0.88,
-        chatterNames: [],
+        chatterData: [],
         functionsCitizenJobs: {},
         functionsCitizenNeeds: {},
         randomSeed: { seed: seed },
@@ -133,20 +133,11 @@ function initMyApp() {
     loadChatSimSounds();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
-        if (user === state.streamer) {
-            if (message.indexOf("test") !== -1) {
-                for (let i = 0; i < 99; i++) {
-                    addCitizen(user + i, state);
-                }
-            }
-        }
-        addCitizen(user, state);
-        addChatter(user, state);
+        handleChatMessage(user, message, state);
     }
     //@ts-ignore
     ComfyJS.onCommand = (user, message, flags, self, extra) => {
-        addCitizen(user, state);
-        addChatter(user, state);
+        handleChatMessage(user, `${message} ${flags}`, state);
     }
     //@ts-ignore
     ComfyJS.Init(state.streamer);
@@ -154,24 +145,65 @@ function initMyApp() {
     runner(app);
 }
 
-function addChatter(user: string, state: ChatSimState) {
-    if (state.chatterNames.find(c => c === user)) return;
-    state.chatterNames.push(user);
-    saveLoaclStorageChatter(state);
+function handleChatMessage(user: string, message: string, state: ChatSimState) {
+    if (!state.chatterData.find(c => c.name === user)) {
+        addCitizen(user, state);
+        addChatter(user, state);
+    }
+    if (message.startsWith("job")) {
+        const splits = message.split(" ");
+        if (splits.length > 1) {
+            let dreamJob = splits[1];
+            if (splits.length > 2) dreamJob += " " + splits[2];
+            const maxLength = 30;
+            if (dreamJob.length > maxLength) dreamJob = dreamJob.substring(0, maxLength);
+            const citizen = state.map.citizens.find(c => c.name === user);
+            const chatter = state.chatterData.find(c => c.name === user);
+            if (citizen) {
+                citizenSetDreamJob(citizen, dreamJob, state);
+            }
+            if (chatter) {
+                chatter.dreamJob = dreamJob;
+            }
+            saveLocalStorageChatter(state.chatterData);
+        }
+    }
 }
 
-function saveLoaclStorageChatter(state: ChatSimState) {
-    localStorage.setItem(LOCAL_STORAGE_CHATTER_KEY, JSON.stringify(state.chatterNames));
+function addChatter(user: string, state: ChatSimState) {
+    if (state.chatterData.find(c => c.name === user)) return;
+    state.chatterData.push({ name: user });
+    saveLocalStorageChatter(state.chatterData);
+}
+
+function saveLocalStorageChatter(chatterData: ChatterData[]) {
+    localStorage.setItem(LOCAL_STORAGE_CHATTER_KEY, JSON.stringify(chatterData));
 }
 
 function loadLocalStorageChatters(state: ChatSimState) {
     const testData = localStorage.getItem(LOCAL_STORAGE_CHATTER_KEY);
     if (testData) {
-        state.chatterNames = JSON.parse(testData);
-        for (let chatter of state.chatterNames) {
-            addCitizen(chatter, state);
+        let data = JSON.parse(testData);
+        if (typeof data[0] === 'string') {
+            data = updateLocalStorageDataToNewVersion(data);
+            saveLocalStorageChatter(data);
+        }
+        state.chatterData = data;
+        for (let chatter of state.chatterData) {
+            const citizen = addCitizen(chatter.name, state);
+            if (citizen) {
+                citizenSetDreamJob(citizen, chatter.dreamJob, state);
+            }
         }
     }
+}
+
+function updateLocalStorageDataToNewVersion(oldData: string[]): ChatterData[] {
+    const newData: ChatterData[] = [];
+    for (let entry of oldData) {
+        newData.push({ name: entry });
+    }
+    return newData;
 }
 
 async function runner(app: App) {

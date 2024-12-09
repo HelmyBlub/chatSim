@@ -7,7 +7,7 @@ import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
-import { CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
+import { citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { calculateDirection, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
@@ -15,7 +15,6 @@ import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAY
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
 import { Tree } from "./tree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
-import { CITIZEN_STATE_MARKET_ITEM_EXCHANGE, CitizenStateMarketTradeBuyerData, CitizenStateMarketTradeData, CitizenStateMarketTradeSellerData } from "./citizenState/citizenStateMarket.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -57,6 +56,7 @@ export type Citizen = {
         reason: string,
         time: number,
     },
+    dreamJob?: string,
     goToBedTime: number;
     sleepDuration: number;
     birthTime: number,
@@ -89,10 +89,11 @@ export const CITIZEN_STATE_THINKING = "thinking";
 export const CITIZEN_TIME_PER_THOUGHT_LINE = 2000;
 const CITIZEN_PAINT_SIZE = 40;
 
-export function addCitizen(user: string, state: ChatSimState) {
+export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {
     if (state.map.citizens.find(c => c.name === user)) return;
     const citizen = createDefaultCitizen(user, state);
     state.map.citizens.push(citizen);
+    return citizen;
 }
 
 export function createDefaultCitizen(citizenName: string, state: ChatSimState): Citizen {
@@ -129,11 +130,17 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
         },
         money: 10,
         skills: {},
-        job: createJob(CITIZEN_JOB_FOOD_GATHERER, state),
+        job: createJob(CITIZEN_JOB_FOOD_GATHERER, state)!,
         log: [],
         maxLogLength: 100,
     };
     return citizen;
+}
+
+export function citizenSetDreamJob(citizen: Citizen, dreamJob: string | undefined, state: ChatSimState) {
+    if (!dreamJob) return;
+    citizen.dreamJob = dreamJob;
+    citizenChangeJob(citizen, dreamJob, state, [`My dream job is ${dreamJob}`]);
 }
 
 export function citizenResetStateTo(citizen: Citizen, type: string) {

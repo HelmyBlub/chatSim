@@ -1,25 +1,34 @@
 Tasks:
 - first chat interactions
-    - choose dream job
-        - citizen will try to become it
+    - choose "dream job"
+        - steps:
+            - make property for citizen
+            - make property for chatter
+            - set when command is typed in chat
+            - display in selected data
+            - make citizen act on it
+        - citizen will try to become it, if it exist
         - dream job is displayed when selected
         - stored at chatter
         - if citizen inizialized in new run, should remember
         - should allow unvalid choices
             - future feature to implement job
+            - can only be one
         - command could be: !job <choise>
     - choose trait
         - command could be !trait <choise>
             - early bird or night owl
                 - otherwise will be randomised
+                - check how changing it of an existing citizen can affect their sleep cycle
             - only one can be choosen
                 - overwrites each other
-
+    - how to visualize to chatter what he can do to change his citizen behavior?
+        - what jobs do exist?
     - don't just consider commands. Set stuff based on chat messages
         - if ceraint words are seen in chat => set traits/jobs
         - advertisment bots messages -> make citizen want to be food market
-        
-            
+            - check in message: "add me on discord"
+                -> set dream job "food market"
     
 
 ---------------------------------------------------
@@ -42,7 +51,7 @@ Tasks done today:
 - bug: camera move keys not working
 - tab to switch between selected visible citizens?
 - selecting click should select closest not first
-- improved code
+- improved trading code
 - trading animation
     - a lot of teleporting of stuff still in. Fix to animate as well
 
@@ -85,6 +94,9 @@ Big Idea:
                 -  chatter can input dream job
                     - dream job will be saved. Citizen will do this job if possible
                     - dream job could be something not yet implemented as a way for me to see what i could implement in the future                    
+            second vision step:
+                - big map
+                - mushrooms and tree do not just instantly respawn
             big vision:
                 - each chatter becomes a citizen of a game world
                     - moves mostly by itself but chatter can influence his citizen

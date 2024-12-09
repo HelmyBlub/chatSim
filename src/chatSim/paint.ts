@@ -44,6 +44,9 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         if (citizen.isDead) {
             ctx.fillText(`    Death Reason: ${citizen.isDead.reason}`, offsetX, offsetY + lineSpacing * lineCounter++);
         }
+        if (citizen.dreamJob) {
+            ctx.fillText(`    Dream Job: ${citizen.dreamJob}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
         ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);

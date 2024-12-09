@@ -31,6 +31,11 @@ export type SelectedObject = {
     object: any,
 }
 
+export type ChatterData = {
+    name: string,
+    dreamJob?: string,
+}
+
 export type ChatSimState = {
     canvas?: HTMLCanvasElement,
     logger?: Logger,
@@ -59,5 +64,5 @@ export type ChatSimState = {
     }
     functionsCitizenJobs: FunctionsCitizenJobs,
     functionsCitizenNeeds: CitizenNeedsFunctions,
-    chatterNames: string[],
+    chatterData: ChatterData[],
 }
