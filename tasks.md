@@ -1,5 +1,42 @@
 Tasks:
 - first chat interactions
+    - choose trait
+        - command could be !trait <choise>
+            - steps:
+                - citizen property: traits: string[]
+                - types trait
+                    - name
+                    - opposite?
+                - function citizenAddTrait
+                - available trait list
+
+                - if chatter writes "!trait <>"
+                    - call citizenAddTrait
+                        - checks if it is in allwed trait list
+                        - each trait does need an add<name>Trait function
+                            - earlyBird need to set wakeUpTime
+                            -
+
+            - early bird or night owl
+                - otherwise will be randomised
+                - check how changing it of an existing citizen can affect their sleep cycle
+            - only one can be choosen
+                - overwrites each other
+            - check: is stored at chatter
+    - how to visualize to chatter what he can do to change his citizen behavior?
+        - what jobs do exist?
+    - don't just consider commands. Set stuff based on chat messages
+        - if ceraint words are seen in chat => set traits/jobs
+        - advertisment bots messages -> make citizen want to be food market
+            - check in message: "add me on discord"
+                -> set dream job "food market"
+                - trait ideas: "idiot", "scammer", "robot"
+            - check in message: "cheap viewers"
+                -> to decide
+    
+
+---------------------------------------------------
+Tasks done today:
     - choose "dream job"
         - steps:
             - make property for citizen
@@ -15,65 +52,6 @@ Tasks:
             - future feature to implement job
             - can only be one
         - command could be: !job <choise>
-    - choose trait
-        - command could be !trait <choise>
-            - early bird or night owl
-                - otherwise will be randomised
-                - check how changing it of an existing citizen can affect their sleep cycle
-            - only one can be choosen
-                - overwrites each other
-    - how to visualize to chatter what he can do to change his citizen behavior?
-        - what jobs do exist?
-    - don't just consider commands. Set stuff based on chat messages
-        - if ceraint words are seen in chat => set traits/jobs
-        - advertisment bots messages -> make citizen want to be food market
-            - check in message: "add me on discord"
-                -> set dream job "food market"
-    
-
----------------------------------------------------
-Tasks done today:
-- mushroom pickup behavior
-    - citizens do not know where mushrooms are if they are to far away
-        - because they can only see a certain distance
-    - citizen can see further at day than at night
-    - citizen move in random directions hopeing to find a mushroom
-    - citizen thinking steps:
-        - i gather mushroom
-            - i look if i see one in my vision distance
-                - if i see one move to
-                 - if i am first pick up
-            - if i do not see one
-                - pick random direction and move to position
-                    - remember last direction. to keep walking direction somewhat consistently
-                - consider beeing to close to edge/corner of map
-- zoom in to mouse cursor not camera middle
-- bug: camera move keys not working
-- tab to switch between selected visible citizens?
-- selecting click should select closest not first
-- improved trading code
-- trading animation
-    - a lot of teleporting of stuff still in. Fix to animate as well
-
-    - on trade move money and item between citizens
-        - successfull customer buy trade steps
-            - customer put money on counter for marketCitizen
-            - and takes item from market inventory
-            - marketCitizen takes money from counter into own inventory
-        - successfull customer sell trade steps
-            - customer put item on counter for marketCitizen
-            - marketCitizen puts money on counter
-                - and takes item from coutner and puts it into market inventory
-            - citizen takes money from counter
-
-        - currently market trade does money + items at the same time. But it should happen separately, so customer can take without paying or leave forgetting to take items after paying
-        - currently happes instantly and code relies on it, which makes it hard to put animation between
-        - item or money move should have some generall code
-        - "setStatePutMoney" from citizen to building (counter) of market.
-            - animate
-            - marketCitizen takes from counter into his inventory
-        - "setStateTradeItem" from citizen to citizen
-            - animate
 
 
 --------------------------------------------------

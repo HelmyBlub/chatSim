@@ -34,6 +34,7 @@ export type SelectedObject = {
 export type ChatterData = {
     name: string,
     dreamJob?: string,
+    traits?: string[],
 }
 
 export type ChatSimState = {

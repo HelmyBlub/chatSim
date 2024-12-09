@@ -9,6 +9,7 @@ import { paintChatSim } from "./paint.js";
 import { loadChatSimSounds } from "./sounds.js";
 import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
+import { addCitizenTrait, handleChatterAddTraitMessage, loadTraits } from "./traits/trait.js";
 
 export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
@@ -128,6 +129,7 @@ function chatSimStateInit(streamer: string): App {
 function initMyApp() {
     const app = chatSimStateInit("HelmiBlub");
     const state = app.state;
+    loadTraits();
     loadLocalStorageChatters(state);
     loadImages();
     loadChatSimSounds();
@@ -146,10 +148,13 @@ function initMyApp() {
 }
 
 function handleChatMessage(user: string, message: string, state: ChatSimState) {
-    if (!state.chatterData.find(c => c.name === user)) {
+    const chatter = state.chatterData.find(c => c.name === user);
+    if (!chatter) {
         addCitizen(user, state);
         addChatter(user, state);
     }
+    const citizen = state.map.citizens.find(c => c.name === user);
+    if (!chatter || !citizen) return;
     if (message.startsWith("job")) {
         const splits = message.split(" ");
         if (splits.length > 1) {
@@ -157,14 +162,22 @@ function handleChatMessage(user: string, message: string, state: ChatSimState) {
             if (splits.length > 2) dreamJob += " " + splits[2];
             const maxLength = 30;
             if (dreamJob.length > maxLength) dreamJob = dreamJob.substring(0, maxLength);
-            const citizen = state.map.citizens.find(c => c.name === user);
-            const chatter = state.chatterData.find(c => c.name === user);
             if (citizen) {
                 citizenSetDreamJob(citizen, dreamJob, state);
             }
             if (chatter) {
                 chatter.dreamJob = dreamJob;
             }
+            saveLocalStorageChatter(state.chatterData);
+        }
+    } else if (message.startsWith("trait")) {
+        const splits = message.split(" ");
+        let trait = splits[1];
+        if (splits.length > 1) {
+            if (splits.length > 2) trait += " " + splits[2];
+            const maxLength = 30;
+            if (trait.length > maxLength) trait = trait.substring(0, maxLength);
+            handleChatterAddTraitMessage(chatter, citizen, trait, state);
             saveLocalStorageChatter(state.chatterData);
         }
     }
@@ -193,6 +206,11 @@ function loadLocalStorageChatters(state: ChatSimState) {
             const citizen = addCitizen(chatter.name, state);
             if (citizen) {
                 citizenSetDreamJob(citizen, chatter.dreamJob, state);
+                if (chatter.traits) {
+                    for (let trait of chatter.traits) {
+                        addCitizenTrait(citizen, trait, state);
+                    }
+                }
             }
         }
     }

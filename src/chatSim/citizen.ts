@@ -15,6 +15,7 @@ import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAY
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
 import { Tree } from "./tree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
+import { CitizenTraits } from "./traits/trait.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -57,6 +58,7 @@ export type Citizen = {
         time: number,
     },
     dreamJob?: string,
+    traitsData: CitizenTraits,
     goToBedTime: number;
     sleepDuration: number;
     birthTime: number,
@@ -101,6 +103,10 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
         name: citizenName,
         goToBedTime: (0.9 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1)) % 1,
         sleepDuration: 0.36 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1),
+        traitsData: {
+            traits: [],
+            maxTraits: 5,
+        },
         birthTime: state.time,
         speed: 2,
         foodPerCent: 1,

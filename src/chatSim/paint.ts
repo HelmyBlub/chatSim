@@ -56,6 +56,12 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(`        ${citizen.stateInfo.stack[0].state}`, offsetX, offsetY + lineSpacing * lineCounter++);
             if (citizen.stateInfo.stack[0].subState) ctx.fillText(`            ${citizen.stateInfo.stack[0].subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
         }
+        if (citizen.traitsData.traits.length > 0) {
+            ctx.fillText(`    Traits:`, offsetX, offsetY + lineSpacing * lineCounter++);
+            for (let trait of citizen.traitsData.traits) {
+                ctx.fillText(`        ${trait}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            }
+        }
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
         for (let item of citizen.inventory.items) {
             ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
