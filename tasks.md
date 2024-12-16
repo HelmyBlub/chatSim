@@ -1,54 +1,15 @@
 Tasks:
-- first chat interactions
-    - don't just consider commands. Set stuff based on chat messages
-        - if ceraint words are seen in chat => set traits/jobs
-            - check in message: "add me on discord"
-                - trait "robot"
-            - check in message: "cheap viewers"
-    - how to visualize to chatter what he can do to change his citizen behavior?
-        - what jobs do exist?
-    
+
+- bigger map
+    - think about what exactly
 
 ---------------------------------------------------
 Tasks done today:
-    - choose trait
-        - command could be !trait <choise>
-            - steps:
-                - citizen property: traits: string[]
-                - types trait
-                    - name
-                    - opposite?
-                - function citizenAddTrait
-                - available trait list
-
-                - if chatter writes "!trait <>"
-                    - call citizenAddTrait
-                        - checks if it is in allwed trait list
-                        - each trait does need an add<name>Trait function
-                            - earlyBird need to set wakeUpTime
-                            -
-
-            - early bird or night owl
-                - otherwise will be randomised
-                - check how changing it of an existing citizen can affect their sleep cycle
-            - only one can be choosen
-                - overwrites each other
-            - check: is stored at chatter
-    - choose "dream job"
-        - steps:
-            - make property for citizen
-            - make property for chatter
-            - set when command is typed in chat
-            - display in selected data
-            - make citizen act on it
-        - citizen will try to become it, if it exist
-        - dream job is displayed when selected
-        - stored at chatter
-        - if citizen inizialized in new run, should remember
-        - should allow unvalid choices
-            - future feature to implement job
-            - can only be one
-        - command could be: !job <choise>
+- first chat interactions
+    - how to visualize to chatter what he can do to change his citizen behavior?
+        - what jobs do exist?
+        - just display options as a list    
+    - display messages of successfull chat message changes
 
 
 --------------------------------------------------
@@ -61,15 +22,6 @@ Big Idea:
     - chatter are a type of input for a game i build
         - idea: chatSim
             next vision step:
-                first chat interactions
-                - "citizen traits"
-                    - something which makes citizen behave differently. Which can be modified by chatters
-                        - like trait: "earlybird", wakes up early
-                        - trait "nightowl". goes to bed late
-                -  chatter can input dream job
-                    - dream job will be saved. Citizen will do this job if possible
-                    - dream job could be something not yet implemented as a way for me to see what i could implement in the future                    
-            second vision step:
                 - big map
                 - mushrooms and tree do not just instantly respawn
             big vision:

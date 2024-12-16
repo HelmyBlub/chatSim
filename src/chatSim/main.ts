@@ -1,9 +1,9 @@
 import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
-import { addCitizen, citizenSetDreamJob } from "./citizen.js";
+import { addCitizen, Citizen, citizenSetDreamJob } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
-import { citizenChangeJob, loadCitizenJobsFunctions } from "./jobs/job.js";
+import { loadCitizenJobsFunctions } from "./jobs/job.js";
 import { createDefaultMap } from "./map.js";
 import { paintChatSim } from "./paint.js";
 import { loadChatSimSounds } from "./sounds.js";
@@ -104,6 +104,11 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
                 moveX: 0,
                 moveY: 0,
                 mouseMoveMap: false,
+            },
+            chatterChangeLog: {
+                maxLength: 10,
+                currentIndex: 0,
+                log: [],
             }
         }
     }
@@ -111,6 +116,15 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
     loadCitizenNeedsFunctions(state);
     onLoadCitizenStateDefaultTickFuntions();
     return state;
+}
+
+export function addChatterChangeLog(message: string, state: ChatSimState) {
+    const logData = state.inputData.chatterChangeLog;
+    logData.log[logData.currentIndex] = {
+        time: performance.now(),
+        message: message,
+    };
+    logData.currentIndex = (logData.currentIndex + 1) % logData.maxLength;
 }
 
 function chatSimStateInit(streamer: string): App {
@@ -164,6 +178,7 @@ function handleChatMessage(user: string, message: string, state: ChatSimState) {
             if (dreamJob.length > maxLength) dreamJob = dreamJob.substring(0, maxLength);
             if (citizen) {
                 citizenSetDreamJob(citizen, dreamJob, state);
+                addChatterChangeLog(`${citizen.name} set Dream Job to ${dreamJob}`, state);
             }
             if (chatter) {
                 chatter.dreamJob = dreamJob;
@@ -178,6 +193,7 @@ function handleChatMessage(user: string, message: string, state: ChatSimState) {
             const maxLength = 30;
             if (trait.length > maxLength) trait = trait.substring(0, maxLength);
             handleChatterAddTraitMessage(chatter, citizen, trait, state);
+            addChatterChangeLog(`${citizen.name} added trait ${trait}`, state);
             saveLocalStorageChatter(state.chatterData);
         }
     }
@@ -186,6 +202,7 @@ function handleChatMessage(user: string, message: string, state: ChatSimState) {
         || message.indexOf("Cheap viewers") > -1
     ) {
         handleChatterAddTraitMessage(chatter, citizen, CITIZEN_TRAIT_ROBOT, state);
+        addChatterChangeLog(`${citizen.name} added trait ${CITIZEN_TRAIT_ROBOT}`, state);
         saveLocalStorageChatter(state.chatterData);
     }
 }

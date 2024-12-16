@@ -74,14 +74,14 @@ export type Citizen = {
     money: number,
     skills: { [key: string]: number },
     needs: CitizenNeeds,
-    log: CitizenLogEntry[];
+    log: LogEntry[];
     lastChat?: Chat,
     maxLogLength: number,
     displayedEquipments: CitizenEquipmentData[],
     paintBehindBuildings?: boolean,
 }
 
-export type CitizenLogEntry = {
+export type LogEntry = {
     time: number,
     message: string,
 }

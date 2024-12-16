@@ -17,7 +17,7 @@ type CitizenTraitFunction = {
     apply(citizen: Citizen, state: ChatSimState): void,
 }
 
-const CITIZEN_TRAIT_FUNCTIONS: { [key: string]: CitizenTraitFunction } = {
+export const CITIZEN_TRAIT_FUNCTIONS: { [key: string]: CitizenTraitFunction } = {
 }
 
 const TRAIT_EARLY_BIRD = "Early Bird";

@@ -1,7 +1,7 @@
 import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
 import { mapCanvasPositionToMapPosition, mapIsPositionVisible, PaintDataMap } from "./map.js";
 import { addCitizen } from "./citizen.js";
-import { calculateDistance } from "./main.js";
+import { addChatterChangeLog, calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
@@ -243,6 +243,9 @@ function keyDown(event: KeyboardEvent, app: App) {
             break;
         case "KeyM":
             addCitizen("TestCitizen" + Math.floor(Math.random() * 1000), state);
+            for (let i = 0; i < 10; i++) {
+                addChatterChangeLog("test" + i, state);
+            }
             break
         case "KeyT":
             startTests(app);

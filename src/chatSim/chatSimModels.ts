@@ -1,3 +1,4 @@
+import { LogEntry } from "./citizen.js"
 import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map.js"
@@ -37,6 +38,12 @@ export type ChatterData = {
     traits?: string[],
 }
 
+export type ChatterChangeLog = {
+    maxLength: number,
+    currentIndex: number,
+    log: LogEntry[],
+}
+
 export type ChatSimState = {
     canvas?: HTMLCanvasElement,
     logger?: Logger,
@@ -61,7 +68,8 @@ export type ChatSimState = {
             mouseMoveMap: boolean,
             moveX: number,
             moveY: number,
-        }
+        },
+        chatterChangeLog: ChatterChangeLog,
     }
     functionsCitizenJobs: FunctionsCitizenJobs,
     functionsCitizenNeeds: CitizenNeedsFunctions,

@@ -1,4 +1,4 @@
-import { IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
+import { drawTextWithOutline, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { ChatSimState, Mushroom, Position } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
 import { Building, BuildingMarket, paintBuildings } from "./building.js";
@@ -6,8 +6,8 @@ import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizen
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { IMAGES } from "./images.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
-import { INVENTORY_MUSHROOM } from "./inventory.js";
 import { paintTrees, Tree } from "./tree.js";
+import { CITIZEN_TRAIT_FUNCTIONS } from "./traits/trait.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
 export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
@@ -20,6 +20,8 @@ export function paintChatSim(state: ChatSimState, gameSpeed: number) {
     paintMapBorder(ctx, state.paintData.map);
     paintSelectedData(ctx, state);
     paintData(ctx, state, gameSpeed);
+    paintChatMessageOptions(ctx, state, 1200, 500);
+    paintChatterChangeLog(ctx, state);
 }
 
 export function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: PaintDataMap): Position {
@@ -27,6 +29,37 @@ export function mapPositionToPaintPosition(mapPosition: Position, paintDataMap: 
         x: mapPosition.x - paintDataMap.cameraPosition.x + paintDataMap.paintOffset.x + paintDataMap.paintWidth / 2,
         y: mapPosition.y - paintDataMap.cameraPosition.y + paintDataMap.paintOffset.y + paintDataMap.paintHeight / 2,
     };
+}
+
+function paintChatterChangeLog(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    const logData = state.inputData.chatterChangeLog;
+    const fontSize = 20;
+    ctx.font = `${fontSize}px Arial`;
+    for (let i = 0; i < logData.log.length; i++) {
+        const job = logData.log[i];
+        if (job.time + 10000 < performance.now()) continue;
+        drawTextWithOutline(ctx, job.message, 10, 30 + i * fontSize);
+    }
+}
+
+function paintChatMessageOptions(ctx: CanvasRenderingContext2D, state: ChatSimState, paintX: number, paintY: number) {
+    const jobList = Object.keys(state.functionsCitizenJobs);
+    let textLineCounter = 0;
+    const fontSize = 16;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.fillStyle = "black";
+    ctx.fillText("Chat Commands:", paintX, paintY + fontSize * textLineCounter++);
+    ctx.fillText("    !job <jobname>", paintX, paintY + fontSize * textLineCounter++);
+    for (let i = 0; i < jobList.length; i++) {
+        const job = jobList[i];
+        ctx.fillText(`        ${job}`, paintX, paintY + fontSize * textLineCounter++);
+    }
+    const traitList = Object.keys(CITIZEN_TRAIT_FUNCTIONS);
+    ctx.fillText("    !trait <trait>", paintX, paintY + fontSize * textLineCounter++);
+    for (let i = 0; i < traitList.length; i++) {
+        const trait = traitList[i];
+        ctx.fillText(`        ${trait}`, paintX, paintY + fontSize * textLineCounter++);
+    }
 }
 
 function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
