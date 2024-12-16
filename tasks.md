@@ -1,7 +1,16 @@
 Tasks:
 
-- bigger map
-    - think about what exactly
+- very big map
+    - make map large
+    - add a lot of mushrooms and trees
+    - make citizens able to survive
+        - citizen only search in proximity
+        - citizens can have memory of further away stuff
+    - check perforamnce
+    - use map chunks and check performance
+    - check paint performance
+        - only paint what is seen? or does offscreen not affect performance?
+    - make map very big
 
 ---------------------------------------------------
 Tasks done today:

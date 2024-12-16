@@ -41,10 +41,10 @@ export type ChatSimMap = {
 }
 
 export function createDefaultMap(): ChatSimMap {
-    const tilesHorizontal = 16;
-    const tilesVertical = 9;
-    const maxTrees = 3;
-    const maxMushrooms = 6;
+    const tilesHorizontal = 100;
+    const tilesVertical = 100;
+    const maxTrees = 300;
+    const maxMushrooms = 600;
     const map: ChatSimMap = createMap(tilesHorizontal, tilesVertical, maxMushrooms, maxTrees);
     fillAllTilesAtStart(map);
     return map;
@@ -222,39 +222,44 @@ export function tickChatSimMap(state: ChatSimState) {
 function tickTreeSpawn(state: ChatSimState) {
     if (state.map.trees.length >= state.map.maxTrees) return;
     if (state.map.emptyTiles.length === 0) return undefined;
-    const emptyTileIndex = getRandomEmptyTileIndex(state);
-    const tilePosition = state.map.emptyTiles[emptyTileIndex];
-    const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
-    const newTree: Tree = createTree(mapPosition);
-    state.map.emptyTiles.splice(emptyTileIndex, 1);
-    state.map.usedTiles.push({
-        position: tilePosition,
-        usedByType: "Tree",
-        object: newTree,
-    });
-    state.map.trees.push(newTree);
+    const maxSpawn = Math.min(state.map.maxTrees - state.map.trees.length, 100);
+    for (let i = 0; i < maxSpawn; i++) {
+        const emptyTileIndex = getRandomEmptyTileIndex(state);
+        const tilePosition = state.map.emptyTiles[emptyTileIndex];
+        const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
+        const newTree: Tree = createTree(mapPosition);
+        state.map.emptyTiles.splice(emptyTileIndex, 1);
+        state.map.usedTiles.push({
+            position: tilePosition,
+            usedByType: "Tree",
+            object: newTree,
+        });
+        state.map.trees.push(newTree);
+    }
 }
-
 
 function mushroomSpawnTick(state: ChatSimState) {
     if (state.map.mushrooms.length >= state.map.maxMushrooms) return;
     if (state.map.emptyTiles.length === 0) return undefined;
-    const emptyTileIndex = getRandomEmptyTileIndex(state);
-    const tilePosition = state.map.emptyTiles[emptyTileIndex];
-    const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
-    const mushroom: Mushroom = {
-        position: {
-            x: mapPosition.x,
-            y: mapPosition.y,
+    const maxSpawn = Math.min(state.map.maxMushrooms - state.map.mushrooms.length, 100);
+    for (let i = 0; i < maxSpawn; i++) {
+        const emptyTileIndex = getRandomEmptyTileIndex(state);
+        const tilePosition = state.map.emptyTiles[emptyTileIndex];
+        const mapPosition = tilePositionToMapPosition(tilePosition, state.map);
+        const mushroom: Mushroom = {
+            position: {
+                x: mapPosition.x,
+                y: mapPosition.y,
+            }
         }
+        state.map.emptyTiles.splice(emptyTileIndex, 1);
+        state.map.usedTiles.push({
+            position: tilePosition,
+            usedByType: "Mushroom",
+            object: mushroom,
+        });
+        state.map.mushrooms.push(mushroom);
     }
-    state.map.emptyTiles.splice(emptyTileIndex, 1);
-    state.map.usedTiles.push({
-        position: tilePosition,
-        usedByType: "Mushroom",
-        object: mushroom,
-    });
-    state.map.mushrooms.push(mushroom);
 }
 
 function getRandomEmptyTileIndex(state: ChatSimState): number {

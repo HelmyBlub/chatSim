@@ -79,7 +79,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
         time: 0,
         tickInterval: 16,
         gameSpeed: 1,
-        timPerDay: 100000,
+        timPerDay: 150000,
         sunriseAt: 0.22,
         sunsetAt: 0.88,
         chatterData: [],

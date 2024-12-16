@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
-import { getTimeOfDay } from "../main.js";
+import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
 import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 
@@ -36,11 +36,18 @@ function tick(citizen: Citizen, state: ChatSimState) {
     }
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.home && citizen.energyPerCent > 0.1) {
-            addCitizenThought(citizen, `I am tired. I go home to sleep.`, state);
-            citizen.stateInfo.stack.unshift({ state: "move home" });
-            citizen.moveTo = {
-                x: citizen.home.position.x,
-                y: citizen.home.position.y,
+            const homeDistance = calculateDistance(citizen.position, citizen.home.position);
+            if (homeDistance < 1000) {
+                addCitizenThought(citizen, `I am tired. I go home to sleep.`, state);
+                citizen.stateInfo.stack.unshift({ state: "move home" });
+                citizen.moveTo = {
+                    x: citizen.home.position.x,
+                    y: citizen.home.position.y,
+                }
+            } else {
+                addCitizenThought(citizen, `I am tired. I am to far away from home. I sleep here.`, state);
+                citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
+                if (citizen.moveTo) citizen.moveTo = undefined;
             }
         } else {
             citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });

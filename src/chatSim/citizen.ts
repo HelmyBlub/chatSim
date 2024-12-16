@@ -465,8 +465,8 @@ function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
     if (citizen.isDead) return;
-    citizen.foodPerCent -= 0.0002;
-    citizen.energyPerCent -= 16 / state.timPerDay;
+    citizen.foodPerCent -= state.tickInterval / state.timPerDay * 0.75;
+    citizen.energyPerCent -= state.tickInterval / state.timPerDay;
     tickCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);

@@ -1,6 +1,8 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
+import { isCitizenInVisionDistance } from "../jobs/job.js";
+import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
 
@@ -15,7 +17,7 @@ export function loadCitizenNeedsFunctionsHome(state: ChatSimState) {
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.home === undefined) return false;
-    if (citizen.home.deterioration > 0.2) return false;
+    if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > 0.2) return false;
     return true;
 }
 

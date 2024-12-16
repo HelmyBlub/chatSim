@@ -43,6 +43,7 @@ function paintChatterChangeLog(ctx: CanvasRenderingContext2D, state: ChatSimStat
 }
 
 function paintChatMessageOptions(ctx: CanvasRenderingContext2D, state: ChatSimState, paintX: number, paintY: number) {
+    if (state.inputData.selected) return;
     const jobList = Object.keys(state.functionsCitizenJobs);
     let textLineCounter = 0;
     const fontSize = 16;
