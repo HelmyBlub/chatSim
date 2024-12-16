@@ -1,3 +1,4 @@
+import { Chatter } from "../obsOverlayApp/mainModels.js";
 import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
 import { addCitizen, Citizen, citizenSetDreamJob } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
@@ -127,45 +128,11 @@ export function addChatterChangeLog(message: string, state: ChatSimState) {
     logData.currentIndex = (logData.currentIndex + 1) % logData.maxLength;
 }
 
-function chatSimStateInit(streamer: string): App {
-    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.width = window.innerWidth - 10;
-    canvas.height = window.innerHeight - 10;
-    const state = createDefaultChatSimState(streamer, Math.random());
-    state.soundVolume = 1;
-    const app: App = { state: state };
-    state.canvas = canvas;
-    chatSimAddInputEventListeners(app, canvas);
-    state.logger = { log: (message, data) => console.log(message, data) };
-    return app;
-}
-
-function initMyApp() {
-    const app = chatSimStateInit("HelmiBlub");
-    const state = app.state;
-    loadTraits();
-    loadLocalStorageChatters(state);
-    loadImages();
-    loadChatSimSounds();
-    //@ts-ignore
-    ComfyJS.onChat = (user, message, flags, self, extra) => {
-        handleChatMessage(user, message, state);
-    }
-    //@ts-ignore
-    ComfyJS.onCommand = (user, message, flags, self, extra) => {
-        handleChatMessage(user, `${message} ${flags}`, state);
-    }
-    //@ts-ignore
-    ComfyJS.Init(state.streamer);
-
-    runner(app);
-}
-
-function handleChatMessage(user: string, message: string, state: ChatSimState) {
-    const chatter = state.chatterData.find(c => c.name === user);
+export function handleChatMessage(user: string, message: string, state: ChatSimState) {
+    let chatter = state.chatterData.find(c => c.name === user);
     if (!chatter) {
         addCitizen(user, state);
-        addChatter(user, state);
+        chatter = addChatter(user, state);
     }
     const citizen = state.map.citizens.find(c => c.name === user);
     if (!chatter || !citizen) return;
@@ -207,10 +174,47 @@ function handleChatMessage(user: string, message: string, state: ChatSimState) {
     }
 }
 
-function addChatter(user: string, state: ChatSimState) {
-    if (state.chatterData.find(c => c.name === user)) return;
-    state.chatterData.push({ name: user });
+function chatSimStateInit(streamer: string): App {
+    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    canvas.width = window.innerWidth - 10;
+    canvas.height = window.innerHeight - 10;
+    const state = createDefaultChatSimState(streamer, Math.random());
+    state.soundVolume = 1;
+    const app: App = { state: state };
+    state.canvas = canvas;
+    chatSimAddInputEventListeners(app, canvas);
+    state.logger = { log: (message, data) => console.log(message, data) };
+    return app;
+}
+
+function initMyApp() {
+    const app = chatSimStateInit("HelmiBlub");
+    const state = app.state;
+    loadTraits();
+    loadLocalStorageChatters(state);
+    loadImages();
+    loadChatSimSounds();
+    //@ts-ignore
+    ComfyJS.onChat = (user, message, flags, self, extra) => {
+        handleChatMessage(user, message, state);
+    }
+    //@ts-ignore
+    ComfyJS.onCommand = (user, message, flags, self, extra) => {
+        handleChatMessage(user, `${message} ${flags}`, state);
+    }
+    //@ts-ignore
+    ComfyJS.Init(state.streamer);
+
+    runner(app);
+}
+
+function addChatter(user: string, state: ChatSimState): ChatterData {
+    const chatterData = state.chatterData.find(c => c.name === user);
+    if (chatterData) return chatterData;
+    const newChatterData = { name: user };
+    state.chatterData.push(newChatterData);
     saveLocalStorageChatter(state.chatterData);
+    return newChatterData;
 }
 
 function saveLocalStorageChatter(chatterData: ChatterData[]) {

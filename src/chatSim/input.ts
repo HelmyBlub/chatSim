@@ -1,7 +1,7 @@
 import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
 import { mapCanvasPositionToMapPosition, mapIsPositionVisible, PaintDataMap } from "./map.js";
 import { addCitizen } from "./citizen.js";
-import { addChatterChangeLog, calculateDistance } from "./main.js";
+import { addChatterChangeLog, calculateDistance, handleChatMessage } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
