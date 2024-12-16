@@ -1,6 +1,6 @@
 import { drawTextWithOutline, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { ChatSimState, Mushroom, Position } from "./chatSimModels.js";
-import { PaintDataMap } from "./map.js";
+import { chunkKeyToPosition, PaintDataMap } from "./map.js";
 import { Building, BuildingMarket, paintBuildings } from "./building.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
@@ -160,22 +160,18 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     ctx.translate(-translateX, -translateY);
 
     ctx.fillStyle = "green";
-    const mapTopLeft = {
-        x: -state.map.mapWidth / 2,
-        y: -state.map.mapHeight / 2,
-    };
-    const paintMapTopLeft = mapPositionToPaintPosition(mapTopLeft, paintDataMap);
-    ctx.fillRect(paintMapTopLeft.x, paintMapTopLeft.y, state.map.mapWidth, state.map.mapHeight);
-
-    const mushroomPaintSize = 30;
-    const mushroomImage = IMAGES[IMAGE_PATH_MUSHROOM];
-    for (let mushroom of state.map.mushrooms) {
-        const paintPos = mapPositionToPaintPosition(mushroom.position, paintDataMap);
-        ctx.drawImage(mushroomImage, 0, 0, 200, 200,
-            paintPos.x - mushroomPaintSize / 2,
-            paintPos.y - mushroomPaintSize / 2,
-            mushroomPaintSize, mushroomPaintSize);
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunkTopLeft = chunkKeyToPosition(chunkKey, state.map);
+        if (!chunkTopLeft) continue;
+        const chunk = state.map.mapChunks[chunkKey];
+        const chunkWidth = chunk.tilesHorizontal * state.map.tileSize + 1 / paintDataMap.zoom;
+        const chunkHeight = chunk.tilesVertical * state.map.tileSize + 1 / paintDataMap.zoom;
+        const paintMapTopLeft = mapPositionToPaintPosition(chunkTopLeft, paintDataMap);
+        ctx.fillRect(paintMapTopLeft.x, paintMapTopLeft.y, chunkWidth, chunkHeight);
     }
+
+    paintMushrooms(ctx, paintDataMap, state);
     paintTrees(ctx, paintDataMap, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
     paintBuildings(ctx, state);
@@ -205,6 +201,22 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         ctx.globalAlpha = transitionAlpha;
         ctx.fillRect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight);
         ctx.globalAlpha = 1;
+    }
+}
+
+function paintMushrooms(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, state: ChatSimState) {
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        const mushroomPaintSize = 30;
+        const mushroomImage = IMAGES[IMAGE_PATH_MUSHROOM];
+        for (let mushroom of chunk.mushrooms) {
+            const paintPos = mapPositionToPaintPosition(mushroom.position, paintDataMap);
+            ctx.drawImage(mushroomImage, 0, 0, 200, 200,
+                paintPos.x - mushroomPaintSize / 2,
+                paintPos.y - mushroomPaintSize / 2,
+                mushroomPaintSize, mushroomPaintSize);
+        }
     }
 }
 

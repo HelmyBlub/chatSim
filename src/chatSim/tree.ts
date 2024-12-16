@@ -13,35 +13,39 @@ export type Tree = {
 
 export function paintTrees(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, state: ChatSimState) {
     const treePaintSize = 60;
-    for (let tree of state.map.trees) {
-        const paintPos = mapPositionToPaintPosition(tree.position, paintDataMap);
-        if (tree.fallTime !== undefined) {
-            const fallDuration = 1000;
-            if (tree.fallTime + fallDuration > state.time) {
-                const rotation = ((tree.fallTime - state.time) / fallDuration) * Math.PI / 2;
-                ctx.save();
-                ctx.translate(paintPos.x, paintPos.y);
-                ctx.rotate(rotation)
-                ctx.translate(-paintPos.x, -paintPos.y);
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let tree of chunk.trees) {
+            const paintPos = mapPositionToPaintPosition(tree.position, paintDataMap);
+            if (tree.fallTime !== undefined) {
+                const fallDuration = 1000;
+                if (tree.fallTime + fallDuration > state.time) {
+                    const rotation = ((tree.fallTime - state.time) / fallDuration) * Math.PI / 2;
+                    ctx.save();
+                    ctx.translate(paintPos.x, paintPos.y);
+                    ctx.rotate(rotation)
+                    ctx.translate(-paintPos.x, -paintPos.y);
+                    ctx.drawImage(IMAGES[IMAGE_PATH_TREE], 0, 0, 200, 200,
+                        paintPos.x - treePaintSize / 2,
+                        paintPos.y - treePaintSize / 2,
+                        treePaintSize, treePaintSize
+                    );
+                    ctx.restore();
+                } else {
+                    const maxTreeWoodValue = 10;
+                    const widthFactor = tree.woodValue / maxTreeWoodValue * 0.9 + 0.1;
+                    ctx.drawImage(IMAGES[IMAGE_PATH_TREE_LOG], 0, 0, 200 * widthFactor, 200,
+                        paintPos.x - treePaintSize / 2 * widthFactor,
+                        paintPos.y - treePaintSize / 2,
+                        treePaintSize * widthFactor, treePaintSize);
+                }
+            } else {
                 ctx.drawImage(IMAGES[IMAGE_PATH_TREE], 0, 0, 200, 200,
                     paintPos.x - treePaintSize / 2,
                     paintPos.y - treePaintSize / 2,
-                    treePaintSize, treePaintSize
-                );
-                ctx.restore();
-            } else {
-                const maxTreeWoodValue = 10;
-                const widthFactor = tree.woodValue / maxTreeWoodValue * 0.9 + 0.1;
-                ctx.drawImage(IMAGES[IMAGE_PATH_TREE_LOG], 0, 0, 200 * widthFactor, 200,
-                    paintPos.x - treePaintSize / 2 * widthFactor,
-                    paintPos.y - treePaintSize / 2,
-                    treePaintSize * widthFactor, treePaintSize);
+                    treePaintSize, treePaintSize);
             }
-        } else {
-            ctx.drawImage(IMAGES[IMAGE_PATH_TREE], 0, 0, 200, 200,
-                paintPos.x - treePaintSize / 2,
-                paintPos.y - treePaintSize / 2,
-                treePaintSize, treePaintSize);
         }
     }
 }

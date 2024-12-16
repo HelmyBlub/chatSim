@@ -167,6 +167,7 @@ export function handleChatMessage(user: string, message: string, state: ChatSimS
 
     if (message.indexOf("add me on discord") > -1
         || message.indexOf("Cheap viewers") > -1
+        || message.indexOf("Best viewers") > -1
     ) {
         handleChatterAddTraitMessage(chatter, citizen, CITIZEN_TRAIT_ROBOT, state);
         addChatterChangeLog(`${citizen.name} added trait ${CITIZEN_TRAIT_ROBOT}`, state);

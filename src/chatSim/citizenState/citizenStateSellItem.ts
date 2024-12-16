@@ -62,22 +62,26 @@ function tickCititzenStateSellItem(citizen: Citizen, state: ChatSimState) {
 function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, state: ChatSimState): BuildingMarket | undefined {
     let closest = undefined;
     let closestDistance: number = -1;
-    for (let building of state.map.buildings) {
-        if (building.deterioration >= 1) continue;
-        if (building.type !== "Market") continue;
-        const market = building as BuildingMarket;
-        if (building.inhabitedBy === undefined) continue;
-        if (building.inhabitedBy.money <= 0) continue;
-        if (inventoryGetAvaiableCapacity(building.inventory, itemName) <= 0) continue;
-        if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
-        if (!closest) {
-            closest = market;
-            closestDistance = calculateDistance(building.position, citizen.position);
-        } else {
-            const tempDistance = calculateDistance(building.position, citizen.position);
-            if (tempDistance < closestDistance) {
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.deterioration >= 1) continue;
+            if (building.type !== "Market") continue;
+            const market = building as BuildingMarket;
+            if (building.inhabitedBy === undefined) continue;
+            if (building.inhabitedBy.money <= 0) continue;
+            if (inventoryGetAvaiableCapacity(building.inventory, itemName) <= 0) continue;
+            if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
+            if (!closest) {
                 closest = market;
-                closestDistance = tempDistance;
+                closestDistance = calculateDistance(building.position, citizen.position);
+            } else {
+                const tempDistance = calculateDistance(building.position, citizen.position);
+                if (tempDistance < closestDistance) {
+                    closest = market;
+                    closestDistance = tempDistance;
+                }
             }
         }
     }

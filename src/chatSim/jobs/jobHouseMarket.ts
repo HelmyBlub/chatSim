@@ -31,13 +31,6 @@ function create(state: ChatSimState): CitizenJobHouseMarket {
 function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState) {
     if (job.lastCheckedHouseAvailability === undefined || job.lastCheckedHouseAvailability + CHECK_INTERVAL < state.time) {
         let housesAvailable = false;
-        for (let house of state.map.buildings) {
-            if (house.inhabitedBy) {
-                housesAvailable = true;
-                job.lastCheckedHouseAvailability = state.time;
-                break;
-            }
-        }
         if (!housesAvailable) {
             citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, [`there is no house to market`]);
             return;

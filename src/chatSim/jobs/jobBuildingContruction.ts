@@ -70,9 +70,13 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
 }
 
 function getCitizenUnfinishedBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {
-    for (let building of state.map.buildings) {
-        if (building.buildProgress !== undefined && citizen === building.owner) {
-            return building;
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.buildProgress !== undefined && citizen === building.owner) {
+                return building;
+            }
         }
     }
     return undefined;

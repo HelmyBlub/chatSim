@@ -103,14 +103,18 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
             return;
         }
     }
-    for (let building of state.map.buildings) {
-        if (building.inhabitedBy === citizen && building !== citizen.home) {
-            const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
-            if (availableAmount > 0) {
-                const wantedAmount = Math.min(openAmount, availableAmount);
-                addCitizenThought(citizen, `I do have ${item.name} at my ${building.type}. I go get it.`, state);
-                setCitizenStateGetItemFromBuilding(citizen, building, item.name, wantedAmount);
-                return;
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.inhabitedBy === citizen && building !== citizen.home) {
+                const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
+                if (availableAmount > 0) {
+                    const wantedAmount = Math.min(openAmount, availableAmount);
+                    addCitizenThought(citizen, `I do have ${item.name} at my ${building.type}. I go get it.`, state);
+                    setCitizenStateGetItemFromBuilding(citizen, building, item.name, wantedAmount);
+                    return;
+                }
             }
         }
     }
@@ -138,21 +142,25 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
 function findClosestOpenMarketWhichSellsItem(citizen: Citizen, itemName: string, state: ChatSimState): Building | undefined {
     let closest = undefined;
     let closestDistance: number = -1;
-    for (let building of state.map.buildings) {
-        if (building.deterioration >= 1) continue;
-        if (building.type !== "Market") continue;
-        if (building.inhabitedBy === undefined) continue;
-        const inventory = building.inventory.items.find(i => i.name === itemName);
-        if (!inventory || inventory.counter === 0) continue;
-        if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
-        if (!closest) {
-            closest = building;
-            closestDistance = calculateDistance(building.position, citizen.position);
-        } else {
-            const tempDistance = calculateDistance(building.position, citizen.position);
-            if (tempDistance < closestDistance) {
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.deterioration >= 1) continue;
+            if (building.type !== "Market") continue;
+            if (building.inhabitedBy === undefined) continue;
+            const inventory = building.inventory.items.find(i => i.name === itemName);
+            if (!inventory || inventory.counter === 0) continue;
+            if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
+            if (!closest) {
                 closest = building;
-                closestDistance = tempDistance;
+                closestDistance = calculateDistance(building.position, citizen.position);
+            } else {
+                const tempDistance = calculateDistance(building.position, citizen.position);
+                if (tempDistance < closestDistance) {
+                    closest = building;
+                    closestDistance = tempDistance;
+                }
             }
         }
     }

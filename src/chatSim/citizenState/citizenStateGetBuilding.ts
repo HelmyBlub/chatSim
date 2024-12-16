@@ -43,13 +43,20 @@ export function setCitizenStateRepairBuilding(citizen: Citizen, building: Buildi
 }
 
 export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
-    for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === buildingType) {
-            return building;
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === buildingType) {
+                return building;
+            }
         }
     }
-    for (let building of state.map.buildings) {
-        if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === buildingType) return building;
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === buildingType) return building;
+        }
     }
     return undefined;
 }
@@ -210,9 +217,13 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
 }
 
 function getCitizenUnfinishedBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
-    for (let building of state.map.buildings) {
-        if (building.buildProgress !== undefined && building.type === buildingType && citizen === building.owner) {
-            return building;
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let building of chunk.buildings) {
+            if (building.buildProgress !== undefined && building.type === buildingType && citizen === building.owner) {
+                return building;
+            }
         }
     }
     return undefined;

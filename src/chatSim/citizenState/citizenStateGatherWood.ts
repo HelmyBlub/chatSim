@@ -3,7 +3,7 @@ import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../ci
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { removeTreeFromMap } from "../map.js";
+import { mapGetChunkForPosition, removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
@@ -98,34 +98,38 @@ function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: C
 }
 
 function moveToTree(citizen: Citizen, state: ChatSimState) {
-    if (state.map.trees.length > 0) {
-        const tree = findClosestTree(citizen, state);
-        if (!tree) return;
-        const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-        citizen.moveTo = {
-            x: tree.position.x + Math.sin(randomDirection) * 10,
-            y: tree.position.y + Math.cos(randomDirection) * 10,
-        };
-    }
+    const tree = findClosestTree(citizen, state);
+    if (!tree) return;
+    const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
+    citizen.moveTo = {
+        x: tree.position.x + Math.sin(randomDirection) * 10,
+        y: tree.position.y + Math.cos(randomDirection) * 10,
+    };
 }
 
 function findClosestTree(citizen: Citizen, state: ChatSimState): Tree | undefined {
     let closestTree: Tree | undefined = undefined;
     let closestDistance = 0;
-    for (let i = state.map.trees.length - 1; i >= 0; i--) {
-        const tree = state.map.trees[i];
-        const distance = calculateDistance(citizen.position, tree.position);
-        if (!closestTree || distance < closestDistance) {
-            closestDistance = distance;
-            closestTree = tree;
+    const chunkKeys = Object.keys(state.map.mapChunks);
+    for (let chunkKey of chunkKeys) {
+        const chunk = state.map.mapChunks[chunkKey];
+        for (let i = chunk.trees.length - 1; i >= 0; i--) {
+            const tree = chunk.trees[i];
+            const distance = calculateDistance(citizen.position, tree.position);
+            if (!closestTree || distance < closestDistance) {
+                closestDistance = distance;
+                closestTree = tree;
+            }
         }
     }
     return closestTree;
 }
 
 function isCloseToTree(citizen: Citizen, state: ChatSimState): Tree | undefined {
-    for (let i = state.map.trees.length - 1; i >= 0; i--) {
-        const tree = state.map.trees[i];
+    const chunk = mapGetChunkForPosition(citizen.position, state.map);
+    if (!chunk) return undefined;
+    for (let i = chunk.trees.length - 1; i >= 0; i--) {
+        const tree = chunk.trees[i];
         if (isCitizenInInteractionDistance(citizen, tree.position)) return tree;
     }
     return undefined;

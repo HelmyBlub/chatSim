@@ -1,8 +1,11 @@
 Tasks:
 
 - very big map
-    - check perforamnce
     - use map chunks and check performance
+        - old check perforamnce
+            - testcase: performance 10 citizens,    time: 2409.90
+            - testcase: performance 100 citizens,   time: 4232.00
+            - testcase: performance 10000 citizens, time: 6156.70
     - check paint performance
         - only paint what is seen? or does offscreen not affect performance?
     - make map very big
