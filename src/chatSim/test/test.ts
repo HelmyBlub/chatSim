@@ -305,7 +305,7 @@ function createTestMapMiddle(): ChatSimMap {
 }
 
 function createTestMapBig(): ChatSimMap {
-    return createMap(50, 50, 30, 16);
+    return createMap(100, 100, 600, 300);
 }
 
 /**

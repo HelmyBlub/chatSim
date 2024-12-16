@@ -235,6 +235,7 @@ function tickTreeSpawn(state: ChatSimState) {
             object: newTree,
         });
         state.map.trees.push(newTree);
+        if (state.map.emptyTiles.length === 0) return undefined;
     }
 }
 
@@ -259,6 +260,7 @@ function mushroomSpawnTick(state: ChatSimState) {
             object: mushroom,
         });
         state.map.mushrooms.push(mushroom);
+        if (state.map.emptyTiles.length === 0) return undefined;
     }
 }
 
