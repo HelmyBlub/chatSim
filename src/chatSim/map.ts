@@ -52,10 +52,10 @@ export type MapChunk = {
 }
 
 export function createDefaultMap(): ChatSimMap {
-    const tilesHorizontal = 1000;
-    const tilesVertical = 1000;
-    const maxTrees = 9000;
-    const maxMushrooms = 36000;
+    const tilesHorizontal = 100;
+    const tilesVertical = 100;
+    const maxTrees = 300;
+    const maxMushrooms = 600;
     const map: ChatSimMap = createMap(tilesHorizontal, tilesVertical, maxMushrooms, maxTrees);
     fillAllChunksAtStart(map);
     return map;
@@ -153,7 +153,7 @@ export function mapGetVisionBorderPositionClosestToPoint(position: Position, map
     const distanceRight = mapVisionTopLeft.x + visionWidth - position.x;
     const distanceTop = position.y - mapVisionTopLeft.y;
     const distanceBottom = mapVisionTopLeft.y + visionHeight - position.y;
-    if (distanceLeft > 0 && distanceRight > 0) {
+    if (distanceLeft >= 0 && distanceRight >= 0) {
         if (distanceTop > 0 && distanceBottom > 0) {
             const min = Math.min(distanceLeft, distanceRight, distanceBottom, distanceTop);
             if (min === distanceLeft) return { x: mapVisionTopLeft.x, y: position.y };
@@ -168,7 +168,7 @@ export function mapGetVisionBorderPositionClosestToPoint(position: Position, map
             }
         }
     } else {
-        if (distanceTop > 0 && distanceBottom > 0) {
+        if (distanceTop >= 0 && distanceBottom >= 0) {
             if (distanceLeft < distanceRight) {
                 return { x: mapVisionTopLeft.x, y: position.y };
             } else {

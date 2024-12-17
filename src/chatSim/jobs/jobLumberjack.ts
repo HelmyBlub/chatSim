@@ -48,14 +48,16 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                     setCitizenStateSellItem(citizen, INVENTORY_WOOD);
                     return;
                 } else {
-                    const reason = [
-                        `I can not carry more ${INVENTORY_WOOD}.`,
-                        `There is no ${CITIZEN_JOB_WOOD_MARKET} to sell to.`,
-                        `I become a ${CITIZEN_JOB_WOOD_MARKET} myself,`,
-                        `so i can sell my ${INVENTORY_WOOD}.`
-                    ];
-                    citizenChangeJob(citizen, CITIZEN_JOB_WOOD_MARKET, state, reason);
-                    return;
+                    if (citizen.dreamJob !== job.name) {
+                        const reason = [
+                            `I can not carry more ${INVENTORY_WOOD}.`,
+                            `There is no ${CITIZEN_JOB_WOOD_MARKET} to sell to.`,
+                            `I become a ${CITIZEN_JOB_WOOD_MARKET} myself,`,
+                            `so i can sell my ${INVENTORY_WOOD}.`
+                        ];
+                        citizenChangeJob(citizen, CITIZEN_JOB_WOOD_MARKET, state, reason);
+                        return;
+                    }
                 }
             }
         }

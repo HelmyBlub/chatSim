@@ -140,6 +140,8 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
         log: [],
         maxLogLength: 100,
     };
+    const jobs = Object.keys(state.functionsCitizenJobs);
+    citizen.dreamJob = jobs[Math.floor(nextRandom(state.randomSeed) * jobs.length)];
     return citizen;
 }
 

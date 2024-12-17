@@ -1,5 +1,6 @@
 Tasks:
-- very big map
+- randomize jobs of citizen
+    - currently all end up in building consturction
 
 ---------------------------------------------------
 Tasks done today:
@@ -34,8 +35,24 @@ Big Idea:
     - chatter are a type of input for a game i build
         - idea: chatSim
             next vision step:
-                - big map
-                - mushrooms and tree do not just instantly respawn
+                - options: 
+                    - improve citizen behavior
+                        - they always forget what they were doing when a more important needs pops up
+                            - stoping customer interaction just to eat at home
+                                - they could wait for a better fitting moment
+                            - running back home to put something in storage, but when they see their borken home, they want to repair it        directly, forgetting that they wanted to store stuff
+                            - want to bring stuff to their market but on the way forget about it
+                    - buy/rent buildings
+                        - currenty just taken without compensation
+                            - see some property which nobody own
+                            - find the owner and ask
+                    - some system for random interactions between citizens?
+                        - some say "hello neighbour"
+                    - make citizen some social meter
+                        - no social interaction as extrovert -> want to commit suicide
+                    - citizens can steal food
+                            
+                        
             big vision:
                 - each chatter becomes a citizen of a game world
                     - moves mostly by itself but chatter can influence his citizen
@@ -64,7 +81,7 @@ Big Idea:
                 - simulate resouces: the more workers gather wood, the more wood, prices for wood go down
                     - resourse have to be transported
                 - game should simulate some society
-                - society should work with 1 or 1000 inhabitant/chatter
+                - society should work with 1 or 10000 inhabitant/chatter
                 - should progress through ages/technologies
                 - world starts with trees and stones and some type of forest food
                 - inhabitants build town own their own

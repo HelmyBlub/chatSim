@@ -30,7 +30,7 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobHouseConstruction(state);
     loadCitizenJobFoodMarket(state);
     loadCitizenJobWoodMarket(state);
-    loadCitizenJobHouseMarket(state);
+    //loadCitizenJobHouseMarket(state);
 }
 
 export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatSimState, reason: string[]) {

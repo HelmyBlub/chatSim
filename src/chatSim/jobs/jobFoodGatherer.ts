@@ -46,14 +46,16 @@ function tick(citizen: Citizen, job: CitizenJobFoodGatherer, state: ChatSimState
                     setCitizenStateSellItem(citizen, INVENTORY_MUSHROOM);
                     return;
                 } else {
-                    const reason = [
-                        `I can not carry more ${INVENTORY_MUSHROOM}.`,
-                        `There is no ${CITIZEN_JOB_FOOD_MARKET} to sell to.`,
-                        `I become a ${CITIZEN_JOB_FOOD_MARKET} myself,`,
-                        `so i can sell my ${INVENTORY_MUSHROOM}.`
-                    ];
-                    citizenChangeJob(citizen, CITIZEN_JOB_FOOD_MARKET, state, reason);
-                    return;
+                    if (citizen.dreamJob !== job.name) {
+                        const reason = [
+                            `I can not carry more ${INVENTORY_MUSHROOM}.`,
+                            `There is no ${CITIZEN_JOB_FOOD_MARKET} to sell to.`,
+                            `I become a ${CITIZEN_JOB_FOOD_MARKET} myself,`,
+                            `so i can sell my ${INVENTORY_MUSHROOM}.`
+                        ];
+                        citizenChangeJob(citizen, CITIZEN_JOB_FOOD_MARKET, state, reason);
+                        return;
+                    }
                 }
             }
         }
