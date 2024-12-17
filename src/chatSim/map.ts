@@ -325,9 +325,10 @@ function calculateDistanceToChunkXY(position: Position, chunkX: number, chunkY: 
 
 function tickTreeSpawn(state: ChatSimState) {
     if (state.map.treeCounter >= state.map.maxTrees) return;
-    const maxSpawn = Math.min(state.map.maxTrees - state.map.treeCounter, 100);
+    const maxSpawn = Math.min(state.map.maxTrees - state.map.treeCounter, 1000);
+    const chunks = Object.keys(state.map.mapChunks);
     for (let i = 0; i < maxSpawn; i++) {
-        const emptyTileInfo = getRandomEmptyTileInfo(state);
+        const emptyTileInfo = getRandomEmptyTileInfo(state, chunks);
         if (!emptyTileInfo) return;
         const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
         const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
@@ -347,9 +348,10 @@ function tickTreeSpawn(state: ChatSimState) {
 
 function mushroomSpawnTick(state: ChatSimState) {
     if (state.map.mushroomCounter >= state.map.maxMushrooms) return;
-    const maxSpawn = Math.min(state.map.maxMushrooms - state.map.mushroomCounter, 100);
+    const maxSpawn = Math.min(state.map.maxMushrooms - state.map.mushroomCounter, 1000);
+    const chunks = Object.keys(state.map.mapChunks);
     for (let i = 0; i < maxSpawn; i++) {
-        const emptyTileInfo = getRandomEmptyTileInfo(state);
+        const emptyTileInfo = getRandomEmptyTileInfo(state, chunks);
         if (!emptyTileInfo) return;
         const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
         const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
@@ -397,14 +399,13 @@ function getRandomEmptyTileInfoInDistance(state: ChatSimState, position: Positio
     return getRandomEmptyTileInfo(state, chunkKeysInDistane);
 }
 
-function getRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string[] | undefined = undefined): { tileIndex: number, chunkKey: string } | undefined {
+function getRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string[]): { tileIndex: number, chunkKey: string } | undefined {
     const maxTries = 10;
     let tryCounter = 0;
-    const chunkKeysToConsider = chunkKeys ? chunkKeys : Object.keys(state.map.mapChunks);
     while (tryCounter < maxTries) {
         tryCounter++;
-        const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeysToConsider.length);
-        const randomChunkKey = chunkKeysToConsider[randomChunkKeyIndex];
+        const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeys.length);
+        const randomChunkKey = chunkKeys[randomChunkKeyIndex];
         const randomChunk = state.map.mapChunks[randomChunkKey];
         if (randomChunk.emptyTiles.length > 0) {
             const randomTileIndex = Math.floor(nextRandom(state.randomSeed) * randomChunk.emptyTiles.length);

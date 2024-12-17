@@ -1,12 +1,14 @@
 Tasks:
 - very big map
-    - check paint performance
-        - only paint what is seen? or does offscreen not affect performance?
-    - make map very big
 
 ---------------------------------------------------
 Tasks done today:
 - very big map
+    - make map very big
+    - check why mushroom/tree spawn take so much time
+    - check paint performance
+    - improved building performance
+     - only paint what is seen at least chunk related stuff
     - use map chunks and check performance
         - change behvaior to consider only close chunks for checks and not every single chunk
         - old check perforamnce
