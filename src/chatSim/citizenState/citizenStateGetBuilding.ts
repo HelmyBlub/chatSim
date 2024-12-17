@@ -138,7 +138,8 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
     const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
     const amountRequired = BUILDING_DATA[buildingType].woodAmount;
     if (inventoryWood && inventoryWood.counter >= amountRequired) {
-        const building = createBuildingOnRandomTile(citizen, state, buildingType);
+        const buildingPosition = citizen.home ? citizen.home.position : citizen.position;
+        const building = createBuildingOnRandomTile(citizen, state, buildingType, buildingPosition);
         if (building) {
             addCitizenThought(citizen, `I have enough wood to build ${buildingType} myself.`, state);
             setCitizenStateBuildBuilding(citizen, building);

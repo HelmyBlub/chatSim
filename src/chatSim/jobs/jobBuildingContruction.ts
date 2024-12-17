@@ -52,7 +52,7 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
             }
             const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
             if (inventoryWood && inventoryWood.counter >= BUILDING_DATA[buildType].woodAmount) {
-                const building = createBuildingOnRandomTile(citizen, state, buildType);
+                const building = createBuildingOnRandomTile(citizen, state, buildType, citizen.position);
                 if (building) setCitizenStateBuildBuilding(citizen, building);
             } else {
                 setCitizenStateGetItem(citizen, INVENTORY_WOOD, BUILDING_DATA[buildType].woodAmount);

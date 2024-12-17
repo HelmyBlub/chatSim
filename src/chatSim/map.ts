@@ -81,8 +81,8 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
     return map;
 }
 
-export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType): Building | undefined {
-    const emptyTileInfo = getRandomEmptyTileInfo(state);
+export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType, buildPositionCenter: Position): Building | undefined {
+    const emptyTileInfo = getRandomEmptyTileInfoInDistance(state, buildPositionCenter, 400);
     if (!emptyTileInfo) return undefined;
     const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
     const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
@@ -285,6 +285,28 @@ export function mapGetChunksInDistance(position: Position, map: ChatSimMap, dist
     return mapChunks;
 }
 
+export function mapGetChunkKeysInDistance(position: Position, map: ChatSimMap, distance: number): string[] {
+    const mapChunkKeys: string[] = [];
+
+    const chunkSize = map.tileSize * map.defaultChunkLength;
+    const chunkXNotRounded = (position.x - map.zeroChunkTopLeft.x) / chunkSize;
+    const chunkYNotRounded = (position.y - map.zeroChunkTopLeft.y) / chunkSize;
+    const checkDistance = distance / chunkSize + 1;
+    for (let x = -checkDistance; x < checkDistance; x++) {
+        for (let y = -checkDistance; y < checkDistance; y++) {
+            const currentChunkX = Math.floor(chunkXNotRounded + x);
+            const currentChunkY = Math.floor(chunkYNotRounded + y);
+            const distanceToChunk = calculateDistanceToChunkXY(position, currentChunkX, currentChunkY, map);
+            if (distanceToChunk > distance) continue;
+            const key = chunkXyToChunkKey(currentChunkX, currentChunkY);
+            const chunk = map.mapChunks[key];
+            if (chunk) mapChunkKeys.push(key);
+        }
+    }
+
+    return mapChunkKeys;
+}
+
 function calculateDistanceToChunkXY(position: Position, chunkX: number, chunkY: number, map: ChatSimMap): number {
     const chunkPos = chunkXyToPosition(chunkX, chunkY, map);
     const chunkSize = map.tileSize * map.defaultChunkLength;
@@ -316,7 +338,6 @@ function tickTreeSpawn(state: ChatSimState) {
 
 function mushroomSpawnTick(state: ChatSimState) {
     if (state.map.mushroomCounter >= state.map.maxMushrooms) return;
-    //    if (state.map.emptyTiles.length === 0) return undefined;
     const maxSpawn = Math.min(state.map.maxMushrooms - state.map.mushroomCounter, 100);
     for (let i = 0; i < maxSpawn; i++) {
         const emptyTileInfo = getRandomEmptyTileInfo(state);
@@ -366,14 +387,19 @@ function chunkXyToChunkKey(chunkX: number, chunkY: number): string {
     return `${chunkX}_${chunkY}`;
 }
 
-function getRandomEmptyTileInfo(state: ChatSimState): { tileIndex: number, chunkKey: string } | undefined {
+function getRandomEmptyTileInfoInDistance(state: ChatSimState, position: Position, distance: number): { tileIndex: number, chunkKey: string } | undefined {
+    const chunkKeysInDistane = mapGetChunkKeysInDistance(position, state.map, distance);
+    return getRandomEmptyTileInfo(state, chunkKeysInDistane);
+}
+
+function getRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string[] | undefined = undefined): { tileIndex: number, chunkKey: string } | undefined {
     const maxTries = 10;
     let tryCounter = 0;
+    const chunkKeysToConsider = chunkKeys ? chunkKeys : Object.keys(state.map.mapChunks);
     while (tryCounter < maxTries) {
         tryCounter++;
-        const chunkKeys = Object.keys(state.map.mapChunks);
-        const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeys.length);
-        const randomChunkKey = chunkKeys[randomChunkKeyIndex];
+        const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeysToConsider.length);
+        const randomChunkKey = chunkKeysToConsider[randomChunkKeyIndex];
         const randomChunk = state.map.mapChunks[randomChunkKey];
         if (randomChunk.emptyTiles.length > 0) {
             const randomTileIndex = Math.floor(nextRandom(state.randomSeed) * randomChunk.emptyTiles.length);

@@ -128,7 +128,7 @@ function testMarketQueue(): Test {
             const marketOwner = createCitizenWithFullfiledNeeds("testCitizenMarket", state);
             state.map.citizens.push(marketOwner);
             marketOwner.job = createJobMarket(state, CITIZEN_JOB_FOOD_MARKET, [INVENTORY_MUSHROOM]);
-            const marketBuilding = createBuildingOnRandomTile(marketOwner, state, "Market")!;
+            const marketBuilding = createBuildingOnRandomTile(marketOwner, state, "Market", marketOwner.position)!;
             marketBuilding.buildProgress = undefined;
             marketBuilding.inhabitedBy = marketOwner;
             marketBuilding.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 30 });
@@ -288,7 +288,7 @@ function createStarvingCitizen(citizenName: string, testState: ChatSimState): Ci
 
 function createCitizenWithFullfiledNeeds(citizenName: string, testState: ChatSimState): Citizen {
     const citizen = createDefaultCitizen(citizenName, testState);
-    const home = createBuildingOnRandomTile(citizen, testState, "House")!;
+    const home = createBuildingOnRandomTile(citizen, testState, "House", citizen.position)!;
     home.buildProgress = undefined;
     home.inhabitedBy = citizen;
     citizen.home = home;
