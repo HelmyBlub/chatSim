@@ -9,6 +9,7 @@ import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
 import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
 import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
+import { mapGetChunksInDistance } from "../map.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -103,9 +104,9 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
             return;
         }
     }
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, 600);
+    for (let chunk of chunks) {
         for (let building of chunk.buildings) {
             if (building.inhabitedBy === citizen && building !== citizen.home) {
                 const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
@@ -142,9 +143,8 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
 function findClosestOpenMarketWhichSellsItem(citizen: Citizen, itemName: string, state: ChatSimState): Building | undefined {
     let closest = undefined;
     let closestDistance: number = -1;
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, 800);
+    for (let chunk of chunks) {
         for (let building of chunk.buildings) {
             if (building.deterioration >= 1) continue;
             if (building.type !== "Market") continue;

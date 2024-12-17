@@ -1,9 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { mapGetChunkForPosition, removeTreeFromMap } from "../map.js";
+import { mapGetChunkForPosition, mapGetChunksInDistance, mapIsPositionOutOfBounds, removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
@@ -15,6 +15,7 @@ type Data = {
     actionStartTime?: number,
     soundPlayedTime?: number,
     amount?: number,
+    lastSearchDirection?: number,
 }
 
 export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
@@ -99,20 +100,44 @@ function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: C
 
 function moveToTree(citizen: Citizen, state: ChatSimState) {
     const tree = findClosestTree(citizen, state);
-    if (!tree) return;
-    const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-    citizen.moveTo = {
-        x: tree.position.x + Math.sin(randomDirection) * 10,
-        y: tree.position.y + Math.cos(randomDirection) * 10,
-    };
+    if (tree) {
+        const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
+        citizen.moveTo = {
+            x: tree.position.x + Math.sin(randomDirection) * 10,
+            y: tree.position.y + Math.cos(randomDirection) * 10,
+        };
+        addCitizenLogEntry(citizen, `I See a tree at x:${citizen.moveTo.x.toFixed()}, y:${citizen.moveTo.y.toFixed()}`, state);
+    } else {
+        const data = citizen.stateInfo.stack[0].data as Data;
+        let newSearchDirection;
+        if (data.lastSearchDirection === undefined) {
+            newSearchDirection = nextRandom(state.randomSeed) * Math.PI * 2;
+        } else {
+            newSearchDirection = data.lastSearchDirection + nextRandom(state.randomSeed) * Math.PI / 2 - Math.PI / 4;
+        }
+        const randomTurnIfOutOfBound = nextRandom(state.randomSeed) < 0.2 ? 0.3 : -0.3;
+        const walkDistance = citizenGetVisionDistance(citizen, state) * 0.75;
+        while (true) {
+            const newMoveTo = {
+                x: citizen.position.x + Math.cos(newSearchDirection) * walkDistance,
+                y: citizen.position.y + Math.sin(newSearchDirection) * walkDistance,
+            }
+            if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
+                newSearchDirection += randomTurnIfOutOfBound;
+            } else {
+                citizen.moveTo = newMoveTo;
+                data.lastSearchDirection = newSearchDirection;
+                return;
+            }
+        }
+    }
 }
 
 function findClosestTree(citizen: Citizen, state: ChatSimState): Tree | undefined {
     let closestTree: Tree | undefined = undefined;
     let closestDistance = 0;
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, 200);
+    for (let chunk of chunks) {
         for (let i = chunk.trees.length - 1; i >= 0; i--) {
             const tree = chunk.trees[i];
             const distance = calculateDistance(citizen.position, tree.position);

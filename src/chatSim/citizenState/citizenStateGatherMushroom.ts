@@ -1,9 +1,9 @@
 import { ChatSimState, Mushroom } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
-import { mapGetChunkForPosition, mapIsPositionOutOfBounds, removeMushroomFromMap } from "../map.js";
+import { mapGetChunkForPosition, mapGetChunksInDistance, mapIsPositionOutOfBounds, removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
@@ -71,17 +71,12 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroo
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
 }
 
-function citizenGetVisionDistance(citizen: Citizen, state: ChatSimState): number {
-    return 180;
-}
-
 function getClosestMushroomInVisionDistance(citizen: Citizen, state: ChatSimState): Mushroom | undefined {
     const visionDistance = citizenGetVisionDistance(citizen, state);
     let closest: Mushroom | undefined = undefined;
     let closestDistance: number = 0;
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, visionDistance);
+    for (let chunk of chunks) {
         for (let mushroom of chunk.mushrooms) {
             const distance = calculateDistance(citizen.position, mushroom.position);
             if (distance < visionDistance) {
@@ -102,7 +97,7 @@ function moveToMushroom(citizen: Citizen, state: ChatSimState) {
             x: mushroom.position.x,
             y: mushroom.position.y,
         }
-        addCitizenLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo.x}, y:${citizen.moveTo.y}`, state);
+        addCitizenLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo.x.toFixed()}, y:${citizen.moveTo.y.toFixed()}`, state);
     } else {
         const data = citizen.stateInfo.stack[0].data as GatherData;
         let newSearchDirection;

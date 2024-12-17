@@ -1,7 +1,7 @@
 import { Mushroom, ChatSimState, Position } from "./chatSimModels.js";
 import { Building, BuildingType, createBuilding, tickBuildings } from "./building.js";
 import { Citizen } from "./citizen.js";
-import { nextRandom } from "./main.js";
+import { calculateDistance, nextRandom } from "./main.js";
 import { createTree, Tree } from "./tree.js";
 
 export type TilePosition = {
@@ -235,6 +235,63 @@ export function tickChatSimMap(state: ChatSimState) {
     tickBuildings(state);
 }
 
+export function chunkKeyToPosition(chunkKey: string, map: ChatSimMap): Position | undefined {
+    const chunkXY = chunkKeyToChunkXy(chunkKey);
+    if (!chunkXY) return undefined;
+    return chunkXyToPosition(chunkXY.x, chunkXY.y, map);
+}
+
+export function chunkXyToPosition(chunkX: number, chunkY: number, map: ChatSimMap): Position {
+    const chunkSize = map.defaultChunkLength * map.tileSize;
+    return {
+        x: chunkX * chunkSize + map.zeroChunkTopLeft.x,
+        y: chunkY * chunkSize + map.zeroChunkTopLeft.y,
+    }
+}
+
+export function mapPositionToChunkXy(position: Position, map: ChatSimMap): { chunkX: number, chunkY: number } {
+    const chunkSize = map.defaultChunkLength * map.tileSize;
+    const chunkX = Math.floor((position.x - map.zeroChunkTopLeft.x) / chunkSize);
+    const chunkY = Math.floor((position.y - map.zeroChunkTopLeft.y) / chunkSize);
+    return { chunkX, chunkY };
+}
+
+export function mapGetChunkForPosition(position: Position, map: ChatSimMap): MapChunk | undefined {
+    const chunkXY = mapPositionToChunkXy(position, map);
+    const chunkKey = chunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
+    const chunk = map.mapChunks[chunkKey];
+    return chunk;
+}
+
+export function mapGetChunksInDistance(position: Position, map: ChatSimMap, distance: number): MapChunk[] {
+    const mapChunks: MapChunk[] = [];
+
+    const chunkSize = map.tileSize * map.defaultChunkLength;
+    const chunkXNotRounded = (position.x - map.zeroChunkTopLeft.x) / chunkSize;
+    const chunkYNotRounded = (position.y - map.zeroChunkTopLeft.y) / chunkSize;
+    const checkDistance = distance / chunkSize + 1;
+    for (let x = -checkDistance; x < checkDistance; x++) {
+        for (let y = -checkDistance; y < checkDistance; y++) {
+            const currentChunkX = Math.floor(chunkXNotRounded + x);
+            const currentChunkY = Math.floor(chunkYNotRounded + y);
+            const distanceToChunk = calculateDistanceToChunkXY(position, currentChunkX, currentChunkY, map);
+            if (distanceToChunk > distance) continue;
+            const key = chunkXyToChunkKey(currentChunkX, currentChunkY);
+            const chunk = map.mapChunks[key];
+            if (chunk) mapChunks.push(chunk);
+        }
+    }
+
+    return mapChunks;
+}
+
+function calculateDistanceToChunkXY(position: Position, chunkX: number, chunkY: number, map: ChatSimMap): number {
+    const chunkPos = chunkXyToPosition(chunkX, chunkY, map);
+    const chunkSize = map.tileSize * map.defaultChunkLength;
+    const closest = mapGetRectanglePositionClosestToPosition(position, chunkPos, chunkSize, chunkSize);
+    return calculateDistance(position, closest);
+}
+
 function tickTreeSpawn(state: ChatSimState) {
     if (state.map.treeCounter >= state.map.maxTrees) return;
     const maxSpawn = Math.min(state.map.maxTrees - state.map.treeCounter, 100);
@@ -294,30 +351,6 @@ function chunkKeyToChunkXy(chunkKey: string): Position | undefined {
         x: chunkX,
         y: chunkY,
     }
-}
-
-export function chunkKeyToPosition(chunkKey: string, map: ChatSimMap): Position | undefined {
-    const chunkXY = chunkKeyToChunkXy(chunkKey);
-    if (!chunkXY) return undefined;
-    const chunkSize = map.defaultChunkLength * map.tileSize;
-    return {
-        x: chunkXY.x * chunkSize + map.zeroChunkTopLeft.x,
-        y: chunkXY.y * chunkSize + map.zeroChunkTopLeft.y,
-    }
-}
-
-export function mapPositionToChunkXy(position: Position, map: ChatSimMap): { chunkX: number, chunkY: number } {
-    const chunkSize = map.defaultChunkLength * map.tileSize;
-    const chunkX = Math.floor((position.x - map.zeroChunkTopLeft.x) / chunkSize);
-    const chunkY = Math.floor((position.y - map.zeroChunkTopLeft.y) / chunkSize);
-    return { chunkX, chunkY };
-}
-
-export function mapGetChunkForPosition(position: Position, map: ChatSimMap): MapChunk | undefined {
-    const chunkXY = mapPositionToChunkXy(position, map);
-    const chunkKey = chunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
-    const chunk = map.mapChunks[chunkKey];
-    return chunk;
 }
 
 function chunkKeyAndTileToPosition(chunkKey: string, tileXY: TilePosition, map: ChatSimMap): Position | undefined {
@@ -387,4 +420,36 @@ function fillAllChunksAtStart(map: ChatSimMap) {
             map.mapChunks[chunkKey] = chunk;
         }
     }
+}
+
+function mapGetRectanglePositionClosestToPosition(position: Position, rectangleTopLeft: Position, rectangleWidth: number, rectangleHeight: number): Position {
+    const distanceLeft = position.x - rectangleTopLeft.x;
+    const distanceRight = rectangleTopLeft.x + rectangleWidth - position.x;
+    const distanceTop = position.y - rectangleTopLeft.y;
+    const distanceBottom = rectangleTopLeft.y + rectangleHeight - position.y;
+    if (distanceLeft >= 0 && distanceRight >= 0) {
+        if (distanceTop > 0 && distanceBottom > 0) {
+            return { x: position.x, y: position.y };
+        } else {
+            if (distanceTop < distanceBottom) {
+                return { x: position.x, y: rectangleTopLeft.y };
+            } else {
+                return { x: position.x, y: rectangleTopLeft.y + rectangleHeight }
+            }
+        }
+    } else {
+        if (distanceTop >= 0 && distanceBottom >= 0) {
+            if (distanceLeft < distanceRight) {
+                return { x: rectangleTopLeft.x, y: position.y };
+            } else {
+                return { x: rectangleTopLeft.x + rectangleWidth, y: position.y };
+            }
+        } else {
+            if (distanceTop < 0 && distanceLeft < 0) return { x: rectangleTopLeft.x, y: rectangleTopLeft.y };
+            if (distanceTop < 0 && distanceRight < 0) return { x: rectangleTopLeft.x + rectangleWidth, y: rectangleTopLeft.y };
+            if (distanceBottom < 0 && distanceLeft < 0) return { x: rectangleTopLeft.x, y: rectangleTopLeft.y + rectangleHeight };
+            if (distanceBottom < 0 && distanceRight < 0) return { x: rectangleTopLeft.x + rectangleWidth, y: rectangleTopLeft.y + rectangleHeight };
+        }
+    }
+    throw "should not happen";
 }

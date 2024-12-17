@@ -274,6 +274,10 @@ export function paintCititzenSpeechBubbles(ctx: CanvasRenderingContext2D, state:
     }
 }
 
+export function citizenGetVisionDistance(citizen: Citizen, state: ChatSimState): number {
+    return 180;
+}
+
 export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
     let nameFontSize = 16 / state.paintData.map.zoom;
     let nameLineWidth = 2 / state.paintData.map.zoom;

@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
-import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
+import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { isCitizenInVisionDistance } from "../jobs/job.js";
 import { calculateDistance } from "../main.js";
 import { mapGetChunkForPosition } from "../map.js";
@@ -33,15 +33,12 @@ function tick(citizen: Citizen, state: ChatSimState) {
             return;
         }
         if (!citizen.home) {
-            const chunk = mapGetChunkForPosition(citizen.position, state.map);
-            if (!chunk) return;
-            const availableHouse = chunk.buildings.find(h => h.inhabitedBy === undefined && h.buildProgress === undefined && h.type === "House");
+            const availableHouse = findBuilding(citizen, "House", state);
             if (availableHouse) {
                 addCitizenThought(citizen, `I moved into a house from ${availableHouse.owner}`, state);
                 availableHouse.inhabitedBy = citizen;
                 citizen.home = availableHouse;
             } else {
-                citizenResetStateTo(citizen, CITIZEN_NEED_HOME);
                 addCitizenThought(citizen, `I want a home.`, state);
                 setCitizenStateGetBuilding(citizen, "House");
             }

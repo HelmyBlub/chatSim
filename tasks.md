@@ -2,6 +2,8 @@ Tasks:
 
 - very big map
     - use map chunks and check performance
+        - change behvaior to consider only close chunks for checks and not every single chunk
+        - wood gathering needs searching behavior like food gatherer
         - old check perforamnce
             - testcase: performance 10 citizens,    time: 2409.90
             - testcase: performance 100 citizens,   time: 4232.00
@@ -13,15 +15,9 @@ Tasks:
 ---------------------------------------------------
 Tasks done today:
 - very big map
-    - make map large
-    - add a lot of mushrooms and trees
-    - make citizens able to survive
-        - citizen only search in proximity
-- first chat interactions
-    - how to visualize to chatter what he can do to change his citizen behavior?
-        - what jobs do exist?
-        - just display options as a list    
-    - display messages of successfull chat message changes
+    - use map chunks and check performance
+        - change behvaior to consider only close chunks for checks and not every single chunk
+        - wood gathering needs searching behavior like food gatherer
 
 
 --------------------------------------------------

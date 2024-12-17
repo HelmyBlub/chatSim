@@ -4,7 +4,7 @@ import { Citizen } from "../citizen.js";
 import { CitizenJob } from "./job.js";
 import { nextRandom } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { createBuildingOnRandomTile } from "../map.js";
+import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateBuildBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
@@ -70,9 +70,8 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
 }
 
 function getCitizenUnfinishedBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, 1000);
+    for (let chunk of chunks) {
         for (let building of chunk.buildings) {
             if (building.buildProgress !== undefined && citizen === building.owner) {
                 return building;

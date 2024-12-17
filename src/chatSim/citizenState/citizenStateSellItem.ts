@@ -6,6 +6,7 @@ import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
+import { mapGetChunksInDistance } from "../map.js";
 
 export type CitizenStateSellItemData = {
     name: string,
@@ -62,9 +63,8 @@ function tickCititzenStateSellItem(citizen: Citizen, state: ChatSimState) {
 function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, state: ChatSimState): BuildingMarket | undefined {
     let closest = undefined;
     let closestDistance: number = -1;
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, 800);
+    for (let chunk of chunks) {
         for (let building of chunk.buildings) {
             if (building.deterioration >= 1) continue;
             if (building.type !== "Market") continue;
