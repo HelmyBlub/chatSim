@@ -1,9 +1,13 @@
 Tasks:
-- randomize jobs of citizen
-    - currently all end up in building consturction
+- thinking about what to do next
+    - too many options
+    - nothing feels right as the next one
+    - very unsure about what feature is next
 
 ---------------------------------------------------
 Tasks done today:
+- randomize jobs of citizen
+    - currently all end up in building consturction
 - very big map
     - make map very big
     - check why mushroom/tree spawn take so much time
@@ -50,6 +54,9 @@ Big Idea:
                         - some say "hello neighbour"
                     - make citizen some social meter
                         - no social interaction as extrovert -> want to commit suicide
+                    - citizen have "working job" hours and "free time"
+                        - add "free time" and some social or private activities
+                        - social activity could be talking with neigbours
                     - citizens can steal food
                             
                         
