@@ -38,6 +38,7 @@ export type ChatSimMap = {
     maxTrees: number,
     treeCounter: number,
     mapChunks: { [key: string]: MapChunk },
+    buildings: Building[],
 }
 
 export type MapChunk = {
@@ -51,10 +52,10 @@ export type MapChunk = {
 }
 
 export function createDefaultMap(): ChatSimMap {
-    const tilesHorizontal = 100;
-    const tilesVertical = 100;
-    const maxTrees = 300;
-    const maxMushrooms = 600;
+    const tilesHorizontal = 1000;
+    const tilesVertical = 1000;
+    const maxTrees = 9000;
+    const maxMushrooms = 36000;
     const map: ChatSimMap = createMap(tilesHorizontal, tilesVertical, maxMushrooms, maxTrees);
     fillAllChunksAtStart(map);
     return map;
@@ -76,6 +77,7 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
         treeCounter: 0,
         zeroChunkTopLeft: { x: 100, y: 50 },
         mapChunks: {},
+        buildings: [],
     }
     fillAllChunksAtStart(map);
     return map;
@@ -88,15 +90,16 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
     const mapPosition = chunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
     if (!mapPosition) return;
-    const house = createBuilding(owner, mapPosition, buildingType);
-    chunk.buildings.push(house);
+    const building = createBuilding(owner, mapPosition, buildingType);
+    chunk.buildings.push(building);
+    state.map.buildings.push(building);
     chunk.emptyTiles.splice(emptyTileInfo.tileIndex, 1);
     chunk.usedTiles.push({
         position: emptyTile,
         usedByType: buildingType,
-        object: house,
+        object: building,
     });
-    return house;
+    return building;
 }
 
 export function mapIsPositionVisible(position: Position, mapPaint: PaintDataMap) {
@@ -195,6 +198,8 @@ export function removeBuildingFromMap(building: Building, map: ChatSimMap) {
         tileX: usedTile.position.tileX,
         tileY: usedTile.position.tileY,
     });
+    const buildingMapIndex = map.buildings.findIndex(b => b === building);
+    if (buildingMapIndex > -1) map.buildings.splice(buildingMapIndex, 1);
 }
 
 export function removeTreeFromMap(tree: Tree, map: ChatSimMap) {

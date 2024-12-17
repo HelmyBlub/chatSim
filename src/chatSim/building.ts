@@ -88,22 +88,18 @@ export function marketGetQueueMapPosition(citizen: Citizen, market: BuildingMark
 }
 
 export function tickBuildings(state: ChatSimState) {
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
-        for (let i = 0; i < chunk.buildings.length; i++) {
-            const building = chunk.buildings[i];
-            if (building.deterioration < 1) {
-                building.deterioration += 0.00004;
-                if (building.deterioration >= 1) {
-                    building.inventory.items = [];
-                    building.brokeDownTime = state.time;
-                }
-            } else if (building.brokeDownTime !== undefined) {
-                const breakDownTime = BUILDING_DATA[building.type].woodAmount * 60000;
-                if (building.brokeDownTime + breakDownTime < state.time) {
-                    removeBuildingFromMap(building, state.map);
-                }
+    for (let i = 0; i < state.map.buildings.length; i++) {
+        const building = state.map.buildings[i];
+        if (building.deterioration < 1) {
+            building.deterioration += 0.00004;
+            if (building.deterioration >= 1) {
+                building.inventory.items = [];
+                building.brokeDownTime = state.time;
+            }
+        } else if (building.brokeDownTime !== undefined) {
+            const breakDownTime = BUILDING_DATA[building.type].woodAmount * 60000;
+            if (building.brokeDownTime + breakDownTime < state.time) {
+                removeBuildingFromMap(building, state.map);
             }
         }
     }
