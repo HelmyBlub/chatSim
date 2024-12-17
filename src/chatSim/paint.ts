@@ -1,6 +1,6 @@
 import { drawTextWithOutline, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { ChatSimState, Mushroom, Position } from "./chatSimModels.js";
-import { chunkKeyToPosition, PaintDataMap } from "./map.js";
+import { ChatSimMap, chunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map.js";
 import { Building, BuildingMarket, paintBuildings } from "./building.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
@@ -170,11 +170,11 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         const paintMapTopLeft = mapPositionToPaintPosition(chunkTopLeft, paintDataMap);
         ctx.fillRect(paintMapTopLeft.x, paintMapTopLeft.y, chunkWidth, chunkHeight);
     }
-
-    paintMushrooms(ctx, paintDataMap, state);
-    paintTrees(ctx, paintDataMap, state);
+    const chunksToPaint = getChunksToPaint(state);
+    paintMushrooms(ctx, paintDataMap, chunksToPaint, state);
+    paintTrees(ctx, paintDataMap, chunksToPaint, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
-    paintBuildings(ctx, state);
+    paintBuildings(ctx, chunksToPaint, state);
     paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
     paintCititzenSpeechBubbles(ctx, state);
@@ -204,10 +204,27 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     }
 }
 
-function paintMushrooms(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, state: ChatSimState) {
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+function getChunksToPaint(state: ChatSimState): MapChunk[] {
+    const chunksToPaint: MapChunk[] = [];
+    const mapPaintData = state.paintData.map;
+    const topLeftMap = mapCanvasPositionToMapPosition({ x: 0, y: 0 }, mapPaintData);
+    const chunkXY = mapPositionToChunkXy(topLeftMap, state.map);
+    const chunkSize = state.map.tileSize * state.map.defaultChunkLength;
+    const horizontalChunks = 1 + mapPaintData.paintWidth / mapPaintData.zoom / chunkSize;
+    const verticalChunks = 1 + mapPaintData.paintHeight / mapPaintData.zoom / chunkSize;
+    for (let x = 0; x < horizontalChunks; x++) {
+        for (let y = 0; y < verticalChunks; y++) {
+            const chunkKey = mapChunkXyToChunkKey(chunkXY.chunkX + x, chunkXY.chunkY + y);
+            const chunk = state.map.mapChunks[chunkKey];
+            if (chunk) chunksToPaint.push(chunk);
+        }
+    }
+
+    return chunksToPaint;
+}
+
+function paintMushrooms(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, chunksToPaint: MapChunk[], state: ChatSimState) {
+    for (let chunk of chunksToPaint) {
         const mushroomPaintSize = 30;
         const mushroomImage = IMAGES[IMAGE_PATH_MUSHROOM];
         for (let mushroom of chunk.mushrooms) {

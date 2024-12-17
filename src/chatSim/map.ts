@@ -258,7 +258,7 @@ export function mapPositionToChunkXy(position: Position, map: ChatSimMap): { chu
 
 export function mapGetChunkForPosition(position: Position, map: ChatSimMap): MapChunk | undefined {
     const chunkXY = mapPositionToChunkXy(position, map);
-    const chunkKey = chunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
+    const chunkKey = mapChunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
     const chunk = map.mapChunks[chunkKey];
     return chunk;
 }
@@ -276,13 +276,17 @@ export function mapGetChunksInDistance(position: Position, map: ChatSimMap, dist
             const currentChunkY = Math.floor(chunkYNotRounded + y);
             const distanceToChunk = calculateDistanceToChunkXY(position, currentChunkX, currentChunkY, map);
             if (distanceToChunk > distance) continue;
-            const key = chunkXyToChunkKey(currentChunkX, currentChunkY);
+            const key = mapChunkXyToChunkKey(currentChunkX, currentChunkY);
             const chunk = map.mapChunks[key];
             if (chunk) mapChunks.push(chunk);
         }
     }
 
     return mapChunks;
+}
+
+export function mapChunkXyToChunkKey(chunkX: number, chunkY: number): string {
+    return `${chunkX}_${chunkY}`;
 }
 
 export function mapGetChunkKeysInDistance(position: Position, map: ChatSimMap, distance: number): string[] {
@@ -298,7 +302,7 @@ export function mapGetChunkKeysInDistance(position: Position, map: ChatSimMap, d
             const currentChunkY = Math.floor(chunkYNotRounded + y);
             const distanceToChunk = calculateDistanceToChunkXY(position, currentChunkX, currentChunkY, map);
             if (distanceToChunk > distance) continue;
-            const key = chunkXyToChunkKey(currentChunkX, currentChunkY);
+            const key = mapChunkXyToChunkKey(currentChunkX, currentChunkY);
             const chunk = map.mapChunks[key];
             if (chunk) mapChunkKeys.push(key);
         }
@@ -383,10 +387,6 @@ function chunkKeyAndTileToPosition(chunkKey: string, tileXY: TilePosition, map: 
     }
 }
 
-function chunkXyToChunkKey(chunkX: number, chunkY: number): string {
-    return `${chunkX}_${chunkY}`;
-}
-
 function getRandomEmptyTileInfoInDistance(state: ChatSimState, position: Position, distance: number): { tileIndex: number, chunkKey: string } | undefined {
     const chunkKeysInDistane = mapGetChunkKeysInDistance(position, state.map, distance);
     return getRandomEmptyTileInfo(state, chunkKeysInDistane);
@@ -419,7 +419,7 @@ function fillAllChunksAtStart(map: ChatSimMap) {
         for (let y = 0; y < verticalChunkCoutner; y++) {
             const chunkX = x - Math.floor(horizontalChunkCoutner / 2);
             const chunkY = y - Math.floor(verticalChunkCoutner / 2);
-            chunkKey = chunkXyToChunkKey(chunkX, chunkY);
+            chunkKey = mapChunkXyToChunkKey(chunkX, chunkY);
             const chunk: MapChunk = {
                 buildings: [],
                 mushrooms: [],

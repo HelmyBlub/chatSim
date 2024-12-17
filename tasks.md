@@ -1,5 +1,11 @@
 Tasks:
+- very big map
+    - check paint performance
+        - only paint what is seen? or does offscreen not affect performance?
+    - make map very big
 
+---------------------------------------------------
+Tasks done today:
 - very big map
     - use map chunks and check performance
         - change behvaior to consider only close chunks for checks and not every single chunk
@@ -11,13 +17,6 @@ Tasks:
             testcase: performance 10 citizens,      time: 4419.80
             testcase: performance 100 citizens,     time: 3904.20
             testcase: performance 10000 citizens,   time: 4224.30
-    - check paint performance
-        - only paint what is seen? or does offscreen not affect performance?
-    - make map very big
-
----------------------------------------------------
-Tasks done today:
-- very big map
     - use map chunks and check performance
         - change behvaior to consider only close chunks for checks and not every single chunk
         - wood gathering needs searching behavior like food gatherer

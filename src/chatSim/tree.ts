@@ -1,6 +1,6 @@
 import { IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { PaintDataMap } from "./map.js";
+import { MapChunk, PaintDataMap } from "./map.js";
 import { IMAGES } from "./images.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
@@ -11,11 +11,10 @@ export type Tree = {
     fallTime?: number,
 }
 
-export function paintTrees(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, state: ChatSimState) {
+export function paintTrees(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, chunksToPaint: MapChunk[], state: ChatSimState) {
     const treePaintSize = 60;
     const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    for (let chunk of chunksToPaint) {
         for (let tree of chunk.trees) {
             const paintPos = mapPositionToPaintPosition(tree.position, paintDataMap);
             if (tree.fallTime !== undefined) {

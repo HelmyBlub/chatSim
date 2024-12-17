@@ -6,7 +6,7 @@ import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } fro
 import { isCitizenInInteractionDistance } from "./jobs/job.js";
 import { BUILDING_DATA } from "./jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
-import { removeBuildingFromMap } from "./map.js";
+import { MapChunk, removeBuildingFromMap } from "./map.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 
 export type BuildingType = "Market" | "House"
@@ -147,7 +147,7 @@ export function createBuilding(owner: Citizen, position: Position, type: Buildin
     return building;
 }
 
-export function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+export function paintBuildings(ctx: CanvasRenderingContext2D, chunksToPaint: MapChunk[], state: ChatSimState) {
     const citizenHouseImage = IMAGES[IMAGE_PATH_CITIZEN_HOUSE];
     const marketImage = IMAGES[IMAGE_PATH_BUILDING_MARKET];
     const buildingPaintSize = 80;
@@ -156,9 +156,7 @@ export function paintBuildings(ctx: CanvasRenderingContext2D, state: ChatSimStat
     const marketNameOffsetY = 181 * buildingPaintSize / buildingImageSize;
     const marketJobOffsetY = 161 * buildingPaintSize / buildingImageSize;
     ctx.font = "8px Arial";
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
-        const chunk = state.map.mapChunks[chunkKey];
+    for (let chunk of chunksToPaint) {
         for (let building of chunk.buildings) {
             let buildingImageIndex = 1;
             const woodRequired = BUILDING_DATA[building.type].woodAmount;
