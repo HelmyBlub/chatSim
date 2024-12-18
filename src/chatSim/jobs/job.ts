@@ -1,6 +1,6 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_THINKING, setCitizenThought } from "../citizen.js";
+import { Citizen, addCitizenLogEntry, CITIZEN_STATE_THINKING, setCitizenThought, citizenCheckTodoList } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
@@ -52,7 +52,7 @@ export function createJob(jobname: string, state: ChatSimState): CitizenJob | un
 }
 
 export function tickCitizenJob(citizen: Citizen, state: ChatSimState) {
-    if (!citizen.job) return;
+    if (citizenCheckTodoList(citizen, state)) return;
     const jobFunctions = state.functionsCitizenJobs[citizen.job.name];
     if (jobFunctions === undefined) {
         console.log("job functions missing for job " + citizen.job);

@@ -106,7 +106,7 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
             x: tree.position.x + Math.sin(randomDirection) * 10,
             y: tree.position.y + Math.cos(randomDirection) * 10,
         };
-        addCitizenLogEntry(citizen, `I See a tree at x:${citizen.moveTo.x.toFixed()}, y:${citizen.moveTo.y.toFixed()}`, state);
+        addCitizenLogEntry(citizen, `I see a tree at x:${tree.position.x.toFixed()}, y:${tree.position.y.toFixed()}`, state);
     } else {
         const data = citizen.stateInfo.stack[0].data as Data;
         let newSearchDirection;

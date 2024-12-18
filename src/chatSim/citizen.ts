@@ -278,6 +278,20 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
+export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState): boolean {
+    if (citizen.stateInfo.stack.length === 0) {
+        if (citizen.memory.todosData.todos.length > 0) {
+            const todo = citizen.memory.todosData.todos[0];
+            if (todo && todo.stateType !== citizen.stateInfo.type) {
+                addCitizenThought(citizen, `Let's do next todo.`, state);
+                citizen.stateInfo.type = todo.stateType;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (state.inputData.selected) {
         let position: Position | undefined;
@@ -544,15 +558,6 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     const typeTickFunction = CITIZEN_STATE_TYPE_TICK_FUNCTIONS[citizen.stateInfo.type];
     typeTickFunction(citizen, state);
-    if (citizen.stateInfo.stack.length === 0) {
-        if (citizen.memory.todosData.todos.length > 0) {
-            const todo = citizen.memory.todosData.todos[0];
-            if (todo && todo.stateType !== citizen.stateInfo.type) {
-                addCitizenThought(citizen, `Let's do next todo.`, state);
-                citizen.stateInfo.type = todo.stateType;
-            }
-        }
-    }
 }
 
 function tickCitizenTypeThinking(citizen: Citizen, state: ChatSimState) {
