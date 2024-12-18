@@ -1,32 +1,17 @@
 Tasks:
-- thinking about what to do next
-    - too many options
-    - nothing feels right as the next one
-    - very unsure about what feature is next
-
+- improve citizen behavior
+    - citizen have some tasks list
+        - if they are hungry, they don't need to eat directly. They put it on their todoList
+            - when a task finishes, they decide to do task of todos next
+        - market cashier should not stop working instantly mid conversation just to go home to eat
+- check job food gatherer gathers mushrooms when low on mushrooms
 ---------------------------------------------------
 Tasks done today:
-- randomize jobs of citizen
-    - currently all end up in building consturction
-- very big map
-    - make map very big
-    - check why mushroom/tree spawn take so much time
-    - check paint performance
-    - improved building performance
-     - only paint what is seen at least chunk related stuff
-    - use map chunks and check performance
-        - change behvaior to consider only close chunks for checks and not every single chunk
-        - old check perforamnce
-            - testcase: performance 10 citizens,    time: 2409.90
-            - testcase: performance 100 citizens,   time: 4232.00
-            - testcase: performance 10000 citizens, time: 6156.70
-        - new
-            testcase: performance 10 citizens,      time: 4419.80
-            testcase: performance 100 citizens,     time: 3904.20
-            testcase: performance 10000 citizens,   time: 4224.30
-    - use map chunks and check performance
-        - change behvaior to consider only close chunks for checks and not every single chunk
-        - wood gathering needs searching behavior like food gatherer
+- citizen behavior feature "todo memory"
+    - food gatherer goes home to store his mushrooms 
+    - reaches home and sees broken house.
+    - put task to his todoList to remember to repair his building
+    - after storing stuff at home he decides repairing home is next
 
 
 --------------------------------------------------
@@ -39,25 +24,21 @@ Big Idea:
     - chatter are a type of input for a game i build
         - idea: chatSim
             next vision step:
-                - options: 
-                    - improve citizen behavior
-                        - they always forget what they were doing when a more important needs pops up
-                            - stoping customer interaction just to eat at home
-                                - they could wait for a better fitting moment
-                            - running back home to put something in storage, but when they see their borken home, they want to repair it        directly, forgetting that they wanted to store stuff
-                            - want to bring stuff to their market but on the way forget about it
-                    - buy/rent buildings
-                        - currenty just taken without compensation
-                            - see some property which nobody own
-                            - find the owner and ask
+                - improve citizen behavior
+                    - they always forget what they were doing when a more important needs pops up
+                        - stoping customer interaction just to eat at home
+                            - they could wait for a better fitting moment
+                        - running back home to put something in storage, but when they see their borken home, they want to repair it        directly, forgetting that they wanted to store stuff
+                        - want to bring stuff to their market but on the way forget about it
+                -
+            second vision idea: 
+                - citizen have "working job" hours and "free time"
+                    - add "free time" and some social or private activities
+                    - social activity could be talking with neigbours
                     - some system for random interactions between citizens?
                         - some say "hello neighbour"
                     - make citizen some social meter
                         - no social interaction as extrovert -> want to commit suicide
-                    - citizen have "working job" hours and "free time"
-                        - add "free time" and some social or private activities
-                        - social activity could be talking with neigbours
-                    - citizens can steal food
                             
                         
             big vision:

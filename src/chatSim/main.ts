@@ -1,6 +1,6 @@
 import { Chatter } from "../obsOverlayApp/mainModels.js";
 import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
-import { addCitizen, Citizen, citizenSetDreamJob } from "./citizen.js";
+import { addCitizen, Citizen, citizenSetDreamJob, loadCitizenStateTypeFunctions } from "./citizen.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
@@ -195,6 +195,7 @@ function initMyApp() {
     loadLocalStorageChatters(state);
     loadImages();
     loadChatSimSounds();
+    loadCitizenStateTypeFunctions();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         handleChatMessage(user, message, state);

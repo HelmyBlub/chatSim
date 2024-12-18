@@ -3,11 +3,11 @@ import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
 import { Building, marketGetCounterPosition } from "./building.js";
-import { tickCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
-import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
+import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
+import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING, citizenNeedTickSleep } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
-import { citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { calculateDirection, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
@@ -16,6 +16,9 @@ import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEqui
 import { Tree } from "./tree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
 import { CitizenTraits } from "./traits/trait.js";
+import { CITIZEN_NEED_FOOD, citizenNeedTickFood } from "./citizenNeeds/citizenNeedFood.js";
+import { CITIZEN_NEED_HOME, citizenNeedTickHome } from "./citizenNeeds/citizenNeedHome.js";
+import { CITIZEN_NEED_STARVING, citizenNeedTickStarving } from "./citizenNeeds/citizenNeedStarving.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -43,6 +46,17 @@ export type CitizenNeeds = {
     nextCompleteNeedCheckStartTime?: number,
 }
 
+export type CitizenTodos = {
+    todos: CitizenTodo[],
+    maxLength: number,
+}
+
+export type CitizenTodo = {
+    priority: number,
+    stateType: string,
+    reasonThought: string,
+}
+
 export type Citizen = {
     job: CitizenJob,
     tradePaw?: {
@@ -56,6 +70,9 @@ export type Citizen = {
     isDead?: {
         reason: string,
         time: number,
+    },
+    memory: {
+        todosData: CitizenTodos,
     },
     dreamJob?: string,
     traitsData: CitizenTraits,
@@ -86,10 +103,22 @@ export type LogEntry = {
     message: string,
 }
 
+const CITIZEN_STATE_TYPE_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
+};
+
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";
 export const CITIZEN_TIME_PER_THOUGHT_LINE = 2000;
 const CITIZEN_PAINT_SIZE = 40;
+
+export function loadCitizenStateTypeFunctions() {
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_WORKING_JOB] = tickCitizenJob;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_SLEEP] = citizenNeedTickSleep;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_FOOD] = citizenNeedTickFood;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HOME] = citizenNeedTickHome;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_STARVING] = citizenNeedTickStarving;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeThinking;
+}
 
 export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {
     if (state.map.citizens.find(c => c.name === user)) return;
@@ -120,6 +149,12 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
         needs: {
             needsData: {},
         },
+        memory: {
+            todosData: {
+                maxLength: 4,
+                todos: [],
+            },
+        },
         inventory: {
             items: [],
             reservedSpace: [
@@ -143,6 +178,34 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
     const jobs = Object.keys(state.functionsCitizenJobs);
     citizen.dreamJob = jobs[Math.floor(nextRandom(state.randomSeed) * jobs.length)];
     return citizen;
+}
+
+export function citizenRemoveTodo(citizen: Citizen, stateType: string) {
+    const todoData = citizen.memory.todosData;
+    const existingIndex = todoData.todos.findIndex(t => t.stateType === stateType);
+    if (existingIndex > -1) {
+        todoData.todos.splice(existingIndex, 1);
+    }
+}
+
+export function citizenAddTodo(citizen: Citizen, priority: number, stateType: string, reasonThought: string, state: ChatSimState) {
+    const todoData = citizen.memory.todosData;
+    const existing = todoData.todos.find(t => t.stateType === stateType);
+    if (existing) {
+        existing.priority = priority;
+        return;
+    }
+    if (todoData.maxLength < todoData.todos.length + 1) {
+        todoData.todos.pop();
+    }
+    const newTodo: CitizenTodo = {
+        priority: priority,
+        stateType: stateType,
+        reasonThought: reasonThought,
+    }
+    addCitizenThought(citizen, reasonThought, state);
+    todoData.todos.push(newTodo);
+    todoData.todos.sort((a, b) => a.priority - b.priority);
 }
 
 export function citizenSetDreamJob(citizen: Citizen, dreamJob: string | undefined, state: ChatSimState) {
@@ -458,7 +521,7 @@ function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, pai
 
 function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPosition: Position, time: number) {
     if (citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) return;
-    if (citizen.stateInfo.stack[0].state !== CITIZEN_NEED_STATE_SLEEPING) return;
+    if (citizen.stateInfo.stack.length === 0 || citizen.stateInfo.stack[0].state !== CITIZEN_NEED_STATE_SLEEPING) return;
     const timer = time / 300;
     const swingRadius = 10;
     const fontSize = 14;
@@ -473,15 +536,26 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     if (citizen.isDead) return;
     citizen.foodPerCent -= state.tickInterval / state.timPerDay * 0.75;
     citizen.energyPerCent -= state.tickInterval / state.timPerDay;
-    tickCitizenNeeds(citizen, state);
+    checkCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
-    if (citizen.stateInfo.type === CITIZEN_STATE_TYPE_WORKING_JOB) {
-        tickCitizenJob(citizen, state);
+    const typeTickFunction = CITIZEN_STATE_TYPE_TICK_FUNCTIONS[citizen.stateInfo.type];
+    typeTickFunction(citizen, state);
+    if (citizen.stateInfo.stack.length === 0) {
+        if (citizen.memory.todosData.todos.length > 0) {
+            const todo = citizen.memory.todosData.todos[0];
+            if (todo && todo.stateType !== citizen.stateInfo.type) {
+                addCitizenThought(citizen, `Let's do next todo.`, state);
+                citizen.stateInfo.type = todo.stateType;
+            }
+        }
     }
+}
+
+function tickCitizenTypeThinking(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_THINKING) {
         const stateInfo = citizen.stateInfo;
         if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + CITIZEN_TIME_PER_THOUGHT_LINE * stateInfo.thoughts!.length < state.time) {

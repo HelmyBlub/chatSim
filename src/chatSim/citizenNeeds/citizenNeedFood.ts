@@ -5,7 +5,7 @@ import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
+import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_FOOD_IN_INVENTORY = 2;
 export const CITIZEN_NEED_FOOD_AT_HOME = 4;
@@ -15,7 +15,6 @@ export const MUSHROOM_FOOD_VALUE = 0.15;
 export function loadCitizenNeedsFunctionsFood(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_FOOD] = {
         isFulfilled: isFulfilled,
-        tick: tick,
     }
 }
 
@@ -37,11 +36,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     }
 }
 
-function tick(citizen: Citizen, state: ChatSimState) {
-    if (citizen.stateInfo.type !== CITIZEN_NEED_FOOD) {
-        citizenResetStateTo(citizen, CITIZEN_NEED_FOOD);
-    }
-
+export function citizenNeedTickFood(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
         const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
         if (inventoryMushroom && inventoryMushroom.counter > 0) {
@@ -55,7 +50,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             const hasEnoughFoodAtHome = homeMushrooms !== undefined && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
             if (hasEnoughFoodAtHome && citizen.foodPerCent >= 0.5) {
                 addCitizenThought(citizen, `I am good on food.`, state);
-                citizenNeedFailingNeedFulfilled(citizen, state);
+                citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_FOOD, state);
                 return;
             }
             const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
@@ -79,7 +74,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
             const hasEnoughFoodInInventory = inventoryMushroom !== undefined && inventoryMushroom.counter >= CITIZEN_NEED_FOOD_IN_INVENTORY;
             if (hasEnoughFoodInInventory) {
                 addCitizenThought(citizen, `I have enough food.`, state);
-                citizenNeedFailingNeedFulfilled(citizen, state);
+                citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_FOOD, state);
                 return;
             }
         }

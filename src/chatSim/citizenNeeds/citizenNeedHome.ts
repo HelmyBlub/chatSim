@@ -1,35 +1,36 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo } from "../citizen.js";
 import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { isCitizenInVisionDistance } from "../jobs/job.js";
-import { calculateDistance } from "../main.js";
-import { mapGetChunkForPosition } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
+import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_HOME = "need home";
 
 export function loadCitizenNeedsFunctionsHome(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_HOME] = {
         isFulfilled: isFulfilled,
-        tick: tick,
     }
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.home === undefined) return false;
-    if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > 0.2) return false;
+    if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > 0.2) {
+        if (citizen.home.deletedFromMap) {
+            citizen.home = undefined;
+            addCitizenThought(citizen, `My home disappeared.`, state);
+            return false;
+        } else {
+            citizenAddTodo(citizen, citizen.home.deterioration, CITIZEN_NEED_HOME, `I need to remember to repair my home.`, state);
+        }
+    }
     return true;
 }
 
-function tick(citizen: Citizen, state: ChatSimState) {
-    if (citizen.stateInfo.type !== CITIZEN_NEED_HOME) {
-        citizenResetStateTo(citizen, CITIZEN_NEED_HOME);
-    }
-
+export function citizenNeedTickHome(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.home && citizen.home.deterioration <= 0.2) {
-            citizenNeedFailingNeedFulfilled(citizen, state);
+            citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HOME, state);
             return;
         }
         if (!citizen.home) {

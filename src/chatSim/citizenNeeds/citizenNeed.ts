@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRemoveTodo, citizenResetStateTo } from "../citizen.js";
 import { CITIZEN_NEED_FOOD, loadCitizenNeedsFunctionsFood } from "./citizenNeedFood.js";
 import { CITIZEN_NEED_HOME, loadCitizenNeedsFunctionsHome } from "./citizenNeedHome.js";
 import { CITIZEN_NEED_SLEEP, loadCitizenNeedsFunctionsSleep } from "./citizenNeedSleep.js";
@@ -7,7 +7,6 @@ import { CITIZEN_NEED_STARVING, loadCitizenNeedsFunctionsStarving } from "./citi
 
 export type CitizenNeedFunctions = {
     isFulfilled(citizen: Citizen, state: ChatSimState): boolean,
-    tick(citizen: Citizen, state: ChatSimState): void,
     createDefaultData?(): any,
 }
 
@@ -23,18 +22,13 @@ export function loadCitizenNeedsFunctions(state: ChatSimState) {
     loadCitizenNeedsFunctionsSleep(state);
 }
 
-export function tickCitizenNeeds(citizen: Citizen, state: ChatSimState) {
+export function checkCitizenNeeds(citizen: Citizen, state: ChatSimState) {
     const isTimeToCheckAllNeeds = citizen.needs.nextCompleteNeedCheckStartTime === undefined || citizen.needs.nextCompleteNeedCheckStartTime <= state.time;
     if (isTimeToCheckAllNeeds) {
         checkAllNeeds(citizen, state);
-    } else {
-        const hasToTickFailingNeed = citizen.needs.lastFailingNeed !== undefined && citizen.stateInfo.type === citizen.needs.lastFailingNeed;
-        if (hasToTickFailingNeed) {
-            const needFunctions = state.functionsCitizenNeeds[citizen.needs.lastFailingNeed!];
-            needFunctions.tick(citizen, state);
-        }
     }
 }
+
 export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSimState) {
     let needData = citizen.needs.needsData[need];
     if (!needData) {
@@ -47,10 +41,15 @@ export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSi
     return needData;
 }
 
-export function citizenNeedFailingNeedFulfilled(citizen: Citizen, state: ChatSimState) {
-    if (citizen.needs.lastFailingNeed === undefined) return;
+export function citizenNeedOnNeedFulfilled(citizen: Citizen, need: string, state: ChatSimState) {
+    if (citizen.needs.lastFailingNeed === undefined) {
+        citizenRemoveTodo(citizen, need);
+        citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
+        return;
+    }
     const startingNeedOrderIndex = NEED_ORDER.findIndex(n => n === citizen.needs.lastFailingNeed) + 1;
     citizen.needs.lastFailingNeed = undefined;
+    citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
     checkAllNeeds(citizen, state, startingNeedOrderIndex);
 }
 
@@ -71,17 +70,12 @@ function checkAllNeeds(citizen: Citizen, state: ChatSimState, startingNeedOrderI
         }
     }
     if (failingNeed) {
-        const needFunctions = state.functionsCitizenNeeds[failingNeed];
-        citizen.needs.lastFailingNeed = failingNeed;
-        needFunctions.tick(citizen, state);
+        if (citizen.needs.lastFailingNeed !== failingNeed) {
+            citizen.needs.lastFailingNeed = failingNeed;
+            citizenResetStateTo(citizen, failingNeed);
+        }
     } else {
         citizen.needs.lastFailingNeed = undefined;
-        if (citizen.stateInfo.type !== CITIZEN_STATE_TYPE_WORKING_JOB) {
-            citizen.stateInfo = {
-                type: CITIZEN_STATE_TYPE_WORKING_JOB, stack: []
-            };
-            addCitizenThought(citizen, `Back to work.`, state);
-        }
     }
 }
 

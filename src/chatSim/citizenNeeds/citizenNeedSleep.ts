@@ -3,7 +3,7 @@ import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRese
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
-import { citizenNeedFailingNeedFulfilled } from "./citizenNeed.js";
+import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
 export const CITIZEN_NEED_STATE_SLEEPING = "sleeping";
@@ -11,7 +11,6 @@ export const CITIZEN_NEED_STATE_SLEEPING = "sleeping";
 export function loadCitizenNeedsFunctionsSleep(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_SLEEP] = {
         isFulfilled: isFulfilled,
-        tick: tick,
     }
 }
 
@@ -30,10 +29,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     return true;
 }
 
-function tick(citizen: Citizen, state: ChatSimState) {
-    if (citizen.stateInfo.type !== CITIZEN_NEED_SLEEP) {
-        citizenResetStateTo(citizen, CITIZEN_NEED_SLEEP);
-    }
+export function citizenNeedTickSleep(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.home && citizen.energyPerCent > 0.1) {
             const homeDistance = calculateDistance(citizen.position, citizen.home.position);
@@ -80,7 +76,7 @@ function tick(citizen: Citizen, state: ChatSimState) {
         if (citizen.energyPerCent > 1) {
             citizen.energyPerCent = 1;
             addCitizenThought(citizen, `Waking up.`, state);
-            citizenNeedFailingNeedFulfilled(citizen, state);
+            citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_SLEEP, state);
             return;
         }
     }
