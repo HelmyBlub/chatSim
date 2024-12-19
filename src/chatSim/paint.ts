@@ -81,8 +81,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         if (citizen.dreamJob) {
             ctx.fillText(`    Dream Job: ${citizen.dreamJob}`, offsetX, offsetY + lineSpacing * lineCounter++);
         }
-        ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%,     Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
@@ -91,10 +90,11 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             if (citizen.stateInfo.stack[0].subState) ctx.fillText(`            ${citizen.stateInfo.stack[0].subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
         }
         if (citizen.traitsData.traits.length > 0) {
-            ctx.fillText(`    Traits:`, offsetX, offsetY + lineSpacing * lineCounter++);
+            let traitsText = `    Traits:`;
             for (let trait of citizen.traitsData.traits) {
-                ctx.fillText(`        ${trait}`, offsetX, offsetY + lineSpacing * lineCounter++);
+                traitsText += ` ${trait},`;
             }
+            ctx.fillText(traitsText, offsetX, offsetY + lineSpacing * lineCounter++);
         }
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
         for (let item of citizen.inventory.items) {
@@ -104,6 +104,12 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(`    Home Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
             for (let item of citizen.home.inventory.items) {
                 ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            }
+        }
+        if (citizen.memory.todosData.todos.length > 0) {
+            ctx.fillText(`    Memory Todos:`, offsetX, offsetY + lineSpacing * lineCounter++);
+            for (let todo of citizen.memory.todosData.todos) {
+                ctx.fillText(`        ${todo.stateType}: ${todo.reasonThought}`, offsetX, offsetY + lineSpacing * lineCounter++);
             }
         }
         if (citizen.log.length > 0) {

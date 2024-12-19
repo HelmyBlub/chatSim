@@ -4,14 +4,14 @@ Tasks:
         - if they are hungry, they don't need to eat directly. They put it on their todoList
             - when a task finishes, they decide to do task of todos next
         - market cashier should not stop working instantly mid conversation just to go home to eat
-- check job food gatherer gathers mushrooms when low on mushrooms
+    - check todo list priority
+- check job food market gathers mushrooms when low on mushrooms
+
+
 ---------------------------------------------------
 Tasks done today:
-- citizen behavior feature "todo memory"
-    - food gatherer goes home to store his mushrooms 
-    - reaches home and sees broken house.
-    - put task to his todoList to remember to repair his building
-    - after storing stuff at home he decides repairing home is next
+- feature "todo memory"
+    - display in selected data
 
 
 --------------------------------------------------
