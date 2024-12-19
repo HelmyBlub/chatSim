@@ -24,16 +24,16 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
     const zoom = state.paintData.map.zoom;
     paintDataMap.cameraPosition.x += moveX / zoom;
     paintDataMap.cameraPosition.y += moveY / zoom;
-    const maxLeft = -state.map.mapWidth / 2;
-    const maxRight = state.map.mapWidth / 2;
+    const maxLeft = state.map.maxLeft;
+    const maxRight = maxLeft + state.map.width;
     if (paintDataMap.cameraPosition.x < maxLeft) {
         paintDataMap.cameraPosition.x = maxLeft;
     } else if (paintDataMap.cameraPosition.x > maxRight) {
         paintDataMap.cameraPosition.x = maxRight;
     }
 
-    const maxTop = -state.map.mapHeight / 2;
-    const maxBottom = state.map.mapHeight / 2;
+    const maxTop = state.map.maxTop;
+    const maxBottom = maxTop + state.map.height;
     if (paintDataMap.cameraPosition.y < maxTop) {
         paintDataMap.cameraPosition.y = maxTop;
     } else if (paintDataMap.cameraPosition.y > maxBottom) {

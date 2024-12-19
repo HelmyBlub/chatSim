@@ -4,11 +4,11 @@ Tasks:
 - check job food market gathers mushrooms when low on mushrooms
 - check: food market customer want to sell but eats his own mushrooms in between which makes trade stuck
     - how to handle?
-- check panning corners zoomed in
 
 
 ---------------------------------------------------
 Tasks done today:
+- fixed panning corners zoomed in
 - feature "todo memory"
     - check todo list priority
     - market cashier should not stop working instantly mid conversation just to go home to eat

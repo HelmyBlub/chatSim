@@ -30,8 +30,10 @@ export type ChatSimMap = {
     tileCounterHorizontal: number,
     tileCounterVertical: number,
     zeroChunkTopLeft: Position,
-    mapHeight: number,
-    mapWidth: number,
+    height: number,
+    width: number,
+    maxTop: number,
+    maxLeft: number,
     citizens: Citizen[],
     maxMushrooms: number,
     mushroomCounter: number,
@@ -68,8 +70,10 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
         defaultChunkLength: 8,
         tileCounterHorizontal: tilesHorizontal,
         tileCounterVertical: tilesVertical,
-        mapHeight: tileSize * tilesVertical,
-        mapWidth: tileSize * tilesHorizontal,
+        height: tileSize * tilesVertical,
+        width: tileSize * tilesHorizontal,
+        maxTop: 0,
+        maxLeft: 0,
         citizens: [],
         maxMushrooms: maxMushrooms,
         mushroomCounter: 0,
@@ -420,11 +424,15 @@ function fillAllChunksAtStart(map: ChatSimMap) {
     const chunkSize = map.defaultChunkLength * map.tileSize;
     const horizontalChunkCoutner = Math.ceil(map.tileCounterHorizontal / map.defaultChunkLength);
     const verticalChunkCoutner = Math.ceil(map.tileCounterVertical / map.defaultChunkLength);
+    const horizontalChunkHalf = Math.floor(horizontalChunkCoutner / 2);
+    const verticalChunkHalf = Math.floor(verticalChunkCoutner / 2);
+    map.maxLeft = - horizontalChunkHalf * chunkSize + map.zeroChunkTopLeft.x;
+    map.maxTop = - verticalChunkHalf * chunkSize + map.zeroChunkTopLeft.y;
     let chunkKey = "";
     for (let x = 0; x < horizontalChunkCoutner; x++) {
         for (let y = 0; y < verticalChunkCoutner; y++) {
-            const chunkX = x - Math.floor(horizontalChunkCoutner / 2);
-            const chunkY = y - Math.floor(verticalChunkCoutner / 2);
+            const chunkX = x - horizontalChunkHalf;
+            const chunkY = y - verticalChunkHalf;
             chunkKey = mapChunkXyToChunkKey(chunkX, chunkY);
             const chunk: MapChunk = {
                 buildings: [],

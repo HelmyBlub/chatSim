@@ -38,8 +38,8 @@ function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState)
     }
     if (citizen.stateInfo.stack.length === 0) {
         citizen.moveTo = {
-            x: nextRandom(state.randomSeed) * state.map.mapWidth - state.map.mapWidth / 2,
-            y: nextRandom(state.randomSeed) * state.map.mapHeight - state.map.mapHeight / 2,
+            x: nextRandom(state.randomSeed) * state.map.width - state.map.width / 2,
+            y: nextRandom(state.randomSeed) * state.map.height - state.map.height / 2,
         }
         const citizenState: JobHouseMarketStateInfo = { state: "selling" };
         citizen.stateInfo.stack.unshift(citizenState);
