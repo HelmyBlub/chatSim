@@ -7,6 +7,7 @@ Tasks:
 
 ---------------------------------------------------
 Tasks done today:
+- fixed stuck eating while sleeping
 - check job food market gathers mushrooms when low on mushrooms
 - fixed panning corners zoomed in
 - improved food market customer adjusting his amount while in queue when he eats away his stock
@@ -28,14 +29,6 @@ Big Idea:
     - chatter are a type of input for a game i build
         - idea: chatSim
             next vision step:
-                - improve citizen behavior
-                    - they always forget what they were doing when a more important needs pops up
-                        - stoping customer interaction just to eat at home
-                            - they could wait for a better fitting moment
-                        - running back home to put something in storage, but when they see their borken home, they want to repair it        directly, forgetting that they wanted to store stuff
-                        - want to bring stuff to their market but on the way forget about it
-                -
-            second vision idea: 
                 - citizen have "working job" hours and "free time"
                     - add "free time" and some social or private activities
                     - social activity could be talking with neigbours

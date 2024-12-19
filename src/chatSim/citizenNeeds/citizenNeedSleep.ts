@@ -15,7 +15,7 @@ export function loadCitizenNeedsFunctionsSleep(state: ChatSimState) {
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
-    if (citizen.energyPerCent < 0.1 || isCitizenSleeping(citizen)) return false;
+    if (citizen.energyPerCent < 0.1 || isCitizenGoingToSleep(citizen)) return false;
     if (citizen.energyPerCent > 0.85) return true;
 
     const time = getTimeOfDay(state.time, state);
@@ -29,8 +29,8 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     return true;
 }
 
-export function isCitizenSleeping(citizen: Citizen): boolean {
-    if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP && citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
+export function isCitizenGoingToSleep(citizen: Citizen): boolean {
+    if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP) {
         return true;
     }
     return false;
