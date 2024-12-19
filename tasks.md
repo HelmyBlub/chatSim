@@ -1,14 +1,15 @@
 Tasks:
 - improve citizen behavior
     - checking if now issues found
-- check job food market gathers mushrooms when low on mushrooms
-- check: food market customer want to sell but eats his own mushrooms in between which makes trade stuck
+- check: food market customer want to sell mushrooms but eats his own mushrooms in between which makes trade stuck
     - how to handle?
 
 
 ---------------------------------------------------
 Tasks done today:
+- check job food market gathers mushrooms when low on mushrooms
 - fixed panning corners zoomed in
+- improved food market customer adjusting his amount while in queue when he eats away his stock
 - feature "todo memory"
     - check todo list priority
     - market cashier should not stop working instantly mid conversation just to go home to eat

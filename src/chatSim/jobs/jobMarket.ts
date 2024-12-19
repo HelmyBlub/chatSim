@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
 import { addCitizenThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
-import { INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
+import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance, sellItemWithInventories } from "./job.js"
@@ -12,6 +12,7 @@ import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../ci
 import { setCitizenStateGetItemFromBuilding } from "../citizenState/citizenStateGetItem.js";
 import { setCitizenStateMarketItemExchange } from "../citizenState/citizenStateMarket.js";
 import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";
+import { setCitizenStateGatherMushroom } from "../citizenState/citizenStateGatherMushroom.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
@@ -344,8 +345,12 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                             setCitizenStateGetItemFromBuilding(citizen, citizen.home, itemName, availableAtHome);
                             return;
                         } else if (itemName === INVENTORY_WOOD) {
-                            setCitizenThought(citizen, [`I am low on ${INVENTORY_WOOD} in my market. I gather some myself.`], state);
+                            setCitizenThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
                             setCitizenStateGatherWood(citizen);
+                            return;
+                        } else if (itemName === INVENTORY_MUSHROOM) {
+                            setCitizenThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
+                            setCitizenStateGatherMushroom(citizen);
                             return;
                         }
                     }
