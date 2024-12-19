@@ -190,6 +190,7 @@ export function citizenRemoveTodo(citizen: Citizen, stateType: string) {
 
 export function citizenAddTodo(citizen: Citizen, priority: number, stateType: string, reasonThought: string, state: ChatSimState) {
     const todoData = citizen.memory.todosData;
+    if (citizen.stateInfo.type === stateType) return;
     const existing = todoData.todos.find(t => t.stateType === stateType);
     if (existing) {
         existing.priority = priority;
@@ -205,7 +206,7 @@ export function citizenAddTodo(citizen: Citizen, priority: number, stateType: st
     }
     addCitizenThought(citizen, reasonThought, state);
     todoData.todos.push(newTodo);
-    todoData.todos.sort((a, b) => a.priority - b.priority);
+    todoData.todos.sort((a, b) => b.priority - a.priority);
 }
 
 export function citizenSetDreamJob(citizen: Citizen, dreamJob: string | undefined, state: ChatSimState) {
@@ -278,13 +279,13 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
-export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState): boolean {
-    if (citizen.stateInfo.stack.length === 0) {
+export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState, conditionStackLength: number = 0): boolean {
+    if (citizen.stateInfo.stack.length <= conditionStackLength) {
         if (citizen.memory.todosData.todos.length > 0) {
             const todo = citizen.memory.todosData.todos[0];
             if (todo && todo.stateType !== citizen.stateInfo.type) {
                 addCitizenThought(citizen, `Let's do next todo.`, state);
-                citizen.stateInfo.type = todo.stateType;
+                citizenResetStateTo(citizen, todo.stateType);
                 return true;
             }
         }

@@ -305,11 +305,16 @@ function tickCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, state:
                     if (possibleResponse.time + 1000 > state.time) return;
                     const intention = possibleResponse.intention as ChatMessageMarketTradeIntention;
                     if (intention.intention === "whatDoYouWant") {
+                        let itemAmount = data.itemAmount;
+                        if (data.sellToMarket) {
+                            const inventoryItem = citizen.inventory.items.find(i => i.name === data.itemName);
+                            itemAmount = data.itemAmount !== undefined && inventoryItem !== undefined ? Math.min(data.itemAmount, inventoryItem.counter) : undefined;
+                        }
                         const myIntention: ChatMessageMarketTradeIntention = {
                             type: CHAT_MESSAGE_INTENTION_MARKET_TRADE,
                             intention: "tradeRequestData",
                             itemName: data.itemName,
-                            itemAmount: data.itemAmount,
+                            itemAmount: itemAmount,
                             sellToMarket: data.sellToMarket,
                         }
                         addChatMessage(chat, citizen, `I want to ${myIntention.sellToMarket ? "sell" : "buy"} ${myIntention.itemAmount}x${myIntention.itemName}.`, state, myIntention);

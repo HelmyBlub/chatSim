@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
+import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, isCitizenThinking, setCitizenThought } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
@@ -15,7 +15,7 @@ export function loadCitizenNeedsFunctionsSleep(state: ChatSimState) {
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
-    if (citizen.energyPerCent < 0.1) return false;
+    if (citizen.energyPerCent < 0.1 || isCitizenSleeping(citizen)) return false;
     if (citizen.energyPerCent > 0.85) return true;
 
     const time = getTimeOfDay(state.time, state);
@@ -24,9 +24,16 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     const wakeUpTime = (goToBedTime + sleepDuration) % 1;
     if ((goToBedTime > wakeUpTime && (time > goToBedTime || time < wakeUpTime))
         || (goToBedTime < wakeUpTime && (time > goToBedTime && time < wakeUpTime))) {
-        return false;
+        citizenAddTodo(citizen, 1 - citizen.energyPerCent, CITIZEN_NEED_SLEEP, `I want to sleep soon.`, state);
     }
     return true;
+}
+
+export function isCitizenSleeping(citizen: Citizen): boolean {
+    if (citizen.stateInfo.type === CITIZEN_NEED_SLEEP && citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_NEED_STATE_SLEEPING) {
+        return true;
+    }
+    return false;
 }
 
 export function citizenNeedTickSleep(citizen: Citizen, state: ChatSimState) {

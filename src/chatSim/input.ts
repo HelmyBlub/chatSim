@@ -76,13 +76,13 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
         let closest: SelectedObject | undefined = undefined;
         let closestDistance = 0;
         let toCheckObjects = [
-            { objects: state.map.citizens, type: "citizen" },
-            { objects: chunk.buildings, type: "building" },
-            { objects: chunk.trees, type: "tree" },
-            { objects: chunk.mushrooms, type: "mushroom" },
+            { objects: state.map.citizens, type: "citizen", size: 40 },
+            { objects: chunk.buildings, type: "building", size: 60 },
+            { objects: chunk.trees, type: "tree", size: 60 },
+            { objects: chunk.mushrooms, type: "mushroom", size: 30 },
         ];
         for (let toCheck of toCheckObjects) {
-            const closestObject = getClosestObject(toCheck.objects, relativeMouseToCanvas, state);
+            const closestObject = getClosestObject(toCheck.objects, toCheck.size, relativeMouseToCanvas, state);
             if (closestObject) {
                 if (closest === undefined || closestObject.distance < closestDistance) {
                     closest = {
@@ -104,12 +104,12 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
     }
 }
 
-function getClosestObject(objects: { position: Position }[], relativeClickPosition: Position, state: ChatSimState): { object: any, distance: number } | undefined {
+function getClosestObject(objects: { position: Position }[], size: number, relativeClickPosition: Position, state: ChatSimState): { object: any, distance: number } | undefined {
     let closest = undefined;
     let closestDistance = 0;
     const mapClickPosition = mapCanvasPositionToMapPosition(relativeClickPosition, state.paintData.map);
     for (let object of objects) {
-        if (isObjectClicked(object.position, 40, relativeClickPosition.x, relativeClickPosition.y, state)) {
+        if (isObjectClicked(object.position, size, relativeClickPosition.x, relativeClickPosition.y, state)) {
             if (closest === undefined) {
                 closest = object;
                 closestDistance = calculateDistance(object.position, mapClickPosition);

@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
-import { addCitizenThought, Citizen, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
+import { addCitizenThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -298,6 +298,7 @@ function stateNegotiationWithCustomer(citizen: Citizen, job: CitizenJob, state: 
 
 function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     citizen.paintBehindBuildings = true;
+    if (citizenCheckTodoList(citizen, state, 2)) return;
 }
 
 function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimState) {

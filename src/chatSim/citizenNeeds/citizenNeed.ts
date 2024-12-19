@@ -42,8 +42,8 @@ export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSi
 }
 
 export function citizenNeedOnNeedFulfilled(citizen: Citizen, need: string, state: ChatSimState) {
+    citizenRemoveTodo(citizen, need);
     if (citizen.needs.lastFailingNeed === undefined) {
-        citizenRemoveTodo(citizen, need);
         citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
         return;
     }
@@ -72,7 +72,7 @@ function checkAllNeeds(citizen: Citizen, state: ChatSimState, startingNeedOrderI
     if (failingNeed) {
         if (citizen.needs.lastFailingNeed !== failingNeed) {
             citizen.needs.lastFailingNeed = failingNeed;
-            citizenResetStateTo(citizen, failingNeed);
+            if (citizen.stateInfo.type !== failingNeed) citizenResetStateTo(citizen, failingNeed);
         }
     } else {
         citizen.needs.lastFailingNeed = undefined;

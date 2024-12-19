@@ -21,7 +21,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
             addCitizenThought(citizen, `My home disappeared.`, state);
             return false;
         } else {
-            citizenAddTodo(citizen, citizen.home.deterioration, CITIZEN_NEED_HOME, `I need to remember to repair my home.`, state);
+            citizenAddTodo(citizen, citizen.home.deterioration * 0.8, CITIZEN_NEED_HOME, `I need to remember to repair my home.`, state);
         }
     }
     return true;

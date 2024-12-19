@@ -1,16 +1,19 @@
 Tasks:
 - improve citizen behavior
-    - citizen have some tasks list
-        - if they are hungry, they don't need to eat directly. They put it on their todoList
-            - when a task finishes, they decide to do task of todos next
-        - market cashier should not stop working instantly mid conversation just to go home to eat
-    - check todo list priority
+    - checking if now issues found
 - check job food market gathers mushrooms when low on mushrooms
+- check: food market customer want to sell but eats his own mushrooms in between which makes trade stuck
+    - how to handle?
+- check panning corners zoomed in
 
 
 ---------------------------------------------------
 Tasks done today:
 - feature "todo memory"
+    - check todo list priority
+    - market cashier should not stop working instantly mid conversation just to go home to eat
+    - if they are hungry, they don't need to eat directly. They put it on their todoList
+        - when a task finishes, they decide to do task of todos next
     - display in selected data
 
 
@@ -40,7 +43,11 @@ Big Idea:
                     - make citizen some social meter
                         - no social interaction as extrovert -> want to commit suicide
                             
-                        
+            citizen trait ideas:
+                - different amount of "food need" storage
+                - different limit of being hungry or starving
+                - different limit of sleep
+                - different priorities for needs                        
             big vision:
                 - each chatter becomes a citizen of a game world
                     - moves mostly by itself but chatter can influence his citizen

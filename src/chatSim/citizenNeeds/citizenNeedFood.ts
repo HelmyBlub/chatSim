@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, isCitizenThinking, setCitizenThought, addCitizenThought, citizenResetStateTo, citizenStateStackTaskSuccess } from "../citizen.js";
+import { Citizen, isCitizenThinking, setCitizenThought, addCitizenThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo } from "../citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -25,11 +25,19 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
             setCitizenStateEat(citizen, inventoryMushroom, "inventory");
         }
     }
-    if (citizen.foodPerCent < 0.5) return false;
+    if (citizen.foodPerCent < 0.5) {
+        citizenAddTodo(citizen, 1 - citizen.foodPerCent, CITIZEN_NEED_FOOD, `I am hungry. I should eat soon.`, state);
+        return true;
+    }
     if (citizen.home) {
         const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
         const hasEnoughFoodAtHome = homeMushrooms !== undefined && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
-        return hasEnoughFoodAtHome;
+        if (!hasEnoughFoodAtHome) {
+            citizenAddTodo(citizen, 0.75, CITIZEN_NEED_FOOD, `I am low on Food. I shoud get some soon.`, state);
+        } else {
+            citizenRemoveTodo(citizen, CITIZEN_NEED_FOOD);
+        }
+        return true;
     } else {
         const hasEnoughFoodInInventory = inventoryMushroom !== undefined && inventoryMushroom.counter >= CITIZEN_NEED_FOOD_IN_INVENTORY;
         return hasEnoughFoodInInventory;
