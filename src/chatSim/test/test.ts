@@ -144,6 +144,7 @@ function testMarketQueue(): Test {
                 const citizen = createCitizenWithFullfiledNeeds("testSellingCustomer", state);
                 const homeMushrooms = citizen.home!.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                 homeMushrooms!.counter = 50;
+                citizen.foodPerCent = 0.887
                 citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 8 });
                 state.map.citizens.push(citizen);
             }

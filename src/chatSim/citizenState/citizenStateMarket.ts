@@ -119,8 +119,12 @@ function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimStat
             }
         } else {
             const buyerData = data as CitizenStateMarketTradeBuyerData;
-            const counterItemIndex = counter.items.findIndex(i => i.name === buyerData.expectedItemName && i.counter === buyerData.expectedItemAmount);
-            if (counterItemIndex > -1) {
+            const counterItem = counter.items.find(i => i.name === buyerData.expectedItemName && i.counter > 0);
+            if (counterItem) {
+                if (counterItem.counter < buyerData.expectedItemAmount) {
+                    buyerData.money = buyerData.money / buyerData.expectedItemAmount * counterItem.counter;
+                    buyerData.expectedItemAmount = counterItem.counter;
+                }
                 citizenState.subState = "putItemForCounterInPaw";
                 citizenState.subStateStartTime = state.time;
             }
@@ -135,9 +139,13 @@ function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimStat
         if (data.seller) {
             const sellerData = data as CitizenStateMarketTradeSellerData;
             const sellerInventoryItem = sellerData.inventory.items.find(i => i.name === sellerData.itemName);
-            if (sellerInventoryItem && sellerInventoryItem.counter >= sellerData.itemAmount) {
-                sellerInventoryItem.counter -= sellerData.itemAmount;
-                item = { name: sellerData.itemName, counter: sellerData.itemAmount };
+            if (sellerInventoryItem && sellerInventoryItem.counter > 0) {
+                const amount = Math.min(sellerInventoryItem.counter, sellerData.itemAmount);
+                sellerInventoryItem.counter -= amount;
+                sellerData.expectedMoney = sellerData.expectedMoney / sellerData.itemAmount * amount;
+                item = { name: sellerData.itemName, counter: amount };
+            } else {
+                citizenStateStackTaskSuccess(citizen);
             }
         } else {
             const buyerData = data as CitizenStateMarketTradeBuyerData;

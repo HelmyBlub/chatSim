@@ -1,14 +1,10 @@
 Tasks:
-- improve citizen behavior
-    - check some more death reasons, maybe something is still off
-    - check all jobs for breaks. When to check todos. Can lead to citizen death as some job action take a lot of time
-- check: food market customer want to sell mushrooms but eats his own mushrooms in between which makes trade stuck
-    - how to handle?
-
-
 ---------------------------------------------------
 Tasks done today:
-
+- check: food market customer want to sell mushrooms but eats his own mushrooms in between which makes trade stuck
+    - they adjust based on item amount on counter
+- check some more death reasons, maybe something is still off
+- check all jobs for breaks. When to check todos. Can lead to citizen death as some job action take a lot of time
 
 --------------------------------------------------
 Big Idea:
