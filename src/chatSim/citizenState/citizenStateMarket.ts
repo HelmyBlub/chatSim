@@ -1,6 +1,6 @@
 import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
-import { ChatSimState } from "../chatSimModels.js";
+import { ChatSimState, TAG_DOING_NOTHING, TAG_OUTSIDE } from "../chatSimModels.js";
 import { addCitizenThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
@@ -53,19 +53,19 @@ export function onLoadCitizenStateDefaultTickMarketFuntions() {
 
 export function setCitizenStateTradeItemWithMarket(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number) {
     const data: CitizenStateMarketTradeStart = { itemName: itemName, itemAmount: itemAmount, market: market, sellToMarket: sellToMarket };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_ITEM_WITH, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_ITEM_WITH, data: data, tags: [TAG_OUTSIDE] });
 }
 
 export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: BuildingMarket) {
     const data: CitizenStateMarketQueue = { market: market };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data, tags: [TAG_OUTSIDE, TAG_DOING_NOTHING] });
 }
 
 export function setCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number | undefined = undefined): boolean {
     const canServe = marketServeCustomer(market, citizen);
     if (!canServe) return false;
     const data: CitizenStateMarketTradeStart = { market: market, itemName: itemName, itemAmount: itemAmount, sellToMarket: sellToMarket };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION, data: data, tags: [TAG_OUTSIDE] });
     return true;
 }
 
@@ -94,7 +94,7 @@ export function setCitizenStateMarketItemExchange(citizen: Citizen, market: Buil
         }
         data = tempData;
     }
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ITEM_EXCHANGE, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ITEM_EXCHANGE, data: data, tags: [TAG_OUTSIDE] });
 }
 
 function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimState) {

@@ -75,3 +75,8 @@ export type ChatSimState = {
     functionsCitizenNeeds: CitizenNeedsFunctions,
     chatterData: ChatterData[],
 }
+
+export const TAG_DOING_NOTHING = "doing nothing";
+export const TAG_WALKING_AROUND = "walking around";
+export const TAG_OUTSIDE = "outside";
+export const TAG_AT_HOME = "at home";

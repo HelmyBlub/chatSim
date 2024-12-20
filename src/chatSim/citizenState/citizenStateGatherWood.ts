@@ -1,4 +1,4 @@
-import { ChatSimState } from "../chatSimModels.js";
+import { ChatSimState, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
 import { addCitizenLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
@@ -24,7 +24,7 @@ export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
 
 export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {
     const data: Data = { amount: amount };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data, tags: [TAG_OUTSIDE, TAG_WALKING_AROUND] });
     citizenSetEquipment(citizen, ["Axe", "WoodPlanks"]);
 }
 

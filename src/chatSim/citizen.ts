@@ -1,6 +1,6 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
+import { ChatSimState, Position, Mushroom, TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
 import { Building, marketGetCounterPosition } from "./building.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
@@ -35,6 +35,7 @@ export type CitizenState = {
     returnedData?: CitizenStateSuccessData,
     subState?: string,
     subStateStartTime?: number,
+    tags?: string[],
 }
 
 export type CitizenStateSuccessData = {
@@ -58,8 +59,15 @@ export type CitizenTodo = {
     reasonThought: string,
 }
 
+export type CitizenHappiness = {
+    happiness: number,
+    happinessTags: string[],
+    unhappinessTags: string[],
+}
+
 export type Citizen = {
     job: CitizenJob,
+    happinessData: CitizenHappiness,
     tradePaw?: {
         item?: InventoryItem,
         moveFrom: Position,
@@ -137,6 +145,11 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
             traits: [],
             maxTraits: 5,
         },
+        happinessData: {
+            happiness: 0,
+            happinessTags: [],
+            unhappinessTags: [],
+        },
         birthTime: state.time,
         speed: 2,
         foodPerCent: 1,
@@ -176,9 +189,20 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
         log: [],
         maxLogLength: 100,
     };
+    setUpHappinessTags(citizen, state);
     const jobs = Object.keys(state.functionsCitizenJobs);
     citizen.dreamJob = jobs[Math.floor(nextRandom(state.randomSeed) * jobs.length)];
     return citizen;
+}
+
+function setUpHappinessTags(citizen: Citizen, state: ChatSimState) {
+    const testTags = [TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME];
+    let randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
+    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
+    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
+    citizen.happinessData.unhappinessTags.push(testTags.splice(randomIndex, 1)[0]);
 }
 
 export function citizenRemoveTodo(citizen: Citizen, stateType: string) {
@@ -555,6 +579,26 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     checkCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);
+    citizenHappinessTick(citizen);
+}
+
+function citizenHappinessTick(citizen: Citizen) {
+    if (citizen.stateInfo.stack.length === 0) return;
+    const citizenState = citizen.stateInfo.stack[0];
+    if (!citizenState.tags) return;
+
+    for (let tag of citizenState.tags) {
+        if (citizen.happinessData.happinessTags.findIndex(t => t === tag) > -1) {
+            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000, 0.0000000001);
+            citizen.happinessData.happiness += changeBy;
+            if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
+        }
+        if (citizen.happinessData.unhappinessTags.findIndex(t => t === tag) > -1) {
+            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000, 0.0000000001);
+            citizen.happinessData.happiness -= changeBy;
+            if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
+        }
+    }
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {
@@ -583,7 +627,8 @@ function deleteCitizens(state: ChatSimState) {
     for (let i = state.map.citizens.length - 1; i >= 0; i--) {
         const starved = state.map.citizens[i].foodPerCent < 0;
         const outOfEngergy = state.map.citizens[i].energyPerCent < 0;
-        if (starved || outOfEngergy) {
+        const suicide = state.map.citizens[i].happinessData.happiness <= -1;
+        if (starved || outOfEngergy || suicide) {
             let deceased = state.map.citizens[i];
             if (!deceased.isDead) {
                 deceased.moveTo = undefined;
@@ -596,6 +641,11 @@ function deleteCitizens(state: ChatSimState) {
                     if (state.logger) state.logger.log(`${deceased.name} died by over working`, deceased);
                     addCitizenLogEntry(deceased, "overworked to death", state);
                     deceased.isDead = { reason: "overworked to death", time: state.time };
+                };
+                if (suicide) {
+                    if (state.logger) state.logger.log(`${deceased.name} commited suicide`, deceased);
+                    addCitizenLogEntry(deceased, "commited suicide", state);
+                    deceased.isDead = { reason: "commited suicide", time: state.time };
                 };
                 if (deceased.home) {
                     if (deceased.home.owner === deceased && state.map.citizens.length > 0) {

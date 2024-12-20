@@ -96,6 +96,21 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             }
             ctx.fillText(traitsText, offsetX, offsetY + lineSpacing * lineCounter++);
         }
+        ctx.fillText(`    Happiness: ${(citizen.happinessData.happiness * 100).toFixed(2)}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizen.happinessData.happinessTags.length > 0) {
+            let happinessText = `    HappinessTags:`;
+            for (let tag of citizen.happinessData.happinessTags) {
+                happinessText += ` ${tag},`;
+            }
+            ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+        if (citizen.happinessData.unhappinessTags.length > 0) {
+            let happinessText = `    unhappinessTags:`;
+            for (let tag of citizen.happinessData.unhappinessTags) {
+                happinessText += ` ${tag},`;
+            }
+            ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
         ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
         for (let item of citizen.inventory.items) {
             ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);

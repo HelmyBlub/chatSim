@@ -1,4 +1,4 @@
-import { ChatSimState } from "../chatSimModels.js";
+import { ChatSimState, TAG_DOING_NOTHING, TAG_OUTSIDE } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
 import { addCitizenThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
@@ -358,6 +358,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                 }
             }
             stateInfo.state = "waitingForCustomers";
+            stateInfo.tags = [TAG_OUTSIDE, TAG_DOING_NOTHING];
             citizen.displayedEquipments = [];
             citizen.paintBehindBuildings = true;
         } else {

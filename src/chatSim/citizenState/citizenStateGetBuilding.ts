@@ -1,4 +1,4 @@
-import { ChatSimState } from "../chatSimModels.js";
+import { ChatSimState, TAG_OUTSIDE } from "../chatSimModels.js";
 import { Building, BuildingType } from "../building.js";
 import { addCitizenLogEntry, addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
@@ -32,13 +32,13 @@ export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: Build
 }
 
 export function setCitizenStateBuildBuilding(citizen: Citizen, building: Building) {
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_BUILD_BUILDING, data: building, tags: [TAG_OUTSIDE] });
     citizenSetEquipment(citizen, ["Helmet", "WoodPlanks", "Hammer"]);
 }
 
 export function setCitizenStateRepairBuilding(citizen: Citizen, building: Building) {
     const data: RepairBuildingData = { building: building };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_REPAIR_BUILDING, data: data, tags: [TAG_OUTSIDE] });
     citizenSetEquipment(citizen, ["WoodPlanks", "Hammer"]);
 }
 
