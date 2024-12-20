@@ -19,6 +19,7 @@ import { CitizenTraits } from "./traits/trait.js";
 import { CITIZEN_NEED_FOOD, citizenNeedTickFood } from "./citizenNeeds/citizenNeedFood.js";
 import { CITIZEN_NEED_HOME, citizenNeedTickHome } from "./citizenNeeds/citizenNeedHome.js";
 import { CITIZEN_NEED_STARVING, citizenNeedTickStarving } from "./citizenNeeds/citizenNeedStarving.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -117,7 +118,7 @@ export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_FOOD] = citizenNeedTickFood;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HOME] = citizenNeedTickHome;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_STARVING] = citizenNeedTickStarving;
-    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeThinking;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeChangeJob;
 }
 
 export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {
@@ -561,11 +562,19 @@ function tickCitizenState(citizen: Citizen, state: ChatSimState) {
     typeTickFunction(citizen, state);
 }
 
-function tickCitizenTypeThinking(citizen: Citizen, state: ChatSimState) {
+function tickCitizenTypeChangeJob(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_THINKING) {
         const stateInfo = citizen.stateInfo;
         if (stateInfo.actionStartTime === undefined || stateInfo.actionStartTime + CITIZEN_TIME_PER_THOUGHT_LINE * stateInfo.thoughts!.length < state.time) {
             citizenResetStateTo(citizen, CITIZEN_STATE_TYPE_WORKING_JOB);
+            return;
+        }
+    }
+    if (citizen.stateInfo.stack.length > 0) {
+        const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
+        if (tickFunction) {
+            tickFunction(citizen, state);
+            return;
         }
     }
 }

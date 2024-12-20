@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
+import { addCitizenLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
@@ -108,6 +108,7 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
         };
         addCitizenLogEntry(citizen, `I see a tree at x:${tree.position.x.toFixed()}, y:${tree.position.y.toFixed()}`, state);
     } else {
+        if (citizenCheckTodoList(citizen, state, 2)) return;
         const data = citizen.stateInfo.stack[0].data as Data;
         let newSearchDirection;
         if (data.lastSearchDirection === undefined) {

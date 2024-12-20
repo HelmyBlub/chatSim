@@ -1,22 +1,13 @@
 Tasks:
 - improve citizen behavior
-    - checking if now issues found
+    - check some more death reasons, maybe something is still off
+    - check all jobs for breaks. When to check todos. Can lead to citizen death as some job action take a lot of time
 - check: food market customer want to sell mushrooms but eats his own mushrooms in between which makes trade stuck
     - how to handle?
 
 
 ---------------------------------------------------
 Tasks done today:
-- fixed stuck eating while sleeping
-- check job food market gathers mushrooms when low on mushrooms
-- fixed panning corners zoomed in
-- improved food market customer adjusting his amount while in queue when he eats away his stock
-- feature "todo memory"
-    - check todo list priority
-    - market cashier should not stop working instantly mid conversation just to go home to eat
-    - if they are hungry, they don't need to eat directly. They put it on their todoList
-        - when a task finishes, they decide to do task of todos next
-    - display in selected data
 
 
 --------------------------------------------------

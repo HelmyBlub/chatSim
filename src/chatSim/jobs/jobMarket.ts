@@ -316,6 +316,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             citizenStateStackTaskSuccess(citizen);
             return;
         }
+        if (citizenCheckTodoList(citizen, state, 2)) return;
         if (isCitizenAtPosition(citizen, job.marketBuilding.position)) {
             const market = job.marketBuilding as BuildingMarket;
             setupReserved(market, jobMarket);
