@@ -1,4 +1,54 @@
 Tasks:
+- social system and "free time"
+    - code steps:
+        - find wording
+            - "tags" to unspecific
+            - "happinessTags": string
+        - citizens 
+            - add property happiness
+            - add list for happinessTags which makes citizen more happy
+            - add list for unhappinessTags which makes citizen unhappy
+        - states
+            - add list for happinessTags
+        - on each state tick
+            - code matches tags of state which tags of citizen and changes happiness based on it
+        - sleeping moves happiness to neutral
+        - when happiness reaches very low value, citizens dies with message "commited suicide"
+        - add new "activities" used for free time/ leisure
+            - walking around
+            - stay at home
+            - add tags
+        - if citizen unhappy
+            - do an leisure activity
+
+    - citizen have property "happiness"
+        - citizen need: "free time"
+            - if run low on happiness, they want to do something which makes them happy
+        - each citizen has something which makes him happy
+            - staying at home
+            - walking around outside
+            - talking with others
+            - creating something
+            - doing nothing
+        - each citizen has something which makes him unhappy
+        - if they do a job which has this activity even job can make them happy
+        - happiness can be negativ
+            - sleeping makes happiness got to neutral/0
+        - commit suicide if it reaches some very low value
+        - each state has a set of "tags"
+            - each activity knows which tags belongs to it to know when to reduce or increase happiness
+        - how does a citizen know what he wants to do in their free time?
+            - each citizen has "tags" which makes him happy/unhappy
+            - "free time activity" / "leisure activity"
+                - activitys have list of tags which they belong to
+            - citizen can search available list of activities
+    - examples:
+        - state "waiting for customer"
+            - tags: doing nothing
+        - state "gathering mushroom"
+            - tags: "walking around" & "outside"
+        - 
+
 ---------------------------------------------------
 Tasks done today:
 - check: food market customer want to sell mushrooms but eats his own mushrooms in between which makes trade stuck
