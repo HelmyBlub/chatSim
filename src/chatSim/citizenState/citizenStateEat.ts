@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenStopMoving } from "../citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "../citizenNeeds/citizenNeedFood.js";
 import { InventoryItem } from "../inventory.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
@@ -30,7 +30,7 @@ function tickCititzenStateEat(citizen: Citizen, state: ChatSimState) {
         return;
     }
     if (data.tempStartTime === undefined) data.tempStartTime = state.time;
-    if (citizen.moveTo) citizen.moveTo = undefined;
+    if (citizen.moveTo) citizenStopMoving(citizen);
     const eatDuration = 1000;
     if (data.tempStartTime + eatDuration < state.time) {
         citizen.foodPerCent = Math.min(citizen.foodPerCent + MUSHROOM_FOOD_VALUE, 1);

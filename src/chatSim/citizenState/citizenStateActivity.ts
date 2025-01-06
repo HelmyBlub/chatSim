@@ -1,5 +1,5 @@
 import { ChatSimState, TAG_AT_HOME, TAG_DOING_NOTHING } from "../chatSimModels.js";
-import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
@@ -28,10 +28,7 @@ function tickCititzenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState)
             }
         } else {
             citizenAddLogEntry(citizen, `moving home`, state);
-            citizen.moveTo = {
-                x: citizen.home.position.x,
-                y: citizen.home.position.y,
-            }
+            citizenMoveTo(citizen, citizen.home.position);
             return;
         }
     }

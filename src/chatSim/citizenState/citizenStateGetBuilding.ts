@@ -1,6 +1,6 @@
 import { ChatSimState, TAG_OUTSIDE } from "../chatSimModels.js";
 import { Building, BuildingType } from "../building.js";
-import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map.js";
@@ -94,10 +94,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                     citizenAddThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
                 }
             } else {
-                citizen.moveTo = {
-                    x: building.position.x,
-                    y: building.position.y,
-                }
+                citizenMoveTo(citizen, building.position);
                 return;
             }
         } else {
@@ -207,10 +204,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                 citizenStateStackTaskSuccess(citizen);
             }
         } else {
-            citizen.moveTo = {
-                x: building.position.x,
-                y: building.position.y,
-            }
+            citizenMoveTo(citizen, building.position);
         }
     }
 }

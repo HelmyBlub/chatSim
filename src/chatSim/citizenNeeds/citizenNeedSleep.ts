@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, citizenIsThinking, citizenSetThought } from "../citizen.js";
+import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, citizenIsThinking, citizenSetThought, citizenStopMoving, citizenMoveTo } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
@@ -43,19 +43,16 @@ export function citizenNeedTickSleep(citizen: Citizen, state: ChatSimState) {
             if (homeDistance < 1000) {
                 citizenAddThought(citizen, `I am tired. I go home to sleep.`, state);
                 citizen.stateInfo.stack.unshift({ state: "move home" });
-                citizen.moveTo = {
-                    x: citizen.home.position.x,
-                    y: citizen.home.position.y,
-                }
+                citizenMoveTo(citizen, citizen.home.position);
             } else {
                 citizenAddThought(citizen, `I am tired. I am to far away from home. I sleep here.`, state);
                 citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
-                if (citizen.moveTo) citizen.moveTo = undefined;
+                if (citizen.moveTo) citizenStopMoving(citizen);
             }
         } else {
             citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
             citizenAddThought(citizen, `I am falling asleep.`, state);
-            if (citizen.moveTo) citizen.moveTo = undefined;
+            if (citizen.moveTo) citizenStopMoving(citizen);
         }
         return;
     }

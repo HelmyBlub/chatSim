@@ -1,5 +1,5 @@
 import { ChatSimState, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
@@ -102,10 +102,11 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
     const tree = findClosestTree(citizen, state);
     if (tree) {
         const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-        citizen.moveTo = {
+        const randomCloseToTreePosition = {
             x: tree.position.x + Math.sin(randomDirection) * 10,
             y: tree.position.y + Math.cos(randomDirection) * 10,
         };
+        citizenMoveTo(citizen, randomCloseToTreePosition);
         citizenAddLogEntry(citizen, `I see a tree at x:${tree.position.x.toFixed()}, y:${tree.position.y.toFixed()}`, state);
     } else {
         if (citizenCheckTodoList(citizen, state, 2)) return;
@@ -126,7 +127,7 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
             if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
                 newSearchDirection += randomTurnIfOutOfBound;
             } else {
-                citizen.moveTo = newMoveTo;
+                citizenMoveTo(citizen, newMoveTo);
                 data.lastSearchDirection = newSearchDirection;
                 return;
             }

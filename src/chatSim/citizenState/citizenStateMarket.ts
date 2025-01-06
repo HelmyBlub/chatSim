@@ -1,7 +1,7 @@
 import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
 import { ChatSimState, TAG_DOING_NOTHING, TAG_OUTSIDE } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, citizenMoveTo } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
 import { JobMarketState, marketCanServeCustomer, marketServeCustomer, TRADE_DATA, TradeData } from "../jobs/jobMarket.js";
@@ -244,16 +244,17 @@ function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState)
                     if (isCitizenAtPosition(citizen, mapPosition)) {
                         data.stepState = "waitingForMyTurn";
                     } else {
-                        citizen.moveTo = mapPosition;
+                        citizenMoveTo(citizen, mapPosition);
                     }
                 } else {
                     if (marketCanServeCustomer(data.market, citizen)) {
                         if (data.stepState === "waitingForMyTurn") {
                             data.stepState = "movingUp";
-                            citizen.moveTo = {
+                            const moveTo = {
                                 x: data.market.position.x + 20,
                                 y: data.market.position.y + 17,
                             }
+                            citizenMoveTo(citizen, moveTo);
                         } else {
                             citizenStateStackTaskSuccess(citizen);
                             data.market.queue?.shift();
@@ -263,7 +264,7 @@ function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState)
                 }
             } else {
                 if (!isCitizenAtPosition(citizen, mapPosition)) {
-                    citizen.moveTo = mapPosition;
+                    citizenMoveTo(citizen, mapPosition);
                 } else {
                     const customerAhead = data.market.queue![queuePosition - 1];
                     const shouldBePosition = marketGetQueueMapPosition(customerAhead, data.market);
@@ -410,10 +411,7 @@ function tickCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, state:
                 return;
             }
         } else {
-            citizen.moveTo = {
-                x: data.market.position.x,
-                y: data.market.position.y,
-            }
+            citizenMoveTo(citizen, data.market.position);
         }
     }
 }
@@ -457,10 +455,11 @@ function tickCitizenStateTradeItemWithMarket(citizen: Citizen, state: ChatSimSta
             citizenStateStackTaskSuccess(citizen);
             return;
         } else {
-            citizen.moveTo = {
+            const moveTo = {
                 x: data.market.position.x + 20,
                 y: data.market.position.y + 17,
             }
+            citizenMoveTo(citizen, moveTo);
         }
     }
 }

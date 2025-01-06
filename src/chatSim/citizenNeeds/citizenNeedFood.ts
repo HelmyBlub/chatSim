@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo } from "../citizen.js";
+import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo } from "../citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -71,10 +71,7 @@ export function citizenNeedTickFood(citizen: Citizen, state: ChatSimState) {
                 if (homeMushrooms && homeMushrooms.counter > 0) {
                     citizen.stateInfo.stack.push({ state: `go home to eat` });
                     citizenAddThought(citizen, `I will go home to eat ${INVENTORY_MUSHROOM}.`, state);
-                    citizen.moveTo = {
-                        x: citizen.home.position.x,
-                        y: citizen.home.position.y,
-                    }
+                    citizenMoveTo(citizen, citizen.home.position);
                     return;
                 }
             }

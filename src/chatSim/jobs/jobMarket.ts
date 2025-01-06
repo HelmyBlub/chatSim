@@ -1,6 +1,6 @@
 import { ChatSimState, TAG_DOING_NOTHING, TAG_OUTSIDE } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
-import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought } from "../citizen.js"
+import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -102,10 +102,7 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
             }
             citizenSetThought(citizen, ["Go to my market and check inventory."], state);
             citizen.stateInfo.stack.unshift({ state: "checkInventory" });
-            citizen.moveTo = {
-                x: job.marketBuilding.position.x,
-                y: job.marketBuilding.position.y,
-            }
+            citizenMoveTo(citizen, job.marketBuilding.position);
         }
     } else {
         const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
@@ -126,10 +123,7 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
         job.marketBuilding = market;
         stateInfo.state = "checkInventory";
         citizenSetThought(citizen, ["Go to my market and check inventory."], state);
-        citizen.moveTo = {
-            x: job.marketBuilding.position.x,
-            y: job.marketBuilding.position.y,
-        }
+        citizenMoveTo(citizen, job.marketBuilding.position);
     } else {
         citizenSetThought(citizen, ["I do not have a market building. I need to get one."], state);
         setCitizenStateGetBuilding(citizen, "Market");
@@ -362,10 +356,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             citizen.displayedEquipments = [];
             citizen.paintBehindBuildings = true;
         } else {
-            citizen.moveTo = {
-                x: job.marketBuilding.position.x,
-                y: job.marketBuilding.position.y,
-            }
+            citizenMoveTo(citizen, job.marketBuilding.position);
         }
     }
 }

@@ -1,6 +1,6 @@
 import { ChatSimState, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
 import { Building, BuildingMarket } from "../building.js";
-import { citizenAddThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
@@ -59,10 +59,7 @@ function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSi
             citizenStateStackTaskSuccess(citizen);
             return;
         } else {
-            citizen.moveTo = {
-                x: data.building.position.x,
-                y: data.building.position.y,
-            }
+            citizenMoveTo(citizen, data.building.position);
         }
     }
 }
@@ -75,10 +72,7 @@ function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimSta
             citizenStateStackTaskSuccess(citizen);
             return;
         } else {
-            citizen.moveTo = {
-                x: data.building.position.x,
-                y: data.building.position.y,
-            }
+            citizenMoveTo(citizen, data.building.position);
         }
     }
 }

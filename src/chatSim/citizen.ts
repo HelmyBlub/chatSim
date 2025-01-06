@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom, TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
-import { Building, marketGetCounterPosition } from "./building.js";
+import { Building } from "./building.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING, citizenNeedTickSleep } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
@@ -28,6 +28,7 @@ export type CitizenStateInfo = {
     previousTaskFailed?: boolean,
     actionStartTime?: number,
     thoughts?: string[],
+    tags: Set<string>,
 }
 
 export type CitizenState = {
@@ -131,6 +132,19 @@ export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeChangeJob;
 }
 
+export function citizenMoveTo(citizen: Citizen, moveTo: Position) {
+    citizen.moveTo = {
+        x: moveTo.x,
+        y: moveTo.y,
+    };
+    citizen.stateInfo.tags.add(TAG_WALKING_AROUND);
+}
+
+export function citizenStopMoving(citizen: Citizen) {
+    citizen.moveTo = undefined;
+    citizen.stateInfo.tags.delete(TAG_WALKING_AROUND);
+}
+
 export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {
     if (state.map.citizens.find(c => c.name === user)) return;
     const citizen = citizenCreateDefault(user, state);
@@ -161,6 +175,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         stateInfo: {
             type: CITIZEN_STATE_TYPE_WORKING_JOB,
             stack: [],
+            tags: new Set<string>(),
         },
         needs: {
             needsData: {},
@@ -233,8 +248,8 @@ export function citizenSetDreamJob(citizen: Citizen, dreamJob: string | undefine
 }
 
 export function citizenResetStateTo(citizen: Citizen, type: string) {
-    citizen.stateInfo = { type: type, stack: [] };
-    citizen.moveTo = undefined;
+    citizen.stateInfo = { type: type, stack: [], tags: citizen.stateInfo.tags };
+    citizenStopMoving(citizen);
     citizen.paintBehindBuildings = undefined;
     citizen.displayedEquipments = [];
 }
@@ -633,7 +648,7 @@ function deleteCitizens(state: ChatSimState) {
         if (starved || outOfEngergy || suicide) {
             let deceased = state.map.citizens[i];
             if (!deceased.isDead) {
-                deceased.moveTo = undefined;
+                citizenStopMoving(deceased);
                 if (starved) {
                     if (state.logger) state.logger.log(`${deceased.name} died by starving`, deceased);
                     citizenAddLogEntry(deceased, "starved to death", state);
@@ -679,7 +694,7 @@ function citizenMoveToTick(citizen: Citizen) {
         if (citizen.speed - distance > 0) {
             citizen.position.x = citizen.moveTo.x;
             citizen.position.y = citizen.moveTo.y;
-            citizen.moveTo = undefined;
+            citizenStopMoving(citizen);
         } else {
             const factor = citizen.speed / distance;
             citizen.position.x += diffX * factor;

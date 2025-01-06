@@ -1,5 +1,5 @@
 import { ChatSimState, Mushroom, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
@@ -93,11 +93,8 @@ function getClosestMushroomInVisionDistance(citizen: Citizen, state: ChatSimStat
 function moveToMushroom(citizen: Citizen, state: ChatSimState) {
     const mushroom = getClosestMushroomInVisionDistance(citizen, state);
     if (mushroom) {
-        citizen.moveTo = {
-            x: mushroom.position.x,
-            y: mushroom.position.y,
-        }
-        citizenAddLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo.x.toFixed()}, y:${citizen.moveTo.y.toFixed()}`, state);
+        citizenMoveTo(citizen, mushroom.position);
+        citizenAddLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo!.x.toFixed()}, y:${citizen.moveTo!.y.toFixed()}`, state);
     } else {
         const data = citizen.stateInfo.stack[0].data as GatherData;
         let newSearchDirection;
@@ -116,7 +113,7 @@ function moveToMushroom(citizen: Citizen, state: ChatSimState) {
             if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
                 newSearchDirection += randomTurnIfOutOfBound;
             } else {
-                citizen.moveTo = newMoveTo;
+                citizenMoveTo(citizen, newMoveTo);
                 data.lastSearchDirection = newSearchDirection;
                 return;
             }
