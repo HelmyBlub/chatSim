@@ -1,4 +1,4 @@
-import { ChatSimState, Mushroom, TAG_OUTSIDE } from "../chatSimModels.js";
+import { ChatSimState, Mushroom } from "../chatSimModels.js";
 import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
@@ -22,7 +22,7 @@ export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
 
 export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
     const data: GatherData = { amount: amount };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: data, tags: [TAG_OUTSIDE] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: data, tags: [] });
     citizenSetEquipment(citizen, ["Basket"]);
 }
 

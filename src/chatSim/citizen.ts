@@ -7,7 +7,7 @@ import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING, citizenNeedTickSleep } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
-import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, isCitizenInInteractionDistance, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
 import { calculateDirection, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
@@ -138,11 +138,17 @@ export function citizenMoveTo(citizen: Citizen, moveTo: Position) {
         y: moveTo.y,
     };
     citizen.stateInfo.tags.add(TAG_WALKING_AROUND);
+    citizen.stateInfo.tags.add(TAG_OUTSIDE);
+    citizen.stateInfo.tags.delete(TAG_AT_HOME);
 }
 
 export function citizenStopMoving(citizen: Citizen) {
     citizen.moveTo = undefined;
     citizen.stateInfo.tags.delete(TAG_WALKING_AROUND);
+    if (citizen.home && isCitizenInInteractionDistance(citizen, citizen.home.position)) {
+        citizen.stateInfo.tags.add(TAG_AT_HOME);
+        citizen.stateInfo.tags.delete(TAG_OUTSIDE);
+    }
 }
 
 export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {

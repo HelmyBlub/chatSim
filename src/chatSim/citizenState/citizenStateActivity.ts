@@ -1,4 +1,4 @@
-import { ChatSimState, TAG_AT_HOME, TAG_DOING_NOTHING } from "../chatSimModels.js";
+import { ChatSimState, TAG_DOING_NOTHING } from "../chatSimModels.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -10,7 +10,7 @@ export function onLoadCitizenStateDefaultTickActivityFuntions() {
 }
 
 export function setCitizenStateDoNothingAtHome(citizen: Citizen) {
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_DO_NOTHING_AT_HOME, tags: [TAG_AT_HOME, TAG_DOING_NOTHING] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_DO_NOTHING_AT_HOME, tags: [TAG_DOING_NOTHING] });
 }
 
 function tickCititzenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState) {
