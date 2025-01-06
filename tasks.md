@@ -1,54 +1,22 @@
 Tasks:
-- social system and "free time"
-    - think about how to add tags to citizen state
-        - problems: 
-            - currently tags need to be more dynamic
-            - should set themselves on certain events?
-        - have two types of tags?
-            - one for current state
-                - required
-            - one for citizen
-                - required for "moving", "at home", "outside"
-                - if citizen is moving, set tag for moving around
-                - if not moving, set remove tag for moving around
-                - state should not need to handle this one
-                    - as there is a state stack, handling the entire stack is bad, so use one at citizen level
-    - code steps:
-        - add more "activities" used for free time/ leisure
-            - walking around
-        - check all places to add tags
-            - display current state tags, so i can see if tags are incorrect or missing
-        - think about tags being opposites?
-        - think about more tags
-        - think about tags changing happiness by different amounts
-
-    - citizen have property "happiness"
-        - citizen need: "free time"
-            - if run low on happiness, they want to do something which makes them happy
-        - each citizen has something which makes him happy
-            - staying at home
-            - walking around outside
-            - talking with others
-            - creating something
-            - doing nothing
-        - each citizen has something which makes him unhappy
-        - if they do a job which has this activity even job can make them happy
-        - happiness can be negativ
-            - sleeping makes happiness got to neutral/0
-        - commit suicide if it reaches some very low value
-        - each state has a set of "tags"
-            - each activity knows which tags belongs to it to know when to reduce or increase happiness
-        - how does a citizen know what he wants to do in their free time?
-            - each citizen has "tags" which makes him happy/unhappy
-            - "free time activity" / "leisure activity"
-                - activitys have list of tags which they belong to
-            - citizen can search available list of activities
-    - examples:
-        - state "waiting for customer"
-            - tags: doing nothing
-        - state "gathering mushroom"
-            - tags: "walking around" & "outside"
-        - 
+- happiness and "free time"
+    - think about tags changing happiness by different amounts
+        - can be different per citizen
+        - can change over the citizens live span
+    - think about more tags
+        - "physically active"
+            - when building stuff
+            - when cutting wood
+            - when walking around
+        - "social interaction"
+            - when trading
+        - "queues"
+            - when in queue
+    - add more "activities" used for free time/ leisure
+        - walking around
+    - citizen should not know which makes them happy or unhappy
+        - if they are unhappy, they try something random
+            - will remember what activity did help and which did not help
 
 ---------------------------------------------------
 Tasks done today:
