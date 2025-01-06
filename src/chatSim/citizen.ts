@@ -616,6 +616,18 @@ function citizenHappinessTick(citizen: Citizen) {
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }
     }
+    for (let tag of citizen.stateInfo.tags) {
+        if (citizen.happinessData.happinessTags.findIndex(t => t === tag) > -1) {
+            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000, 0.0000000001);
+            citizen.happinessData.happiness += changeBy;
+            if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
+        }
+        if (citizen.happinessData.unhappinessTags.findIndex(t => t === tag) > -1) {
+            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000, 0.0000000001);
+            citizen.happinessData.happiness -= changeBy;
+            if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
+        }
+    }
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {

@@ -85,6 +85,11 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizen.stateInfo.tags.size > 0) {
+            let tagsString = "";
+            citizen.stateInfo.tags.forEach(t => tagsString += t + ",");
+            ctx.fillText(`       Tags: ${tagsString}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
         if (citizen.stateInfo.stack.length > 0) {
             const citizenState = citizen.stateInfo.stack[0];
             ctx.fillText(`        ${citizenState.state}`, offsetX, offsetY + lineSpacing * lineCounter++);

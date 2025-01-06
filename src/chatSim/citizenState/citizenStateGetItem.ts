@@ -1,4 +1,4 @@
-import { ChatSimState, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
+import { ChatSimState, TAG_OUTSIDE } from "../chatSimModels.js";
 import { Building, BuildingMarket } from "../building.js";
 import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
@@ -43,12 +43,12 @@ export function setCitizenStateGetItem(citizen: Citizen, itemName: string, itemA
 
 export function setCitizenStateGetItemFromBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number) {
     const data: CitizenStateItemAndBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data, tags: [TAG_OUTSIDE, TAG_WALKING_AROUND] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GET_ITEM_FROM_BUILDING, data: data, tags: [TAG_OUTSIDE] });
 }
 
 export function setCitizenStateTransportItemToBuilding(citizen: Citizen, building: Building, itemName: string, itemAmount: number | undefined = undefined) {
     const data: CitizenStateItemAndBuildingData = { itemName: itemName, itemAmount: itemAmount, building: building };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING, data: data, tags: [TAG_OUTSIDE, TAG_WALKING_AROUND] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING, data: data, tags: [TAG_OUTSIDE] });
 }
 
 function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSimState) {
