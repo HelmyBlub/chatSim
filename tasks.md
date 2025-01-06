@@ -1,6 +1,7 @@
 Tasks:
 - social system and "free time"
     - code steps:
+        - display current tags
         - add new "activities" used for free time/ leisure
             - walking around
             - stay at home
@@ -12,6 +13,7 @@ Tasks:
         - think about tags being opposites?
         - think about more tags
         - think about tags changing happiness by different amounts
+        - check performance
 
     - citizen have property "happiness"
         - citizen need: "free time"

@@ -86,8 +86,12 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
         if (citizen.stateInfo.stack.length > 0) {
-            ctx.fillText(`        ${citizen.stateInfo.stack[0].state}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            if (citizen.stateInfo.stack[0].subState) ctx.fillText(`            ${citizen.stateInfo.stack[0].subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            const citizenState = citizen.stateInfo.stack[0];
+            ctx.fillText(`        ${citizenState.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            if (citizenState.subState) ctx.fillText(`            ${citizenState.subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            if (citizenState.tags) {
+                ctx.fillText(`       Tags: ${citizenState.tags.join()}`, offsetX, offsetY + lineSpacing * lineCounter++);
+            }
         }
         if (citizen.traitsData.traits.length > 0) {
             let traitsText = `    Traits:`;
