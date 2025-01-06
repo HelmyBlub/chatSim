@@ -83,7 +83,7 @@ export function startTests(app: App, visualizeTests: boolean = false) {
                     timeString += `, time change: ${(timeDiffernce * 100).toFixed(2)}%`;
                 }
             }
-            console.log(`success: ${result}, testcase: ${test.description}, ${timeString}`);
+            console.log(`success: ${result}, testcase: ${test.description}, ${timeString}, endCitizenCounter: ${state.map.citizens.length}`);
         }
         if (!app.didFirstTestRun) {
             app.didFirstTestRun = true;
@@ -112,7 +112,7 @@ export function testRunner(app: App) {
     const state = app.state;
     if (currentTest.checkFinishCondition(state)) {
         const result = currentTest.checkSucceded(state);
-        console.log(`success: ${result}, testcase: ${currentTest.description}`);
+        console.log(`success: ${result}, testcase: ${currentTest.description}, endCitizenCounter: ${state.map.citizens.length}`);
         app.runningTests.currentTest = undefined;
     }
 }
@@ -216,7 +216,7 @@ function testPerformance10Citizens(): Test {
             const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapMiddle();
             for (let i = 0; i < 10; i++) {
-                const citizen = createDefaultCitizen(`testCitizen${i + 1}`, state);
+                const citizen = createDefaultCitizen(`testCitizen${i + 1} `, state);
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -225,7 +225,7 @@ function testPerformance10Citizens(): Test {
             return getDay(state) > untilDay;
         },
         checkSucceded: (state) => {
-            if (getDay(state) <= untilDay) console.log(`reached day ${getDay(state)}`);
+            if (getDay(state) <= untilDay) console.log(`reached day ${getDay(state)} `);
             return getDay(state) > untilDay;
         }
     }
@@ -240,7 +240,7 @@ function testPerformance100Citizens(): Test {
             const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapBig();
             for (let i = 0; i < 100; i++) {
-                const citizen = createDefaultCitizen(`testCitizen${i + 1}`, state);
+                const citizen = createDefaultCitizen(`testCitizen${i + 1} `, state);
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -264,7 +264,7 @@ function testPerformance10000Citizens(): Test {
             const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapBig();
             for (let i = 0; i < 10000; i++) {
-                const citizen = createDefaultCitizen(`testCitizen${i + 1}`, state);
+                const citizen = createDefaultCitizen(`testCitizen${i + 1} `, state);
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -273,7 +273,7 @@ function testPerformance10000Citizens(): Test {
             return state.time > untilTime;
         },
         checkSucceded: (state) => {
-            if (state.time <= untilTime) console.log(`reached time ${state.time}`);
+            if (state.time <= untilTime) console.log(`reached time ${state.time} `);
             return state.time > untilTime;
         }
     }
