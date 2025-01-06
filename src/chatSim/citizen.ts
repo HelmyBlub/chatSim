@@ -20,6 +20,7 @@ import { CITIZEN_NEED_FOOD, citizenNeedTickFood } from "./citizenNeeds/citizenNe
 import { CITIZEN_NEED_HOME, citizenNeedTickHome } from "./citizenNeeds/citizenNeedHome.js";
 import { CITIZEN_NEED_STARVING, citizenNeedTickStarving } from "./citizenNeeds/citizenNeedStarving.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";
+import { CITIZEN_NEED_HAPPINESS, citizenNeedTickHappiness } from "./citizenNeeds/citizenNeedHappiness.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -126,6 +127,7 @@ export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_FOOD] = citizenNeedTickFood;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HOME] = citizenNeedTickHome;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_STARVING] = citizenNeedTickStarving;
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HAPPINESS] = citizenNeedTickHappiness;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeChangeJob;
 }
 

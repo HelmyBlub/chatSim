@@ -1,6 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRemoveTodo, citizenResetStateTo } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRemoveTodo, citizenResetStateTo } from "../citizen.js";
 import { CITIZEN_NEED_FOOD, loadCitizenNeedsFunctionsFood } from "./citizenNeedFood.js";
+import { CITIZEN_NEED_HAPPINESS, loadCitizenNeedsFunctionsHappiness } from "./citizenNeedHappiness.js";
 import { CITIZEN_NEED_HOME, loadCitizenNeedsFunctionsHome } from "./citizenNeedHome.js";
 import { CITIZEN_NEED_SLEEP, loadCitizenNeedsFunctionsSleep } from "./citizenNeedSleep.js";
 import { CITIZEN_NEED_STARVING, loadCitizenNeedsFunctionsStarving } from "./citizenNeedStarving.js";
@@ -15,11 +16,12 @@ export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
 const NEED_ORDER: string[] = [];
 
 export function loadCitizenNeedsFunctions(state: ChatSimState) {
-    NEED_ORDER.push(CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME);
+    NEED_ORDER.push(CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME, CITIZEN_NEED_HAPPINESS);
     loadCitizenNeedsFunctionsStarving(state);
     loadCitizenNeedsFunctionsFood(state);
     loadCitizenNeedsFunctionsHome(state);
     loadCitizenNeedsFunctionsSleep(state);
+    loadCitizenNeedsFunctionsHappiness(state);
 }
 
 export function checkCitizenNeeds(citizen: Citizen, state: ChatSimState) {
