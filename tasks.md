@@ -1,12 +1,21 @@
 Tasks:
 - social system and "free time"
+    - think about how to add tags to citizen state
+        - problems: 
+            - currently tags need to be more dynamic
+            - should set themselves on certain events?
+        - have two types of tags?
+            - one for current state
+                - required
+            - one for citizen
+                - required for "moving", "at home", "outside"
+                - if citizen is moving, set tag for moving around
+                - if not moving, set remove tag for moving around
+                - state should not need to handle this one
+                    - as there is a state stack, handling the entire stack is bad, so use one at citizen level
     - code steps:
-        - add new "activities" used for free time/ leisure
-            - stay at home, do nothing
+        - add more "activities" used for free time/ leisure
             - walking around
-            - add tags
-        - if citizen unhappy
-            - do an leisure activity
         - check all places to add tags
             - display current state tags, so i can see if tags are incorrect or missing
         - think about tags being opposites?

@@ -1,6 +1,6 @@
 import { IMAGE_PATH_MONEY, IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { addCitizenLogEntry, Citizen } from "./citizen.js";
+import { citizenAddLogEntry, Citizen } from "./citizen.js";
 import { IMAGES } from "./images.js";
 import { isCitizenAtPosition } from "./jobs/job.js";
 
@@ -101,7 +101,7 @@ export function inventoryEmptyCitizenToHomeInventory(citizen: Citizen, state: Ch
         for (let item of citizen.inventory.items) {
             if (item.counter > 0) {
                 const amount = inventoryMoveItemBetween(item.name, citizen.inventory, citizen.home.inventory, item.counter);
-                if (amount > 0) addCitizenLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
+                if (amount > 0) citizenAddLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
             }
         }
     }

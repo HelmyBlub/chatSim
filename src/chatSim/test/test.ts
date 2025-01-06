@@ -1,5 +1,5 @@
 import { App, ChatSimState, Logger } from "../chatSimModels.js";
-import { Citizen, createDefaultCitizen } from "../citizen.js";
+import { Citizen, citizenCreateDefault } from "../citizen.js";
 import { CITIZEN_NEED_FOOD_AT_HOME, CITIZEN_NEED_FOOD_IN_INVENTORY } from "../citizenNeeds/citizenNeedFood.js";
 import { CITIZEN_STARVING_FOOD_PER_CENT } from "../citizenNeeds/citizenNeedStarving.js";
 import { createJob } from "../jobs/job.js";
@@ -133,7 +133,7 @@ function testMarketQueue(): Test {
             marketBuilding.inhabitedBy = marketOwner;
             marketBuilding.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 30 });
             for (let i = 0; i < 5; i++) {
-                const citizen = createDefaultCitizen("testBuyingCustomer" + i, state);
+                const citizen = citizenCreateDefault("testBuyingCustomer" + i, state);
                 if (i % 3 === 0) citizen.energyPerCent = 0.94;
                 citizen.foodPerCent = 0.87;
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state)!;
@@ -216,7 +216,7 @@ function testPerformance10Citizens(): Test {
             const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapMiddle();
             for (let i = 0; i < 10; i++) {
-                const citizen = createDefaultCitizen(`testCitizen${i + 1} `, state);
+                const citizen = citizenCreateDefault(`testCitizen${i + 1} `, state);
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -240,7 +240,7 @@ function testPerformance100Citizens(): Test {
             const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapBig();
             for (let i = 0; i < 100; i++) {
-                const citizen = createDefaultCitizen(`testCitizen${i + 1} `, state);
+                const citizen = citizenCreateDefault(`testCitizen${i + 1} `, state);
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -264,7 +264,7 @@ function testPerformance10000Citizens(): Test {
             const state = createDefaultChatSimState("testStreamer", 0);
             state.map = createTestMapBig();
             for (let i = 0; i < 10000; i++) {
-                const citizen = createDefaultCitizen(`testCitizen${i + 1} `, state);
+                const citizen = citizenCreateDefault(`testCitizen${i + 1} `, state);
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -282,13 +282,13 @@ function testPerformance10000Citizens(): Test {
 
 
 function createStarvingCitizen(citizenName: string, testState: ChatSimState): Citizen {
-    const citizen = createDefaultCitizen(citizenName, testState);
+    const citizen = citizenCreateDefault(citizenName, testState);
     citizen.foodPerCent = CITIZEN_STARVING_FOOD_PER_CENT;
     return citizen;
 }
 
 function createCitizenWithFullfiledNeeds(citizenName: string, testState: ChatSimState): Citizen {
-    const citizen = createDefaultCitizen(citizenName, testState);
+    const citizen = citizenCreateDefault(citizenName, testState);
     const home = createBuildingOnRandomTile(citizen, testState, "House", citizen.position)!;
     home.buildProgress = undefined;
     home.inhabitedBy = citizen;

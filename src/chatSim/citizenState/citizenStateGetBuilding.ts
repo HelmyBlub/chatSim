@@ -1,6 +1,6 @@
 import { ChatSimState, TAG_OUTSIDE } from "../chatSimModels.js";
 import { Building, BuildingType } from "../building.js";
-import { addCitizenLogEntry, addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map.js";
@@ -91,7 +91,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                     building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
                     building.brokeDownTime = undefined;
                     inventoryWood.counter--;
-                    addCitizenThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
+                    citizenAddThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
                 }
             } else {
                 citizen.moveTo = {
@@ -131,7 +131,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
     }
     const unfinishedBuilding = getCitizenUnfinishedBuilding(citizen, buildingType, state);
     if (unfinishedBuilding) {
-        addCitizenThought(citizen, `I have an unfinished ${buildingType}. I go continue building it.`, state);
+        citizenAddThought(citizen, `I have an unfinished ${buildingType}. I go continue building it.`, state);
         setCitizenStateBuildBuilding(citizen, unfinishedBuilding);
         return;
     }
@@ -141,11 +141,11 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
         const buildingPosition = citizen.home ? citizen.home.position : citizen.position;
         const building = createBuildingOnRandomTile(citizen, state, buildingType, buildingPosition);
         if (building) {
-            addCitizenThought(citizen, `I have enough wood to build ${buildingType} myself.`, state);
+            citizenAddThought(citizen, `I have enough wood to build ${buildingType} myself.`, state);
             setCitizenStateBuildBuilding(citizen, building);
         };
     } else {
-        addCitizenThought(citizen, `I need ${INVENTORY_WOOD} to build ${buildingType}.`, state);
+        citizenAddThought(citizen, `I need ${INVENTORY_WOOD} to build ${buildingType}.`, state);
         citizenSetEquipment(citizen, ["WoodPlanks"]);
         setCitizenStateGetItem(citizen, INVENTORY_WOOD, amountRequired);
     }
@@ -185,7 +185,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                         return;
                     }
                 }
-                addCitizenLogEntry(citizen, `building in Progress ${building.buildProgress} `, state);
+                citizenAddLogEntry(citizen, `building in Progress ${building.buildProgress} `, state);
                 if (buildingInventoryWood.counter > 0) {
                     buildingInventoryWood.counter--;
                 }
@@ -198,7 +198,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
             building.deterioration -= progressPerTick;
             if (building.deterioration < 0) building.deterioration = 0;
             if (building.buildProgress >= 1) {
-                addCitizenLogEntry(citizen, `building finished.`, state);
+                citizenAddLogEntry(citizen, `building finished.`, state);
                 building.buildProgress = undefined;
                 if (!citizen.home && building.type === "House") {
                     citizen.home = building;

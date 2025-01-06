@@ -133,12 +133,12 @@ export function loadCitizenStateTypeFunctions() {
 
 export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {
     if (state.map.citizens.find(c => c.name === user)) return;
-    const citizen = createDefaultCitizen(user, state);
+    const citizen = citizenCreateDefault(user, state);
     state.map.citizens.push(citizen);
     return citizen;
 }
 
-export function createDefaultCitizen(citizenName: string, state: ChatSimState): Citizen {
+export function citizenCreateDefault(citizenName: string, state: ChatSimState): Citizen {
     const citizen: Citizen = {
         name: citizenName,
         goToBedTime: (0.9 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1)) % 1,
@@ -197,16 +197,6 @@ export function createDefaultCitizen(citizenName: string, state: ChatSimState): 
     return citizen;
 }
 
-function setUpHappinessTags(citizen: Citizen, state: ChatSimState) {
-    const testTags = [TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME];
-    let randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
-    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
-    randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
-    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
-    randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
-    citizen.happinessData.unhappinessTags.push(testTags.splice(randomIndex, 1)[0]);
-}
-
 export function citizenRemoveTodo(citizen: Citizen, stateType: string) {
     const todoData = citizen.memory.todosData;
     const existingIndex = todoData.todos.findIndex(t => t.stateType === stateType);
@@ -231,7 +221,7 @@ export function citizenAddTodo(citizen: Citizen, priority: number, stateType: st
         stateType: stateType,
         reasonThought: reasonThought,
     }
-    addCitizenThought(citizen, reasonThought, state);
+    citizenAddThought(citizen, reasonThought, state);
     todoData.todos.push(newTodo);
     todoData.todos.sort((a, b) => b.priority - a.priority);
 }
@@ -266,7 +256,7 @@ export function citizenStateStackTaskFailed(citizen: Citizen) {
     citizen.stateInfo.previousTaskFailed = true;
 }
 
-export function addCitizenLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
+export function citizenAddLogEntry(citizen: Citizen, message: string, state: ChatSimState) {
     citizen.log.unshift({
         time: state.time,
         message: message,
@@ -276,26 +266,26 @@ export function addCitizenLogEntry(citizen: Citizen, message: string, state: Cha
     }
 }
 
-export function addCitizenThought(citizen: Citizen, thought: string, state: ChatSimState) {
-    if (isCitizenThinking(citizen, state) && citizen.stateInfo.thoughts) {
-        addCitizenLogEntry(citizen, thought, state);
+export function citizenAddThought(citizen: Citizen, thought: string, state: ChatSimState) {
+    if (citizenIsThinking(citizen, state) && citizen.stateInfo.thoughts) {
+        citizenAddLogEntry(citizen, thought, state);
         citizen.stateInfo.thoughts.push(thought);
         if (citizen.stateInfo.thoughts.length > 4) {
             citizen.stateInfo.actionStartTime = Math.min(CITIZEN_TIME_PER_THOUGHT_LINE + citizen.stateInfo.actionStartTime!, state.time);
             citizen.stateInfo.thoughts.shift();
         }
     } else {
-        setCitizenThought(citizen, [thought], state);
+        citizenSetThought(citizen, [thought], state);
     }
 }
 
-export function setCitizenThought(citizen: Citizen, thoughts: string[], state: ChatSimState) {
+export function citizenSetThought(citizen: Citizen, thoughts: string[], state: ChatSimState) {
     citizen.stateInfo.thoughts = thoughts;
     citizen.stateInfo.actionStartTime = state.time;
-    addCitizenLogEntry(citizen, thoughts.join(""), state);
+    citizenAddLogEntry(citizen, thoughts.join(""), state);
 }
 
-export function canCitizenCarryMore(citizen: Citizen): boolean {
+export function citizenCanCarryMore(citizen: Citizen): boolean {
     return inventoryGetUsedCapacity(citizen.inventory) < citizen.inventory.size;
 }
 
@@ -311,7 +301,7 @@ export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState, cond
         if (citizen.memory.todosData.todos.length > 0) {
             const todo = citizen.memory.todosData.todos[0];
             if (todo && todo.stateType !== citizen.stateInfo.type) {
-                addCitizenThought(citizen, `Let's do next todo.`, state);
+                citizenAddThought(citizen, `Let's do next todo.`, state);
                 citizenResetStateTo(citizen, todo.stateType);
                 return true;
             }
@@ -357,7 +347,7 @@ export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimS
     }
 }
 
-export function isCitizenThinking(citizen: Citizen, state: ChatSimState) {
+export function citizenIsThinking(citizen: Citizen, state: ChatSimState) {
     return citizen.stateInfo.actionStartTime !== undefined
         && citizen.stateInfo.thoughts
         && citizen.stateInfo.actionStartTime + citizen.stateInfo.thoughts.length * CITIZEN_TIME_PER_THOUGHT_LINE >= state.time;
@@ -484,6 +474,16 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
     }
 }
 
+function setUpHappinessTags(citizen: Citizen, state: ChatSimState) {
+    const testTags = [TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME];
+    let randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
+    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
+    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
+    citizen.happinessData.unhappinessTags.push(testTags.splice(randomIndex, 1)[0]);
+}
+
 function paintCitizenName(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, nameFontSize: number, nameLineWidth: number) {
     ctx.font = `${nameFontSize}px Arial`;
     const nameOffsetX = Math.floor(ctx.measureText(citizen.name).width / 2);
@@ -492,7 +492,7 @@ function paintCitizenName(ctx: CanvasRenderingContext2D, citizen: Citizen, paint
 }
 
 function paintThoughtBubble(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
-    if (!isCitizenThinking(citizen, state)) return;
+    if (!citizenIsThinking(citizen, state)) return;
     const stateInfo = citizen.stateInfo;
     if (stateInfo.actionStartTime === undefined || stateInfo.thoughts === undefined) return;
     const fontSize = 8;
@@ -636,17 +636,17 @@ function deleteCitizens(state: ChatSimState) {
                 deceased.moveTo = undefined;
                 if (starved) {
                     if (state.logger) state.logger.log(`${deceased.name} died by starving`, deceased);
-                    addCitizenLogEntry(deceased, "starved to death", state);
+                    citizenAddLogEntry(deceased, "starved to death", state);
                     deceased.isDead = { reason: "starved to death", time: state.time };
                 }
                 if (outOfEngergy) {
                     if (state.logger) state.logger.log(`${deceased.name} died by over working`, deceased);
-                    addCitizenLogEntry(deceased, "overworked to death", state);
+                    citizenAddLogEntry(deceased, "overworked to death", state);
                     deceased.isDead = { reason: "overworked to death", time: state.time };
                 };
                 if (suicide) {
                     if (state.logger) state.logger.log(`${deceased.name} commited suicide`, deceased);
-                    addCitizenLogEntry(deceased, "commited suicide", state);
+                    citizenAddLogEntry(deceased, "commited suicide", state);
                     deceased.isDead = { reason: "commited suicide", time: state.time };
                 };
                 if (deceased.home) {

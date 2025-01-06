@@ -1,6 +1,6 @@
 import { ChatSimState, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
 import { Building, BuildingMarket } from "../building.js";
-import { addCitizenThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
@@ -98,7 +98,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
     if (citizen.home && !item.ignoreHome) {
         const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved);
         if (availableAmountAtHome > 0) {
-            addCitizenThought(citizen, `I do have ${item.name} at home. I go get it.`, state);
+            citizenAddThought(citizen, `I do have ${item.name} at home. I go get it.`, state);
             const wantedAmount = Math.min(openAmount, availableAmountAtHome);
             setCitizenStateGetItemFromBuilding(citizen, citizen.home, item.name, wantedAmount);
             return;
@@ -112,7 +112,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
                 const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
                 if (availableAmount > 0) {
                     const wantedAmount = Math.min(openAmount, availableAmount);
-                    addCitizenThought(citizen, `I do have ${item.name} at my ${building.type}. I go get it.`, state);
+                    citizenAddThought(citizen, `I do have ${item.name} at my ${building.type}. I go get it.`, state);
                     setCitizenStateGetItemFromBuilding(citizen, building, item.name, wantedAmount);
                     return;
                 }
@@ -122,19 +122,19 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
     if (citizen.money >= 2) {
         const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state) as BuildingMarket;
         if (market) {
-            addCitizenThought(citizen, `I will buy ${item.name} at ${market.inhabitedBy!.name}.`, state);
+            citizenAddThought(citizen, `I will buy ${item.name} at ${market.inhabitedBy!.name}.`, state);
             setCitizenStateTradeItemWithMarket(citizen, market, false, item.name, item.amount);
             return;
         }
     }
 
     if (item.name === INVENTORY_MUSHROOM) {
-        addCitizenThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
+        citizenAddThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
         setCitizenStateGatherMushroom(citizen, item.amount);
         return;
     }
     if (item.name === INVENTORY_WOOD) {
-        addCitizenThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
+        citizenAddThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
         setCitizenStateGatherWood(citizen, item.amount);
         return;
     }

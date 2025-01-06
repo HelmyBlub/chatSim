@@ -1,5 +1,5 @@
 import { ChatSimState, Mushroom, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
@@ -61,7 +61,7 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroo
         citizen.inventory.items.push(inventoryMushroom);
     }
     inventoryMushroom.counter++;
-    addCitizenLogEntry(citizen, `picked up ${INVENTORY_MUSHROOM}. ${inventoryMushroom.counter} in inventory.`, state);
+    citizenAddLogEntry(citizen, `picked up ${INVENTORY_MUSHROOM}. ${inventoryMushroom.counter} in inventory.`, state);
     playChatSimSound(SOUND_PATH_PICKUP, citizen.position, state);
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
@@ -97,7 +97,7 @@ function moveToMushroom(citizen: Citizen, state: ChatSimState) {
             x: mushroom.position.x,
             y: mushroom.position.y,
         }
-        addCitizenLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo.x.toFixed()}, y:${citizen.moveTo.y.toFixed()}`, state);
+        citizenAddLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo.x.toFixed()}, y:${citizen.moveTo.y.toFixed()}`, state);
     } else {
         const data = citizen.stateInfo.stack[0].data as GatherData;
         let newSearchDirection;

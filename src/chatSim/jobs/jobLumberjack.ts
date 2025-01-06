@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, setCitizenThought } from "../citizen.js";
+import { Citizen, citizenSetThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../inventory.js";
@@ -38,7 +38,7 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
             setCitizenStateGatherWood(citizen);
         } else {
             if (citizen.home && inventoryGetAvaiableCapacity(citizen.home.inventory, INVENTORY_WOOD) > 0) {
-                setCitizenThought(citizen, [
+                citizenSetThought(citizen, [
                     `I can not carry more ${INVENTORY_WOOD}.`,
                     `I will store them at home.`
                 ], state);

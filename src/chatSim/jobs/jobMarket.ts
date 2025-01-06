@@ -1,6 +1,6 @@
 import { ChatSimState, TAG_DOING_NOTHING, TAG_OUTSIDE } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
-import { addCitizenThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, isCitizenThinking, setCitizenThought } from "../citizen.js"
+import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -100,7 +100,7 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
                 job.currentDayCounter = day;
                 job.customerCounter.unshift(0);
             }
-            setCitizenThought(citizen, ["Go to my market and check inventory."], state);
+            citizenSetThought(citizen, ["Go to my market and check inventory."], state);
             citizen.stateInfo.stack.unshift({ state: "checkInventory" });
             citizen.moveTo = {
                 x: job.marketBuilding.position.x,
@@ -125,13 +125,13 @@ function stateGetMarketBuilding(citizen: Citizen, job: CitizenJob, state: ChatSi
         market.inhabitedBy = citizen;
         job.marketBuilding = market;
         stateInfo.state = "checkInventory";
-        setCitizenThought(citizen, ["Go to my market and check inventory."], state);
+        citizenSetThought(citizen, ["Go to my market and check inventory."], state);
         citizen.moveTo = {
             x: job.marketBuilding.position.x,
             y: job.marketBuilding.position.y,
         }
     } else {
-        setCitizenThought(citizen, ["I do not have a market building. I need to get one."], state);
+        citizenSetThought(citizen, ["I do not have a market building. I need to get one."], state);
         setCitizenStateGetBuilding(citizen, "Market");
     }
 }
@@ -303,7 +303,7 @@ function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: Chat
 }
 
 function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    if (citizen.moveTo === undefined && !isCitizenThinking(citizen, state)) {
+    if (citizen.moveTo === undefined && !citizenIsThinking(citizen, state)) {
         const jobMarket = job as CitizenJobMarket;
         const stateInfo = citizen.stateInfo.stack[0] as JobMarketStateInfo;
 
@@ -325,9 +325,9 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             }
             if (market.deterioration > 1 / BUILDING_DATA[market.type].woodAmount) {
                 if (market.deterioration > 1) {
-                    addCitizenThought(citizen, `My market broke down. I need to repair`, state);
+                    citizenAddThought(citizen, `My market broke down. I need to repair`, state);
                 } else {
-                    addCitizenThought(citizen, `I need to repair my market.`, state);
+                    citizenAddThought(citizen, `I need to repair my market.`, state);
                 }
                 setCitizenStateRepairBuilding(citizen, market);
                 return;
@@ -342,15 +342,15 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                     if (citizen.home && availableSpace > 5) {
                         const availableAtHome = inventoryGetPossibleTakeOutAmount(itemName, citizen.home.inventory);
                         if (availableAtHome > 5) {
-                            setCitizenThought(citizen, [`I want to add inventory to my market from home.`], state);
+                            citizenSetThought(citizen, [`I want to add inventory to my market from home.`], state);
                             setCitizenStateGetItemFromBuilding(citizen, citizen.home, itemName, availableAtHome);
                             return;
                         } else if (itemName === INVENTORY_WOOD) {
-                            setCitizenThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
+                            citizenSetThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
                             setCitizenStateGatherWood(citizen);
                             return;
                         } else if (itemName === INVENTORY_MUSHROOM) {
-                            setCitizenThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
+                            citizenSetThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
                             setCitizenStateGatherMushroom(citizen);
                             return;
                         }

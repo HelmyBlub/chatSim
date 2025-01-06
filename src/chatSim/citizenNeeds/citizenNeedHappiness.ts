@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddTodo, setCitizenThought } from "../citizen.js";
+import { Citizen, citizenAddTodo, citizenSetThought } from "../citizen.js";
 import { setCitizenStateDoNothingAtHome } from "../citizenState/citizenStateActivity.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
@@ -23,7 +23,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.happinessData.happiness < CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT) {
-            setCitizenThought(citizen, [`I am too unhappy. I need to do something.`], state);
+            citizenSetThought(citizen, [`I am too unhappy. I need to do something.`], state);
             // TODO: find a activity which makes citizen happy
             setCitizenStateDoNothingAtHome(citizen);
             return;

@@ -1,7 +1,7 @@
 import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
 import { ChatSimState, TAG_DOING_NOTHING, TAG_OUTSIDE } from "../chatSimModels.js";
-import { addCitizenThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
 import { JobMarketState, marketCanServeCustomer, marketServeCustomer, TRADE_DATA, TradeData } from "../jobs/jobMarket.js";
@@ -444,7 +444,7 @@ function tickCitizenStateTradeItemWithMarket(citizen: Citizen, state: ChatSimSta
                     }
                     if (citizenState.subState === undefined && (marketHasQueue(data.market) || marketState !== "waitingForCustomers")) {
                         citizenState.subState = "joinedQueue";
-                        addCitizenThought(citizen, `I have to join the queue.`, state);
+                        citizenAddThought(citizen, `I have to join the queue.`, state);
                         setCitizenStateEnterMarketQueue(citizen, data.market);
                         return;
                     } else {

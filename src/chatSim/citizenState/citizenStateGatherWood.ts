@@ -1,5 +1,5 @@
 import { ChatSimState, TAG_OUTSIDE, TAG_WALKING_AROUND } from "../chatSimModels.js";
-import { addCitizenLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
@@ -106,7 +106,7 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
             x: tree.position.x + Math.sin(randomDirection) * 10,
             y: tree.position.y + Math.cos(randomDirection) * 10,
         };
-        addCitizenLogEntry(citizen, `I see a tree at x:${tree.position.x.toFixed()}, y:${tree.position.y.toFixed()}`, state);
+        citizenAddLogEntry(citizen, `I see a tree at x:${tree.position.x.toFixed()}, y:${tree.position.y.toFixed()}`, state);
     } else {
         if (citizenCheckTodoList(citizen, state, 2)) return;
         const data = citizen.stateInfo.stack[0].data as Data;
@@ -169,7 +169,7 @@ function cutTreeForWood(citizen: Citizen, tree: Tree, state: ChatSimState) {
     }
     tree.woodValue--;
     inventoryWood.counter++;
-    addCitizenLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}, in inventory: ${inventoryWood.counter}x${INVENTORY_WOOD}`, state);
+    citizenAddLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}, in inventory: ${inventoryWood.counter}x${INVENTORY_WOOD}`, state);
     if (tree.woodValue === 0) removeTreeFromMap(tree, state.map);
 
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;

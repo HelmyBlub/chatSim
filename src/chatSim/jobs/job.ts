@@ -1,6 +1,6 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
-import { Citizen, addCitizenLogEntry, CITIZEN_STATE_THINKING, setCitizenThought, citizenCheckTodoList } from "../citizen.js";
+import { Citizen, citizenAddLogEntry, CITIZEN_STATE_THINKING, citizenSetThought, citizenCheckTodoList } from "../citizen.js";
 import { loadCitizenJobFoodGatherer } from "./jobFoodGatherer.js";
 import { loadCitizenJobFoodMarket } from "./jobFoodMarket.js";
 import { loadCitizenJobHouseConstruction } from "./jobBuildingContruction.js";
@@ -42,7 +42,7 @@ export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatS
         type: CITIZEN_STATE_TYPE_CHANGE_JOB,
         stack: [{ state: CITIZEN_STATE_THINKING }],
     };
-    setCitizenThought(citizen, reason, state);
+    citizenSetThought(citizen, reason, state);
 }
 
 export function createJob(jobname: string, state: ChatSimState): CitizenJob | undefined {
@@ -99,8 +99,8 @@ export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemNam
     const totalPrice = itemPrice * tradeAmount;
     seller.money += totalPrice;
     buyer.money -= totalPrice;
-    addCitizenLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
-    addCitizenLogEntry(buyer, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
+    citizenAddLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
+    citizenAddLogEntry(buyer, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
     return tradeAmount;
 }
 

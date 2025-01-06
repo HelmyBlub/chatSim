@@ -1,6 +1,6 @@
 import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js"
-import { addCitizenLogEntry, Citizen } from "./citizen.js"
+import { citizenAddLogEntry, Citizen } from "./citizen.js"
 
 export type Chat = {
     messages: ChatMessage[],
@@ -40,7 +40,7 @@ export function createEmptyChat(): Chat {
 
 export function addChatMessage(chat: Chat, citizen: Citizen, message: string, state: ChatSimState, intention: ChatMessageIntention | undefined = undefined) {
     chat.messages.push({ by: citizen, message: message, time: state.time, intention: intention });
-    addCitizenLogEntry(citizen, `I said: ${message}.`, state);
+    citizenAddLogEntry(citizen, `I said: ${message}.`, state);
     chat.lastMessageTime = state.time;
     if (chat.messages.length > chat.maxMessages) {
         chat.messages.shift();
