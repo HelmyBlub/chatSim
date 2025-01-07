@@ -1,10 +1,8 @@
 Tasks:
 - happiness and "free time"
-    - think about more tags
-        - "queues"
-            - when in queue
     - add more "activities" used for free time/ leisure
-        - walking around
+        - randomly walking around
+        - interacting with other citizens
     - citizen should not know which makes them happy or unhappy
         - if they are unhappy, they try something random
             - will remember what activity did help and which did not help

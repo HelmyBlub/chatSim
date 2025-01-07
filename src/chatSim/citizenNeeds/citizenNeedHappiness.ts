@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddTodo, citizenSetThought } from "../citizen.js";
-import { setCitizenStateDoNothingAtHome } from "../citizenState/citizenStateActivity.js";
+import { Citizen, citizenAddThought, citizenAddTodo, citizenSetThought, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_WALKING_AROUND } from "../citizen.js";
+import { setCitizenStateDoNothingAtHome, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
@@ -15,7 +15,7 @@ export function loadCitizenNeedsFunctionsHappiness(state: ChatSimState) {
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.happinessData.happiness < CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT) {
-        citizenAddTodo(citizen, Math.abs(citizen.happinessData.happiness) * 0.5, CITIZEN_NEED_HAPPINESS, `I should do something which makes me happy soon.`, state);
+        citizenAddTodo(citizen, Math.abs(citizen.happinessData.happiness) * 0.8, CITIZEN_NEED_HAPPINESS, `I should do something which makes me happy soon.`, state);
     }
     return true;
 }
@@ -23,9 +23,23 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.happinessData.happiness < CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT) {
-            citizenSetThought(citizen, [`I am too unhappy. I need to do something.`], state);
+            citizenAddThought(citizen, `I am too unhappy. I need to do something.`, state);
             // TODO: find a activity which makes citizen happy
-            setCitizenStateDoNothingAtHome(citizen);
+            if (citizen.happinessData.happinessTagFactors.has(TAG_AT_HOME)
+                || citizen.happinessData.happinessTagFactors.has(TAG_DOING_NOTHING)
+            ) {
+                citizenAddThought(citizen, `I like to do nothing at home.`, state);
+                setCitizenStateDoNothingAtHome(citizen);
+                return;
+            }
+            if (citizen.happinessData.happinessTagFactors.has(TAG_WALKING_AROUND)
+                || citizen.happinessData.happinessTagFactors.has(TAG_OUTSIDE)
+                || citizen.happinessData.happinessTagFactors.has(TAG_PHYSICALLY_ACTIVE)
+            ) {
+                citizenAddThought(citizen, `I like walk around a bit.`, state);
+                setCitizenStateWalkingAroundRandomly(citizen);
+                return;
+            }
             return;
         } else {
             citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HAPPINESS, state);
