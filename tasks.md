@@ -1,29 +1,27 @@
 Tasks:
 - happiness and "free time"
     - add more "activities" used for free time/ leisure
-        - randomly walking around
         - interacting with other citizens
+            - walk around until i see a citizen
+            - walk to him and start conversation
+                - code
+                    - some function "inviteToChat" return boolean if chat accepted or not
+                        - if accepted. push citizenState stack for conversation
+                - say "hello. I am <name>, how are you?" 
+                - answer: "hello i am <name>. <answer based on happiness value>"
+                - say "<some topic based on job>"
+    
+            - other citizen might ignore and continue
+            - want to get to know his neigbours
+                - search for other buildings and find their inhabitants
+                - start conversation with them
+            - 
     - citizen should not know which makes them happy or unhappy
         - if they are unhappy, they try something random
             - will remember what activity did help and which did not help
 
 ---------------------------------------------------
 Tasks done today:
-- social system and "free time"
-    - code steps:
-        - citizens 
-            - add property happiness: number, between -1 to 1. -1 => very unhappy, will commit suicide. 1 => very happy 
-            - add list for happinessTags which makes citizen more happy
-            - add list for unhappinessTags which makes citizen unhappy
-        - states
-            - add list for tags
-        - on each state tick
-            - code matches tags of state which tags of citizen and changes happiness based on it
-        - when happiness reaches very low value, citizens dies with message "commited suicide"
-- check: food market customer want to sell mushrooms but eats his own mushrooms in between which makes trade stuck
-    - they adjust based on item amount on counter
-- check some more death reasons, maybe something is still off
-- check all jobs for breaks. When to check todos. Can lead to citizen death as some job action take a lot of time
 
 --------------------------------------------------
 Big Idea:
