@@ -1,6 +1,6 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Position, Mushroom, TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME } from "./chatSimModels.js";
+import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
 import { PaintDataMap } from "./map.js";
 import { Building } from "./building.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
@@ -116,6 +116,16 @@ export type LogEntry = {
 
 const CITIZEN_STATE_TYPE_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
 };
+
+export const CITIZEN_TAGS_AND_FACTORS = new Map<string, number>()
+export const TAG_DOING_NOTHING = "doing nothing"
+export const TAG_WALKING_AROUND = "walking around"
+export const TAG_OUTSIDE = "outside"
+export const TAG_AT_HOME = "at home"
+CITIZEN_TAGS_AND_FACTORS.set(TAG_DOING_NOTHING, 1.5);
+CITIZEN_TAGS_AND_FACTORS.set(TAG_WALKING_AROUND, 0.20);
+CITIZEN_TAGS_AND_FACTORS.set(TAG_OUTSIDE, 0.12);
+CITIZEN_TAGS_AND_FACTORS.set(TAG_AT_HOME, 1.5);
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";
@@ -613,26 +623,28 @@ function citizenHappinessTick(citizen: Citizen) {
     const citizenState = citizen.stateInfo.stack[0];
     if (!citizenState.tags) return;
 
+    const happinessFactor = citizen.happinessData.happinessTagFactors;
+    const unhappinessFactor = citizen.happinessData.unhappinessTagFactors;
     for (let tag of citizenState.tags) {
-        if (citizen.happinessData.happinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000, 0.0000000001);
+        if (happinessFactor.has(tag)) {
+            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000 * happinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness += changeBy;
             if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
         }
         if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000, 0.0000000001);
+            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000 * unhappinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }
     }
     for (let tag of citizen.stateInfo.tags) {
         if (citizen.happinessData.happinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000, 0.0000000001);
+            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000 * happinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness += changeBy;
             if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
         }
         if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000, 0.0000000001);
+            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000 * unhappinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }
@@ -723,4 +735,5 @@ function citizenMoveToTick(citizen: Citizen) {
         }
     }
 }
+
 

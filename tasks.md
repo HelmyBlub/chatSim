@@ -1,8 +1,6 @@
 Tasks:
 - happiness and "free time"
-    - think about tags changing happiness by different amounts
-        - can be different per citizen
-        - can change over the citizens live span
+    - each tag has a specific base factor
     - think about more tags
         - "physically active"
             - when building stuff

@@ -1,6 +1,7 @@
 import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
-import { ChatSimState, TAG_DOING_NOTHING } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { TAG_DOING_NOTHING } from "../citizen.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, citizenMoveTo } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";

@@ -1,4 +1,5 @@
-import { ChatSimState, TAG_DOING_NOTHING } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { TAG_DOING_NOTHING } from "../citizen.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";

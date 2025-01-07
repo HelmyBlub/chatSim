@@ -1,4 +1,5 @@
-import { ChatSimState, TAG_DOING_NOTHING } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { TAG_DOING_NOTHING } from "../citizen.js";
 import { BuildingMarket } from "../building.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
