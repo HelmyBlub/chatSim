@@ -130,8 +130,8 @@ export const TAG_PHYSICALLY_ACTIVE = "physically active";
 CITIZEN_TAGS_AND_FACTORS.set(TAG_PHYSICALLY_ACTIVE, 1.5);
 export const TAG_SOCIAL_INTERACTION = "social interaction";
 CITIZEN_TAGS_AND_FACTORS.set(TAG_SOCIAL_INTERACTION, 1.0);
-export const TAG_QUEUE = "queuing";
-CITIZEN_TAGS_AND_FACTORS.set(TAG_QUEUE, 1.0);
+export const TAG_QUEUING = "queuing";
+CITIZEN_TAGS_AND_FACTORS.set(TAG_QUEUING, 1.0);
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";

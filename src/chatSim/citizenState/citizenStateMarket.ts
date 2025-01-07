@@ -1,7 +1,7 @@
 import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../building.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
-import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { TAG_DOING_NOTHING, TAG_QUEUING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, citizenMoveTo } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
@@ -59,7 +59,7 @@ export function setCitizenStateTradeItemWithMarket(citizen: Citizen, market: Bui
 
 export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: BuildingMarket) {
     const data: CitizenStateMarketQueue = { market: market };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data, tags: new Set([TAG_DOING_NOTHING]) });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data, tags: new Set([TAG_DOING_NOTHING, TAG_QUEUING]) });
 }
 
 export function setCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number | undefined = undefined): boolean {

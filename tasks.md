@@ -1,8 +1,6 @@
 Tasks:
 - happiness and "free time"
     - think about more tags
-        - "social interaction"
-            - when trading
         - "queues"
             - when in queue
     - add more "activities" used for free time/ leisure
