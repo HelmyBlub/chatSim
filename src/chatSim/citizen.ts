@@ -63,8 +63,8 @@ export type CitizenTodo = {
 
 export type CitizenHappiness = {
     happiness: number,
-    happinessTags: string[],
-    unhappinessTags: string[],
+    happinessTagFactors: Map<string, number>,
+    unhappinessTagFactors: Map<string, number>,
 }
 
 export type Citizen = {
@@ -169,8 +169,8 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         },
         happinessData: {
             happiness: 0,
-            happinessTags: [],
-            unhappinessTags: [],
+            happinessTagFactors: new Map<string, number>(),
+            unhappinessTagFactors: new Map<string, number>(),
         },
         birthTime: state.time,
         speed: 2,
@@ -498,11 +498,14 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
 function setUpHappinessTags(citizen: Citizen, state: ChatSimState) {
     const testTags = [TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME];
     let randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
-    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    let randomFactor = 0.5 + nextRandom(state.randomSeed) * 1.5;
+    citizen.happinessData.happinessTagFactors.set(testTags.splice(randomIndex, 1)[0], randomFactor);
     randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
-    citizen.happinessData.happinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    randomFactor = 0.5 + nextRandom(state.randomSeed) * 1.5;
+    citizen.happinessData.happinessTagFactors.set(testTags.splice(randomIndex, 1)[0], randomFactor);
     randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
-    citizen.happinessData.unhappinessTags.push(testTags.splice(randomIndex, 1)[0]);
+    randomFactor = 0.5 + nextRandom(state.randomSeed) * 1.5;
+    citizen.happinessData.unhappinessTagFactors.set(testTags.splice(randomIndex, 1)[0], randomFactor);
 }
 
 function paintCitizenName(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, nameFontSize: number, nameLineWidth: number) {
@@ -611,24 +614,24 @@ function citizenHappinessTick(citizen: Citizen) {
     if (!citizenState.tags) return;
 
     for (let tag of citizenState.tags) {
-        if (citizen.happinessData.happinessTags.findIndex(t => t === tag) > -1) {
+        if (citizen.happinessData.happinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000, 0.0000000001);
             citizen.happinessData.happiness += changeBy;
             if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
         }
-        if (citizen.happinessData.unhappinessTags.findIndex(t => t === tag) > -1) {
+        if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000, 0.0000000001);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }
     }
     for (let tag of citizen.stateInfo.tags) {
-        if (citizen.happinessData.happinessTags.findIndex(t => t === tag) > -1) {
+        if (citizen.happinessData.happinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000, 0.0000000001);
             citizen.happinessData.happiness += changeBy;
             if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
         }
-        if (citizen.happinessData.unhappinessTags.findIndex(t => t === tag) > -1) {
+        if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000, 0.0000000001);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;

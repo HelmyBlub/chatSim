@@ -106,17 +106,17 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(traitsText, offsetX, offsetY + lineSpacing * lineCounter++);
         }
         ctx.fillText(`    Happiness: ${(citizen.happinessData.happiness * 100).toFixed(2)}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        if (citizen.happinessData.happinessTags.length > 0) {
+        if (citizen.happinessData.happinessTagFactors.size > 0) {
             let happinessText = `    HappinessTags:`;
-            for (let tag of citizen.happinessData.happinessTags) {
-                happinessText += ` ${tag},`;
+            for (let tag of citizen.happinessData.happinessTagFactors) {
+                happinessText += ` ${tag[0]}(${tag[1].toFixed(1)}),`;
             }
             ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
         }
-        if (citizen.happinessData.unhappinessTags.length > 0) {
+        if (citizen.happinessData.unhappinessTagFactors.size > 0) {
             let happinessText = `    unhappinessTags:`;
-            for (let tag of citizen.happinessData.unhappinessTags) {
-                happinessText += ` ${tag},`;
+            for (let tag of citizen.happinessData.unhappinessTagFactors) {
+                happinessText += ` ${tag[0]}(${tag[1].toFixed(1)}),`;
             }
             ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
         }
