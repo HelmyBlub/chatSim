@@ -1,11 +1,11 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { TAG_DOING_NOTHING } from "../citizen.js";
+import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
 import { BuildingMarket } from "../building.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { buyItemWithInventories, citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance, sellItemWithInventories } from "./job.js"
+import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance } from "./job.js"
 import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";
@@ -52,7 +52,7 @@ export function marketServeCustomer(market: BuildingMarket, customer: Citizen): 
     const canServe = marketCanServeCustomer(market, customer);
     if (!canServe) return false;
     const servingState: JobMarketState = "servingCustomer";
-    market.inhabitedBy.stateInfo.stack.unshift({ state: servingState, tags: new Set() });
+    market.inhabitedBy.stateInfo.stack.unshift({ state: servingState, tags: new Set([TAG_SOCIAL_INTERACTION]) });
     const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
     jobMarket.currentCustomer = customer;
     jobMarket.customerCounter[0]++;
@@ -148,14 +148,14 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
             return;
         }
         const state: JobMarketState = "negotiationWithCustomer";
-        citizen.stateInfo.stack.unshift({ state: state, tags: new Set() });
+        citizen.stateInfo.stack.unshift({ state: state, tags: new Set([TAG_SOCIAL_INTERACTION]) });
         return;
     } else {
         if (stateInfo.returnedData.type === TRADE_DATA) {
             stateInfo.subState = "startedTrade";
             const tradeData: TradeData = stateInfo.returnedData as TradeData;
             const state: JobMarketState = "tradingWithCustomer";
-            citizen.stateInfo.stack.unshift({ state: state, data: tradeData, tags: new Set() });
+            citizen.stateInfo.stack.unshift({ state: state, data: tradeData, tags: new Set([TAG_SOCIAL_INTERACTION]) });
             return;
         }
     }
