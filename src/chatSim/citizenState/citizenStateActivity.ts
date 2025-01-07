@@ -11,7 +11,7 @@ export function onLoadCitizenStateDefaultTickActivityFuntions() {
 }
 
 export function setCitizenStateDoNothingAtHome(citizen: Citizen) {
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_DO_NOTHING_AT_HOME, tags: [TAG_DOING_NOTHING] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_DO_NOTHING_AT_HOME, tags: new Set([TAG_DOING_NOTHING]) });
 }
 
 function tickCititzenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState) {

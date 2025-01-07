@@ -52,7 +52,7 @@ export function marketServeCustomer(market: BuildingMarket, customer: Citizen): 
     const canServe = marketCanServeCustomer(market, customer);
     if (!canServe) return false;
     const servingState: JobMarketState = "servingCustomer";
-    market.inhabitedBy.stateInfo.stack.unshift({ state: servingState });
+    market.inhabitedBy.stateInfo.stack.unshift({ state: servingState, tags: new Set() });
     const jobMarket = market.inhabitedBy.job as CitizenJobMarket;
     jobMarket.currentCustomer = customer;
     jobMarket.customerCounter[0]++;
@@ -82,7 +82,7 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
     if (citizen.stateInfo.stack.length === 0) {
         if (!job.marketBuilding || job.marketBuilding.deterioration >= 1) {
             const state: JobMarketState = "getMarketBuilding";
-            citizen.stateInfo.stack.unshift({ state: state });
+            citizen.stateInfo.stack.unshift({ state: state, tags: new Set() });
         } else {
             const day = getDay(state);
             if (job.currentDayCounter !== day) {
@@ -102,7 +102,7 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
                 job.customerCounter.unshift(0);
             }
             citizenSetThought(citizen, ["Go to my market and check inventory."], state);
-            citizen.stateInfo.stack.unshift({ state: "checkInventory" });
+            citizen.stateInfo.stack.unshift({ state: "checkInventory", tags: new Set() });
             citizenMoveTo(citizen, job.marketBuilding.position);
         }
     } else {
@@ -148,14 +148,14 @@ function stateServingCustomer(citizen: Citizen, job: CitizenJob, state: ChatSimS
             return;
         }
         const state: JobMarketState = "negotiationWithCustomer";
-        citizen.stateInfo.stack.unshift({ state: state });
+        citizen.stateInfo.stack.unshift({ state: state, tags: new Set() });
         return;
     } else {
         if (stateInfo.returnedData.type === TRADE_DATA) {
             stateInfo.subState = "startedTrade";
             const tradeData: TradeData = stateInfo.returnedData as TradeData;
             const state: JobMarketState = "tradingWithCustomer";
-            citizen.stateInfo.stack.unshift({ state: state, data: tradeData });
+            citizen.stateInfo.stack.unshift({ state: state, data: tradeData, tags: new Set() });
             return;
         }
     }
@@ -353,7 +353,8 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                 }
             }
             stateInfo.state = "waitingForCustomers";
-            stateInfo.tags = [TAG_DOING_NOTHING];
+            stateInfo.tags.clear();
+            stateInfo.tags.add(TAG_DOING_NOTHING);
             citizen.displayedEquipments = [];
             citizen.paintBehindBuildings = true;
         } else {

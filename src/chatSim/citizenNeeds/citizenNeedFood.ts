@@ -69,7 +69,7 @@ export function citizenNeedTickFood(citizen: Citizen, state: ChatSimState) {
             }
             if (citizen.foodPerCent < 0.5) {
                 if (homeMushrooms && homeMushrooms.counter > 0) {
-                    citizen.stateInfo.stack.push({ state: `go home to eat` });
+                    citizen.stateInfo.stack.push({ state: `go home to eat`, tags: new Set() });
                     citizenAddThought(citizen, `I will go home to eat ${INVENTORY_MUSHROOM}.`, state);
                     citizenMoveTo(citizen, citizen.home.position);
                     return;

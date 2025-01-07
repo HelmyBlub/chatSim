@@ -95,7 +95,9 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(`        ${citizenState.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
             if (citizenState.subState) ctx.fillText(`            ${citizenState.subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
             if (citizenState.tags) {
-                ctx.fillText(`       Tags: ${citizenState.tags.join()}`, offsetX, offsetY + lineSpacing * lineCounter++);
+                let tagsString = "";
+                citizenState.tags.forEach(t => tagsString += t + ",");
+                ctx.fillText(`       Tags: ${tagsString}`, offsetX, offsetY + lineSpacing * lineCounter++);
             }
         }
         if (citizen.traitsData.traits.length > 0) {

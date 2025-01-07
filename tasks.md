@@ -1,11 +1,6 @@
 Tasks:
 - happiness and "free time"
-    - each tag has a specific base factor
     - think about more tags
-        - "physically active"
-            - when building stuff
-            - when cutting wood
-            - when walking around
         - "social interaction"
             - when trading
         - "queues"

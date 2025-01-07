@@ -8,10 +8,6 @@ export type CitizenJobHouseMarket = CitizenJob & {
     lastCheckedHouseAvailability?: number,
 }
 
-type JobHouseMarketStateInfo = {
-    state: "selling",
-}
-
 export const CITIZEN_JOB_HOUSE_MARKET = "House Market";
 const CHECK_INTERVAL = 1000;
 
@@ -29,15 +25,5 @@ function create(state: ChatSimState): CitizenJobHouseMarket {
 }
 
 function tick(citizen: Citizen, job: CitizenJobHouseMarket, state: ChatSimState) {
-    if (job.lastCheckedHouseAvailability === undefined || job.lastCheckedHouseAvailability + CHECK_INTERVAL < state.time) {
-        let housesAvailable = false;
-        if (!housesAvailable) {
-            citizenChangeJob(citizen, CITIZEN_JOB_BUILDING_CONSTRUCTION, state, [`there is no house to market`]);
-            return;
-        }
-    }
-    if (citizen.stateInfo.stack.length === 0) {
-        const citizenState: JobHouseMarketStateInfo = { state: "selling" };
-        citizen.stateInfo.stack.unshift(citizenState);
-    }
+
 }

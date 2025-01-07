@@ -22,7 +22,7 @@ export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
 
 export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
     const data: GatherData = { amount: amount };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: data, tags: [] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: data, tags: new Set() });
     citizenSetEquipment(citizen, ["Basket"]);
 }
 

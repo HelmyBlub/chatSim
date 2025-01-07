@@ -54,19 +54,19 @@ export function onLoadCitizenStateDefaultTickMarketFuntions() {
 
 export function setCitizenStateTradeItemWithMarket(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number) {
     const data: CitizenStateMarketTradeStart = { itemName: itemName, itemAmount: itemAmount, market: market, sellToMarket: sellToMarket };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_ITEM_WITH, data: data, tags: [] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_ITEM_WITH, data: data, tags: new Set() });
 }
 
 export function setCitizenStateEnterMarketQueue(citizen: Citizen, market: BuildingMarket) {
     const data: CitizenStateMarketQueue = { market: market };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data, tags: [TAG_DOING_NOTHING] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ENTER_QUEUE, data: data, tags: new Set([TAG_DOING_NOTHING]) });
 }
 
 export function setCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, market: BuildingMarket, sellToMarket: boolean, itemName: string, itemAmount: number | undefined = undefined): boolean {
     const canServe = marketServeCustomer(market, citizen);
     if (!canServe) return false;
     const data: CitizenStateMarketTradeStart = { market: market, itemName: itemName, itemAmount: itemAmount, sellToMarket: sellToMarket };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION, data: data, tags: [] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_TRADE_CUSTOMER_NEGOTIATION, data: data, tags: new Set() });
     return true;
 }
 
@@ -95,7 +95,7 @@ export function setCitizenStateMarketItemExchange(citizen: Citizen, market: Buil
         }
         data = tempData;
     }
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ITEM_EXCHANGE, data: data, tags: [] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_MARKET_ITEM_EXCHANGE, data: data, tags: new Set() });
 }
 
 function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimState) {

@@ -40,7 +40,7 @@ export function citizenChangeJob(citizen: Citizen, jobName: string, state: ChatS
     citizenStopMoving(citizen);
     citizen.stateInfo = {
         type: CITIZEN_STATE_TYPE_CHANGE_JOB,
-        stack: [{ state: CITIZEN_STATE_THINKING }],
+        stack: [{ state: CITIZEN_STATE_THINKING, tags: new Set() }],
         tags: citizen.stateInfo.tags,
     };
     citizenSetThought(citizen, reason, state);

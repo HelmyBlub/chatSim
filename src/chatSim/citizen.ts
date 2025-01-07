@@ -37,7 +37,7 @@ export type CitizenState = {
     returnedData?: CitizenStateSuccessData,
     subState?: string,
     subStateStartTime?: number,
-    tags?: string[],
+    tags: Set<string>,
 }
 
 export type CitizenStateSuccessData = {
@@ -119,13 +119,19 @@ const CITIZEN_STATE_TYPE_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, sta
 
 export const CITIZEN_TAGS_AND_FACTORS = new Map<string, number>()
 export const TAG_DOING_NOTHING = "doing nothing"
-export const TAG_WALKING_AROUND = "walking around"
-export const TAG_OUTSIDE = "outside"
-export const TAG_AT_HOME = "at home"
 CITIZEN_TAGS_AND_FACTORS.set(TAG_DOING_NOTHING, 1.5);
+export const TAG_WALKING_AROUND = "walking around"
 CITIZEN_TAGS_AND_FACTORS.set(TAG_WALKING_AROUND, 0.20);
+export const TAG_OUTSIDE = "outside"
 CITIZEN_TAGS_AND_FACTORS.set(TAG_OUTSIDE, 0.12);
+export const TAG_AT_HOME = "at home"
 CITIZEN_TAGS_AND_FACTORS.set(TAG_AT_HOME, 1.5);
+export const TAG_PHYSICALLY_ACTIVE = "physically active";
+CITIZEN_TAGS_AND_FACTORS.set(TAG_PHYSICALLY_ACTIVE, 1.5);
+export const TAG_SOCIAL_INTERACTION = "social interaction";
+CITIZEN_TAGS_AND_FACTORS.set(TAG_SOCIAL_INTERACTION, 1.0);
+export const TAG_QUEUE = "queuing";
+CITIZEN_TAGS_AND_FACTORS.set(TAG_QUEUE, 1.0);
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";
@@ -149,12 +155,14 @@ export function citizenMoveTo(citizen: Citizen, moveTo: Position) {
     };
     citizen.stateInfo.tags.add(TAG_WALKING_AROUND);
     citizen.stateInfo.tags.add(TAG_OUTSIDE);
+    citizen.stateInfo.tags.add(TAG_PHYSICALLY_ACTIVE);
     citizen.stateInfo.tags.delete(TAG_AT_HOME);
 }
 
 export function citizenStopMoving(citizen: Citizen) {
     citizen.moveTo = undefined;
     citizen.stateInfo.tags.delete(TAG_WALKING_AROUND);
+    citizen.stateInfo.tags.delete(TAG_PHYSICALLY_ACTIVE);
     if (citizen.home && isCitizenInInteractionDistance(citizen, citizen.home.position)) {
         citizen.stateInfo.tags.add(TAG_AT_HOME);
         citizen.stateInfo.tags.delete(TAG_OUTSIDE);
@@ -506,7 +514,7 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
 }
 
 function setUpHappinessTags(citizen: Citizen, state: ChatSimState) {
-    const testTags = [TAG_DOING_NOTHING, TAG_WALKING_AROUND, TAG_OUTSIDE, TAG_AT_HOME];
+    const testTags = Array.from(CITIZEN_TAGS_AND_FACTORS.keys());
     let randomIndex = Math.floor(nextRandom(state.randomSeed) * testTags.length);
     let randomFactor = 0.5 + nextRandom(state.randomSeed) * 1.5;
     citizen.happinessData.happinessTagFactors.set(testTags.splice(randomIndex, 1)[0], randomFactor);

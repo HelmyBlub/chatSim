@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
@@ -24,7 +24,7 @@ export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
 
 export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {
     const data: Data = { amount: amount };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data, tags: [] });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data, tags: new Set() });
     citizenSetEquipment(citizen, ["Axe", "WoodPlanks"]);
 }
 
@@ -50,6 +50,7 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
         }
         const tree = isCloseToTree(citizen, state);
         if (tree) {
+            citizenState.tags.add(TAG_PHYSICALLY_ACTIVE);
             const divider = 100 * Math.PI * 2;
             const animationPerCent = (state.time / divider) % 1;
             const animationDuration1Tick = state.tickInterval / divider;
@@ -60,6 +61,7 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
             const isCutDown = cutDownTree(citizen, tree, state);
             if (isCutDown) cutTreeLogIntoPlanks(citizen, tree, citizenState.data, state);
         } else {
+            citizenState.tags.delete(TAG_PHYSICALLY_ACTIVE);
             axe!.data = false;
             moveToTree(citizen, state);
         }

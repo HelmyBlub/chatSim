@@ -18,7 +18,7 @@ export function onLoadCitizenStateDefaultTickEatFuntions() {
 
 export function setCitizenStateEat(citizen: Citizen, inventoryFood: InventoryItem, inventoryName: string) {
     const data: CitizenStateEatData = { inventoryFood: inventoryFood, inventoryName: inventoryName };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_EAT, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_EAT, data: data, tags: new Set() });
 }
 
 function tickCititzenStateEat(citizen: Citizen, state: ChatSimState) {

@@ -33,7 +33,7 @@ export function setCitizenStateSellItem(citizen: Citizen, itemName: string, item
         amount = inventoryItem.counter;
     }
     const data: CitizenStateSellItemData = { name: itemName, amount: amount };
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SELL_ITEM, data: data });
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SELL_ITEM, data: data, tags: new Set() });
 }
 
 function tickCititzenStateSellItem(citizen: Citizen, state: ChatSimState) {

@@ -42,15 +42,15 @@ export function citizenNeedTickSleep(citizen: Citizen, state: ChatSimState) {
             const homeDistance = calculateDistance(citizen.position, citizen.home.position);
             if (homeDistance < 1000) {
                 citizenAddThought(citizen, `I am tired. I go home to sleep.`, state);
-                citizen.stateInfo.stack.unshift({ state: "move home" });
+                citizen.stateInfo.stack.unshift({ state: "move home", tags: new Set() });
                 citizenMoveTo(citizen, citizen.home.position);
             } else {
                 citizenAddThought(citizen, `I am tired. I am to far away from home. I sleep here.`, state);
-                citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
+                citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING, tags: new Set() });
                 if (citizen.moveTo) citizenStopMoving(citizen);
             }
         } else {
-            citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING });
+            citizen.stateInfo.stack.unshift({ state: CITIZEN_NEED_STATE_SLEEPING, tags: new Set() });
             citizenAddThought(citizen, `I am falling asleep.`, state);
             if (citizen.moveTo) citizenStopMoving(citizen);
         }
