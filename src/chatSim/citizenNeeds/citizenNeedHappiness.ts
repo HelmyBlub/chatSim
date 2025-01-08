@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddThought, citizenAddTodo, citizenSetThought, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_WALKING_AROUND } from "../citizen.js";
-import { setCitizenStateDoNothingAtHome, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
+import { Citizen, citizenAddThought, citizenAddTodo, citizenSetThought, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../citizen.js";
+import { setCitizenStateDoNothingAtHome, setCitizenStateTalkToSomebody, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
@@ -24,7 +24,12 @@ export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) 
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.happinessData.happiness < CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT) {
             citizenAddThought(citizen, `I am too unhappy. I need to do something.`, state);
-            // TODO: find a activity which makes citizen happy
+            if (citizen.happinessData.happinessTagFactors.has(TAG_SOCIAL_INTERACTION)) {
+                citizenAddThought(citizen, `I like to talk to somebody.`, state);
+                setCitizenStateTalkToSomebody(citizen);
+                return;
+            }
+
             if (citizen.happinessData.happinessTagFactors.has(TAG_AT_HOME)
                 || citizen.happinessData.happinessTagFactors.has(TAG_DOING_NOTHING)
             ) {

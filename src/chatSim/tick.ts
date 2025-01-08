@@ -10,6 +10,7 @@ import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./citizenState
 import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./citizenState/citizenStateGetItem.js";
 import { onLoadCitizenStateDefaultTickEatFuntions } from "./citizenState/citizenStateEat.js";
 import { onLoadCitizenStateDefaultTickActivityFuntions } from "./citizenState/citizenStateActivity.js";
+import { onLoadCitizenStateDefaultTickSmallTalkFuntions } from "./citizenState/citizenStateSmallTalk.js";
 
 export const CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
 };
@@ -23,6 +24,7 @@ export function onLoadCitizenStateDefaultTickFuntions() {
     onLoadCitizenStateDefaultTickMarketFuntions();
     onLoadCitizenStateDefaultTickEatFuntions();
     onLoadCitizenStateDefaultTickActivityFuntions();
+    onLoadCitizenStateDefaultTickSmallTalkFuntions();
 }
 
 export function chatSimTick(state: ChatSimState) {

@@ -1,21 +1,28 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenGetVisionDistance, TAG_DOING_NOTHING } from "../citizen.js";
+import { citizenMoveToRandom, citizenStopMoving, TAG_DOING_NOTHING } from "../citizen.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
-import { isCitizenAtPosition } from "../jobs/job.js";
-import { nextRandom } from "../main.js";
-import { mapIsPositionOutOfBounds } from "../map.js";
+import { isCitizenAtPosition, isCitizenInInteractionDistance, isCitizenInVisionDistance } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { setCitizenStateSmallTalk } from "./citizenStateSmallTalk.js";
 
 type RandomMoveData = {
     lastSearchDirection?: number,
 }
 
+type TalkToSomebodyData = {
+    lastSearchDirection?: number,
+    citizenInVisionDistance?: Citizen,
+    talkStarted?: boolean,
+}
+
 export const CITIZEN_STATE_DO_NOTHING_AT_HOME = "do nothing at home";
 export const CITIZEN_STATE_WALKING_AROUND_RANDOMLY = "walking around randomly";
+export const CITIZEN_STATE_TALK_TO_SOMEBODY = "talk to somebody";
 
 export function onLoadCitizenStateDefaultTickActivityFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_DO_NOTHING_AT_HOME] = tickCititzenStateDoNothingAtHome;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_WALKING_AROUND_RANDOMLY] = tickCititzenStateWalkingAroundRandomly;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TALK_TO_SOMEBODY] = tickCititzenStateTalkToSomebody;
 }
 
 export function setCitizenStateDoNothingAtHome(citizen: Citizen) {
@@ -26,6 +33,37 @@ export function setCitizenStateWalkingAroundRandomly(citizen: Citizen) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_WALKING_AROUND_RANDOMLY, tags: new Set(), data: {} });
 }
 
+export function setCitizenStateTalkToSomebody(citizen: Citizen) {
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TALK_TO_SOMEBODY, tags: new Set(), data: {} });
+}
+
+function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) {
+    if (!citizen.moveTo) {
+        const data = citizen.stateInfo.stack[0].data as TalkToSomebodyData;
+        if (data.talkStarted) {
+            citizenStateStackTaskSuccess(citizen);
+            return;
+        }
+        if (!data.citizenInVisionDistance) {
+            data.citizenInVisionDistance = state.map.citizens.find(c => c !== citizen && isCitizenInVisionDistance(citizen, c.position));
+        }
+        if (data.citizenInVisionDistance) {
+            if (!isCitizenInInteractionDistance(citizen, data.citizenInVisionDistance.position)) {
+                citizenMoveTo(citizen, { x: data.citizenInVisionDistance.position.x, y: data.citizenInVisionDistance.position.y });
+            } else {
+                data.talkStarted = true;
+                setCitizenStateSmallTalk(citizen, citizen);
+                setCitizenStateSmallTalk(data.citizenInVisionDistance, citizen);
+                citizenStopMoving(data.citizenInVisionDistance);
+                citizenMoveTo(citizen, { x: data.citizenInVisionDistance.position.x + 20, y: data.citizenInVisionDistance.position.y });
+                return;
+            }
+        } else {
+            data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
+        }
+    }
+}
+
 function tickCititzenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSimState) {
     if (!citizen.moveTo) {
         if (citizen.happinessData.happiness > 0.5) {
@@ -34,27 +72,7 @@ function tickCititzenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSim
             return;
         }
         const data = citizen.stateInfo.stack[0].data as RandomMoveData;
-        let newSearchDirection;
-        if (data.lastSearchDirection === undefined) {
-            newSearchDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-        } else {
-            newSearchDirection = data.lastSearchDirection + nextRandom(state.randomSeed) * Math.PI / 2 - Math.PI / 4;
-        }
-        const randomTurnIfOutOfBound = nextRandom(state.randomSeed) < 0.2 ? 0.3 : -0.3;
-        const walkDistance = citizenGetVisionDistance(citizen, state) * 0.75;
-        while (true) {
-            const newMoveTo = {
-                x: citizen.position.x + Math.cos(newSearchDirection) * walkDistance,
-                y: citizen.position.y + Math.sin(newSearchDirection) * walkDistance,
-            }
-            if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
-                newSearchDirection += randomTurnIfOutOfBound;
-            } else {
-                citizenMoveTo(citizen, newMoveTo);
-                data.lastSearchDirection = newSearchDirection;
-                return;
-            }
-        }
+        data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
     }
 }
 

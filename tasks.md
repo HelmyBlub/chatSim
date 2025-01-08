@@ -9,7 +9,8 @@ Tasks:
                         - if accepted. push citizenState stack for conversation
                 - say "hello. I am <name>, how are you?" 
                 - answer: "hello i am <name>. <answer based on happiness value>"
-                - say "<some topic based on job>"
+                - say "<introduce job>"
+                - stop conversation
     
             - other citizen might ignore and continue
             - want to get to know his neigbours
@@ -19,6 +20,7 @@ Tasks:
     - citizen should not know which makes them happy or unhappy
         - if they are unhappy, they try something random
             - will remember what activity did help and which did not help
+- bug: buying wood endless loop. Customer want to buy wood but market does not have any wood. Customer does not stop asking for wood.
 
 ---------------------------------------------------
 Tasks done today:

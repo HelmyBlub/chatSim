@@ -3,6 +3,7 @@ import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddT
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
+import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
@@ -81,6 +82,14 @@ export function citizenNeedTickSleep(citizen: Citizen, state: ChatSimState) {
             citizen.energyPerCent = 1;
             citizenAddThought(citizen, `Waking up.`, state);
             citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_SLEEP, state);
+            return;
+        }
+    }
+
+    if (citizen.stateInfo.stack.length > 0) {
+        const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
+        if (tickFunction) {
+            tickFunction(citizen, state);
             return;
         }
     }

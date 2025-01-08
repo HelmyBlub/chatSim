@@ -1,5 +1,5 @@
 import { ChatSimState, Mushroom } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
@@ -97,27 +97,7 @@ function moveToMushroom(citizen: Citizen, state: ChatSimState) {
         citizenAddLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo!.x.toFixed()}, y:${citizen.moveTo!.y.toFixed()}`, state);
     } else {
         const data = citizen.stateInfo.stack[0].data as GatherData;
-        let newSearchDirection;
-        if (data.lastSearchDirection === undefined) {
-            newSearchDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-        } else {
-            newSearchDirection = data.lastSearchDirection + nextRandom(state.randomSeed) * Math.PI / 2 - Math.PI / 4;
-        }
-        const randomTurnIfOutOfBound = nextRandom(state.randomSeed) < 0.2 ? 0.3 : -0.3;
-        const walkDistance = citizenGetVisionDistance(citizen, state) * 0.75;
-        while (true) {
-            const newMoveTo = {
-                x: citizen.position.x + Math.cos(newSearchDirection) * walkDistance,
-                y: citizen.position.y + Math.sin(newSearchDirection) * walkDistance,
-            }
-            if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
-                newSearchDirection += randomTurnIfOutOfBound;
-            } else {
-                citizenMoveTo(citizen, newMoveTo);
-                data.lastSearchDirection = newSearchDirection;
-                return;
-            }
-        }
+        data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
     }
 }
 

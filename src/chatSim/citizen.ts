@@ -1,7 +1,7 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
-import { PaintDataMap } from "./map.js";
+import { mapIsPositionOutOfBounds, PaintDataMap } from "./map.js";
 import { Building } from "./building.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING, citizenNeedTickSleep } from "./citizenNeeds/citizenNeedSleep.js";
@@ -166,6 +166,29 @@ export function citizenStopMoving(citizen: Citizen) {
     if (citizen.home && isCitizenInInteractionDistance(citizen, citizen.home.position)) {
         citizen.stateInfo.tags.add(TAG_AT_HOME);
         citizen.stateInfo.tags.delete(TAG_OUTSIDE);
+    }
+}
+
+export function citizenMoveToRandom(citizen: Citizen, state: ChatSimState, lastSearchDirection: number | undefined = undefined): number {
+    let newSearchDirection;
+    if (lastSearchDirection === undefined) {
+        newSearchDirection = nextRandom(state.randomSeed) * Math.PI * 2;
+    } else {
+        newSearchDirection = lastSearchDirection + nextRandom(state.randomSeed) * Math.PI / 2 - Math.PI / 4;
+    }
+    const randomTurnIfOutOfBound = nextRandom(state.randomSeed) < 0.2 ? 0.3 : -0.3;
+    const walkDistance = citizenGetVisionDistance(citizen, state) * 0.75;
+    while (true) {
+        const newMoveTo = {
+            x: citizen.position.x + Math.cos(newSearchDirection) * walkDistance,
+            y: citizen.position.y + Math.sin(newSearchDirection) * walkDistance,
+        }
+        if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
+            newSearchDirection += randomTurnIfOutOfBound;
+        } else {
+            citizenMoveTo(citizen, newMoveTo);
+            return newSearchDirection;
+        }
     }
 }
 

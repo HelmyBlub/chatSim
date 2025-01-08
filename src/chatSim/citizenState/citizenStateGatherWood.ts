@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE, citizenMoveToRandom } from "../citizen.js";
 import { inventoryGetAvaiableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
@@ -113,27 +113,7 @@ function moveToTree(citizen: Citizen, state: ChatSimState) {
     } else {
         if (citizenCheckTodoList(citizen, state, 2)) return;
         const data = citizen.stateInfo.stack[0].data as Data;
-        let newSearchDirection;
-        if (data.lastSearchDirection === undefined) {
-            newSearchDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-        } else {
-            newSearchDirection = data.lastSearchDirection + nextRandom(state.randomSeed) * Math.PI / 2 - Math.PI / 4;
-        }
-        const randomTurnIfOutOfBound = nextRandom(state.randomSeed) < 0.2 ? 0.3 : -0.3;
-        const walkDistance = citizenGetVisionDistance(citizen, state) * 0.75;
-        while (true) {
-            const newMoveTo = {
-                x: citizen.position.x + Math.cos(newSearchDirection) * walkDistance,
-                y: citizen.position.y + Math.sin(newSearchDirection) * walkDistance,
-            }
-            if (mapIsPositionOutOfBounds(newMoveTo, state.map)) {
-                newSearchDirection += randomTurnIfOutOfBound;
-            } else {
-                citizenMoveTo(citizen, newMoveTo);
-                data.lastSearchDirection = newSearchDirection;
-                return;
-            }
-        }
+        data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
     }
 }
 

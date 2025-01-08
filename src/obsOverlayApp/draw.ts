@@ -31,7 +31,7 @@ export function draw(state: State) {
     }
     drawGames(ctx, state);
     drawCookieJar(ctx, state);
-    drawFrameRate(ctx, state);
+    //drawFrameRate(ctx, state);
 }
 
 function drawCookieJar(ctx: CanvasRenderingContext2D, state: State) {
