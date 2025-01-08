@@ -2,21 +2,14 @@ Tasks:
 - happiness and "free time"
     - add more "activities" used for free time/ leisure
         - interacting with other citizens
-            - walk around until i see a citizen
-            - walk to him and start conversation
-                - code
-                    - some function "inviteToChat" return boolean if chat accepted or not
-                        - if accepted. push citizenState stack for conversation
-                - say "hello. I am <name>, how are you?" 
-                - answer: "hello i am <name>. <answer based on happiness value>"
-                - say "<introduce job>"
-                - stop conversation
-    
-            - other citizen might ignore and continue
-            - want to get to know his neigbours
-                - search for other buildings and find their inhabitants
-                - start conversation with them
-            - 
+            - add other cases:
+                - sleeping citizen will be mad. Changes conversation messages.
+                - sleeping citizen will ignore and continue sleeping
+                - remember names and in conversation greet with name if they know each other already.
+                - answer with how they are feeling correctly. Or maybe choose to lie or say the truth.
+            -  trait "bad memory" forget names fast
+            - think about how to improve code for social interaction chats
+                - should be easy to add new chat messages/topics
     - citizen should not know which makes them happy or unhappy
         - if they are unhappy, they try something random
             - will remember what activity did help and which did not help
