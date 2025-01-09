@@ -24,7 +24,6 @@ export function setCitizenStateSmallTalk(citizen: Citizen, chatStarterCitizen: C
 function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data = citizenState.data as CitizenStateSmallTalkData;
-    if (citizen.moveTo) return;
     if (!citizenState.subState) {
         if (data.chatStarterCitizen === citizen) {
             if (!citizen.lastChat) {
@@ -40,14 +39,16 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
             citizenState.subState = "waitingForResponse";
         }
     }
+    if (data.chatStarterCitizen.moveTo) return;
     if (!data.chatStarterCitizen.lastChat) return;
     const chat = data.chatStarterCitizen.lastChat;
     if (citizenState.subState === "waitingForResponse") {
         const message = chat.messages[chat.messages.length - 1];
         const reactionTime = message.time + 1000;
         if (reactionTime > state.time) return;
-        if (message.time + 3000 < state.time) {
+        if (message.time + 5000 < state.time) {
             citizenStateStackTaskSuccess(citizen);
+            return;
         }
         if (message.by === citizen) return;
         const repsonseIntention = message.intention as ChatMessageSmallTalkIntention;

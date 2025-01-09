@@ -48,16 +48,12 @@ function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) 
             data.citizenInVisionDistance = state.map.citizens.find(c => c !== citizen && isCitizenInVisionDistance(citizen, c.position));
         }
         if (data.citizenInVisionDistance) {
-            if (!isCitizenInInteractionDistance(citizen, data.citizenInVisionDistance.position)) {
-                citizenMoveTo(citizen, { x: data.citizenInVisionDistance.position.x, y: data.citizenInVisionDistance.position.y });
-            } else {
-                data.talkStarted = true;
-                setCitizenStateSmallTalk(citizen, citizen);
-                setCitizenStateSmallTalk(data.citizenInVisionDistance, citizen);
-                citizenStopMoving(data.citizenInVisionDistance);
-                citizenMoveTo(citizen, { x: data.citizenInVisionDistance.position.x + 20, y: data.citizenInVisionDistance.position.y });
-                return;
-            }
+            data.talkStarted = true;
+            setCitizenStateSmallTalk(citizen, citizen);
+            setCitizenStateSmallTalk(data.citizenInVisionDistance, citizen);
+            citizenStopMoving(data.citizenInVisionDistance);
+            citizenMoveTo(citizen, { x: data.citizenInVisionDistance.position.x + 20, y: data.citizenInVisionDistance.position.y });
+            return;
         } else {
             data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
         }
