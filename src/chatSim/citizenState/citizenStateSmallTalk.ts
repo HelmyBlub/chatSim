@@ -1,10 +1,13 @@
 import { addChatMessage, ChatMessage, ChatMessageIntention, createEmptyChat } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenStateStackTaskSuccess, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { Citizen, citizenMoveTo, citizenStateStackTaskSuccess, citizenStopMoving, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { citizenIsGoingToSleep, citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
+import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 
 export type CitizenStateSmallTalkData = {
     chatStarterCitizen: Citizen,
+    firstInviteCitizen?: Citizen,
 }
 
 export type ChatMessageSmallTalkIntention = ChatMessageIntention & {
@@ -17,8 +20,23 @@ export function onLoadCitizenStateDefaultTickSmallTalkFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SMALL_TALK] = tickCititzenStateSmallTalk;
 }
 
-export function setCitizenStateSmallTalk(citizen: Citizen, chatStarterCitizen: Citizen) {
-    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SMALL_TALK, data: { chatStarterCitizen: chatStarterCitizen }, tags: new Set([TAG_SOCIAL_INTERACTION]) });
+export function setCitizenStateSmallTalk(citizen: Citizen, chatStarterCitizen: Citizen, firstInviteCitizen: Citizen | undefined = undefined) {
+    citizen.stateInfo.stack.unshift({
+        state: CITIZEN_STATE_SMALL_TALK,
+        data: { chatStarterCitizen: chatStarterCitizen, firstInviteCitizen: firstInviteCitizen },
+        tags: new Set([TAG_SOCIAL_INTERACTION])
+    });
+}
+
+export function citizenInviteToChat(invitingCitizen: Citizen, invitedCitizen: Citizen, state: ChatSimState) {
+    if (citizenIsSleeping(invitedCitizen)) {
+        if (nextRandom(state.randomSeed) < 0.25) {
+            addChatMessage(invitingCitizen.lastChat!, invitedCitizen, "Let me sleep! Idiot!", state);
+        }
+        return;
+    }
+    setCitizenStateSmallTalk(invitedCitizen, invitingCitizen);
+    citizenStopMoving(invitedCitizen);
 }
 
 function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
@@ -34,7 +52,10 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                 intention: "initialGreeting",
             }
             addChatMessage(citizen.lastChat, citizen, "Hello!", state, intention);
+            citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + 20, y: data.firstInviteCitizen!.position.y });
+            citizenInviteToChat(citizen, data.firstInviteCitizen!, state);
             citizenState.subState = "waitingForResponse";
+            return;
         } else {
             citizenState.subState = "waitingForResponse";
         }

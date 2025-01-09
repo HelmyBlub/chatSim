@@ -49,10 +49,7 @@ function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) 
         }
         if (data.citizenInVisionDistance) {
             data.talkStarted = true;
-            setCitizenStateSmallTalk(citizen, citizen);
-            setCitizenStateSmallTalk(data.citizenInVisionDistance, citizen);
-            citizenStopMoving(data.citizenInVisionDistance);
-            citizenMoveTo(citizen, { x: data.citizenInVisionDistance.position.x + 20, y: data.citizenInVisionDistance.position.y });
+            setCitizenStateSmallTalk(citizen, citizen, data.citizenInVisionDistance);
             return;
         } else {
             data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
