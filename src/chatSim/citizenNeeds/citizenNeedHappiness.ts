@@ -13,6 +13,15 @@ export function loadCitizenNeedsFunctionsHappiness(state: ChatSimState) {
     }
 }
 
+export function citizenHappinessToString(citizen: Citizen): string {
+    const happiness = citizen.happinessData.happiness;
+    if (happiness < -0.5) return "horrible";
+    if (happiness < -0.25) return "sad";
+    if (happiness < 0) return "fine";
+    if (happiness < 0.5) return "good";
+    return "happy";
+}
+
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.happinessData.happiness < CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT) {
         citizenAddTodo(citizen, Math.abs(citizen.happinessData.happiness) * 0.8, CITIZEN_NEED_HAPPINESS, `I should do something which makes me happy soon.`, state);

@@ -1,11 +1,11 @@
 Tasks:
+- chat bubble: stick last chat message to citizen position who said it. Not to chat owner
 - happiness and "free time"
     - add more "activities" used for free time/ leisure
         - interacting with other citizens
             - add other cases:
-                - remember names and in conversation greet with name if they know each other already.
                 - answer with how they are feeling correctly. Or maybe choose to lie or say the truth.
-            -  trait "bad memory" forget names fast
+            - trait "bad memory" forget names fast
             - think about how to improve code for social interaction chats
                 - should be easy to add new chat messages/topics
     - citizen should not know which makes them happy or unhappy

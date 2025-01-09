@@ -1,6 +1,7 @@
 import { addChatMessage, ChatMessage, ChatMessageIntention, createEmptyChat } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, citizenMoveTo, citizenStateStackTaskSuccess, citizenStopMoving, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.js";
 import { citizenIsGoingToSleep, citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -120,13 +121,21 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                         type: CITIZEN_STATE_SMALL_TALK,
                         intention: "howAreYou",
                     }
-                    addChatMessage(chat, citizen, `I am fine. How are you?`, state, intention);
+                    let howAmI = "fine";
+                    if (nextRandom(state.randomSeed) < 0.5) {
+                        howAmI = citizenHappinessToString(citizen);
+                    }
+                    addChatMessage(chat, citizen, `I am ${howAmI}. How are you?`, state, intention);
                 } else {
                     const intention: ChatMessageSmallTalkIntention = {
                         type: CITIZEN_STATE_SMALL_TALK,
                         intention: "bye bye",
                     }
-                    addChatMessage(chat, citizen, `I am fine. Bye Bye!`, state, intention);
+                    let howAmI = "fine";
+                    if (nextRandom(state.randomSeed) < 0.5) {
+                        howAmI = citizenHappinessToString(citizen);
+                    }
+                    addChatMessage(chat, citizen, `I am ${howAmI}. Bye Bye!`, state, intention);
                 }
             }
             if (repsonseIntention.intention === "bye bye") {
