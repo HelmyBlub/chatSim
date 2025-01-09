@@ -67,6 +67,11 @@ export type CitizenHappiness = {
     unhappinessTagFactors: Map<string, number>,
 }
 
+export type CitizenMemory = {
+    todosData: CitizenTodos,
+    citizensKnownByName: Set<Citizen>,
+}
+
 export type Citizen = {
     job: CitizenJob,
     happinessData: CitizenHappiness,
@@ -82,9 +87,7 @@ export type Citizen = {
         reason: string,
         time: number,
     },
-    memory: {
-        todosData: CitizenTodos,
-    },
+    memory: CitizenMemory,
     dreamJob?: string,
     traitsData: CitizenTraits,
     goToBedTime: number;
@@ -232,6 +235,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
                 maxLength: 4,
                 todos: [],
             },
+            citizensKnownByName: new Set<Citizen>(),
         },
         inventory: {
             items: [],

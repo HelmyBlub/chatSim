@@ -82,11 +82,20 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                     }
                     addChatMessage(chat, citizen, "Hello?", state, intention);
                 } else {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "introduce",
+                    if (citizen.memory.citizensKnownByName.has(message.by)) {
+                        const intention: ChatMessageSmallTalkIntention = {
+                            type: CITIZEN_STATE_SMALL_TALK,
+                            intention: "howAreYou",
+                        }
+                        addChatMessage(chat, citizen, `How are you today ${message.by.name}?`, state, intention);
+                    } else {
+                        const intention: ChatMessageSmallTalkIntention = {
+                            type: CITIZEN_STATE_SMALL_TALK,
+                            intention: "introduce",
+                        }
+                        message.by.memory.citizensKnownByName.add(citizen);
+                        addChatMessage(chat, citizen, `My name is ${citizen.name}. Who are you?`, state, intention);
                     }
-                    addChatMessage(chat, citizen, `My name is ${citizen.name}. Who are you?`, state, intention);
                 }
             }
             if (repsonseIntention.intention === "introduce") {
@@ -95,6 +104,7 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                         type: CITIZEN_STATE_SMALL_TALK,
                         intention: "introduce",
                     }
+                    message.by.memory.citizensKnownByName.add(citizen);
                     addChatMessage(chat, citizen, `My name is ${citizen.name}.`, state, intention);
                 } else {
                     const intention: ChatMessageSmallTalkIntention = {

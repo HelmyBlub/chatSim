@@ -3,8 +3,6 @@ Tasks:
     - add more "activities" used for free time/ leisure
         - interacting with other citizens
             - add other cases:
-                - sleeping citizen will ignore and continue sleeping
-                - sleeping citizen will be mad. Changes conversation messages.
                 - remember names and in conversation greet with name if they know each other already.
                 - answer with how they are feeling correctly. Or maybe choose to lie or say the truth.
             -  trait "bad memory" forget names fast
@@ -15,8 +13,6 @@ Tasks:
             - will remember what activity did help and which did not help
 - bug: buying wood endless loop. Customer want to buy wood but market does not have any wood. Customer does not stop asking for wood.
 
----------------------------------------------------
-Tasks done today:
 
 --------------------------------------------------
 Big Idea:
