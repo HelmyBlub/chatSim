@@ -67,9 +67,22 @@ export type CitizenHappiness = {
     unhappinessTagFactors: Map<string, number>,
 }
 
+export type CitizenMemoryMetCitizen = {
+    citizen: Citizen,
+    meetCounter: number,
+    knowName: boolean,
+    lastTimeMet: number,
+    relationshipType: "talkedToOnce" | "friend" | "hateThatGuy",
+}
+
 export type CitizenMemory = {
     todosData: CitizenTodos,
-    citizensKnownByName: Set<Citizen>,
+    metCitizensData: {
+        maxCitizenRemember: number,
+        maxNamesRemember: number,
+        nameRememberCounter: number,
+        metCitizens: CitizenMemoryMetCitizen[],
+    },
 }
 
 export type Citizen = {
@@ -235,7 +248,12 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
                 maxLength: 4,
                 todos: [],
             },
-            citizensKnownByName: new Set<Citizen>(),
+            metCitizensData: {
+                maxNamesRemember: 10,
+                maxCitizenRemember: 30,
+                nameRememberCounter: 0,
+                metCitizens: [],
+            }
         },
         inventory: {
             items: [],
