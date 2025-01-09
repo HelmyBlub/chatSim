@@ -3,8 +3,6 @@ Tasks:
 - happiness and "free time"
     - add more "activities" used for free time/ leisure
         - interacting with other citizens
-            - add other cases:
-                - answer with how they are feeling correctly. Or maybe choose to lie or say the truth.
             - trait "bad memory" forget names fast
             - think about how to improve code for social interaction chats
                 - should be easy to add new chat messages/topics

@@ -1,6 +1,7 @@
 import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js"
-import { citizenAddLogEntry, Citizen } from "./citizen.js"
+import { citizenAddLogEntry, Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js"
+import { mapPositionToPaintPosition } from "./paint.js";
 
 export type Chat = {
     messages: ChatMessage[],
@@ -56,10 +57,22 @@ export function paintChatBubbles(ctx: CanvasRenderingContext2D, chatOwner: Citiz
     for (let i = 0; i < chat.messages.length; i++) {
         const message = chat.messages[i];
         if (message.time + 4000 < state.time) continue;
-        const offsetY = -(chat.messages.length - i - 1) * (fontSize + padding * 2 + margin);
+        let offsetY = -(chat.messages.length - i - 1) * (fontSize + padding * 2 + margin);
         let offsetX = (message.by.position.x - chatOwner.position.x);
-        if (offsetX < -80) offsetX = -80;
-        if (offsetX > 80) offsetX = 80;
+        if (i !== chat.messages.length - 1) {
+            if (offsetX < -80) offsetX = -80;
+            if (offsetX > 80) offsetX = 80;
+        } else {
+            let stickToByCitizen = false;
+            if (-120 < offsetX && offsetX < -80) offsetX = -80;
+            if (120 > offsetX && offsetX > 80) offsetX = 80;
+            if (offsetX > 120 || offsetX < -120) stickToByCitizen = true;
+            if (stickToByCitizen) {
+                const tempPaintPos = mapPositionToPaintPosition(message.by.position, state.paintData.map);
+                const tempY = tempPaintPos.y - CITIZEN_PAINT_SIZE / 2 - 4;
+                offsetY = tempY - paintPos.y;
+            }
+        }
         paintChatBubble(ctx, message.message, { x: paintPos.x + offsetX, y: paintPos.y + offsetY }, fontSize, padding, i === chat.messages.length - 1);
     }
 }

@@ -139,7 +139,7 @@ CITIZEN_TAGS_AND_FACTORS.set(TAG_QUEUING, 1.0);
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";
 export const CITIZEN_TIME_PER_THOUGHT_LINE = 2000;
-const CITIZEN_PAINT_SIZE = 40;
+export const CITIZEN_PAINT_SIZE = 40;
 
 export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_WORKING_JOB] = tickCitizenJob;
