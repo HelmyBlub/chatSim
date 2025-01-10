@@ -10,7 +10,7 @@ import { paintChatSim } from "./paint.js";
 import { loadChatSimSounds } from "./sounds.js";
 import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
-import { addCitizenTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits } from "./traits/trait.js";
+import { citizenAddTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits, citizenAddRandomTrait } from "./traits/trait.js";
 
 export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
@@ -131,7 +131,8 @@ export function addChatterChangeLog(message: string, state: ChatSimState) {
 export function handleChatMessage(user: string, message: string, state: ChatSimState) {
     let chatter = state.chatterData.find(c => c.name === user);
     if (!chatter) {
-        addCitizen(user, state);
+        const newCitizen = addCitizen(user, state);
+        if (newCitizen) citizenAddRandomTrait(newCitizen, state);
         chatter = addChatter(user, state);
     }
     const citizen = state.map.citizens.find(c => c.name === user);
@@ -238,8 +239,10 @@ function loadLocalStorageChatters(state: ChatSimState) {
                 citizenSetDreamJob(citizen, chatter.dreamJob, state);
                 if (chatter.traits) {
                     for (let trait of chatter.traits) {
-                        addCitizenTrait(citizen, trait, state);
+                        citizenAddTrait(citizen, trait, state);
                     }
+                } else {
+                    citizenAddRandomTrait(citizen, state);
                 }
             }
         }

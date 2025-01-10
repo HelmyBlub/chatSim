@@ -1,7 +1,7 @@
 Tasks:
 - happiness and "free time"
     - interacting with other citizens
-        - trait "bad memory" forget names fast
+        - trait "bad name memory" / "good name memory" forget names fast
         - think about how to improve code for social interaction chats
             - should be easy to add new chat messages/topics
     - citizen should not know which makes them happy or unhappy

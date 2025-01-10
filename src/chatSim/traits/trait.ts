@@ -1,5 +1,5 @@
 import { ChatSimState, ChatterData, RandomSeed } from "../chatSimModels.js";
-import { Citizen } from "../citizen.js";
+import { Citizen, CITIZEN_DEFAULT_NAMES_REMEMBER } from "../citizen.js";
 import { nextRandom } from "../main.js";
 
 export type CitizenTraits = {
@@ -10,6 +10,7 @@ export type CitizenTraits = {
 type CitizenTrait = {
     name: string,
     opposite?: string,
+    type: "positive" | "neutral" | "negative" | "shouldNotBeAppliedRandomly",
 }
 
 type CitizenTraitFunction = {
@@ -22,17 +23,21 @@ export const CITIZEN_TRAIT_FUNCTIONS: { [key: string]: CitizenTraitFunction } = 
 
 const TRAIT_EARLY_BIRD = "Early Bird";
 const TRAIT_NIGHT_OWL = "Night Owl";
+const CITIZEN_TRAIT_BAD_NAME_MEMORY = "Bad Name Memory";
+const CITIZEN_TRAIT_GOOD_NAME_MEMORY = "Good Name Memory";
 export const CITIZEN_TRAIT_ROBOT = "Robot";
 
 export function loadTraits() {
-    CITIZEN_TRAIT_FUNCTIONS[TRAIT_EARLY_BIRD] = { apply: applyEarlyBird, trait: { name: TRAIT_EARLY_BIRD, opposite: TRAIT_NIGHT_OWL } };
-    CITIZEN_TRAIT_FUNCTIONS[TRAIT_NIGHT_OWL] = { apply: applyNightOwl, trait: { name: TRAIT_NIGHT_OWL, opposite: TRAIT_EARLY_BIRD } };
-    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_ROBOT] = { apply: applyRobot, trait: { name: CITIZEN_TRAIT_ROBOT } };
+    CITIZEN_TRAIT_FUNCTIONS[TRAIT_EARLY_BIRD] = { apply: applyEarlyBird, trait: { name: TRAIT_EARLY_BIRD, opposite: TRAIT_NIGHT_OWL, type: "neutral" } };
+    CITIZEN_TRAIT_FUNCTIONS[TRAIT_NIGHT_OWL] = { apply: applyNightOwl, trait: { name: TRAIT_NIGHT_OWL, opposite: TRAIT_EARLY_BIRD, type: "neutral" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_ROBOT] = { apply: applyRobot, trait: { name: CITIZEN_TRAIT_ROBOT, type: "shouldNotBeAppliedRandomly" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_BAD_NAME_MEMORY] = { apply: applyBadNameMemory, trait: { name: CITIZEN_TRAIT_BAD_NAME_MEMORY, opposite: CITIZEN_TRAIT_GOOD_NAME_MEMORY, type: "negative" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_GOOD_NAME_MEMORY] = { apply: applyGoodNameMemory, trait: { name: CITIZEN_TRAIT_GOOD_NAME_MEMORY, opposite: CITIZEN_TRAIT_BAD_NAME_MEMORY, type: "positive" } };
 }
 
 export function handleChatterAddTraitMessage(chatter: ChatterData, citizen: Citizen, trait: string, state: ChatSimState) {
     saveTraitInChatter(chatter, trait);
-    addCitizenTrait(citizen, trait, state);
+    citizenAddTrait(citizen, trait, state);
 }
 
 function saveTraitInChatter(chatter: ChatterData, trait: string) {
@@ -53,7 +58,21 @@ function saveTraitInChatter(chatter: ChatterData, trait: string) {
     }
 }
 
-export function addCitizenTrait(citizen: Citizen, trait: string, state: ChatSimState) {
+export function citizenAddRandomTrait(citizen: Citizen, state: ChatSimState) {
+    const keys = Object.keys(CITIZEN_TRAIT_FUNCTIONS);
+    const randomAllowedTraits = [];
+    for (let key of keys) {
+        const traitFunctions = CITIZEN_TRAIT_FUNCTIONS[key];
+        if (traitFunctions.trait.type !== "shouldNotBeAppliedRandomly") {
+            randomAllowedTraits.push(key);
+        }
+    }
+    const randomIndex = Math.floor(randomAllowedTraits.length * nextRandom(state.randomSeed));
+    const randomTrait = randomAllowedTraits[randomIndex];
+    citizenAddTrait(citizen, randomTrait, state);
+}
+
+export function citizenAddTrait(citizen: Citizen, trait: string, state: ChatSimState) {
     citizen.traitsData.traits.push(trait);
     const traitFunctions = CITIZEN_TRAIT_FUNCTIONS[trait];
     if (traitFunctions) {
@@ -76,6 +95,14 @@ function applyEarlyBird(citizen: Citizen, state: ChatSimState) {
 
 function applyRobot(citizen: Citizen, state: ChatSimState) {
     citizen.speed = citizen.speed * 0.5;
+}
+
+function applyBadNameMemory(citizen: Citizen, state: ChatSimState) {
+    citizen.memory.metCitizensData.maxNamesRemember = Math.floor(CITIZEN_DEFAULT_NAMES_REMEMBER * 0.66);
+}
+
+function applyGoodNameMemory(citizen: Citizen, state: ChatSimState) {
+    citizen.memory.metCitizensData.maxNamesRemember = Math.floor(CITIZEN_DEFAULT_NAMES_REMEMBER * 1.4);
 }
 
 function applyNightOwl(citizen: Citizen, state: ChatSimState) {

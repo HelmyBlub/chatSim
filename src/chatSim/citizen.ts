@@ -153,6 +153,7 @@ export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";
 export const CITIZEN_TIME_PER_THOUGHT_LINE = 2000;
 export const CITIZEN_PAINT_SIZE = 40;
+export const CITIZEN_DEFAULT_NAMES_REMEMBER = 15;
 
 export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_WORKING_JOB] = tickCitizenJob;
@@ -249,7 +250,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
                 todos: [],
             },
             metCitizensData: {
-                maxNamesRemember: 10,
+                maxNamesRemember: CITIZEN_DEFAULT_NAMES_REMEMBER,
                 maxCitizenRemember: 30,
                 nameRememberCounter: 0,
                 metCitizens: [],
