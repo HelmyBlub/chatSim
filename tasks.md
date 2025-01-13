@@ -2,7 +2,10 @@ Tasks:
 - happiness and "free time"
     - interacting with other citizens
         - think about how to improve code for social interaction chats
-            - should be easy to add new chat messages/topics
+            - first version in tempTestFile.ts. Continue here
+                - check conversations. First version implemented but not completely tested yet
+                    - bug: "bye bye" is not happening yet
+
     - citizen should not know which makes them happy or unhappy
         - if they are unhappy, they try something random
             - will remember what activity did help and which did not help

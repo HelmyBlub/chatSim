@@ -1,18 +1,20 @@
-import { addChatMessage, ChatMessage, ChatMessageIntention, createEmptyChat } from "../chatBubble.js";
+import { addChatMessage, ChatMessageIntention, createEmptyChat } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, CitizenMemoryMetCitizen, citizenMoveTo, citizenStateStackTaskSuccess, citizenStopMoving, TAG_SOCIAL_INTERACTION } from "../citizen.js";
 import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.js";
-import { citizenIsGoingToSleep, citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
+import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { getMessageForIntentionAndPhase, INTENTION_GREETING, INTENTION_REPLY } from "./tempTestFile.js";
 
 export type CitizenStateSmallTalkData = {
     chatStarterCitizen: Citizen,
+    lastIntention?: string,
     firstInviteCitizen?: Citizen,
 }
 
 export type ChatMessageSmallTalkIntention = ChatMessageIntention & {
-    intention: "initialGreeting" | "introduce" | "howAreYou" | "bye bye",
+    intention: string,
 }
 
 export const CITIZEN_STATE_SMALL_TALK = "Small Talk";
@@ -118,11 +120,13 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
             if (!citizen.lastChat) {
                 citizen.lastChat = createEmptyChat();
             }
+            const messageAndIntention = getMessageForIntentionAndPhase(citizen, data.firstInviteCitizen!, INTENTION_GREETING, "initMessage", state)!;
             const intention: ChatMessageSmallTalkIntention = {
                 type: CITIZEN_STATE_SMALL_TALK,
-                intention: "initialGreeting",
+                intention: messageAndIntention.intention!,
             }
-            addChatMessage(citizen.lastChat, citizen, "Hello!", state, intention);
+            data.lastIntention = intention.intention;
+            addChatMessage(citizen.lastChat, citizen, messageAndIntention.message!, state, intention);
             citizenRememberMeetingCitizen(citizen, data.firstInviteCitizen!, state);
             citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + 20, y: data.firstInviteCitizen!.position.y });
             citizenInviteToChat(citizen, data.firstInviteCitizen!, state);
@@ -146,81 +150,36 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
         if (message.by === citizen) return;
         const repsonseIntention = message.intention as ChatMessageSmallTalkIntention;
         if (repsonseIntention) {
-            if (repsonseIntention.intention === "initialGreeting") {
-                if (data.chatStarterCitizen !== citizen) {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "initialGreeting",
-                    }
-                    citizenRememberMeetingCitizen(citizen, message.by, state);
-                    addChatMessage(chat, citizen, "Hello?", state, intention);
-                } else {
-                    if (citizenMemoryKnowByName(citizen, message.by)) {
-                        const intention: ChatMessageSmallTalkIntention = {
-                            type: CITIZEN_STATE_SMALL_TALK,
-                            intention: "howAreYou",
-                        }
-                        addChatMessage(chat, citizen, `How are you today ${message.by.name}?`, state, intention);
-                    } else {
-                        const intention: ChatMessageSmallTalkIntention = {
-                            type: CITIZEN_STATE_SMALL_TALK,
-                            intention: "introduce",
-                        }
-                        addChatMessage(chat, citizen, `My name is ${citizen.name}. Who are you?`, state, intention);
-                        citizenRememberName(message.by, citizen, state);
-                    }
-                }
-            }
-            if (repsonseIntention.intention === "introduce") {
-                if (data.chatStarterCitizen !== citizen) {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "introduce",
-                    }
-                    citizenRememberName(message.by, citizen, state);
-                    addChatMessage(chat, citizen, `My name is ${citizen.name}.`, state, intention);
-                } else {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "howAreYou",
-                    }
-                    addChatMessage(chat, citizen, `How are you?`, state, intention);
-                }
-            }
-            if (repsonseIntention.intention === "howAreYou") {
-                if (data.chatStarterCitizen !== citizen) {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "howAreYou",
-                    }
-                    let howAmI = "fine";
-                    if (nextRandom(state.randomSeed) < 0.5) {
-                        howAmI = citizenHappinessToString(citizen);
-                    }
-                    addChatMessage(chat, citizen, `I am ${howAmI}. How are you?`, state, intention);
-                } else {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "bye bye",
-                    }
-                    let howAmI = "fine";
-                    if (nextRandom(state.randomSeed) < 0.5) {
-                        howAmI = citizenHappinessToString(citizen);
-                    }
-                    addChatMessage(chat, citizen, `I am ${howAmI}. Bye Bye!`, state, intention);
-                }
-            }
-            if (repsonseIntention.intention === "bye bye") {
-                if (data.chatStarterCitizen !== citizen) {
-                    const intention: ChatMessageSmallTalkIntention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
-                        intention: "bye bye",
-                    }
-                    addChatMessage(chat, citizen, `Bye bye!`, state, intention);
+            if (repsonseIntention.intention === INTENTION_REPLY) {
+                // find next intention
+                const followUpIntention = getMessageForIntentionAndPhase(citizen, message.by, data.lastIntention!, "followUpIntention", state);
+                if (!followUpIntention || !followUpIntention.intention) {
                     citizenStateStackTaskSuccess(citizen);
-                } else {
-                    citizenStateStackTaskSuccess(citizen);
+                    return;
                 }
+                const messageAndIntention = getMessageForIntentionAndPhase(citizen, message.by, followUpIntention.intention, "initMessage", state);
+                if (!messageAndIntention) throw "should not happen";
+                const intention = {
+                    type: CITIZEN_STATE_SMALL_TALK,
+                    intention: messageAndIntention.intention,
+                }
+                data.lastIntention = intention.intention;
+                addChatMessage(chat, citizen, messageAndIntention.message!, state, intention);
+            } else {
+                // reply to intention
+                const messageAndIntention = getMessageForIntentionAndPhase(citizen, message.by, repsonseIntention.intention, "replyMessage", state);
+                if (!messageAndIntention) {
+                    citizenStateStackTaskSuccess(citizen);
+                    return;
+                }
+                let intention: ChatMessageSmallTalkIntention | undefined = undefined;
+                if (messageAndIntention.intention) {
+                    intention = {
+                        type: CITIZEN_STATE_SMALL_TALK,
+                        intention: messageAndIntention.intention,
+                    }
+                }
+                addChatMessage(chat, citizen, messageAndIntention.message!, state, intention);
             }
         }
     }
