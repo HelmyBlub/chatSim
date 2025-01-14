@@ -5,7 +5,7 @@ import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.j
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { getMessageForIntentionAndPhase, INTENTION_GREETING, INTENTION_REPLY } from "./tempTestFile.js";
+import { getMessageForIntentionAndPhase, INTENTION_BYE_BYE, INTENTION_GREETING, INTENTION_REPLY } from "./citizenChatMessageOptions.js";
 
 export type CitizenStateSmallTalkData = {
     chatStarterCitizen: Citizen,
@@ -133,6 +133,7 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
             citizenState.subState = "waitingForResponse";
             return;
         } else {
+            citizenRememberMeetingCitizen(citizen, data.chatStarterCitizen, state);
             citizenState.subState = "waitingForResponse";
         }
     }
@@ -165,6 +166,7 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                 }
                 data.lastIntention = intention.intention;
                 addChatMessage(chat, citizen, messageAndIntention.message!, state, intention);
+                if (messageAndIntention.execute) messageAndIntention.execute(citizen, message.by, state);
             } else {
                 // reply to intention
                 const messageAndIntention = getMessageForIntentionAndPhase(citizen, message.by, repsonseIntention.intention, "replyMessage", state);
@@ -179,7 +181,13 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                         intention: messageAndIntention.intention,
                     }
                 }
+                data.lastIntention = repsonseIntention.intention;
                 addChatMessage(chat, citizen, messageAndIntention.message!, state, intention);
+                if (messageAndIntention.execute) messageAndIntention.execute(citizen, message.by, state);
+                if (repsonseIntention.intention === INTENTION_BYE_BYE) {
+                    citizenStateStackTaskSuccess(citizen);
+                    return;
+                }
             }
         }
     }

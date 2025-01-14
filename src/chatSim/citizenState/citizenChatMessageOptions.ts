@@ -3,13 +3,14 @@ import { Citizen } from "../citizen.js";
 import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { nextRandom } from "../main.js";
-import { ChatMessageSmallTalkIntention, citizenMemoryKnowByName, CitizenStateSmallTalkData } from "./citizenStateSmallTalk.js";
+import { ChatMessageSmallTalkIntention, citizenMemoryKnowByName, citizenRememberName, CitizenStateSmallTalkData } from "./citizenStateSmallTalk.js";
 
 type IntentionFunction = (citizen: Citizen, messageToCitizen: Citizen, phase: ChatIntentionPhase, state: ChatSimState) => ChatMessageOption | undefined;
 type ChatMessageOption = {
     message?: string[],
     condition?: (citizen: Citizen, messageToCitizen: Citizen) => boolean,
     intention?: string,
+    execute?: (citizen: Citizen, messageToCitizen: Citizen, state: ChatSimState) => void,
 }
 type ChatIntentionPhase = "initMessage" | "replyMessage" | "followUpIntention";
 
@@ -30,7 +31,7 @@ export function getMessageForIntentionAndPhase(citizen: Citizen, messageToCitize
     const intentionFunction = FUNCTIONS_INTENTIONS[intention]
     if (!intentionFunction) return;
     const messageOption = intentionFunction(citizen, messageToCitizen, phase, state);
-    if (!messageOption || (phase !== "followUpIntention" && !messageOption.message)) throw "should not happen";
+    if (!messageOption) return;
     let message = undefined;
     if (messageOption.message) {
         message = messageOption.message[0];
@@ -45,7 +46,7 @@ export function getMessageForIntentionAndPhase(citizen: Citizen, messageToCitize
     } else if (phase === "initMessage") {
         returnIntention = intention;
     }
-    return { message: message, intention: returnIntention };
+    return { message: message, intention: returnIntention, execute: messageOption.execute };
 }
 
 function selectOption(citizen: Citizen, messageToCitizen: Citizen, list: ChatMessageOption[]): ChatMessageOption | undefined {
@@ -89,12 +90,12 @@ function createChatIntroduction(citizen: Citizen, messageToCitizen: Citizen, pha
         case "initMessage":
             return selectOption(
                 citizen, messageToCitizen, [
-                { message: [`My name is ${citizen.name}. Who are you?`] },
+                { message: [`My name is ${citizen.name}. Who are you?`], execute: (c, mtc, s) => citizenRememberName(mtc, c, s) },
             ]);
         case "replyMessage":
             return selectOption(
                 citizen, messageToCitizen, [
-                { message: [`My name is ${citizen.name}.`], intention: INTENTION_REPLY },
+                { message: [`My name is ${citizen.name}.`], intention: INTENTION_REPLY, execute: (c, mtc, s) => citizenRememberName(mtc, c, s) },
             ]);
         case "followUpIntention":
             return selectOption(
