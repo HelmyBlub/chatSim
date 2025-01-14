@@ -1,12 +1,30 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddThought, citizenAddTodo, citizenSetThought, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../citizen.js";
+import { Citizen, citizenAddThought, citizenAddTodo, citizenSetThought, citizenStateStackTaskSuccess, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../citizen.js";
 import { setCitizenStateDoNothingAtHome, setCitizenStateTalkToSomebody, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
+import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
+type CitizenLeisureFunction = (citizen: Citizen) => void;
+type CitizenLeisureData = {
+    leisure: string,
+    startingHappiness: number,
+}
+
 export const CITIZEN_NEED_HAPPINESS = "need happiness";
 
+const CITIZEN_LEISURE_DO_NOTHING = "do nothing at home";
+const CITIZEN_LEISURE_WALK_AROUND_RANDOMLY = "walk around randomly";
+const CITIZEN_LEISURE_TALK_TO_SOMEBODY = "talk to somebody";
+const CITIZEN_LEISURE_FUNCTIONS: { [key: string]: CitizenLeisureFunction } = {};
+CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_DO_NOTHING] = setCitizenStateDoNothingAtHome;
+CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_WALK_AROUND_RANDOMLY] = setCitizenStateWalkingAroundRandomly;
+CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_TALK_TO_SOMEBODY] = setCitizenStateTalkToSomebody;
+
+
 export const CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT = -0.5;
+const CITIZEN_STATE_DECIDE_LEISURE = "decide leisure";
+
 export function loadCitizenNeedsFunctionsHappiness(state: ChatSimState) {
     state.functionsCitizenNeeds[CITIZEN_NEED_HAPPINESS] = {
         isFulfilled: isFulfilled,
@@ -33,34 +51,94 @@ export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) 
     if (citizen.stateInfo.stack.length === 0) {
         if (citizen.happinessData.happiness < CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT) {
             citizenAddThought(citizen, `I am too unhappy. I need to do something.`, state);
-            if (citizen.happinessData.happinessTagFactors.has(TAG_SOCIAL_INTERACTION)) {
-                citizenAddThought(citizen, `I like to talk to somebody.`, state);
-                setCitizenStateTalkToSomebody(citizen);
-                return;
-            }
-
-            if (citizen.happinessData.happinessTagFactors.has(TAG_AT_HOME)
-                || citizen.happinessData.happinessTagFactors.has(TAG_DOING_NOTHING)
-            ) {
-                citizenAddThought(citizen, `I like to do nothing at home.`, state);
-                setCitizenStateDoNothingAtHome(citizen);
-                return;
-            }
-            if (citizen.happinessData.happinessTagFactors.has(TAG_WALKING_AROUND)
-                || citizen.happinessData.happinessTagFactors.has(TAG_OUTSIDE)
-                || citizen.happinessData.happinessTagFactors.has(TAG_PHYSICALLY_ACTIVE)
-            ) {
-                citizenAddThought(citizen, `I like walk around a bit.`, state);
-                setCitizenStateWalkingAroundRandomly(citizen);
-                return;
-            }
+            citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_DECIDE_LEISURE, tags: new Set() });
             return;
         } else {
+            citizenAddThought(citizen, `I feel a bit better.`, state);
             citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HAPPINESS, state);
             return;
         }
     }
-
+    if (citizen.stateInfo.stack.length > 0) {
+        const citizenStack = citizen.stateInfo.stack[0];
+        if (citizenStack.state === CITIZEN_STATE_DECIDE_LEISURE) {
+            let data: CitizenLeisureData = citizenStack.data;
+            if (!data) {
+                const didHelpKeys = Object.keys(citizen.memory.leisure.didHelp);
+                if (didHelpKeys.length > 0) {
+                    citizenAddThought(citizen, `I like to ${didHelpKeys[0]}.`, state);
+                    CITIZEN_LEISURE_FUNCTIONS[didHelpKeys[0]](citizen);
+                    data = {
+                        leisure: didHelpKeys[0],
+                        startingHappiness: citizen.happinessData.happiness,
+                    };
+                    citizenStack.data = data;
+                    return;
+                }
+                const leisureOptions = Object.keys(CITIZEN_LEISURE_FUNCTIONS);
+                const didNotHelpKeys = Object.keys(citizen.memory.leisure.didNotHelp);
+                if (didNotHelpKeys.length > 0) {
+                    for (let key of didNotHelpKeys) {
+                        const index = leisureOptions.findIndex(o => o === key);
+                        if (index > -1) leisureOptions.splice(index, 1);
+                    }
+                }
+                if (leisureOptions.length > 0) {
+                    const randomIndex = Math.floor(nextRandom(state.randomSeed) * leisureOptions.length);
+                    const option = leisureOptions[randomIndex];
+                    citizenAddThought(citizen, `I like to try ${option}.`, state);
+                    CITIZEN_LEISURE_FUNCTIONS[option](citizen);
+                    data = {
+                        leisure: option,
+                        startingHappiness: citizen.happinessData.happiness,
+                    };
+                    citizenStack.data = data;
+                    return;
+                } else {
+                    // what now?
+                    console.log("this can happen");
+                }
+            } else {
+                const happinessChange = citizen.happinessData.happiness - data.startingHappiness;
+                if (happinessChange > 0.25) {
+                    let didHelpData = citizen.memory.leisure.didHelp[data.leisure];
+                    if (!didHelpData) {
+                        didHelpData = {
+                            counter: 1,
+                            lastExecuted: state.time,
+                            leisure: data.leisure
+                        };
+                        citizen.memory.leisure.didHelp[data.leisure] = didHelpData;
+                        let didNotHelpData = citizen.memory.leisure.didNotHelp[data.leisure];
+                        if (didNotHelpData) {
+                            delete citizen.memory.leisure.didNotHelp[data.leisure];
+                        }
+                    } else {
+                        didHelpData.counter++;
+                        didHelpData.lastExecuted = state.time;
+                    }
+                } else {
+                    let didNotHelpData = citizen.memory.leisure.didNotHelp[data.leisure];
+                    if (!didNotHelpData) {
+                        didNotHelpData = {
+                            counter: 1,
+                            lastExecuted: state.time,
+                            leisure: data.leisure
+                        };
+                        citizen.memory.leisure.didNotHelp[data.leisure] = didNotHelpData;
+                        let didHelpData = citizen.memory.leisure.didHelp[data.leisure];
+                        if (didHelpData) {
+                            delete citizen.memory.leisure.didHelp[data.leisure];
+                        }
+                    } else {
+                        didNotHelpData.counter++;
+                        didNotHelpData.lastExecuted = state.time;
+                    }
+                }
+                citizenStateStackTaskSuccess(citizen);
+            }
+        }
+    }
     if (citizen.stateInfo.stack.length > 0) {
         const tickFunction = CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[citizen.stateInfo.stack[0].state];
         tickFunction(citizen, state);

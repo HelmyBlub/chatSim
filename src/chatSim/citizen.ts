@@ -75,8 +75,18 @@ export type CitizenMemoryMetCitizen = {
     relationshipType: "talkedToOnce" | "friend" | "hateThatGuy",
 }
 
+export type CitizenLeisureMemory = {
+    leisure: string,
+    counter: number,
+    lastExecuted: number
+}
+
 export type CitizenMemory = {
     todosData: CitizenTodos,
+    leisure: {
+        didHelp: { [key: string]: CitizenLeisureMemory },
+        didNotHelp: { [key: string]: CitizenLeisureMemory },
+    }
     metCitizensData: {
         maxCitizenRemember: number,
         maxNamesRemember: number,
@@ -248,6 +258,10 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
             todosData: {
                 maxLength: 4,
                 todos: [],
+            },
+            leisure: {
+                didHelp: {},
+                didNotHelp: {},
             },
             metCitizensData: {
                 maxNamesRemember: CITIZEN_DEFAULT_NAMES_REMEMBER,

@@ -1,14 +1,18 @@
 Tasks:
 - happiness and "free time"
-    - interacting with other citizens
-        - think about how to improve code for social interaction chats
-            - first version in tempTestFile.ts. Continue here
-                - check conversations. First version implemented but not completely tested yet
-                    - bug: "bye bye" is not happening yet
-
-    - citizen should not know which makes them happy or unhappy
+    - citizen should not know which makes them happy or unhappy when they start
+        - dev steps:
+            - problem: leisure acitivites stopped when citizen was happy. Now if they do it randomly, this case does not happen and they will not learn
+                - change activites to end after some time
+            - unhappy memory has to be reevaluated over time? maybe citizen can change so he should be able to try again after long time passed
+            - check: suicide behavior might need to change
+                - idea: Don't commit if not tried out 3 different ones yet.
+        - they have to learn it over time
         - if they are unhappy, they try something random
             - will remember what activity did help and which did not help
+        - try randomly. If happy after finishing leisure activity they assume activity helped.
+            - only know if something helped if happines changed positively more than 50% 
+            - commiting suicide only after 3x unsuccessful tries and still being unhappy
 - bug: buying wood endless loop. Customer want to buy wood but market does not have any wood. Customer does not stop asking for wood.
 
 
