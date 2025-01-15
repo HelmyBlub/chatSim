@@ -80,28 +80,36 @@ export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) 
                 }
                 if (leisureOptions.length > 0) {
                     const randomIndex = Math.floor(nextRandom(state.randomSeed) * leisureOptions.length);
-                    const option = leisureOptions[randomIndex];
-                    citizenAddThought(citizen, `I like to try ${option}.`, state);
-
-                    CITIZEN_LEISURE_FUNCTIONS[option](citizen, state);
-                    data = {
-                        leisure: option,
-                        startingHappiness: citizen.happinessData.happiness,
-                    };
-                    citizenStack.data = data;
-                    return;
+                    decidedLeisure = leisureOptions[randomIndex];
+                    citizenAddThought(citizen, `I like to try ${decidedLeisure}.`, state);
                 } else {
-                    // what now?
-
-                    citizenAddThought(citizen, `I have tried everything i know and i am still not happy.`, state);
-                    citizenStateStackTaskSuccess(citizen);
-                    citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HAPPINESS, state);
-                    return;
+                    // retry activities which did not help
+                    const maxTryCounter = 3;
+                    let currentChoosenKey = undefined;
+                    let currentChoosenCounter = 3;
+                    for (let key of didNotHelpKeys) {
+                        let didNotHelpData = citizen.memory.leisure.didNotHelp[key];
+                        if (didNotHelpData.counter < maxTryCounter) {
+                            if (currentChoosenKey === undefined || currentChoosenCounter > didNotHelpData.counter) {
+                                currentChoosenKey = key;
+                                currentChoosenCounter = didNotHelpData.counter;
+                            }
+                        }
+                    }
+                    if (currentChoosenKey !== undefined) {
+                        decidedLeisure = currentChoosenKey;
+                        citizenAddThought(citizen, `Let's try ${decidedLeisure} again.`, state);
+                    } else {
+                        citizenAddThought(citizen, `I have tried everything i know and i am still not happy.`, state);
+                        citizenStateStackTaskSuccess(citizen);
+                        citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HAPPINESS, state);
+                        return;
+                    }
                 }
                 if (decidedLeisure !== undefined) {
-                    CITIZEN_LEISURE_FUNCTIONS[didHelpKeys[0]](citizen, state);
+                    CITIZEN_LEISURE_FUNCTIONS[decidedLeisure](citizen, state);
                     data = {
-                        leisure: didHelpKeys[0],
+                        leisure: decidedLeisure,
                         startingHappiness: citizen.happinessData.happiness,
                     };
                     citizenStack.data = data;
