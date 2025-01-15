@@ -439,6 +439,9 @@ function tickCitizenStateTradeItemWithMarket(citizen: Citizen, state: ChatSimSta
                             setCitizenStateMarketItemExchange(citizen, data.market, tradeData.sellToMarket, tradeData.itemName, tradeData.itemAmount, tradeData.price, false, citizen.inventory);
                             citizenState.subState = "itemExchange";
                             return;
+                        } else {
+                            citizenStateStackTaskSuccess(citizen);
+                            return;
                         }
                     }
                     if (citizenState.subState === undefined && (marketHasQueue(data.market) || marketState !== "waitingForCustomers")) {
