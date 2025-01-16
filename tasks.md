@@ -4,6 +4,16 @@ Tasks:
 what next?:
 - improve social
     - 50/50 extroverts/introverts
+        idea1:
+            - extrovert -> likes social interaction
+            - introvert -> hates social interaction
+            - citizen try different leisure activities, not just the first one
+        idea2:
+            - social battery, 0-100%
+            - extrovert battery fills up takling to someone, drains not talking
+            - introvert battery fills up not talking to someone, drains talking
+            - different multipliers per citizen 
+            - suicide if empty battery
     - extroverts always want social interaction
     - more chat interactions
     - more than two citizens chatting

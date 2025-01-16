@@ -331,6 +331,7 @@ function tickCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, state:
                         addChatMessage(chat, citizen, `I want to ${myIntention.sellToMarket ? "sell" : "buy"} ${myIntention.itemAmount}x${myIntention.itemName}.`, state, myIntention);
                         citizenState.subState = "waitingForRespone";
                         citizenState.subStateStartTime = state.time;
+                        return;
                     }
                     if (intention.intention === "priceResponse") {
                         if (intention.itemAmount !== undefined && intention.singlePrice !== undefined) {
@@ -387,7 +388,7 @@ function tickCitizenStateMarketTradeCustomerNegotiation(citizen: Citizen, state:
                             }
                         }
                     }
-                    if (intention.intention === "tradeFullfiled") {
+                    if (intention.intention === "tradeFullfiled" || intention.intention === "tradeCancelled") {
                         citizenStateStackTaskSuccess(citizen);
                         return;
                     }
