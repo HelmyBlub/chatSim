@@ -65,6 +65,9 @@ export type CitizenHappiness = {
     happiness: number,
     happinessTagFactors: Map<string, number>,
     unhappinessTagFactors: Map<string, number>,
+    isExtrovert: boolean,
+    socialBattery: number,
+    socialBatteryFactor: number,
 }
 
 export type CitizenMemoryMetCitizen = {
@@ -239,6 +242,9 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
             happiness: 0,
             happinessTagFactors: new Map<string, number>(),
             unhappinessTagFactors: new Map<string, number>(),
+            socialBattery: 1,
+            socialBatteryFactor: 0.25 + nextRandom(state.randomSeed) * 0.75,
+            isExtrovert: nextRandom(state.randomSeed) < 0.5 ? true : false,
         },
         birthTime: state.time,
         speed: 2,
@@ -693,30 +699,57 @@ function citizenHappinessTick(citizen: Citizen) {
 
     const happinessFactor = citizen.happinessData.happinessTagFactors;
     const unhappinessFactor = citizen.happinessData.unhappinessTagFactors;
+    let isSocialInteraction = false;
     for (let tag of citizenState.tags) {
         if (happinessFactor.has(tag)) {
             const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000 * happinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness += changeBy;
-            if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
         }
         if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000 * unhappinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
+        }
+        if (tag === TAG_SOCIAL_INTERACTION) {
+            isSocialInteraction = true;
         }
     }
     for (let tag of citizen.stateInfo.tags) {
         if (citizen.happinessData.happinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000 * happinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness += changeBy;
-            if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
         }
         if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
             const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000 * unhappinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }
+        if (tag === TAG_SOCIAL_INTERACTION) {
+            isSocialInteraction = true;
+        }
     }
+    const factor = citizen.happinessData.socialBatteryFactor;
+    const baseChange = 0.002;
+    if (citizen.happinessData.isExtrovert) {
+        if (isSocialInteraction) {
+            citizen.happinessData.socialBattery += (1 - factor / 2) * baseChange * (1 - citizen.happinessData.socialBattery);
+        } else {
+            citizen.happinessData.socialBattery -= factor / 2 * baseChange / 20 * (0 + citizen.happinessData.socialBattery);
+        }
+    } else {
+        if (isSocialInteraction) {
+            citizen.happinessData.socialBattery -= factor / 2 * baseChange * (0 + citizen.happinessData.happiness);
+        } else {
+            citizen.happinessData.socialBattery += (1 - factor / 2) * baseChange / 20 * (1 - citizen.happinessData.happiness);
+        }
+    }
+    if (citizen.happinessData.socialBattery > 1) citizen.happinessData.socialBattery = 1;
+    if (citizen.happinessData.socialBattery < 0) citizen.happinessData.socialBattery = 0;
+    if (citizen.happinessData.socialBattery < 0.2) {
+        citizen.happinessData.happiness -= (0.2 - citizen.happinessData.socialBattery) / 1000 * (1 + citizen.happinessData.happiness);
+    }
+    if (citizen.happinessData.happiness > 1) citizen.happinessData.happiness = 1;
+    if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
 }
 
 function tickCitizenState(citizen: Citizen, state: ChatSimState) {

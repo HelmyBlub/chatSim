@@ -64,46 +64,54 @@ export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) 
         if (citizenStack.state === CITIZEN_STATE_DECIDE_LEISURE) {
             let data: CitizenLeisureData = citizenStack.data;
             if (!data) {
-                const didHelpKeys = Object.keys(citizen.memory.leisure.didHelp);
                 let decidedLeisure = undefined;
-                if (didHelpKeys.length > 0) {
-                    decidedLeisure = didHelpKeys[0];
-                    citizenAddThought(citizen, `I like to ${decidedLeisure}.`, state);
+                if (citizen.happinessData.socialBattery < 0.2 && citizen.happinessData.isExtrovert) {
+                    decidedLeisure = CITIZEN_LEISURE_TALK_TO_SOMEBODY;
+                    citizenAddThought(citizen, `I need to ${decidedLeisure}.`, state);
                 }
-                const leisureOptions = Object.keys(CITIZEN_LEISURE_FUNCTIONS);
-                const didNotHelpKeys = Object.keys(citizen.memory.leisure.didNotHelp);
-                if (didNotHelpKeys.length > 0) {
-                    for (let key of didNotHelpKeys) {
-                        const index = leisureOptions.findIndex(o => o === key);
-                        if (index > -1) leisureOptions.splice(index, 1);
+                if (!decidedLeisure) {
+                    const didHelpKeys = Object.keys(citizen.memory.leisure.didHelp);
+                    if (didHelpKeys.length > 0) {
+                        decidedLeisure = didHelpKeys[0];
+                        citizenAddThought(citizen, `I like to ${decidedLeisure}.`, state);
                     }
                 }
-                if (leisureOptions.length > 0) {
-                    const randomIndex = Math.floor(nextRandom(state.randomSeed) * leisureOptions.length);
-                    decidedLeisure = leisureOptions[randomIndex];
-                    citizenAddThought(citizen, `I like to try ${decidedLeisure}.`, state);
-                } else {
-                    // retry activities which did not help
-                    const maxTryCounter = 3;
-                    let currentChoosenKey = undefined;
-                    let currentChoosenCounter = 3;
-                    for (let key of didNotHelpKeys) {
-                        let didNotHelpData = citizen.memory.leisure.didNotHelp[key];
-                        if (didNotHelpData.counter < maxTryCounter) {
-                            if (currentChoosenKey === undefined || currentChoosenCounter > didNotHelpData.counter) {
-                                currentChoosenKey = key;
-                                currentChoosenCounter = didNotHelpData.counter;
-                            }
+                if (!decidedLeisure) {
+                    const leisureOptions = Object.keys(CITIZEN_LEISURE_FUNCTIONS);
+                    const didNotHelpKeys = Object.keys(citizen.memory.leisure.didNotHelp);
+                    if (didNotHelpKeys.length > 0) {
+                        for (let key of didNotHelpKeys) {
+                            const index = leisureOptions.findIndex(o => o === key);
+                            if (index > -1) leisureOptions.splice(index, 1);
                         }
                     }
-                    if (currentChoosenKey !== undefined) {
-                        decidedLeisure = currentChoosenKey;
-                        citizenAddThought(citizen, `Let's try ${decidedLeisure} again.`, state);
+                    if (leisureOptions.length > 0) {
+                        const randomIndex = Math.floor(nextRandom(state.randomSeed) * leisureOptions.length);
+                        decidedLeisure = leisureOptions[randomIndex];
+                        citizenAddThought(citizen, `I like to try ${decidedLeisure}.`, state);
                     } else {
-                        citizenAddThought(citizen, `I have tried everything i know and i am still not happy.`, state);
-                        citizenStateStackTaskSuccess(citizen);
-                        citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HAPPINESS, state);
-                        return;
+                        // retry activities which did not help
+                        const maxTryCounter = 3;
+                        let currentChoosenKey = undefined;
+                        let currentChoosenCounter = 3;
+                        for (let key of didNotHelpKeys) {
+                            let didNotHelpData = citizen.memory.leisure.didNotHelp[key];
+                            if (didNotHelpData.counter < maxTryCounter) {
+                                if (currentChoosenKey === undefined || currentChoosenCounter > didNotHelpData.counter) {
+                                    currentChoosenKey = key;
+                                    currentChoosenCounter = didNotHelpData.counter;
+                                }
+                            }
+                        }
+                        if (currentChoosenKey !== undefined) {
+                            decidedLeisure = currentChoosenKey;
+                            citizenAddThought(citizen, `Let's try ${decidedLeisure} again.`, state);
+                        } else {
+                            citizenAddThought(citizen, `I have tried everything i know and i am still not happy.`, state);
+                            citizenStateStackTaskSuccess(citizen);
+                            citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HAPPINESS, state);
+                            return;
+                        }
                     }
                 }
                 if (decidedLeisure !== undefined) {

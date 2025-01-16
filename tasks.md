@@ -1,22 +1,11 @@
 Tasks:
-- bug: buying wood endless loop. Customer want to buy wood but market does not have any wood. Customer does not stop asking for wood.
 
 what next?:
 - improve social
-    - 50/50 extroverts/introverts
-        idea1:
-            - extrovert -> likes social interaction
-            - introvert -> hates social interaction
-            - citizen try different leisure activities, not just the first one
-        idea2:
-            - social battery, 0-100%
-            - extrovert battery fills up takling to someone, drains not talking
-            - introvert battery fills up not talking to someone, drains talking
-            - different multipliers per citizen 
-            - suicide if empty battery
-    - extroverts always want social interaction
-    - more chat interactions
-    - more than two citizens chatting
+    - extroverts wants to talk to someone each day?
+        - independant of happines
+        - new need social. If social battery below 50%. Then start talkToSomebody
+            - if needSocial. needHappiness no longer should care for battery
 - bad citizens behavior:
     - stealing 
         - if starving consider stealing food
@@ -35,6 +24,8 @@ what next?:
 - use chatting system for markets
     - be able to better customize chats between customer and cashier
 
+
+- check: leisure activity put from hekpfull to unhelpful if just failed once? should reduce counter instead?
 --------------------------------------------------
 Big Idea:
 - do some game for chatters.
