@@ -1,11 +1,11 @@
 Tasks:
-
-what next?:
 - improve social
     - extroverts wants to talk to someone each day?
         - independant of happines
         - new need social. If social battery below 50%. Then start talkToSomebody
             - if needSocial. needHappiness no longer should care for battery
+
+what next ideas:
 - bad citizens behavior:
     - stealing 
         - if starving consider stealing food

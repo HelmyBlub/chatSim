@@ -24,6 +24,7 @@ import { CITIZEN_NEED_HAPPINESS, citizenNeedTickHappiness } from "./citizenNeeds
 
 export type CitizenStateInfo = {
     type: string,
+    isImportantNeed?: boolean,
     stack: CitizenState[],
     previousTaskFailed?: boolean,
     actionStartTime?: number,
@@ -402,7 +403,7 @@ export function tickCitizens(state: ChatSimState) {
 }
 
 export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState, conditionStackLength: number = 0): boolean {
-    if (citizen.stateInfo.stack.length <= conditionStackLength) {
+    if (!citizen.stateInfo.isImportantNeed && citizen.stateInfo.stack.length <= conditionStackLength) {
         if (citizen.memory.todosData.todos.length > 0) {
             const todo = citizen.memory.todosData.todos[0];
             if (todo && todo.stateType !== citizen.stateInfo.type) {
@@ -738,9 +739,9 @@ function citizenHappinessTick(citizen: Citizen) {
         }
     } else {
         if (isSocialInteraction) {
-            citizen.happinessData.socialBattery -= factor / 2 * baseChange * (0 + citizen.happinessData.happiness);
+            citizen.happinessData.socialBattery -= factor / 2 * baseChange * (0 + citizen.happinessData.socialBattery);
         } else {
-            citizen.happinessData.socialBattery += (1 - factor / 2) * baseChange / 20 * (1 - citizen.happinessData.happiness);
+            citizen.happinessData.socialBattery += (1 - factor / 2) * baseChange / 20 * (1 - citizen.happinessData.socialBattery);
         }
     }
     if (citizen.happinessData.socialBattery > 1) citizen.happinessData.socialBattery = 1;

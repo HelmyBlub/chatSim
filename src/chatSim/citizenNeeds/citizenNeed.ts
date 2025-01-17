@@ -74,7 +74,12 @@ function checkAllNeeds(citizen: Citizen, state: ChatSimState, startingNeedOrderI
     if (failingNeed) {
         if (citizen.needs.lastFailingNeed !== failingNeed) {
             citizen.needs.lastFailingNeed = failingNeed;
-            if (citizen.stateInfo.type !== failingNeed) citizenResetStateTo(citizen, failingNeed);
+            if (citizen.stateInfo.type !== failingNeed) {
+                citizenResetStateTo(citizen, failingNeed);
+                citizen.stateInfo.isImportantNeed = true;
+            }
+        } else if (citizen.stateInfo.type !== failingNeed) {
+            console.log("should not happen");
         }
     } else {
         citizen.needs.lastFailingNeed = undefined;
