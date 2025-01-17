@@ -1,17 +1,12 @@
 Tasks:
-- improve social
-    - dev steps:
-        - new need "needSocialBatteryExtroverts"
-        - 
-    - extroverts wants to talk to someone each day?
-        - independant of happines
-        - new need social. If social battery below 50%. Then start talkToSomebody
-            - if needSocial. needHappiness no longer should care for battery
-
 what next ideas:
 - bad citizens behavior:
     - stealing 
         - if starving consider stealing food
+        - if unhappy and starving very likely to steel
+        - if unhappy might steal
+        - if has some bad trait citizen will be far more likely to steal
+        - citizen should not always know stuff was stolen. So they need to memorize and when checking inventory realize its missing
     - fist fight
         - if someone steals and is found out
 - more images:
