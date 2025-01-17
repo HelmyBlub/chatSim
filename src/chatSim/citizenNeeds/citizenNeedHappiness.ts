@@ -1,9 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddThought, citizenAddTodo, citizenSetThought, citizenStateStackTaskSuccess, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenAddThought, citizenAddTodo, citizenSetThought, citizenStateStackTaskSuccess, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../citizen.js";
 import { setCitizenStateDoNothingAtHome, setCitizenStateTalkToSomebody, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
+import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 type CitizenLeisureFunction = (citizen: Citizen, state: ChatSimState) => void;
 type CitizenLeisureData = {
@@ -25,10 +25,11 @@ CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_TALK_TO_SOMEBODY] = setCitizenStateTal
 export const CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT = -0.5;
 const CITIZEN_STATE_DECIDE_LEISURE = "decide leisure";
 
-export function loadCitizenNeedsFunctionsHappiness(state: ChatSimState) {
-    state.functionsCitizenNeeds[CITIZEN_NEED_HAPPINESS] = {
+export function loadCitizenNeedsFunctionsHappiness() {
+    CITIZEN_NEEDS_FUNCTIONS[CITIZEN_NEED_HAPPINESS] = {
         isFulfilled: isFulfilled,
     }
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HAPPINESS] = citizenNeedTickHappiness;
 }
 
 export function citizenHappinessToString(citizen: Citizen): string {

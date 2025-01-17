@@ -1,5 +1,4 @@
 import { LogEntry } from "./citizen.js"
-import { CitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map.js"
 import { TestData } from "./test/test.js"
@@ -72,7 +71,6 @@ export type ChatSimState = {
         chatterChangeLog: ChatterChangeLog,
     }
     functionsCitizenJobs: FunctionsCitizenJobs,
-    functionsCitizenNeeds: CitizenNeedsFunctions,
     chatterData: ChatterData[],
 }
 

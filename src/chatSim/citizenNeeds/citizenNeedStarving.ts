@@ -1,18 +1,19 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenSetThought } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenSetThought } from "../citizen.js";
 import { setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
+import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_STARVING = "need starving";
 
 export const CITIZEN_STARVING_FOOD_PER_CENT = 0.2;
-export function loadCitizenNeedsFunctionsStarving(state: ChatSimState) {
-    state.functionsCitizenNeeds[CITIZEN_NEED_STARVING] = {
+export function loadCitizenNeedsFunctionsStarving() {
+    CITIZEN_NEEDS_FUNCTIONS[CITIZEN_NEED_STARVING] = {
         isFulfilled: isFulfilled,
     }
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_STARVING] = citizenNeedTickStarving;
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {

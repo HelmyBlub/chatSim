@@ -21,6 +21,7 @@ import { CITIZEN_NEED_HOME, citizenNeedTickHome } from "./citizenNeeds/citizenNe
 import { CITIZEN_NEED_STARVING, citizenNeedTickStarving } from "./citizenNeeds/citizenNeedStarving.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";
 import { CITIZEN_NEED_HAPPINESS, citizenNeedTickHappiness } from "./citizenNeeds/citizenNeedHappiness.js";
+import { CITIZEN_NEED_SCOIAL_INTERACTION, citizenNeedTickSocialInteraction } from "./citizenNeeds/citizenNeedSocialInteraction.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -144,7 +145,7 @@ export type LogEntry = {
     message: string,
 }
 
-const CITIZEN_STATE_TYPE_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
+export const CITIZEN_STATE_TYPE_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
 };
 
 export const CITIZEN_TAGS_AND_FACTORS = new Map<string, number>()
@@ -171,11 +172,6 @@ export const CITIZEN_DEFAULT_NAMES_REMEMBER = 15;
 
 export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_WORKING_JOB] = tickCitizenJob;
-    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_SLEEP] = citizenNeedTickSleep;
-    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_FOOD] = citizenNeedTickFood;
-    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HOME] = citizenNeedTickHome;
-    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_STARVING] = citizenNeedTickStarving;
-    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HAPPINESS] = citizenNeedTickHappiness;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeChangeJob;
 }
 

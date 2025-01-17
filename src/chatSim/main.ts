@@ -85,7 +85,6 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
         sunsetAt: 0.88,
         chatterData: [],
         functionsCitizenJobs: {},
-        functionsCitizenNeeds: {},
         randomSeed: { seed: seed },
         map: createDefaultMap(),
         paintData: {
@@ -114,7 +113,6 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
         }
     }
     loadCitizenJobsFunctions(state);
-    loadCitizenNeedsFunctions(state);
     onLoadCitizenStateDefaultTickFuntions();
     return state;
 }
@@ -192,6 +190,7 @@ function chatSimStateInit(streamer: string): App {
 function initMyApp() {
     const app = chatSimStateInit("HelmiBlub");
     const state = app.state;
+    loadCitizenNeedsFunctions();
     loadTraits();
     loadLocalStorageChatters(state);
     loadImages();

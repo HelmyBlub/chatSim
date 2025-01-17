@@ -1,18 +1,19 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, citizenAddTodo, citizenIsThinking, citizenStopMoving, citizenMoveTo } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenAddTodo, citizenIsThinking, citizenStopMoving, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS } from "../citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
+import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_SLEEP = "need sleep";
 export const CITIZEN_NEED_STATE_SLEEPING = "sleeping";
 
-export function loadCitizenNeedsFunctionsSleep(state: ChatSimState) {
-    state.functionsCitizenNeeds[CITIZEN_NEED_SLEEP] = {
+export function loadCitizenNeedsFunctionsSleep() {
+    CITIZEN_NEEDS_FUNCTIONS[CITIZEN_NEED_SLEEP] = {
         isFulfilled: isFulfilled,
     }
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_SLEEP] = citizenNeedTickSleep;
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {

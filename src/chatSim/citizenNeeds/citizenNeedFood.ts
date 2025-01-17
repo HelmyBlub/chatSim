@@ -1,21 +1,22 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo } from "../citizen.js";
+import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS } from "../citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
+import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_FOOD_IN_INVENTORY = 2;
 export const CITIZEN_NEED_FOOD_AT_HOME = 4;
 export const CITIZEN_NEED_FOOD = "need food";
 export const MUSHROOM_FOOD_VALUE = 0.15;
 
-export function loadCitizenNeedsFunctionsFood(state: ChatSimState) {
-    state.functionsCitizenNeeds[CITIZEN_NEED_FOOD] = {
+export function loadCitizenNeedsFunctionsFood() {
+    CITIZEN_NEEDS_FUNCTIONS[CITIZEN_NEED_FOOD] = {
         isFulfilled: isFulfilled,
     }
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_FOOD] = citizenNeedTickFood;
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {

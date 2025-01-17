@@ -1,16 +1,17 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo } from "../citizen.js";
+import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS } from "../citizen.js";
 import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { isCitizenInVisionDistance } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
+import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
 export const CITIZEN_NEED_HOME = "need home";
 
-export function loadCitizenNeedsFunctionsHome(state: ChatSimState) {
-    state.functionsCitizenNeeds[CITIZEN_NEED_HOME] = {
+export function loadCitizenNeedsFunctionsHome() {
+    CITIZEN_NEEDS_FUNCTIONS[CITIZEN_NEED_HOME] = {
         isFulfilled: isFulfilled,
     }
+    CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_NEED_HOME] = citizenNeedTickHome;
 }
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {

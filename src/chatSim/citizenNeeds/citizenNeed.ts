@@ -4,24 +4,26 @@ import { CITIZEN_NEED_FOOD, loadCitizenNeedsFunctionsFood } from "./citizenNeedF
 import { CITIZEN_NEED_HAPPINESS, loadCitizenNeedsFunctionsHappiness } from "./citizenNeedHappiness.js";
 import { CITIZEN_NEED_HOME, loadCitizenNeedsFunctionsHome } from "./citizenNeedHome.js";
 import { CITIZEN_NEED_SLEEP, loadCitizenNeedsFunctionsSleep } from "./citizenNeedSleep.js";
+import { CITIZEN_NEED_SCOIAL_INTERACTION, loadCitizenNeedsFunctionsSocialInteraction } from "./citizenNeedSocialInteraction.js";
 import { CITIZEN_NEED_STARVING, loadCitizenNeedsFunctionsStarving } from "./citizenNeedStarving.js";
 
 export type CitizenNeedFunctions = {
     isFulfilled(citizen: Citizen, state: ChatSimState): boolean,
     createDefaultData?(): any,
 }
-
 export type CitizenNeedsFunctions = { [key: string]: CitizenNeedFunctions };
+export const CITIZEN_NEEDS_FUNCTIONS: CitizenNeedsFunctions = {};
 
 const NEED_ORDER: string[] = [];
 
-export function loadCitizenNeedsFunctions(state: ChatSimState) {
-    NEED_ORDER.push(CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME, CITIZEN_NEED_HAPPINESS);
-    loadCitizenNeedsFunctionsStarving(state);
-    loadCitizenNeedsFunctionsFood(state);
-    loadCitizenNeedsFunctionsHome(state);
-    loadCitizenNeedsFunctionsSleep(state);
-    loadCitizenNeedsFunctionsHappiness(state);
+export function loadCitizenNeedsFunctions() {
+    NEED_ORDER.push(CITIZEN_NEED_STARVING, CITIZEN_NEED_SLEEP, CITIZEN_NEED_FOOD, CITIZEN_NEED_HOME, CITIZEN_NEED_HAPPINESS, CITIZEN_NEED_SCOIAL_INTERACTION);
+    loadCitizenNeedsFunctionsStarving();
+    loadCitizenNeedsFunctionsFood();
+    loadCitizenNeedsFunctionsHome();
+    loadCitizenNeedsFunctionsSleep();
+    loadCitizenNeedsFunctionsHappiness();
+    loadCitizenNeedsFunctionsSocialInteraction();
 }
 
 export function checkCitizenNeeds(citizen: Citizen, state: ChatSimState) {
@@ -34,7 +36,7 @@ export function checkCitizenNeeds(citizen: Citizen, state: ChatSimState) {
 export function getCitizenNeedData(need: string, citizen: Citizen, state: ChatSimState) {
     let needData = citizen.needs.needsData[need];
     if (!needData) {
-        const needFunctions = state.functionsCitizenNeeds[need];
+        const needFunctions = CITIZEN_NEEDS_FUNCTIONS[need];
         if (needFunctions && needFunctions.createDefaultData) {
             needData = needFunctions.createDefaultData();
             citizen.needs.needsData[need] = needData;
@@ -65,7 +67,7 @@ function checkAllNeeds(citizen: Citizen, state: ChatSimState, startingNeedOrderI
             failingNeed = need;
             break;
         }
-        const needFunctions = state.functionsCitizenNeeds[need];
+        const needFunctions = CITIZEN_NEEDS_FUNCTIONS[need];
         if (!needFunctions.isFulfilled(citizen, state)) {
             failingNeed = need;
             break;

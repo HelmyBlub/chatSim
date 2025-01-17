@@ -1,5 +1,8 @@
 Tasks:
 - improve social
+    - dev steps:
+        - new need "needSocialBatteryExtroverts"
+        - 
     - extroverts wants to talk to someone each day?
         - independant of happines
         - new need social. If social battery below 50%. Then start talkToSomebody
