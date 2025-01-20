@@ -1,17 +1,29 @@
 Tasks:
+- stealing
+    - continue working on "tickCitizenStateSearch"
+        - improve citizen behavior to be able to search multiple things at the same time
+    - dev step
+        - new state getItemByStealingFromBuildings
+            - only if no one is currently in building
+            - waiting for no one to be near
+    - improve code:
+        - citizen needs to search food. Moving around looking for mushroom and looking for building to steal from or if very hunger steal directly from citizen
+        - if citizen sees a mushroom and someone else picks it up he gets angry and want to steal
+- citizen view distance depending on what. Mushroom small can't see that far. Building can be seen a lot further
+- citizen can ask other citizen for food if starving
+- remember markets near home
+
 what next ideas:
-- max speed: when tick is longer than 50ms, capp and keep up to that value
-    - problem: when accidently increasing to much, stuck some time in to high mode
 - bad citizens behavior:
     - stealing 
-        - if starving consider stealing food
-        - if unhappy and starving very likely to steel
-        - if unhappy might steal
-        - if has some bad trait citizen will be far more likely to steal
+        - if citizen is starving and has no money, no food, is unhappy
+            - citizen will try to steal food from homes
+                - just steals the minimum at the start
+                - might increase stealing habbit
+                    - might steal more often
         - citizen should not always know stuff was stolen. So they need to memorize and when checking inventory realize its missing
     - fist fight
         - if someone steals and is found out
-- citizen can ask other citizen for food if starving
 - more images:
     - dog:
         - starving dog => thin dog
