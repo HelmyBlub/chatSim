@@ -1,5 +1,7 @@
 Tasks:
 what next ideas:
+- max speed: when tick is longer than 50ms, capp and keep up to that value
+    - problem: when accidently increasing to much, stuck some time in to high mode
 - bad citizens behavior:
     - stealing 
         - if starving consider stealing food
@@ -9,6 +11,7 @@ what next ideas:
         - citizen should not always know stuff was stolen. So they need to memorize and when checking inventory realize its missing
     - fist fight
         - if someone steals and is found out
+- citizen can ask other citizen for food if starving
 - more images:
     - dog:
         - starving dog => thin dog

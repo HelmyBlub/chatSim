@@ -49,6 +49,7 @@ export type ChatSimState = {
     tickInterval: number,
     soundVolume?: number,
     gameSpeed: number,
+    gameSpeedLimited?: number,
     streamer: string,
     time: number,
     timPerDay: number,
