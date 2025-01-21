@@ -1,8 +1,11 @@
 Tasks:
+- continue working on improved citizen search
+    - first try with mushrooms looked good
+    - naming problems like "mushrooms", "Mushroom", "mushroom"
 - stealing
-    - continue working on "tickCitizenStateSearch"
-        - improve citizen behavior to be able to search multiple things at the same time
     - dev step
+        - new citizen search anything
+            - search food
         - new state getItemByStealingFromBuildings
             - only if no one is currently in building
             - waiting for no one to be near
