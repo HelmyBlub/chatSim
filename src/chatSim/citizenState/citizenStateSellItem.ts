@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { BuildingMarket } from "../building.js";
 import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
-import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -71,7 +71,7 @@ function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, 
             const market = building as BuildingMarket;
             if (building.inhabitedBy === undefined) continue;
             if (building.inhabitedBy.money <= 0) continue;
-            if (inventoryGetAvaiableCapacity(building.inventory, itemName) <= 0) continue;
+            if (inventoryGetAvailableCapacity(building.inventory, itemName) <= 0) continue;
             if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
             if (!closest) {
                 closest = market;

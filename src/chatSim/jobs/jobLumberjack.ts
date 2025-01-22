@@ -4,7 +4,7 @@ import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { Tree } from "../tree.js";
-import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
@@ -33,11 +33,11 @@ function create(state: ChatSimState): CitizenJobLuberjack {
 
 function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
-        const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD);
+        const available = inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_WOOD);
         if (available > 0) {
             setCitizenStateGatherWood(citizen);
         } else {
-            if (citizen.home && inventoryGetAvaiableCapacity(citizen.home.inventory, INVENTORY_WOOD) > 0) {
+            if (citizen.home && inventoryGetAvailableCapacity(citizen.home.inventory, INVENTORY_WOOD) > 0) {
                 citizenSetThought(citizen, [
                     `I can not carry more ${INVENTORY_WOOD}.`,
                     `I will store them at home.`

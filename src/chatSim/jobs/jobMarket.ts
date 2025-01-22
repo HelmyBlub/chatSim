@@ -10,7 +10,7 @@ import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingC
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
-import { setCitizenStateGetItemFromBuilding } from "../citizenState/citizenStateGetItem.js";
+import { setCitizenStateGetItemFromBuilding, setCitizenStateSearchItem } from "../citizenState/citizenStateGetItem.js";
 import { setCitizenStateMarketItemExchange } from "../citizenState/citizenStateMarket.js";
 import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";
 import { setCitizenStateGatherMushroom } from "../citizenState/citizenStateGatherMushroom.js";
@@ -346,7 +346,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                             return;
                         } else if (itemName === INVENTORY_MUSHROOM) {
                             citizenSetThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
-                            setCitizenStateGatherMushroom(citizen);
+                            setCitizenStateSearchItem(citizen, INVENTORY_MUSHROOM, undefined, true);
                             return;
                         }
                     }

@@ -8,7 +8,7 @@ import { loadCitizenJobHouseMarket } from "./jobHouseMarket.js";
 import { loadCitizenJobLumberjack } from "./jobLumberjack.js";
 import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
 import { calculateDistance } from "../main.js";
-import { Inventory, inventoryGetAvaiableCapacity } from "../inventory.js";
+import { Inventory, inventoryGetAvailableCapacity } from "../inventory.js";
 import { findBuilding } from "../citizenState/citizenStateGetBuilding.js";
 
 export type CitizenJob = {
@@ -83,7 +83,7 @@ export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemNam
     const sellerItem = sellerInventory.items.find(i => i.name === itemName);
     if (!sellerItem) return;
     const sellerAmount = sellerItem.counter;
-    let buyerInventoryCapacity = inventoryGetAvaiableCapacity(buyerInventory, itemName);
+    let buyerInventoryCapacity = inventoryGetAvailableCapacity(buyerInventory, itemName);
     const buyerInventoryMoneyAmount = Math.min(buyerInventoryCapacity, Math.floor(buyer.money / itemPrice));
     const buyerAmount = requestedAmount !== undefined ? Math.min(buyerInventoryMoneyAmount, requestedAmount) : buyerInventoryMoneyAmount;
     const tradeAmount = Math.min(sellerAmount, buyerAmount);

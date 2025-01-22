@@ -1,7 +1,6 @@
 Tasks:
-- continue working on improved citizen search
-    - first try with mushrooms looked good
-    - naming problems like "mushrooms", "Mushroom", "mushroom"
+- last time:
+    - citizen mutli search looking great. Continue with stealing?
 - stealing
     - dev step
         - new citizen search anything

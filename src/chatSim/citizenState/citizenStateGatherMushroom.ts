@@ -1,17 +1,16 @@
-import { ChatSimState, Mushroom } from "../chatSimModels.js";
+import { ChatSimState, Mushroom, Position } from "../chatSimModels.js";
 import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom } from "../citizen.js";
-import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { mapGetChunkForPosition, mapGetChunksInDistance, mapIsPositionOutOfBounds, removeMushroomFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenAtPosition } from "../jobs/job.js";
+import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { playChatSimSound, SOUND_PATH_PICKUP } from "../sounds.js";
 
 type GatherData = {
-    amount?: number,
-    lastSearchDirection?: number,
+    mushroomPosition: Position,
 }
 
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
@@ -20,35 +19,24 @@ export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_MUSHROOM] = tickCititzenStateGatherMushroom;
 }
 
-export function setCitizenStateGatherMushroom(citizen: Citizen, amount: number | undefined = undefined) {
-    const data: GatherData = { amount: amount };
+export function setCitizenStateGatherMushroom(citizen: Citizen, mushroomPosition: Position) {
+    const data: GatherData = { mushroomPosition: { x: mushroomPosition.x, y: mushroomPosition.y } };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: data, tags: new Set() });
-    citizenSetEquipment(citizen, ["Basket"]);
 }
 
-export function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
+function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
-
     if (citizen.moveTo === undefined) {
-        const mushroom = isCloseToMushroom(citizen, state);
-        if (mushroom !== undefined) {
-            pickUpMushroom(citizen, state, mushroom);
+        const data: GatherData = citizenState.data;
+        if (isCitizenAtPosition(citizen, data.mushroomPosition)) {
+            const mushroom = isCloseToMushroom(citizen, state);
+            if (mushroom !== undefined) {
+                pickUpMushroom(citizen, state, mushroom);
+            }
+            citizenStateStackTaskSuccess(citizen);
+            return;
         } else {
-            moveToMushroom(citizen, state);
-        }
-        const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-        if (inventoryMushroom) {
-            const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_MUSHROOM);
-            const limit = inventoryMushroom.counter + available;
-            let amount: number = limit;
-            if (citizenState.data !== undefined) {
-                const data = citizenState.data as GatherData;
-                if (data.amount !== undefined) amount = Math.min(data.amount, limit);
-            }
-            if (inventoryMushroom.counter >= amount) {
-                citizenStateStackTaskSuccess(citizen);
-                return;
-            }
+            citizenMoveTo(citizen, data.mushroomPosition);
         }
     }
 }
@@ -69,36 +57,6 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroo
         inventoryMushroom.counter++;
     }
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
-}
-
-function getClosestMushroomInVisionDistance(citizen: Citizen, state: ChatSimState): Mushroom | undefined {
-    const visionDistance = citizenGetVisionDistance(citizen, state);
-    let closest: Mushroom | undefined = undefined;
-    let closestDistance: number = 0;
-    const chunks = mapGetChunksInDistance(citizen.position, state.map, visionDistance);
-    for (let chunk of chunks) {
-        for (let mushroom of chunk.mushrooms) {
-            const distance = calculateDistance(citizen.position, mushroom.position);
-            if (distance < visionDistance) {
-                if (closest === undefined || distance < closestDistance) {
-                    closest = mushroom;
-                    closestDistance = distance;
-                }
-            }
-        }
-    }
-    return closest;
-}
-
-function moveToMushroom(citizen: Citizen, state: ChatSimState) {
-    const mushroom = getClosestMushroomInVisionDistance(citizen, state);
-    if (mushroom) {
-        citizenMoveTo(citizen, mushroom.position);
-        citizenAddLogEntry(citizen, `I See a ${INVENTORY_MUSHROOM} at x:${citizen.moveTo!.x.toFixed()}, y:${citizen.moveTo!.y.toFixed()}`, state);
-    } else {
-        const data = citizen.stateInfo.stack[0].data as GatherData;
-        data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
-    }
 }
 
 function isCloseToMushroom(citizen: Citizen, state: ChatSimState): Mushroom | undefined {

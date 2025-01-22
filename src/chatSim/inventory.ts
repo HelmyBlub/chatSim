@@ -55,7 +55,7 @@ export function inventoryGetMissingReserved(inventory: Inventory, itemName: stri
     return 0;
 }
 
-export function inventoryGetAvaiableCapacity(inventory: Inventory, itemName: string) {
+export function inventoryGetAvailableCapacity(inventory: Inventory, itemName: string) {
     if (inventory.reservedSpace) {
         let counter = 0;
         for (let item of inventory.items) {
@@ -134,7 +134,7 @@ export function inventoryPutItemInto(itemName: string, inventory: Inventory, amo
         }
         inventory.items.push(item);
     }
-    const availableCapacity = inventoryGetAvaiableCapacity(inventory, itemName);
+    const availableCapacity = inventoryGetAvailableCapacity(inventory, itemName);
     if (actualAmount > availableCapacity) actualAmount = availableCapacity;
     if (actualAmount < 0) {
         throw "negativ trade not allowed";

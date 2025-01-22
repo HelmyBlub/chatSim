@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE, citizenMoveToRandom } from "../citizen.js";
-import { inventoryGetAvaiableCapacity } from "../inventory.js";
+import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { mapGetChunkForPosition, mapGetChunksInDistance, mapIsPositionOutOfBounds, removeTreeFromMap } from "../map.js";
@@ -36,7 +36,7 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
         const axe = citizenGetEquipmentData(citizen, "Axe");
         const data: Data = citizenState.data;
         if (inventoryWood) {
-            const available = inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD);
+            const available = inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_WOOD);
             const limit = inventoryWood.counter + available;
             let amount: number = limit;
             if (data.amount !== undefined) {
@@ -94,7 +94,7 @@ function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: C
     if (data.actionStartTime === undefined) data.actionStartTime = state.time;
     if (data.actionStartTime + cutDuration < state.time) {
         data.actionStartTime = state.time;
-        if (inventoryGetAvaiableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
+        if (inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_WOOD) > 0) {
             cutTreeForWood(citizen, tree, state);
         }
     }
