@@ -11,6 +11,7 @@ import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { MapChunk, mapGetChunksInDistance } from "../map.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
+import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -37,6 +38,7 @@ export type CitizenStateItemAndBuildingData = {
 export type CitizenStateSearchData = {
     searchFor: {
         type: keyof MapChunk,
+        intention?: string,
         viewDistance: number,
         condition?: SearchCondition,
     }[],
@@ -46,6 +48,7 @@ export type CitizenStateSearchData = {
 export type CitizenStateSearchSuccessData = CitizenStateSuccessData & {
     found: any,
     foundType: keyof MapChunk,
+    intention?: string,
 }
 
 type SearchCondition = (object: any, citizen: Citizen, state: ChatSimState) => boolean;
@@ -220,10 +223,21 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
         const returnedData = citizenState.returnedData as CitizenStateSearchSuccessData;
         if (returnedData) {
             if (returnedData.foundType === "buildings") {
-                const market = returnedData.found as BuildingMarket;
-                citizenAddThought(citizen, `I will buy ${itemName} at ${market.inhabitedBy!.name}.`, state);
-                setCitizenStateTradeItemWithMarket(citizen, market, false, itemName, data.amount!);
-                return;
+                if (returnedData.intention === undefined) {
+                    const market = returnedData.found as BuildingMarket;
+                    citizenAddThought(citizen, `I will buy ${itemName} at ${market.inhabitedBy!.name}.`, state);
+                    setCitizenStateTradeItemWithMarket(citizen, market, false, itemName, data.amount!);
+                    return;
+                } else if (returnedData.intention === "steal") {
+                    const building = returnedData.found as Building;
+                    citizenAddThought(citizen, `I will steal ${itemName} from building inhabited by ${building.inhabitedBy?.name}.`, state);
+                    setCitizenStateGetItemFromBuilding(citizen, building, itemName, 1);
+                    citizen.stealCounter++;
+                    state.stealCounter++;
+                    return;
+                } else {
+                    throw "unknwon case";
+                }
             } else if (returnedData.foundType === "mushrooms") {
                 const mushroom = returnedData.found as Mushroom;
                 setCitizenStateGatherMushroom(citizen, mushroom.position);
@@ -246,6 +260,17 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
                 citizenSetEquipment(citizen, ["Basket"]);
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for growing ${INVENTORY_MUSHROOM}.`, state);
                 searchData.searchFor.push({ type: "mushrooms", viewDistance: viewDistance });
+
+                if (citizen.money < 2 && citizen.happinessData.happiness < 0 && citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
+                    if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i would steal for ${INVENTORY_MUSHROOM}.`, state);
+                    searchData.searchFor.push({
+                        type: "buildings", viewDistance: viewDistance, intention: "steal", condition:
+                            (building: Building, citizen: Citizen, state: ChatSimState) => {
+                                let inventoryItem = building.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+                                return inventoryItem !== undefined && inventoryItem.counter > 0;
+                            }
+                    });
+                }
             }
             if (itemName === INVENTORY_WOOD) searchData.searchFor.push({ type: "trees", viewDistance: viewDistance });
             if (citizen.money >= 2 && !data.ignoreMarkets && data.amount !== undefined) {
@@ -270,7 +295,7 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
         for (let search of data.searchFor) {
             const found = getClosest(citizen, search.viewDistance, search.type, state, search.condition);
             if (found) {
-                const successData: CitizenStateSearchSuccessData = { type: CITIZEN_STATE_SEARCH, found: found, foundType: search.type };
+                const successData: CitizenStateSearchSuccessData = { type: CITIZEN_STATE_SEARCH, found: found, foundType: search.type, intention: search.intention };
                 citizenStateStackTaskSuccessWithData(citizen, successData);
                 return;
             }

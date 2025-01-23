@@ -110,7 +110,8 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
                 currentIndex: 0,
                 log: [],
             }
-        }
+        },
+        stealCounter: 0,
     }
     loadCitizenJobsFunctions(state);
     onLoadCitizenStateDefaultTickFuntions();

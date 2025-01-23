@@ -286,7 +286,7 @@ function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState, gameSpeed
     const offsetX = state.paintData.map.paintWidth + 20;
     const citizenCounter = state.map.citizens.length;
     const gameSpeedLimited = state.gameSpeedLimited ? `(${state.gameSpeedLimited})` : "";
-    ctx.fillText(`${getTimeOfDayString(state.time, state)}, speed: ${gameSpeed.toFixed(2)}${gameSpeedLimited},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}`, offsetX, 25);
+    ctx.fillText(`${getTimeOfDayString(state.time, state)}, speed: ${gameSpeed.toFixed(2)}${gameSpeedLimited},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}, steal: ${state.stealCounter}`, offsetX, 25);
     if (state.inputData.selected === undefined) {
         for (let i = 0; i < Math.min(20, state.map.citizens.length); i++) {
             const citizen = state.map.citizens[i];

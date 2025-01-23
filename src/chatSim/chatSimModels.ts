@@ -73,6 +73,7 @@ export type ChatSimState = {
     }
     functionsCitizenJobs: FunctionsCitizenJobs,
     chatterData: ChatterData[],
+    stealCounter: number,
 }
 
 

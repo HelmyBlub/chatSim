@@ -138,6 +138,7 @@ export type Citizen = {
     maxLogLength: number,
     displayedEquipments: CitizenEquipmentData[],
     paintBehindBuildings?: boolean,
+    stealCounter: number,
 }
 
 export type LogEntry = {
@@ -292,6 +293,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         job: createJob(CITIZEN_JOB_FOOD_GATHERER, state)!,
         log: [],
         maxLogLength: 100,
+        stealCounter: 0,
     };
     setUpHappinessTags(citizen, state);
     const jobs = Object.keys(state.functionsCitizenJobs);
