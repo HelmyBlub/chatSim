@@ -1,9 +1,9 @@
-import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenCheckTodoList, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE, citizenMoveToRandom } from "../citizen.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE } from "../citizen.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
-import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
+import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { mapGetChunkForPosition, mapGetChunksInDistance, mapIsPositionOutOfBounds, removeTreeFromMap } from "../map.js";
+import { mapGetChunkForPosition, removeTreeFromMap } from "../map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { Tree } from "../tree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
@@ -12,18 +12,18 @@ import { playChatSimSound, SOUND_PATH_CUT, SOUND_PATH_TREE_FALL } from "../sound
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
+    treePosition: Position,
     actionStartTime?: number,
     soundPlayedTime?: number,
     amount?: number,
-    lastSearchDirection?: number,
 }
 
 export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCititzenStateGatherWood;
 }
 
-export function setCitizenStateGatherWood(citizen: Citizen, amount: number | undefined = undefined) {
-    const data: Data = { amount: amount };
+export function setCitizenStateGatherWood(citizen: Citizen, treePosition: Position, amount?: number) {
+    const data: Data = { treePosition, amount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_WOOD, data: data, tags: new Set() });
     citizenSetEquipment(citizen, ["Axe", "WoodPlanks"]);
 }
@@ -32,38 +32,40 @@ export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimStat
     const citizenState = citizen.stateInfo.stack[0];
 
     if (citizen.moveTo === undefined) {
-        const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
-        const axe = citizenGetEquipmentData(citizen, "Axe");
         const data: Data = citizenState.data;
-        if (inventoryWood) {
-            const available = inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_WOOD);
-            const limit = inventoryWood.counter + available;
-            let amount: number = limit;
-            if (data.amount !== undefined) {
-                amount = Math.min(data.amount, limit);
-            }
-            if (inventoryWood.counter >= amount) {
+        if (isCitizenInInteractionDistance(citizen, data.treePosition)) {
+            const inventoryWood = citizen.inventory.items.find(i => i.name === INVENTORY_WOOD);
+            const axe = citizenGetEquipmentData(citizen, "Axe");
+            const canCarryMore = inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_WOOD) > 0;
+            const reachedLimit = !canCarryMore || (inventoryWood && data.amount !== undefined && inventoryWood.counter >= data.amount);
+            if (reachedLimit) {
                 axe!.data = undefined;
                 citizenStateStackTaskSuccess(citizen);
                 return;
             }
-        }
-        const tree = isCloseToTree(citizen, state);
-        if (tree) {
-            citizenState.tags.add(TAG_PHYSICALLY_ACTIVE);
-            const divider = 100 * Math.PI * 2;
-            const animationPerCent = (state.time / divider) % 1;
-            const animationDuration1Tick = state.tickInterval / divider;
-            if (animationPerCent < animationDuration1Tick) {
-                playChatSimSound(SOUND_PATH_CUT, citizen.position, state);
+            const tree = isCloseToTree(citizen, state);
+            if (tree) {
+                citizenState.tags.add(TAG_PHYSICALLY_ACTIVE);
+                const divider = 100 * Math.PI * 2;
+                const animationPerCent = (state.time / divider) % 1;
+                const animationDuration1Tick = state.tickInterval / divider;
+                if (animationPerCent < animationDuration1Tick) {
+                    playChatSimSound(SOUND_PATH_CUT, citizen.position, state);
+                }
+                axe!.data = true;
+                const isCutDown = cutDownTree(citizen, tree, state);
+                if (isCutDown) cutTreeLogIntoPlanks(citizen, tree, citizenState.data, state);
+            } else {
+                citizenStateStackTaskSuccess(citizen);
+                return;
             }
-            axe!.data = true;
-            const isCutDown = cutDownTree(citizen, tree, state);
-            if (isCutDown) cutTreeLogIntoPlanks(citizen, tree, citizenState.data, state);
         } else {
-            citizenState.tags.delete(TAG_PHYSICALLY_ACTIVE);
-            axe!.data = false;
-            moveToTree(citizen, state);
+            const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
+            const randomCloseToTreePosition = {
+                x: data.treePosition.x + Math.sin(randomDirection) * 10,
+                y: data.treePosition.y + Math.cos(randomDirection) * 10,
+            };
+            citizenMoveTo(citizen, randomCloseToTreePosition);
         }
     }
 }
@@ -98,40 +100,6 @@ function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: C
             cutTreeForWood(citizen, tree, state);
         }
     }
-}
-
-function moveToTree(citizen: Citizen, state: ChatSimState) {
-    const tree = findClosestTree(citizen, state);
-    if (tree) {
-        const randomDirection = nextRandom(state.randomSeed) * Math.PI * 2;
-        const randomCloseToTreePosition = {
-            x: tree.position.x + Math.sin(randomDirection) * 10,
-            y: tree.position.y + Math.cos(randomDirection) * 10,
-        };
-        citizenMoveTo(citizen, randomCloseToTreePosition);
-        citizenAddLogEntry(citizen, `I see a tree at x:${tree.position.x.toFixed()}, y:${tree.position.y.toFixed()}`, state);
-    } else {
-        if (citizenCheckTodoList(citizen, state, 2)) return;
-        const data = citizen.stateInfo.stack[0].data as Data;
-        data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
-    }
-}
-
-function findClosestTree(citizen: Citizen, state: ChatSimState): Tree | undefined {
-    let closestTree: Tree | undefined = undefined;
-    let closestDistance = 0;
-    const chunks = mapGetChunksInDistance(citizen.position, state.map, 200);
-    for (let chunk of chunks) {
-        for (let i = chunk.trees.length - 1; i >= 0; i--) {
-            const tree = chunk.trees[i];
-            const distance = calculateDistance(citizen.position, tree.position);
-            if (!closestTree || distance < closestDistance) {
-                closestDistance = distance;
-                closestTree = tree;
-            }
-        }
-    }
-    return closestTree;
 }
 
 function isCloseToTree(citizen: Citizen, state: ChatSimState): Tree | undefined {

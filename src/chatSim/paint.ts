@@ -83,7 +83,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(`    Dream Job: ${citizen.dreamJob}`, offsetX, offsetY + lineSpacing * lineCounter++);
         }
         ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%,     Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Happiness: ${(citizen.happinessData.happiness * 100).toFixed(2)}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`    Happiness: ${(citizen.happinessData.happiness * 100).toFixed(3)}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    socialBattery: ${(citizen.happinessData.socialBattery * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);

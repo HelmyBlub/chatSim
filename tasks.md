@@ -1,13 +1,9 @@
 Tasks:
-- stealing
-    - dev step
-        - new state getItemByStealingFromBuildings
-            - only if no one is currently in building
-            - waiting for no one to be near
-    - improve code:
-        - citizen needs to search food. Moving around looking for mushroom and looking for building to steal from or if very hunger steal directly from citizen
-        - if citizen sees a mushroom and someone else picks it up he gets angry and want to steal
 - remember to also add multi search to gathering wood
+    - bug: citizen can buy more wood than he can carry, wood over maximum just disappears
+- remember home inventory instead of accessing it directly
+    - citizen should realize stuff was stolen
+        - also check home breaking down case
 - check if search can work with search citizens
 - check if code should be ordered differently, with more files?
 - citizen view distance depending on what. Mushroom small can't see that far. Building can be seen a lot further

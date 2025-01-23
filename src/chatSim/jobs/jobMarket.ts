@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
 import { BuildingMarket } from "../building.js";
-import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, CitizenStateInfo, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
+import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -12,8 +12,6 @@ import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatM
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding, setCitizenStateSearchItem } from "../citizenState/citizenStateGetItem.js";
 import { setCitizenStateMarketItemExchange } from "../citizenState/citizenStateMarket.js";
-import { setCitizenStateGatherWood } from "../citizenState/citizenStateGatherWood.js";
-import { setCitizenStateGatherMushroom } from "../citizenState/citizenStateGatherMushroom.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
@@ -342,7 +340,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                             return;
                         } else if (itemName === INVENTORY_WOOD) {
                             citizenSetThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);
-                            setCitizenStateGatherWood(citizen);
+                            setCitizenStateSearchItem(citizen, INVENTORY_WOOD, undefined, true);
                             return;
                         } else if (itemName === INVENTORY_MUSHROOM) {
                             citizenSetThought(citizen, [`I am low on ${itemName} in my market. I gather some myself.`], state);

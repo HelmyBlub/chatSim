@@ -12,6 +12,7 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { MapChunk, mapGetChunksInDistance } from "../map.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
+import { Tree } from "../tree.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -157,25 +158,8 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
         }
     }
 
-    if (item.name === INVENTORY_MUSHROOM) {
-        citizenAddThought(citizen, `I will search for ${item.name}.`, state);
-        setCitizenStateSearchItem(citizen, item.name, item.amount);
-        return;
-    }
-    if (citizen.money >= 2) {
-        const market = findClosestOpenMarketWhichSellsItem(citizen, item.name, state) as BuildingMarket;
-        if (market) {
-            citizenAddThought(citizen, `I will buy ${item.name} at ${market.inhabitedBy!.name}.`, state);
-            setCitizenStateTradeItemWithMarket(citizen, market, false, item.name, item.amount);
-            return;
-        }
-    }
-
-    if (item.name === INVENTORY_WOOD) {
-        citizenAddThought(citizen, `I did not see a way to get ${item.name}. Let's gather it myself.`, state);
-        setCitizenStateGatherWood(citizen, item.amount);
-        return;
-    }
+    citizenAddThought(citizen, `I will search for ${item.name}.`, state);
+    setCitizenStateSearchItem(citizen, item.name, item.amount);
 }
 
 function buildingSellsItem(building: Building, citizen: Citizen, state: ChatSimState, itemName: string): boolean {
@@ -188,33 +172,6 @@ function buildingSellsItem(building: Building, citizen: Citizen, state: ChatSimS
     return true;
 }
 
-function findClosestOpenMarketWhichSellsItem(citizen: Citizen, itemName: string, state: ChatSimState): Building | undefined {
-    let closest = undefined;
-    let closestDistance: number = -1;
-    const chunks = mapGetChunksInDistance(citizen.position, state.map, 800);
-    for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
-            if (building.deterioration >= 1) continue;
-            if (building.type !== "Market") continue;
-            if (building.inhabitedBy === undefined) continue;
-            const inventory = building.inventory.items.find(i => i.name === itemName);
-            if (!inventory || inventory.counter === 0) continue;
-            if (!isCitizenAtPosition(building.inhabitedBy, building.position)) continue;
-            if (!closest) {
-                closest = building;
-                closestDistance = calculateDistance(building.position, citizen.position);
-            } else {
-                const tempDistance = calculateDistance(building.position, citizen.position);
-                if (tempDistance < closestDistance) {
-                    closest = building;
-                    closestDistance = tempDistance;
-                }
-            }
-        }
-    }
-    return closest;
-}
-
 function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const citizenState = citizen.stateInfo.stack[0];
@@ -225,8 +182,10 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             if (returnedData.foundType === "buildings") {
                 if (returnedData.intention === undefined) {
                     const market = returnedData.found as BuildingMarket;
+                    const item = citizen.inventory.items.find(i => i.name === itemName);
+                    let openAmount = item ? data.amount! - item.counter : data.amount!;
                     citizenAddThought(citizen, `I will buy ${itemName} at ${market.inhabitedBy!.name}.`, state);
-                    setCitizenStateTradeItemWithMarket(citizen, market, false, itemName, data.amount!);
+                    setCitizenStateTradeItemWithMarket(citizen, market, false, itemName, openAmount);
                     return;
                 } else if (returnedData.intention === "steal") {
                     const building = returnedData.found as Building;
@@ -241,9 +200,12 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             } else if (returnedData.foundType === "mushrooms") {
                 const mushroom = returnedData.found as Mushroom;
                 setCitizenStateGatherMushroom(citizen, mushroom.position);
+            } else if (returnedData.foundType === "trees") {
+                const tree = returnedData.found as Tree;
+                setCitizenStateGatherWood(citizen, tree.position, data.amount);
             }
         } else if (citizenState.subState === "searching") {
-            let item = citizen.inventory.items.find(i => i.name === itemName);
+            const item = citizen.inventory.items.find(i => i.name === itemName);
             const canCarryMore = inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_MUSHROOM) > 0;
             const reachedLimit = !canCarryMore || (item && data.amount !== undefined && item.counter >= data.amount);
             if (reachedLimit) {
@@ -261,7 +223,7 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for growing ${INVENTORY_MUSHROOM}.`, state);
                 searchData.searchFor.push({ type: "mushrooms", viewDistance: viewDistance });
 
-                if (citizen.money < 2 && citizen.happinessData.happiness < 0 && citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
+                if (citizen.money < 4 && citizen.happinessData.happiness < 0 && citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
                     if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i would steal for ${INVENTORY_MUSHROOM}.`, state);
                     searchData.searchFor.push({
                         type: "buildings", viewDistance: viewDistance, intention: "steal", condition:
@@ -272,9 +234,12 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
                     });
                 }
             }
-            if (itemName === INVENTORY_WOOD) searchData.searchFor.push({ type: "trees", viewDistance: viewDistance });
+            if (itemName === INVENTORY_WOOD) {
+                if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for trees.`, state);
+                searchData.searchFor.push({ type: "trees", viewDistance: viewDistance });
+            }
             if (citizen.money >= 2 && !data.ignoreMarkets && data.amount !== undefined) {
-                if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for Markets selling ${INVENTORY_MUSHROOM}.`, state);
+                if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for Markets selling ${itemName}.`, state);
                 searchData.searchFor.push({
                     type: "buildings", viewDistance: viewDistance, condition:
                         (building: Building, citizen: Citizen, state: ChatSimState) => {
