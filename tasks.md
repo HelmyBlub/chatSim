@@ -1,13 +1,14 @@
 Tasks:
-- remember to also add multi search to gathering wood
-    - bug: citizen can buy more wood than he can carry, wood over maximum just disappears
-- remember home inventory instead of accessing it directly
+- citizen remember home inventory instead of accessing it directly
     - citizen should realize stuff was stolen
         - also check home breaking down case
-- check if search can work with search citizens
-- check if code should be ordered differently, with more files?
-- citizen view distance depending on what. Mushroom small can't see that far. Building can be seen a lot further
+- citizen view distance depending on what
+    - Mushroom small can't see that far. Building can be seen a lot further
+    - at night can see as far
+    - cut down tree not visible as far as standing tree
+    - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving
+- check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
 - improve UI?
     - instead of growing list of displayed things
