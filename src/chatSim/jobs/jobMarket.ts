@@ -333,7 +333,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                         availableSpace -= inventoryMoveItemBetween(itemName, citizen.inventory, job.marketBuilding.inventory);
                     }
                     if (citizen.home && availableSpace > 5) {
-                        const availableAtHome = inventoryGetPossibleTakeOutAmount(itemName, citizen.home.inventory);
+                        const availableAtHome = inventoryGetPossibleTakeOutAmount(itemName, citizen.home.inventory, false, citizen.memory.homeInventory.rememberedItems);
                         if (availableAtHome > 5) {
                             citizenSetThought(citizen, [`I want to add inventory to my market from home.`], state);
                             setCitizenStateGetItemFromBuilding(citizen, citizen.home, itemName, availableAtHome);

@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS } from "../citizen.js";
+import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMemorizeHomeInventory } from "../citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -31,8 +31,8 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
         return true;
     }
     if (citizen.home) {
-        const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-        const hasEnoughFoodAtHome = homeMushrooms !== undefined && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
+        const homeMushroomsMemory = citizen.memory.homeInventory.rememberedItems.find(i => i.name === INVENTORY_MUSHROOM);
+        const hasEnoughFoodAtHome = homeMushroomsMemory !== undefined && homeMushroomsMemory.counter >= CITIZEN_NEED_FOOD_AT_HOME;
         if (!hasEnoughFoodAtHome) {
             citizenAddTodo(citizen, 0.75, CITIZEN_NEED_FOOD, `I am low on Food. I shoud get some soon.`, state);
         } else {
@@ -55,7 +55,7 @@ export function citizenNeedTickFood(citizen: Citizen, state: ChatSimState) {
             }
         }
         if (citizen.home) {
-            const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+            const homeMushrooms = citizen.memory.homeInventory.rememberedItems.find(i => i.name === INVENTORY_MUSHROOM);
             const hasEnoughFoodAtHome = homeMushrooms !== undefined && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
             if (hasEnoughFoodAtHome && citizen.foodPerCent >= 0.5) {
                 citizenAddThought(citizen, `I am good on food.`, state);
@@ -94,13 +94,16 @@ export function citizenNeedTickFood(citizen: Citizen, state: ChatSimState) {
             if (citizen.moveTo === undefined && !citizenIsThinking(citizen, state)) {
                 if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
                     const homeMushrooms = citizen.home.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-                    if (homeMushrooms) {
-                        if (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE && homeMushrooms.counter > 0) {
+                    if (homeMushrooms && homeMushrooms.counter > 0) {
+                        if (citizen.foodPerCent < 1 - MUSHROOM_FOOD_VALUE) {
                             setCitizenStateEat(citizen, homeMushrooms, "home");
                             return;
                         }
+                    } else {
+                        citizenAddThought(citizen, `Where are the ${INVENTORY_MUSHROOM}? I thought i have some at home!`, state);
                     }
                 }
+                citizenMemorizeHomeInventory(citizen);
                 citizenStateStackTaskSuccess(citizen);
                 return;
             }

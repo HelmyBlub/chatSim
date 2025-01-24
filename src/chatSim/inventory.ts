@@ -76,8 +76,13 @@ export function inventoryGetAvailableCapacity(inventory: Inventory, itemName: st
     }
 }
 
-export function inventoryGetPossibleTakeOutAmount(itemName: string, inventory: Inventory, ignoreReserved: boolean = false): number {
-    const item = inventory.items.find(i => i.name === itemName);
+export function inventoryGetPossibleTakeOutAmount(itemName: string, inventory: Inventory, ignoreReserved: boolean = false, homeMemoryItems?: InventoryItem[]): number {
+    let item;
+    if (homeMemoryItems) {
+        item = homeMemoryItems.find(i => i.name === itemName);
+    } else {
+        item = inventory.items.find(i => i.name === itemName);
+    }
     if (!item || item.counter === 0) return 0;
     if (inventory.reservedSpace && !ignoreReserved) {
         const reserved = inventory.reservedSpace.find(i => i.name === itemName);
@@ -94,17 +99,6 @@ export function inventoryGetUsedCapacity(inventory: Inventory): number {
         counter += item.counter;
     }
     return counter;
-}
-
-export function inventoryEmptyCitizenToHomeInventory(citizen: Citizen, state: ChatSimState) {
-    if (citizen.home && isCitizenAtPosition(citizen, citizen.home.position)) {
-        for (let item of citizen.inventory.items) {
-            if (item.counter > 0) {
-                const amount = inventoryMoveItemBetween(item.name, citizen.inventory, citizen.home.inventory, item.counter);
-                if (amount > 0) citizenAddLogEntry(citizen, `move ${amount}x${item.name} from inventory to home inventory`, state);
-            }
-        }
-    }
 }
 
 export function inventoryMoveItemBetween(itemName: string, fromInventory: Inventory, toInventory: Inventory, amount: number | undefined = undefined): number {

@@ -1,6 +1,6 @@
 import { ChatSimState, Mushroom, Position } from "../chatSimModels.js";
 import { Building, BuildingMarket } from "../building.js";
-import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory } from "../citizen.js";
 import { inventoryGetAvailableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
@@ -101,6 +101,9 @@ function tickCitizenStateTransportItemToBuilding(citizen: Citizen, state: ChatSi
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (isCitizenAtPosition(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, citizen.inventory, data.building.inventory, data.itemAmount);
+            if (citizen.home === data.building) {
+                citizenMemorizeHomeInventory(citizen);
+            }
             citizenStateStackTaskSuccess(citizen);
             return;
         } else {
@@ -114,6 +117,9 @@ function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimSta
         const data = citizen.stateInfo.stack[0].data as CitizenStateItemAndBuildingData;
         if (isCitizenAtPosition(citizen, data.building.position)) {
             inventoryMoveItemBetween(data.itemName, data.building.inventory, citizen.inventory, data.itemAmount);
+            if (citizen.home === data.building) {
+                citizenMemorizeHomeInventory(citizen);
+            }
             citizenStateStackTaskSuccess(citizen);
             return;
         } else {
@@ -135,7 +141,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
         openAmount -= citizenInventory.counter;
     }
     if (citizen.home && !item.ignoreHome) {
-        const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved);
+        const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved, citizen.memory.homeInventory.rememberedItems);
         if (availableAmountAtHome > 0) {
             citizenAddThought(citizen, `I do have ${item.name} at home. I go get it.`, state);
             const wantedAmount = Math.min(openAmount, availableAmountAtHome);

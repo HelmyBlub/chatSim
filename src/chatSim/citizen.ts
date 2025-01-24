@@ -98,6 +98,9 @@ export type CitizenMemory = {
         nameRememberCounter: number,
         metCitizens: CitizenMemoryMetCitizen[],
     },
+    homeInventory: {
+        rememberedItems: InventoryItem[],
+    }
 }
 
 export type Citizen = {
@@ -272,6 +275,9 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
                 maxCitizenRemember: 30,
                 nameRememberCounter: 0,
                 metCitizens: [],
+            },
+            homeInventory: {
+                rememberedItems: [],
             }
         },
         inventory: {
@@ -299,6 +305,19 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
     const jobs = Object.keys(state.functionsCitizenJobs);
     citizen.dreamJob = jobs[Math.floor(nextRandom(state.randomSeed) * jobs.length)];
     return citizen;
+}
+
+export function citizenMemorizeHomeInventory(citizen: Citizen) {
+    if (!citizen.home) {
+        citizen.memory.homeInventory.rememberedItems = [];
+        return;
+    }
+    const inventoryItems = citizen.home.inventory.items;
+    const rememberedItems: InventoryItem[] = [];
+    for (let item of inventoryItems) {
+        rememberedItems.push({ name: item.name, counter: item.counter });
+    }
+    citizen.memory.homeInventory.rememberedItems = rememberedItems;
 }
 
 export function citizenRemoveTodo(citizen: Citizen, stateType: string) {

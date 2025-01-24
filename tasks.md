@@ -1,15 +1,16 @@
 Tasks:
 - citizen remember home inventory instead of accessing it directly
-    - citizen should realize stuff was stolen
-        - also check home breaking down case
+    - add a thought when they come home and no food is there but some was expected
 - citizen view distance depending on what
     - Mushroom small can't see that far. Building can be seen a lot further
     - at night can see as far
     - cut down tree not visible as far as standing tree
     - add citizen trait good/bad vision
+- citizen remember to check their home once in a while
 - citizen can ask other citizen for food if starving
 - check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
+- check citizen names remember counter beeing to high. Maybe interacting with same citizen twice has incorrect logic?
 - improve UI?
     - instead of growing list of displayed things
     - make it easier to find citizen
