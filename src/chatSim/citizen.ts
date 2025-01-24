@@ -98,7 +98,8 @@ export type CitizenMemory = {
         nameRememberCounter: number,
         metCitizens: CitizenMemoryMetCitizen[],
     },
-    homeInventory: {
+    home: {
+        lastTimeVisited?: number,
         rememberedItems: InventoryItem[],
     }
 }
@@ -276,7 +277,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
                 nameRememberCounter: 0,
                 metCitizens: [],
             },
-            homeInventory: {
+            home: {
                 rememberedItems: [],
             }
         },
@@ -309,7 +310,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
 
 export function citizenMemorizeHomeInventory(citizen: Citizen) {
     if (!citizen.home) {
-        citizen.memory.homeInventory.rememberedItems = [];
+        citizen.memory.home.rememberedItems = [];
         return;
     }
     const inventoryItems = citizen.home.inventory.items;
@@ -317,7 +318,7 @@ export function citizenMemorizeHomeInventory(citizen: Citizen) {
     for (let item of inventoryItems) {
         rememberedItems.push({ name: item.name, counter: item.counter });
     }
-    citizen.memory.homeInventory.rememberedItems = rememberedItems;
+    citizen.memory.home.rememberedItems = rememberedItems;
 }
 
 export function citizenRemoveTodo(citizen: Citizen, stateType: string) {

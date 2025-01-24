@@ -141,7 +141,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
         openAmount -= citizenInventory.counter;
     }
     if (citizen.home && !item.ignoreHome) {
-        const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved, citizen.memory.homeInventory.rememberedItems);
+        const availableAmountAtHome = inventoryGetPossibleTakeOutAmount(item.name, citizen.home.inventory, item.ignoreReserved, citizen.memory.home.rememberedItems);
         if (availableAmountAtHome > 0) {
             citizenAddThought(citizen, `I do have ${item.name} at home. I go get it.`, state);
             const wantedAmount = Math.min(openAmount, availableAmountAtHome);

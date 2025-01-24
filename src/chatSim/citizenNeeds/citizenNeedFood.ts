@@ -31,7 +31,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
         return true;
     }
     if (citizen.home) {
-        const homeMushroomsMemory = citizen.memory.homeInventory.rememberedItems.find(i => i.name === INVENTORY_MUSHROOM);
+        const homeMushroomsMemory = citizen.memory.home.rememberedItems.find(i => i.name === INVENTORY_MUSHROOM);
         const hasEnoughFoodAtHome = homeMushroomsMemory !== undefined && homeMushroomsMemory.counter >= CITIZEN_NEED_FOOD_AT_HOME;
         if (!hasEnoughFoodAtHome) {
             citizenAddTodo(citizen, 0.75, CITIZEN_NEED_FOOD, `I am low on Food. I shoud get some soon.`, state);
@@ -55,7 +55,7 @@ export function citizenNeedTickFood(citizen: Citizen, state: ChatSimState) {
             }
         }
         if (citizen.home) {
-            const homeMushrooms = citizen.memory.homeInventory.rememberedItems.find(i => i.name === INVENTORY_MUSHROOM);
+            const homeMushrooms = citizen.memory.home.rememberedItems.find(i => i.name === INVENTORY_MUSHROOM);
             const hasEnoughFoodAtHome = homeMushrooms !== undefined && homeMushrooms.counter >= CITIZEN_NEED_FOOD_AT_HOME;
             if (hasEnoughFoodAtHome && citizen.foodPerCent >= 0.5) {
                 citizenAddThought(citizen, `I am good on food.`, state);
