@@ -1,5 +1,4 @@
 Tasks:
-- citizen remember to check their home once in a while
 - citizen view distance depending on what
     - Mushroom small can't see that far. Building can be seen a lot further
     - at night can see as far
