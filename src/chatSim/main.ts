@@ -5,7 +5,8 @@ import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
 import { loadCitizenJobsFunctions } from "./jobs/job.js";
-import { createDefaultMap } from "./map.js";
+import { createDefaultMap } from "./map/map.js";
+import { loadMapObjectsFunctions } from "./map/mapObjects.js";
 import { paintChatSim } from "./paint.js";
 import { loadChatSimSounds } from "./sounds.js";
 import { testRunner } from "./test/test.js";
@@ -197,6 +198,7 @@ function initMyApp() {
     loadImages();
     loadChatSimSounds();
     loadCitizenStateTypeFunctions();
+    loadMapObjectsFunctions();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         handleChatMessage(user, message, state);

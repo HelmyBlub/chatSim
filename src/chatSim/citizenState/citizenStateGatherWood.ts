@@ -3,12 +3,13 @@ import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveT
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { mapGetChunkForPosition, removeTreeFromMap } from "../map.js";
+import { mapGetChunkForPosition } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { Tree } from "../tree.js";
+import { MAP_OBJECT_TREE, Tree } from "../map/tree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { playChatSimSound, SOUND_PATH_CUT, SOUND_PATH_TREE_FALL } from "../sounds.js";
+import { mapDeleteObject } from "../map/mapObjects.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
@@ -105,8 +106,9 @@ function cutTreeLogIntoPlanks(citizen: Citizen, tree: Tree, data: Data, state: C
 function isCloseToTree(citizen: Citizen, state: ChatSimState): Tree | undefined {
     const chunk = mapGetChunkForPosition(citizen.position, state.map);
     if (!chunk) return undefined;
-    for (let i = chunk.trees.length - 1; i >= 0; i--) {
-        const tree = chunk.trees[i];
+    const trees = chunk.tileObjects.get(MAP_OBJECT_TREE) as Tree[];
+    if (!trees) return undefined;
+    for (let tree of trees) {
         if (isCitizenInInteractionDistance(citizen, tree.position)) return tree;
     }
     return undefined;
@@ -121,7 +123,7 @@ function cutTreeForWood(citizen: Citizen, tree: Tree, state: ChatSimState) {
     tree.woodValue--;
     inventoryWood.counter++;
     citizenAddLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}, in inventory: ${inventoryWood.counter}x${INVENTORY_WOOD}`, state);
-    if (tree.woodValue === 0) removeTreeFromMap(tree, state.map);
+    if (tree.woodValue === 0) mapDeleteObject(tree, state.map);
 
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];

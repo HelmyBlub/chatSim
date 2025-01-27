@@ -1,10 +1,10 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Position, Mushroom } from "./chatSimModels.js";
-import { mapIsPositionOutOfBounds, PaintDataMap } from "./map.js";
-import { Building } from "./building.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
+import { mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
+import { Building } from "./map/building.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
-import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING, citizenNeedTickSleep } from "./citizenNeeds/citizenNeedSleep.js";
+import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, isCitizenInInteractionDistance, tickCitizenJob } from "./jobs/job.js";
@@ -13,15 +13,11 @@ import { calculateDirection, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
-import { Tree } from "./tree.js";
+import { Tree } from "./map/tree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
 import { CitizenTraits } from "./traits/trait.js";
-import { CITIZEN_NEED_FOOD, citizenNeedTickFood } from "./citizenNeeds/citizenNeedFood.js";
-import { CITIZEN_NEED_HOME, citizenNeedTickHome } from "./citizenNeeds/citizenNeedHome.js";
-import { CITIZEN_NEED_STARVING, citizenNeedTickStarving } from "./citizenNeeds/citizenNeedStarving.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";
-import { CITIZEN_NEED_HAPPINESS, citizenNeedTickHappiness } from "./citizenNeeds/citizenNeedHappiness.js";
-import { CITIZEN_NEED_SCOIAL_INTERACTION, citizenNeedTickSocialInteraction } from "./citizenNeeds/citizenNeedSocialInteraction.js";
+import { Mushroom } from "./map/mapObjectMushroom.js";
 
 export type CitizenStateInfo = {
     type: string,

@@ -1,6 +1,6 @@
 import { LogEntry } from "./citizen.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
-import { ChatSimMap, PaintDataMap } from "./map.js"
+import { ChatSimMap, PaintDataMap } from "./map/map.js"
 import { TestData } from "./test/test.js"
 
 export type Position = {
@@ -13,10 +13,6 @@ export type Logger = {
 }
 
 export type RandomSeed = { seed: number };
-
-export type Mushroom = {
-    position: Position,
-}
 
 export type App = {
     state: ChatSimState,

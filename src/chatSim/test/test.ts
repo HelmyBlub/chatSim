@@ -8,7 +8,7 @@ import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
 import { createJobMarket } from "../jobs/jobMarket.js";
 import { createDefaultChatSimState, getDay } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
-import { ChatSimMap, createBuildingOnRandomTile, createMap, tickChatSimMap } from "../map.js";
+import { ChatSimMap, createBuildingOnRandomTile, createMap, tickChatSimMap } from "../map/map.js";
 import { chatSimTick } from "../tick.js";
 
 export type TestData = {

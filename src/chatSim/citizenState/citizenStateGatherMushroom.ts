@@ -1,13 +1,13 @@
-import { ChatSimState, Mushroom, Position } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenGetVisionDistance, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom } from "../citizen.js";
-import { inventoryGetAvailableCapacity } from "../inventory.js";
-import { calculateDistance, nextRandom, SKILL_GATHERING } from "../main.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
+import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
-import { mapGetChunkForPosition, mapGetChunksInDistance, mapIsPositionOutOfBounds, removeMushroomFromMap } from "../map.js";
+import { mapGetChunkForPosition } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
-import { citizenSetEquipment } from "../paintCitizenEquipment.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 import { playChatSimSound, SOUND_PATH_PICKUP } from "../sounds.js";
+import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
+import { mapDeleteObject } from "../map/mapObjects.js";
 
 type GatherData = {
     mushroomPosition: Position,
@@ -42,7 +42,7 @@ function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) 
 }
 
 function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroom) {
-    removeMushroomFromMap(mushroom, state.map);
+    mapDeleteObject(mushroom, state.map);
     let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (inventoryMushroom === undefined) {
         inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0 };
@@ -62,8 +62,9 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroo
 function isCloseToMushroom(citizen: Citizen, state: ChatSimState): Mushroom | undefined {
     const chunk = mapGetChunkForPosition(citizen.position, state.map);
     if (!chunk) return undefined;
-    for (let i = chunk.mushrooms.length - 1; i >= 0; i--) {
-        const mushroom = chunk.mushrooms[i];
+    const mushrooms = chunk.tileObjects.get(MAP_OBJECT_MUSHROOM) as Mushroom[];
+    if (!mushrooms) return undefined;
+    for (let mushroom of mushrooms) {
         if (isCitizenAtPosition(citizen, mushroom.position)) return mushroom;
     }
     return undefined;

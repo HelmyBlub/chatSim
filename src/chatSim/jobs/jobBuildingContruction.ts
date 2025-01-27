@@ -1,10 +1,10 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Building, BuildingType } from "../building.js";
+import { Building, BuildingType, MAP_OBJECT_BUILDING } from "../map/building.js";
 import { Citizen } from "../citizen.js";
 import { CitizenJob } from "./job.js";
 import { nextRandom } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map.js";
+import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateBuildBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
@@ -72,7 +72,9 @@ function tick(citizen: Citizen, job: CitizenJobBuildingConstruction, state: Chat
 function getCitizenUnfinishedBuilding(citizen: Citizen, state: ChatSimState): Building | undefined {
     const chunks = mapGetChunksInDistance(citizen.position, state.map, 1000);
     for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
+        const buildings = chunk.tileObjects.get(MAP_OBJECT_BUILDING) as Building[];
+        if (!buildings) continue;
+        for (let building of buildings) {
             if (building.buildProgress !== undefined && citizen === building.owner) {
                 return building;
             }

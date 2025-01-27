@@ -8,10 +8,11 @@ Tasks:
             - objects: Set<MapChunkObject>
     - tree/mushroom/building all be of some common type
     - add functions like paint/getVisionDistance and others
+    - check for more required refactoring after this change
 - citizen view distance depending on what
     - Mushroom small can't see that far. Building can be seen a lot further
-    - at night can see as far
     - cut down tree not visible as far as standing tree
+    - at night can see as far
     - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving
 - check if "citizen search" code should be ordered differently, with more files?

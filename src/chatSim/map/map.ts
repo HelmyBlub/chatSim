@@ -1,8 +1,8 @@
-import { Mushroom, ChatSimState, Position } from "./chatSimModels.js";
-import { Building, BuildingType, createBuilding, tickBuildings } from "./building.js";
-import { Citizen } from "./citizen.js";
-import { calculateDistance, nextRandom } from "./main.js";
-import { createTree, Tree } from "./tree.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { Building, BuildingType, createBuilding, MAP_OBJECT_BUILDING, tickBuildings } from "./building.js";
+import { Citizen } from "../citizen.js";
+import { calculateDistance, nextRandom } from "../main.js";
+import { MapChunkTileObject, mapObjectsTickGlobal } from "./mapObjects.js";
 
 export type TilePosition = {
     tileX: number,
@@ -48,9 +48,7 @@ export type MapChunk = {
     tilesVertical: number,
     usedTiles: Tile[],
     emptyTiles: TilePosition[],
-    mushrooms: Mushroom[],
-    trees: Tree[],
-    buildings: Building[],
+    tileObjects: Map<string, MapChunkTileObject[]>,
 }
 
 export function createDefaultMap(): ChatSimMap {
@@ -92,10 +90,17 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     if (!emptyTileInfo) return undefined;
     const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
     const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
-    const mapPosition = chunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
+    const mapPosition = mapChunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
     if (!mapPosition) return;
     const building = createBuilding(owner, mapPosition, buildingType);
-    chunk.buildings.push(building);
+
+    let chunkObjects = chunk.tileObjects.get(MAP_OBJECT_BUILDING);
+    if (!chunkObjects) {
+        chunkObjects = [];
+        chunk.tileObjects.set(MAP_OBJECT_BUILDING, chunkObjects);
+    }
+    chunkObjects.push(building);
+
     state.map.buildings.push(building);
     chunk.emptyTiles.splice(emptyTileInfo.tileIndex, 1);
     chunk.usedTiles.push({
@@ -119,6 +124,15 @@ export function mapIsPositionVisible(position: Position, mapPaint: PaintDataMap)
         return true;
     }
     return false;
+}
+
+export function mapChunkKeyAndTileToPosition(chunkKey: string, tileXY: TilePosition, map: ChatSimMap): Position | undefined {
+    const chunkPosition = chunkKeyToPosition(chunkKey, map);
+    if (!chunkPosition) return undefined;
+    return {
+        x: chunkPosition.x + tileXY.tileX * map.tileSize + map.tileSize / 2,
+        y: chunkPosition.y + tileXY.tileY * map.tileSize + map.tileSize / 2,
+    }
 }
 
 export function mapIsPositionOutOfBounds(position: Position, map: ChatSimMap): boolean {
@@ -188,60 +202,25 @@ export function mapGetVisionBorderPositionClosestToPoint(position: Position, map
     throw "should not happen";
 }
 
-export function removeBuildingFromMap(building: Building, map: ChatSimMap) {
-    const chunk = mapGetChunkForPosition(building.position, map);
-    if (!chunk) return;
-    const usedTileIndex = chunk.usedTiles.findIndex(t => t.object === building);
-    if (usedTileIndex === -1) return;
-    const houseIndex = chunk.buildings.findIndex(h => h === building);
-    if (houseIndex === -1) return;
-    chunk.buildings.splice(houseIndex, 1);
-    building.deletedFromMap = true;
-    const usedTile = chunk.usedTiles.splice(usedTileIndex, 1)[0];
-    chunk.emptyTiles.push({
-        tileX: usedTile.position.tileX,
-        tileY: usedTile.position.tileY,
-    });
-    const buildingMapIndex = map.buildings.findIndex(b => b === building);
-    if (buildingMapIndex > -1) map.buildings.splice(buildingMapIndex, 1);
-}
-
-export function removeTreeFromMap(tree: Tree, map: ChatSimMap) {
-    const chunk = mapGetChunkForPosition(tree.position, map);
-    if (!chunk) return;
-    const usedTileIndex = chunk.usedTiles.findIndex(t => t.object === tree);
-    if (usedTileIndex === -1) return;
-    const treeIndex = chunk.trees.findIndex(h => h === tree);
-    if (treeIndex === -1) return;
-    chunk.trees.splice(treeIndex, 1);
-    const usedTile = chunk.usedTiles.splice(usedTileIndex, 1)[0];
-    map.treeCounter--;
-    chunk.emptyTiles.push({
-        tileX: usedTile.position.tileX,
-        tileY: usedTile.position.tileY,
-    });
-}
-
-export function removeMushroomFromMap(mushroom: Mushroom, map: ChatSimMap) {
-    const chunk = mapGetChunkForPosition(mushroom.position, map);
-    if (!chunk) return;
-    const usedTileIndex = chunk.usedTiles.findIndex(t => t.object === mushroom);
-    if (usedTileIndex === -1) return;
-    const mushroomIndex = chunk.mushrooms.findIndex(h => h === mushroom);
-    if (mushroomIndex === -1) return;
-    chunk.mushrooms.splice(mushroomIndex, 1);
-    const usedTile = chunk.usedTiles.splice(usedTileIndex, 1)[0];
-    map.mushroomCounter--;
-    chunk.emptyTiles.push({
-        tileX: usedTile.position.tileX,
-        tileY: usedTile.position.tileY,
-    });
-}
-
 export function tickChatSimMap(state: ChatSimState) {
-    tickTreeSpawn(state);
-    mushroomSpawnTick(state);
+    mapObjectsTickGlobal(state);
     tickBuildings(state);
+}
+
+export function mapGetRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string[]): { tileIndex: number, chunkKey: string } | undefined {
+    const maxTries = 10;
+    let tryCounter = 0;
+    while (tryCounter < maxTries) {
+        tryCounter++;
+        const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeys.length);
+        const randomChunkKey = chunkKeys[randomChunkKeyIndex];
+        const randomChunk = state.map.mapChunks[randomChunkKey];
+        if (randomChunk.emptyTiles.length > 0) {
+            const randomTileIndex = Math.floor(nextRandom(state.randomSeed) * randomChunk.emptyTiles.length);
+            return { tileIndex: randomTileIndex, chunkKey: randomChunkKey };
+        }
+    }
+    return undefined;
 }
 
 export function chunkKeyToPosition(chunkKey: string, map: ChatSimMap): Position | undefined {
@@ -327,57 +306,6 @@ function calculateDistanceToChunkXY(position: Position, chunkX: number, chunkY: 
     return calculateDistance(position, closest);
 }
 
-function tickTreeSpawn(state: ChatSimState) {
-    if (state.map.treeCounter >= state.map.maxTrees) return;
-    const maxSpawn = Math.min(state.map.maxTrees - state.map.treeCounter, 1000);
-    const chunks = Object.keys(state.map.mapChunks);
-    for (let i = 0; i < maxSpawn; i++) {
-        const emptyTileInfo = getRandomEmptyTileInfo(state, chunks);
-        if (!emptyTileInfo) return;
-        const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
-        const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
-        const mapPosition = chunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
-        if (!mapPosition) return;
-        const newTree: Tree = createTree(mapPosition);
-        chunk.emptyTiles.splice(emptyTileInfo.tileIndex, 1);
-        state.map.treeCounter++;
-        chunk.usedTiles.push({
-            position: emptyTile,
-            usedByType: "Tree",
-            object: newTree,
-        });
-        chunk.trees.push(newTree);
-    }
-}
-
-function mushroomSpawnTick(state: ChatSimState) {
-    if (state.map.mushroomCounter >= state.map.maxMushrooms) return;
-    const maxSpawn = Math.min(state.map.maxMushrooms - state.map.mushroomCounter, 1000);
-    const chunks = Object.keys(state.map.mapChunks);
-    for (let i = 0; i < maxSpawn; i++) {
-        const emptyTileInfo = getRandomEmptyTileInfo(state, chunks);
-        if (!emptyTileInfo) return;
-        const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
-        const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
-        const mapPosition = chunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
-        if (!mapPosition) return;
-        const mushroom: Mushroom = {
-            position: {
-                x: mapPosition.x,
-                y: mapPosition.y,
-            }
-        }
-        chunk.emptyTiles.splice(emptyTileInfo.tileIndex, 1);
-        state.map.mushroomCounter++;
-        chunk.usedTiles.push({
-            position: emptyTile,
-            usedByType: "Mushroom",
-            object: mushroom,
-        });
-        chunk.mushrooms.push(mushroom);
-    }
-}
-
 function chunkKeyToChunkXy(chunkKey: string): Position | undefined {
     const temp = chunkKey.split("_");
     if (temp.length !== 2) return undefined;
@@ -389,34 +317,9 @@ function chunkKeyToChunkXy(chunkKey: string): Position | undefined {
     }
 }
 
-function chunkKeyAndTileToPosition(chunkKey: string, tileXY: TilePosition, map: ChatSimMap): Position | undefined {
-    const chunkPosition = chunkKeyToPosition(chunkKey, map);
-    if (!chunkPosition) return undefined;
-    return {
-        x: chunkPosition.x + tileXY.tileX * map.tileSize + map.tileSize / 2,
-        y: chunkPosition.y + tileXY.tileY * map.tileSize + map.tileSize / 2,
-    }
-}
-
 function getRandomEmptyTileInfoInDistance(state: ChatSimState, position: Position, distance: number): { tileIndex: number, chunkKey: string } | undefined {
     const chunkKeysInDistane = mapGetChunkKeysInDistance(position, state.map, distance);
-    return getRandomEmptyTileInfo(state, chunkKeysInDistane);
-}
-
-function getRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string[]): { tileIndex: number, chunkKey: string } | undefined {
-    const maxTries = 10;
-    let tryCounter = 0;
-    while (tryCounter < maxTries) {
-        tryCounter++;
-        const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeys.length);
-        const randomChunkKey = chunkKeys[randomChunkKeyIndex];
-        const randomChunk = state.map.mapChunks[randomChunkKey];
-        if (randomChunk.emptyTiles.length > 0) {
-            const randomTileIndex = Math.floor(nextRandom(state.randomSeed) * randomChunk.emptyTiles.length);
-            return { tileIndex: randomTileIndex, chunkKey: randomChunkKey };
-        }
-    }
-    return undefined;
+    return mapGetRandomEmptyTileInfo(state, chunkKeysInDistane);
 }
 
 function fillAllChunksAtStart(map: ChatSimMap) {
@@ -435,9 +338,7 @@ function fillAllChunksAtStart(map: ChatSimMap) {
             const chunkY = y - verticalChunkHalf;
             chunkKey = mapChunkXyToChunkKey(chunkX, chunkY);
             const chunk: MapChunk = {
-                buildings: [],
-                mushrooms: [],
-                trees: [],
+                tileObjects: new Map(),
                 tilesHorizontal: map.defaultChunkLength,
                 tilesVertical: map.defaultChunkLength,
                 emptyTiles: [],

@@ -1,6 +1,6 @@
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { calculateDistance3D, nextRandom } from "./main.js";
-import { mapGetVisionBorderPositionClosestToPoint, mapIsPositionVisible, PaintDataMap } from "./map.js";
+import { mapGetVisionBorderPositionClosestToPoint, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
 
 type SoundData = {
     audio: HTMLAudioElement[],

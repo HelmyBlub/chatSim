@@ -1,9 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Building, BuildingType } from "../building.js";
+import { Building, BuildingType, MAP_OBJECT_BUILDING } from "../map/building.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map.js";
+import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -45,15 +45,19 @@ export function setCitizenStateRepairBuilding(citizen: Citizen, building: Buildi
 export function findBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
     const chunks = mapGetChunksInDistance(citizen.position, state.map, 600);
     for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
-            if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.type === buildingType) {
+        const buildings = chunk.tileObjects.get(MAP_OBJECT_BUILDING) as Building[];
+        if (!buildings) continue;
+        for (let building of buildings) {
+            if (building.buildProgress === undefined && building.inhabitedBy === citizen && building.buildingType === buildingType) {
                 return building;
             }
         }
     }
     for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
-            if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.type === buildingType) return building;
+        const buildings = chunk.tileObjects.get(MAP_OBJECT_BUILDING) as Building[];
+        if (!buildings) continue;
+        for (let building of buildings) {
+            if (building.buildProgress === undefined && building.inhabitedBy === undefined && building.buildingType === buildingType) return building;
         }
     }
     return undefined;
@@ -67,7 +71,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
         citizenStateStackTaskSuccess(citizen);
         return;
     }
-    if (building.deterioration < 1 / BUILDING_DATA[building.type].woodAmount) {
+    if (building.deterioration < 1 / BUILDING_DATA[building.buildingType].woodAmount) {
         citizenStateStackTaskSuccess(citizen);
         return;
     }
@@ -90,7 +94,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                 }
                 if (data.tempStartTime + repairDuration < state.time) {
                     data.tempStartTime = undefined;
-                    building.deterioration -= 1 / BUILDING_DATA[building.type].woodAmount;
+                    building.deterioration -= 1 / BUILDING_DATA[building.buildingType].woodAmount;
                     building.brokeDownTime = undefined;
                     inventoryWood.counter--;
                     citizenAddThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
@@ -101,7 +105,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                 return;
             }
         } else {
-            const totalWood = BUILDING_DATA[building.type].woodAmount;
+            const totalWood = BUILDING_DATA[building.buildingType].woodAmount;
             const repairAmount = Math.floor(totalWood * building.deterioration);
             hammer.data = false;
             setCitizenStateGetItem(citizen, INVENTORY_WOOD, repairAmount, true);
@@ -168,7 +172,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
             const hammer = citizenGetEquipmentData(citizen, "Hammer")!;
             hammer.data = true;
             citizenState.tags.add(TAG_PHYSICALLY_ACTIVE);
-            const woodRequired = BUILDING_DATA[building.type].woodAmount;
+            const woodRequired = BUILDING_DATA[building.buildingType].woodAmount;
             const progressPerTick = 0.008 / woodRequired;
             if ((building.buildProgress * woodRequired) % 1 < progressPerTick * woodRequired) {
                 let buildingInventoryWood = building.inventory.items.find(i => i.name === INVENTORY_WOOD);
@@ -202,7 +206,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
             if (building.buildProgress >= 1) {
                 citizenAddLogEntry(citizen, `building finished.`, state);
                 building.buildProgress = undefined;
-                if (!citizen.home && building.type === "House") {
+                if (!citizen.home && building.buildingType === "House") {
                     citizen.home = building;
                     building.inhabitedBy = citizen;
                 }
@@ -218,8 +222,10 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
 function getCitizenUnfinishedBuilding(citizen: Citizen, buildingType: BuildingType, state: ChatSimState): Building | undefined {
     const chunks = mapGetChunksInDistance(citizen.position, state.map, 600);
     for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
-            if (building.buildProgress !== undefined && building.type === buildingType && citizen === building.owner) {
+        const buildings = chunk.tileObjects.get(MAP_OBJECT_BUILDING) as Building[];
+        if (!buildings) continue;
+        for (let building of buildings) {
+            if (building.buildProgress !== undefined && building.buildingType === buildingType && citizen === building.owner) {
                 return building;
             }
         }

@@ -5,7 +5,7 @@ import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./citizenS
 import { onLoadCitizenStateDefaultTickGatherWoodFuntions } from "./citizenState/citizenStateGatherWood.js";
 import { onLoadCitizenStateDefaultTickMarketFuntions } from "./citizenState/citizenStateMarket.js";
 import { onLoadCitizenStateDefaultTickSellItemFuntions } from "./citizenState/citizenStateSellItem.js";
-import { tickChatSimMap } from "./map.js";
+import { tickChatSimMap } from "./map/map.js";
 import { onLoadCitizenStateDefaultTickGetBuildingFuntions } from "./citizenState/citizenStateGetBuilding.js";
 import { onLoadCitizenStateDefaultTickGetItemFuntions } from "./citizenState/citizenStateGetItem.js";
 import { onLoadCitizenStateDefaultTickEatFuntions } from "./citizenState/citizenStateEat.js";

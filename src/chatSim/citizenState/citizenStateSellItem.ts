@@ -1,12 +1,12 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { BuildingMarket } from "../building.js";
+import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/building.js";
 import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
-import { mapGetChunksInDistance } from "../map.js";
+import { mapGetChunksInDistance } from "../map/map.js";
 
 export type CitizenStateSellItemData = {
     name: string,
@@ -65,9 +65,11 @@ function findClosestOpenMarketWhichBuysItem(citizen: Citizen, itemName: string, 
     let closestDistance: number = -1;
     const chunks = mapGetChunksInDistance(citizen.position, state.map, 800);
     for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
+        const buildings = chunk.tileObjects.get(MAP_OBJECT_BUILDING) as Building[];
+        if (!buildings) continue;
+        for (let building of buildings) {
             if (building.deterioration >= 1) continue;
-            if (building.type !== "Market") continue;
+            if (building.buildingType !== "Market") continue;
             const market = building as BuildingMarket;
             if (building.inhabitedBy === undefined) continue;
             if (building.inhabitedBy.money <= 0) continue;

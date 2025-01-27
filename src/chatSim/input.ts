@@ -1,10 +1,11 @@
 import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
-import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map.js";
+import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
 import { addCitizen } from "./citizen.js";
 import { addChatterChangeLog, calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
+import { MAP_OBJECT_TREE, Tree } from "./map/tree.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -75,11 +76,13 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
         if (!chunk) return;
         let closest: SelectedObject | undefined = undefined;
         let closestDistance = 0;
+        let trees = chunk.tileObjects.get(MAP_OBJECT_TREE) as Tree[];
+        if (!trees) trees = [];
         let toCheckObjects = [
             { objects: state.map.citizens, type: "citizen", size: 40 },
-            { objects: chunk.buildings, type: "building", size: 60 },
-            { objects: chunk.trees, type: "tree", size: 60 },
-            { objects: chunk.mushrooms, type: "mushroom", size: 30 },
+            // { objects: chunk.buildings, type: "building", size: 60 }, //TODO
+            // { objects: trees, type: "tree", size: 60 },
+            // { objects: chunk.mushrooms, type: "mushroom", size: 30 },
         ];
         for (let toCheck of toCheckObjects) {
             const closestObject = getClosestObject(toCheck.objects, toCheck.size, relativeMouseToCanvas, state);

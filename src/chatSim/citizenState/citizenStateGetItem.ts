@@ -1,5 +1,5 @@
-import { ChatSimState, Mushroom, Position } from "../chatSimModels.js";
-import { Building, BuildingMarket } from "../building.js";
+import { ChatSimState } from "../chatSimModels.js";
+import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/building.js";
 import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory } from "../citizen.js";
 import { inventoryGetAvailableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance } from "../main.js";
@@ -9,10 +9,11 @@ import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
 import { setCitizenStateGatherWood } from "./citizenStateGatherWood.js";
 import { setCitizenStateTradeItemWithMarket } from "./citizenStateMarket.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
-import { MapChunk, mapGetChunksInDistance } from "../map.js";
+import { mapGetChunksInDistance } from "../map/map.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
-import { Tree } from "../tree.js";
+import { MAP_OBJECT_TREE, Tree } from "../map/tree.js";
+import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -38,7 +39,7 @@ export type CitizenStateItemAndBuildingData = {
 
 export type CitizenStateSearchData = {
     searchFor: {
-        type: keyof MapChunk,
+        type: string,
         intention?: string,
         viewDistance: number,
         condition?: SearchCondition,
@@ -48,7 +49,7 @@ export type CitizenStateSearchData = {
 
 export type CitizenStateSearchSuccessData = CitizenStateSuccessData & {
     found: any,
-    foundType: keyof MapChunk,
+    foundType: string,
     intention?: string,
 }
 
@@ -151,12 +152,14 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
     }
     const chunks = mapGetChunksInDistance(citizen.position, state.map, 600);
     for (let chunk of chunks) {
-        for (let building of chunk.buildings) {
+        const buildings = chunk.tileObjects.get(MAP_OBJECT_BUILDING) as Building[];
+        if (!buildings) continue;
+        for (let building of buildings) {
             if (building.inhabitedBy === citizen && building !== citizen.home) {
                 const availableAmount = inventoryGetPossibleTakeOutAmount(item.name, building.inventory, item.ignoreReserved);
                 if (availableAmount > 0) {
                     const wantedAmount = Math.min(openAmount, availableAmount);
-                    citizenAddThought(citizen, `I do have ${item.name} at my ${building.type}. I go get it.`, state);
+                    citizenAddThought(citizen, `I do have ${item.name} at my ${building.buildingType}. I go get it.`, state);
                     setCitizenStateGetItemFromBuilding(citizen, building, item.name, wantedAmount);
                     return;
                 }
@@ -170,7 +173,7 @@ function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
 
 function buildingSellsItem(building: Building, citizen: Citizen, state: ChatSimState, itemName: string): boolean {
     if (building.deterioration >= 1) return false;
-    if (building.type !== "Market") return false;
+    if (building.buildingType !== "Market") return false;
     if (building.inhabitedBy === undefined) return false;
     const inventory = building.inventory.items.find(i => i.name === itemName);
     if (!inventory || inventory.counter === 0) return false;
@@ -203,10 +206,10 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
                 } else {
                     throw "unknwon case";
                 }
-            } else if (returnedData.foundType === "mushrooms") {
+            } else if (returnedData.foundType === MAP_OBJECT_MUSHROOM) {
                 const mushroom = returnedData.found as Mushroom;
                 setCitizenStateGatherMushroom(citizen, mushroom.position);
-            } else if (returnedData.foundType === "trees") {
+            } else if (returnedData.foundType === MAP_OBJECT_TREE) {
                 const tree = returnedData.found as Tree;
                 setCitizenStateGatherWood(citizen, tree.position, data.amount);
             }
@@ -227,12 +230,12 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             if (itemName === INVENTORY_MUSHROOM) {
                 citizenSetEquipment(citizen, ["Basket"]);
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for growing ${INVENTORY_MUSHROOM}.`, state);
-                searchData.searchFor.push({ type: "mushrooms", viewDistance: viewDistance });
+                searchData.searchFor.push({ type: MAP_OBJECT_MUSHROOM, viewDistance: viewDistance });
 
                 if (citizen.money < 4 && citizen.happinessData.happiness < 0 && citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
                     if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i would steal for ${INVENTORY_MUSHROOM}.`, state);
                     searchData.searchFor.push({
-                        type: "buildings", viewDistance: viewDistance, intention: "steal", condition:
+                        type: MAP_OBJECT_BUILDING, viewDistance: viewDistance, intention: "steal", condition:
                             (building: Building, citizen: Citizen, state: ChatSimState) => {
                                 let inventoryItem = building.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                                 return inventoryItem !== undefined && inventoryItem.counter > 0;
@@ -242,12 +245,12 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             }
             if (itemName === INVENTORY_WOOD) {
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for trees.`, state);
-                searchData.searchFor.push({ type: "trees", viewDistance: viewDistance });
+                searchData.searchFor.push({ type: MAP_OBJECT_TREE, viewDistance: viewDistance });
             }
             if (citizen.money >= 2 && !data.ignoreMarkets && data.amount !== undefined) {
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for Markets selling ${itemName}.`, state);
                 searchData.searchFor.push({
-                    type: "buildings", viewDistance: viewDistance, condition:
+                    type: MAP_OBJECT_BUILDING, viewDistance: viewDistance, condition:
                         (building: Building, citizen: Citizen, state: ChatSimState) => {
                             return buildingSellsItem(building, citizen, state, itemName);
                         }
@@ -275,14 +278,14 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
     }
 }
 
-function getClosest(citizen: Citizen, visionDistance: number, key: keyof MapChunk, state: ChatSimState, searchCondition: SearchCondition | undefined = undefined): any | undefined {
+function getClosest(citizen: Citizen, visionDistance: number, key: string, state: ChatSimState, searchCondition: SearchCondition | undefined = undefined): any | undefined {
     let closest: any | undefined = undefined;
     let closestDistance: number = 0;
     const chunks = mapGetChunksInDistance(citizen.position, state.map, visionDistance);
     for (let chunk of chunks) {
-        const arrayProperty = chunk[key];
-        if (!Array.isArray(arrayProperty)) continue;
-        for (let object of arrayProperty) {
+        const mapObjects = chunk.tileObjects.get(key);
+        if (!mapObjects) continue;
+        for (let object of mapObjects) {
             const distance = calculateDistance(citizen.position, (object as any).position);
             if (distance > visionDistance) continue;
             if (closest !== undefined && distance > closestDistance) continue;

@@ -3,7 +3,7 @@ import { Citizen, citizenSetThought } from "../citizen.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { Tree } from "../tree.js";
+import { Tree } from "../map/tree.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateSearchItem, setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";

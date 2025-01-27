@@ -1,13 +1,14 @@
-import { drawTextWithOutline, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
-import { ChatSimState, Mushroom, Position } from "./chatSimModels.js";
-import { ChatSimMap, chunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map.js";
-import { Building, BuildingMarket, paintBuildings } from "./building.js";
+import { drawTextWithOutline } from "../drawHelper.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
+import { chunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
+import { Building, BuildingMarket } from "./map/building.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
-import { IMAGES } from "./images.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
-import { paintTrees, Tree } from "./tree.js";
+import { Tree } from "./map/tree.js";
 import { CITIZEN_TRAIT_FUNCTIONS } from "./traits/trait.js";
+import { paintChunkObjects } from "./map/mapObjects.js";
+import { Mushroom } from "./map/mapObjectMushroom.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
 export const PAINT_LAYER_CITIZEN_BEFORE_HOUSES = 1;
@@ -151,7 +152,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         }
     } else if (selected.type === "building") {
         const building: Building = selected.object;
-        ctx.fillText(`Building: ${building.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`Building: ${building.buildingType}`, offsetX, offsetY + lineSpacing * lineCounter++);
         ctx.fillText(`    Owner: ${building.owner.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         if (building.inhabitedBy !== undefined) ctx.fillText(`    Inhabited by: ${building.inhabitedBy.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
         if (building.buildProgress !== undefined) ctx.fillText(`    Build Progress: ${(building.buildProgress * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
@@ -160,7 +161,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         for (let item of building.inventory.items) {
             ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
         }
-        if (building.type === "Market") {
+        if (building.buildingType === "Market") {
             const market = building as BuildingMarket;
             ctx.fillText(`    Counter:`, offsetX, offsetY + lineSpacing * lineCounter++);
             ctx.fillText(`        money: ${market.counter.money}`, offsetX, offsetY + lineSpacing * lineCounter++);
@@ -206,10 +207,8 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         ctx.fillRect(paintMapTopLeft.x, paintMapTopLeft.y, chunkWidth, chunkHeight);
     }
     const chunksToPaint = getChunksToPaint(state);
-    paintMushrooms(ctx, paintDataMap, chunksToPaint, state);
-    paintTrees(ctx, paintDataMap, chunksToPaint, state);
+    paintChunkObjects(ctx, chunksToPaint, paintDataMap, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
-    paintBuildings(ctx, chunksToPaint, state);
     paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
     paintCititzenSpeechBubbles(ctx, state);
@@ -256,20 +255,6 @@ function getChunksToPaint(state: ChatSimState): MapChunk[] {
     }
 
     return chunksToPaint;
-}
-
-function paintMushrooms(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap, chunksToPaint: MapChunk[], state: ChatSimState) {
-    for (let chunk of chunksToPaint) {
-        const mushroomPaintSize = 30;
-        const mushroomImage = IMAGES[IMAGE_PATH_MUSHROOM];
-        for (let mushroom of chunk.mushrooms) {
-            const paintPos = mapPositionToPaintPosition(mushroom.position, paintDataMap);
-            ctx.drawImage(mushroomImage, 0, 0, 200, 200,
-                paintPos.x - mushroomPaintSize / 2,
-                paintPos.y - mushroomPaintSize / 2,
-                mushroomPaintSize, mushroomPaintSize);
-        }
-    }
 }
 
 function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMap) {
