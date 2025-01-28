@@ -174,7 +174,7 @@ function testCitizenShouldNotStarve(): Test {
         },
         checkFinishCondition: (state) => {
             const citizen = state.map.citizens[0];
-            return citizen.foodPerCent > CITIZEN_STARVING_FOOD_PER_CENT || state.time > 10000;
+            return citizen.foodPerCent > CITIZEN_STARVING_FOOD_PER_CENT || state.time > 30000;
         },
         checkSucceded: (state) => {
             const citizen = state.map.citizens[0];

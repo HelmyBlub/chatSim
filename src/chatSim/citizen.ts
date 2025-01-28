@@ -1,7 +1,7 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
+import { mapChunkKeyToPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
 import { Building } from "./map/mapObjectBuilding.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
@@ -222,8 +222,8 @@ export function citizenMoveToRandom(citizen: Citizen, state: ChatSimState, lastS
     }
     // citizen out of bounds case?
     console.log("citizen out of bounds?");
-    debugger;
-    newSearchDirection = calculateDirection(citizen.position, { x: 0, y: 0 });
+    //debugger;
+    newSearchDirection = calculateDirection(citizen.position, mapChunkKeyToPosition("0_0", state.map)!);
     const newMoveTo = {
         x: citizen.position.x + Math.cos(newSearchDirection) * 200,
         y: citizen.position.y + Math.sin(newSearchDirection) * 200,

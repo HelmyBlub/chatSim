@@ -1,6 +1,5 @@
 Tasks:
 - citizen view distance depending on what
-    - at night can see as far
     - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving
 - check if "citizen search" code should be ordered differently, with more files?
