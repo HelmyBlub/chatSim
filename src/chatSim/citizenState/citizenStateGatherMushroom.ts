@@ -7,7 +7,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { playChatSimSound, SOUND_PATH_PICKUP } from "../sounds.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
-import { mapDeleteObject } from "../map/mapObjects.js";
+import { mapDeleteObject } from "../map/mapObject.js";
 
 type GatherData = {
     mushroomPosition: Position,

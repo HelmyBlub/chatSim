@@ -1,10 +1,10 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Building, BuildingType, MAP_OBJECT_BUILDING } from "../map/building.js";
+import { Building, BuildingType, createBuildingOnRandomTile, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
 import { Citizen } from "../citizen.js";
 import { CitizenJob } from "./job.js";
 import { nextRandom } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map/map.js";
+import { mapGetChunksInDistance } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateBuildBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";

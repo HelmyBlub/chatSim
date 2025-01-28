@@ -1,7 +1,7 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { loadMapObjectTree } from "./tree.js";
-import { ChatSimMap, MapChunk, mapChunkKeyAndTileToPosition, mapGetChunkForPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
-import { loadMapObjectBuilding } from "./building.js";
+import { loadMapObjectTree } from "./mapObjectTree.js";
+import { ChatSimMap, MapChunk, mapChunkKeyAndTileToPosition, mapGetChunkAndTileForPosition, mapGetChunkForPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
+import { loadMapObjectBuilding } from "./mapObjectBuilding.js";
 import { loadMapObjectMushroom } from "./mapObjectMushroom.js";
 
 export type MapChunkTileObject = {
@@ -56,6 +56,27 @@ export function mapAddObjectRandomPosition(objectType: string, state: ChatSimSta
     }
     chunkObjects.push(object);
     return object;
+}
+
+export function mapAddObject(object: MapChunkTileObject, state: ChatSimState): boolean {
+    const chunkAndTile = mapGetChunkAndTileForPosition(object.position, state.map);
+    if (chunkAndTile === undefined) return false;
+    const chunk = chunkAndTile.chunk;
+    const emptyTileIndex = chunk.emptyTiles.findIndex(t => t.tileX === chunkAndTile.tileX && t.tileY === chunkAndTile.tileY);
+    if (emptyTileIndex === -1) return false;
+    const emptyTile = chunk.emptyTiles.splice(emptyTileIndex, 1)[0];
+    chunk.usedTiles.push({
+        position: emptyTile,
+        usedByType: object.type,
+        object: object,
+    });
+    let chunkObjects = chunk.tileObjects.get(object.type);
+    if (!chunkObjects) {
+        chunkObjects = [];
+        chunk.tileObjects.set(object.type, chunkObjects);
+    }
+    chunkObjects.push(object);
+    return true;
 }
 
 export function paintChunkObjects(ctx: CanvasRenderingContext2D, chunks: MapChunk[], paintDataMap: PaintDataMap, state: ChatSimState) {

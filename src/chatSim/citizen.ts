@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
-import { Building } from "./map/building.js";
+import { Building } from "./map/mapObjectBuilding.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
@@ -13,7 +13,7 @@ import { calculateDirection, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
-import { Tree } from "./map/tree.js";
+import { Tree } from "./map/mapObjectTree.js";
 import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
 import { CitizenTraits } from "./traits/trait.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";

@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
-import { BuildingMarket } from "../map/building.js";
+import { BuildingMarket } from "../map/mapObjectBuilding.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";

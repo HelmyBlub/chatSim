@@ -1,9 +1,8 @@
 Tasks:
 - for next feature vision distance think about redesign code for map objects
-    - selecting object need fixing
     - check for more required refactoring after this change
+        - buildings and ticking redesign?
     - add functions like paint/getVisionDistance and others
-    - buildings and ticking redesign?
 - citizen view distance depending on what
     - Mushroom small can't see that far. Building can be seen a lot further
     - cut down tree not visible as far as standing tree

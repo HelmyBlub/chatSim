@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/building.js";
+import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
 import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory } from "../citizen.js";
 import { inventoryGetAvailableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance } from "../main.js";
@@ -12,7 +12,7 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { mapGetChunksInDistance } from "../map/map.js";
 import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
-import { MAP_OBJECT_TREE, Tree } from "../map/tree.js";
+import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
 
 export type CitizenStateGetItemData = {

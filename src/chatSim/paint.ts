@@ -1,13 +1,13 @@
 import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { chunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
-import { Building, BuildingMarket } from "./map/building.js";
+import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
-import { Tree } from "./map/tree.js";
+import { Tree } from "./map/mapObjectTree.js";
 import { CITIZEN_TRAIT_FUNCTIONS } from "./traits/trait.js";
-import { paintChunkObjects } from "./map/mapObjects.js";
+import { paintChunkObjects } from "./map/mapObject.js";
 import { Mushroom } from "./map/mapObjectMushroom.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;

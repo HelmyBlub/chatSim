@@ -3,7 +3,7 @@ import { ChatSimState, Position } from "../chatSimModels.js";
 import { ChatSimMap, mapChunkKeyAndTileToPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapChunkTileObject } from "./mapObjects.js";
+import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapChunkTileObject } from "./mapObject.js";
 
 export type Tree = MapChunkTileObject & {
     woodValue: number,

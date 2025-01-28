@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/building.js";
+import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
 import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";

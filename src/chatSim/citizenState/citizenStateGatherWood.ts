@@ -5,11 +5,11 @@ import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { mapGetChunkForPosition } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { MAP_OBJECT_TREE, Tree } from "../map/tree.js";
+import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { playChatSimSound, SOUND_PATH_CUT, SOUND_PATH_TREE_FALL } from "../sounds.js";
-import { mapDeleteObject } from "../map/mapObjects.js";
+import { mapDeleteObject } from "../map/mapObject.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {

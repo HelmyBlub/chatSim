@@ -1,8 +1,8 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { Building, BuildingType, createBuilding, MAP_OBJECT_BUILDING, tickBuildings } from "./building.js";
+import { Building, BuildingType, createBuilding, MAP_OBJECT_BUILDING, tickBuildings } from "./mapObjectBuilding.js";
 import { Citizen } from "../citizen.js";
 import { calculateDistance, nextRandom } from "../main.js";
-import { MapChunkTileObject, mapObjectsTickGlobal } from "./mapObjects.js";
+import { mapAddObject, MapChunkTileObject, mapObjectsTickGlobal } from "./mapObject.js";
 
 export type TilePosition = {
     tileX: number,
@@ -83,32 +83,6 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
     }
     fillAllChunksAtStart(map);
     return map;
-}
-
-export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType, buildPositionCenter: Position): Building | undefined {
-    const emptyTileInfo = getRandomEmptyTileInfoInDistance(state, buildPositionCenter, 400);
-    if (!emptyTileInfo) return undefined;
-    const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
-    const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
-    const mapPosition = mapChunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
-    if (!mapPosition) return;
-    const building = createBuilding(owner, mapPosition, buildingType);
-
-    let chunkObjects = chunk.tileObjects.get(MAP_OBJECT_BUILDING);
-    if (!chunkObjects) {
-        chunkObjects = [];
-        chunk.tileObjects.set(MAP_OBJECT_BUILDING, chunkObjects);
-    }
-    chunkObjects.push(building);
-
-    state.map.buildings.push(building);
-    chunk.emptyTiles.splice(emptyTileInfo.tileIndex, 1);
-    chunk.usedTiles.push({
-        position: emptyTile,
-        usedByType: buildingType,
-        object: building,
-    });
-    return building;
 }
 
 export function mapIsPositionVisible(position: Position, mapPaint: PaintDataMap) {
@@ -251,6 +225,17 @@ export function mapGetChunkForPosition(position: Position, map: ChatSimMap): Map
     return chunk;
 }
 
+export function mapGetChunkAndTileForPosition(position: Position, map: ChatSimMap): { chunk: MapChunk, tileX: number, tileY: number } | undefined {
+    const chunk = mapGetChunkForPosition(position, map);
+    if (chunk === undefined) return undefined;
+    const chunkSize = map.defaultChunkLength * map.tileSize;
+    let tileX = Math.floor((position.x % chunkSize) / map.tileSize);
+    if (tileX < 0) tileX += map.defaultChunkLength;
+    let tileY = Math.floor((position.y % chunkSize) / map.tileSize);
+    if (tileY < 0) tileY += map.defaultChunkLength;
+    return { chunk, tileX, tileY };
+}
+
 export function mapGetChunksInDistance(position: Position, map: ChatSimMap, distance: number): MapChunk[] {
     const mapChunks: MapChunk[] = [];
 
@@ -275,6 +260,11 @@ export function mapGetChunksInDistance(position: Position, map: ChatSimMap, dist
 
 export function mapChunkXyToChunkKey(chunkX: number, chunkY: number): string {
     return `${chunkX}_${chunkY}`;
+}
+
+export function getRandomEmptyTileInfoInDistance(state: ChatSimState, position: Position, distance: number): { tileIndex: number, chunkKey: string } | undefined {
+    const chunkKeysInDistane = mapGetChunkKeysInDistance(position, state.map, distance);
+    return mapGetRandomEmptyTileInfo(state, chunkKeysInDistane);
 }
 
 export function mapGetChunkKeysInDistance(position: Position, map: ChatSimMap, distance: number): string[] {
@@ -315,11 +305,6 @@ function chunkKeyToChunkXy(chunkKey: string): Position | undefined {
         x: chunkX,
         y: chunkY,
     }
-}
-
-function getRandomEmptyTileInfoInDistance(state: ChatSimState, position: Position, distance: number): { tileIndex: number, chunkKey: string } | undefined {
-    const chunkKeysInDistane = mapGetChunkKeysInDistance(position, state.map, distance);
-    return mapGetRandomEmptyTileInfo(state, chunkKeysInDistane);
 }
 
 function fillAllChunksAtStart(map: ChatSimMap) {

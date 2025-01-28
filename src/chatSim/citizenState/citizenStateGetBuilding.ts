@@ -1,9 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Building, BuildingType, MAP_OBJECT_BUILDING } from "../map/building.js";
+import { Building, BuildingType, createBuildingOnRandomTile, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE } from "../citizen.js";
 import { inventoryMoveItemBetween } from "../inventory.js";
 import { INVENTORY_WOOD } from "../inventory.js";
-import { createBuildingOnRandomTile, mapGetChunksInDistance } from "../map/map.js";
+import { mapGetChunksInDistance } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";

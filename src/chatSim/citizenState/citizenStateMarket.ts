@@ -1,4 +1,4 @@
-import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../map/building.js";
+import { BuildingMarket, marketGetCounterPosition, marketGetQueueMapPosition, marketGetQueuePosition, marketHasQueue } from "../map/mapObjectBuilding.js";
 import { createEmptyChat, ChatMessage, ChatMessageMarketTradeIntention, CHAT_MESSAGE_INTENTION_MARKET_TRADE, addChatMessage } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
 import { TAG_DOING_NOTHING, TAG_QUEUING, TAG_SOCIAL_INTERACTION } from "../citizen.js";

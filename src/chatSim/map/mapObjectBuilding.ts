@@ -6,9 +6,9 @@ import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } fro
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
-import { ChatSimMap, MapChunk, PaintDataMap } from "./map.js";
+import { ChatSimMap, getRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { MAP_OBJECTS_FUNCTIONS, MapChunkTileObject, mapDeleteObject } from "./mapObjects.js";
+import { MAP_OBJECTS_FUNCTIONS, mapAddObject, MapChunkTileObject, mapDeleteObject } from "./mapObject.js";
 
 export type BuildingType = "Market" | "House"
 export type Building = MapChunkTileObject & {
@@ -40,10 +40,17 @@ export function loadMapObjectBuilding() {
     }
 }
 
-function onDelete(building: Building, map: ChatSimMap) {
-    const buildingMapIndex = map.buildings.findIndex(b => b === building);
-    if (buildingMapIndex > -1) map.buildings.splice(buildingMapIndex, 1);
-    building.deletedFromMap = true;
+export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType, buildPositionCenter: Position): Building | undefined {
+    const emptyTileInfo = getRandomEmptyTileInfoInDistance(state, buildPositionCenter, 400);
+    if (!emptyTileInfo) return undefined;
+    const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
+    const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
+    const mapPosition = mapChunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
+    if (!mapPosition) return;
+    const building = createBuilding(owner, mapPosition, buildingType);
+    const success = mapAddObject(building, state);
+    if (success) state.map.buildings.push(building);
+    return building;
 }
 
 export function marketGetCounterPosition(market: BuildingMarket): Position {
@@ -157,6 +164,13 @@ export function createBuilding(owner: Citizen, position: Position, type: Buildin
         return market;
     }
     return building;
+}
+
+
+function onDelete(building: Building, map: ChatSimMap) {
+    const buildingMapIndex = map.buildings.findIndex(b => b === building);
+    if (buildingMapIndex > -1) map.buildings.splice(buildingMapIndex, 1);
+    building.deletedFromMap = true;
 }
 
 function paint(ctx: CanvasRenderingContext2D, building: Building, paintDataMap: PaintDataMap, state: ChatSimState) {

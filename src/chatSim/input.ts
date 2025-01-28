@@ -5,10 +5,10 @@ import { addChatterChangeLog, calculateDistance } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
-import { MAP_OBJECT_TREE, Tree } from "./map/tree.js";
-import { MAP_OBJECT_BUILDING } from "./map/building.js";
+import { MAP_OBJECT_TREE, Tree } from "./map/mapObjectTree.js";
+import { MAP_OBJECT_BUILDING } from "./map/mapObjectBuilding.js";
 import { MAP_OBJECT_MUSHROOM } from "./map/mapObjectMushroom.js";
-import { MapChunkTileObject } from "./map/mapObjects.js";
+import { MapChunkTileObject } from "./map/mapObject.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
