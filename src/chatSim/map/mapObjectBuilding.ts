@@ -35,8 +35,9 @@ export const MAP_OBJECT_BUILDING = "building";
 
 export function loadMapObjectBuilding() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_BUILDING] = {
-        paint: paint,
+        getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
         onDelete: onDelete,
+        paint: paint,
     }
 }
 
@@ -166,6 +167,10 @@ export function createBuilding(owner: Citizen, position: Position, type: Buildin
     return building;
 }
 
+
+function getMaxVisionDistanceFactor() {
+    return 2;
+}
 
 function onDelete(building: Building, map: ChatSimMap) {
     const buildingMapIndex = map.buildings.findIndex(b => b === building);

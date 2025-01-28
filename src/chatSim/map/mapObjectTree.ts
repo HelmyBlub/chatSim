@@ -17,10 +17,20 @@ export const MAP_OBJECT_TREE = "tree";
 export function loadMapObjectTree() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_TREE] = {
         create: createTree,
-        paint: paintTree,
+        getVisionDistanceFactor: getVisionDistanceFactor,
+        getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
         onDelete: onDelete,
+        paint: paintTree,
         tickGlobal: tickTreeSpawn,
     }
+}
+
+function getMaxVisionDistanceFactor() {
+    return 2;
+}
+
+function getVisionDistanceFactor(tree: Tree) {
+    return tree.fallTime === undefined ? 2 : 0.8;
 }
 
 function tickTreeSpawn(state: ChatSimState) {

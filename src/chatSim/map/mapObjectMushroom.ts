@@ -14,10 +14,15 @@ export const MAP_OBJECT_MUSHROOM = "mushroom";
 export function loadMapObjectMushroom() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_MUSHROOM] = {
         create: create,
-        paint: paint,
+        getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
         onDelete: onDelete,
+        paint: paint,
         tickGlobal: tickMushroomSpawn,
     }
+}
+
+function getMaxVisionDistanceFactor() {
+    return 0.5;
 }
 
 function paint(ctx: CanvasRenderingContext2D, mushroom: Mushroom, paintDataMap: PaintDataMap, state: ChatSimState) {

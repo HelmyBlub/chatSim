@@ -14,6 +14,7 @@ import { citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
 import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
+import { MAP_OBJECTS_FUNCTIONS, mapGetMaxObjectVisionDistanceFactor } from "../map/mapObject.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -281,13 +282,19 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
 function getClosest(citizen: Citizen, visionDistance: number, key: string, state: ChatSimState, searchCondition: SearchCondition | undefined = undefined): any | undefined {
     let closest: any | undefined = undefined;
     let closestDistance: number = 0;
-    const chunks = mapGetChunksInDistance(citizen.position, state.map, visionDistance);
+    const objectTypeVisionDistance = visionDistance * mapGetMaxObjectVisionDistanceFactor(key);
+    const chunks = mapGetChunksInDistance(citizen.position, state.map, objectTypeVisionDistance);
+    const getObjectSpecificVisionDistance = MAP_OBJECTS_FUNCTIONS[key].getVisionDistanceFactor;
     for (let chunk of chunks) {
         const mapObjects = chunk.tileObjects.get(key);
         if (!mapObjects) continue;
+        let objectVisionDistance = objectTypeVisionDistance;
         for (let object of mapObjects) {
             const distance = calculateDistance(citizen.position, (object as any).position);
-            if (distance > visionDistance) continue;
+            if (getObjectSpecificVisionDistance) {
+                objectVisionDistance = visionDistance * getObjectSpecificVisionDistance(object);
+            }
+            if (distance > objectVisionDistance) continue;
             if (closest !== undefined && distance > closestDistance) continue;
             if (searchCondition && !searchCondition(object, citizen, state)) continue;
             closest = object;

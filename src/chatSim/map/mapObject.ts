@@ -11,7 +11,8 @@ export type MapChunkTileObject = {
 
 export type FunctionsMapObject = {
     create?(position: Position, state: ChatSimState): MapChunkTileObject,
-    getVisionDistance?(object: MapChunkTileObject): number,
+    getMaxVisionDistanceFactor(): number,
+    getVisionDistanceFactor?(object: MapChunkTileObject): number,
     onDelete?(object: MapChunkTileObject, map: ChatSimMap): void,
     paint(ctx: CanvasRenderingContext2D, object: MapChunkTileObject, paintDataMap: PaintDataMap, state: ChatSimState): void,
     tickGlobal?(state: ChatSimState): void,
@@ -91,6 +92,11 @@ export function mapPaintChunkObjects(ctx: CanvasRenderingContext2D, chunks: MapC
             }
         }
     }
+}
+
+export function mapGetMaxObjectVisionDistanceFactor(objectType: string): number {
+    const objectFunctions = MAP_OBJECTS_FUNCTIONS[objectType];
+    return objectFunctions.getMaxVisionDistanceFactor();
 }
 
 export function mapObjectsTickGlobal(state: ChatSimState) {
