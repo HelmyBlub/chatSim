@@ -1,14 +1,9 @@
 Tasks:
 - for next feature vision distance think about redesign code for map objects
-    - type mapChunk change to
-        - create new common type
-            - MapChunkObject
-                - type: string //Tree, Mushroom, Building
-        - mapChunk
-            - objects: Set<MapChunkObject>
-    - tree/mushroom/building all be of some common type
-    - add functions like paint/getVisionDistance and others
+    - selecting object need fixing
     - check for more required refactoring after this change
+    - add functions like paint/getVisionDistance and others
+    - buildings and ticking redesign?
 - citizen view distance depending on what
     - Mushroom small can't see that far. Building can be seen a lot further
     - cut down tree not visible as far as standing tree

@@ -6,6 +6,9 @@ import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
 import { MAP_OBJECT_TREE, Tree } from "./map/tree.js";
+import { MAP_OBJECT_BUILDING } from "./map/building.js";
+import { MAP_OBJECT_MUSHROOM } from "./map/mapObjectMushroom.js";
+import { MapChunkTileObject } from "./map/mapObjects.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -76,13 +79,11 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
         if (!chunk) return;
         let closest: SelectedObject | undefined = undefined;
         let closestDistance = 0;
-        let trees = chunk.tileObjects.get(MAP_OBJECT_TREE) as Tree[];
-        if (!trees) trees = [];
         let toCheckObjects = [
             { objects: state.map.citizens, type: "citizen", size: 40 },
-            // { objects: chunk.buildings, type: "building", size: 60 }, //TODO
-            // { objects: trees, type: "tree", size: 60 },
-            // { objects: chunk.mushrooms, type: "mushroom", size: 30 },
+            { objects: chunk.tileObjects.get(MAP_OBJECT_BUILDING), size: 60 },
+            { objects: chunk.tileObjects.get(MAP_OBJECT_TREE), size: 60 },
+            { objects: chunk.tileObjects.get(MAP_OBJECT_MUSHROOM), size: 30 },
         ];
         for (let toCheck of toCheckObjects) {
             const closestObject = getClosestObject(toCheck.objects, toCheck.size, relativeMouseToCanvas, state);
@@ -90,7 +91,7 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
                 if (closest === undefined || closestObject.distance < closestDistance) {
                     closest = {
                         object: closestObject.object,
-                        type: toCheck.type,
+                        type: toCheck.type ?? (closestObject.object as MapChunkTileObject).type,
                     }
                     closestDistance = closestObject.distance;
                 }
@@ -100,6 +101,8 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
             state.inputData.selected = closest;
             if (closest.type === "citizen") {
                 state.paintData.map.lockCameraToSelected = true;
+            } else {
+                state.paintData.map.lockCameraToSelected = false;
             }
             return;
         }
@@ -107,7 +110,8 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
     }
 }
 
-function getClosestObject(objects: { position: Position }[], size: number, relativeClickPosition: Position, state: ChatSimState): { object: any, distance: number } | undefined {
+function getClosestObject(objects: { position: Position }[] | undefined, size: number, relativeClickPosition: Position, state: ChatSimState): { object: any, distance: number } | undefined {
+    if (objects === undefined) return;
     let closest = undefined;
     let closestDistance = 0;
     const mapClickPosition = mapCanvasPositionToMapPosition(relativeClickPosition, state.paintData.map);
