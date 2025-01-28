@@ -1,13 +1,13 @@
 import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { chunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
+import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
 import { getTimeOfDay, getTimeOfDayString } from "./main.js";
 import { Tree } from "./map/mapObjectTree.js";
 import { CITIZEN_TRAIT_FUNCTIONS } from "./traits/trait.js";
-import { paintChunkObjects } from "./map/mapObject.js";
+import { mapPaintChunkObjects } from "./map/mapObject.js";
 import { Mushroom } from "./map/mapObjectMushroom.js";
 
 export const PAINT_LAYER_CITIZEN_AFTER_HOUSES = 2;
@@ -198,7 +198,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     ctx.fillStyle = "green";
     const chunkKeys = Object.keys(state.map.mapChunks);
     for (let chunkKey of chunkKeys) {
-        const chunkTopLeft = chunkKeyToPosition(chunkKey, state.map);
+        const chunkTopLeft = mapChunkKeyToPosition(chunkKey, state.map);
         if (!chunkTopLeft) continue;
         const chunk = state.map.mapChunks[chunkKey];
         const chunkWidth = chunk.tilesHorizontal * state.map.tileSize + 1 / paintDataMap.zoom;
@@ -207,7 +207,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
         ctx.fillRect(paintMapTopLeft.x, paintMapTopLeft.y, chunkWidth, chunkHeight);
     }
     const chunksToPaint = getChunksToPaint(state);
-    paintChunkObjects(ctx, chunksToPaint, paintDataMap, state);
+    mapPaintChunkObjects(ctx, chunksToPaint, paintDataMap, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
     paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);

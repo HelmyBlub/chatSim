@@ -79,7 +79,7 @@ export function mapAddObject(object: MapChunkTileObject, state: ChatSimState): b
     return true;
 }
 
-export function paintChunkObjects(ctx: CanvasRenderingContext2D, chunks: MapChunk[], paintDataMap: PaintDataMap, state: ChatSimState) {
+export function mapPaintChunkObjects(ctx: CanvasRenderingContext2D, chunks: MapChunk[], paintDataMap: PaintDataMap, state: ChatSimState) {
     for (let chunk of chunks) {
         const types = chunk.tileObjects.keys();
         for (let type of types) {

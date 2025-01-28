@@ -2,7 +2,7 @@ import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { ChatSimMap, mapChunkKeyAndTileToPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
+import { ChatSimMap, PaintDataMap } from "./map.js";
 import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapChunkTileObject } from "./mapObject.js";
 
 export type Mushroom = MapChunkTileObject & {

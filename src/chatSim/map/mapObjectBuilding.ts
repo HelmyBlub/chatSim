@@ -6,7 +6,7 @@ import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } fro
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
-import { ChatSimMap, getRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";
+import { ChatSimMap, mapGetRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { MAP_OBJECTS_FUNCTIONS, mapAddObject, MapChunkTileObject, mapDeleteObject } from "./mapObject.js";
 
@@ -41,7 +41,7 @@ export function loadMapObjectBuilding() {
 }
 
 export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType, buildPositionCenter: Position): Building | undefined {
-    const emptyTileInfo = getRandomEmptyTileInfoInDistance(state, buildPositionCenter, 400);
+    const emptyTileInfo = mapGetRandomEmptyTileInfoInDistance(state, buildPositionCenter, 400);
     if (!emptyTileInfo) return undefined;
     const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
     const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
