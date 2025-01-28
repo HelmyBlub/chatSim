@@ -205,8 +205,10 @@ export function citizenMoveToRandom(citizen: Citizen, state: ChatSimState, lastS
         newSearchDirection = lastSearchDirection + nextRandom(state.randomSeed) * Math.PI / 2 - Math.PI / 4;
     }
     const randomTurnIfOutOfBound = nextRandom(state.randomSeed) < 0.2 ? 0.3 : -0.3;
-    const walkDistance = citizenGetVisionDistance(citizen, state) * 0.75;
-    while (true) {
+    const initialCitizenVisionDistance = citizenGetVisionDistance(citizen, state);
+    const lightModifiedVisionDistance = initialCitizenVisionDistance * state.map.lightPerCent;
+    const walkDistance = lightModifiedVisionDistance * 0.75;
+    while (-Math.PI * 4 < newSearchDirection && newSearchDirection < Math.PI * 4) {
         const newMoveTo = {
             x: citizen.position.x + Math.cos(newSearchDirection) * walkDistance,
             y: citizen.position.y + Math.sin(newSearchDirection) * walkDistance,
@@ -215,9 +217,19 @@ export function citizenMoveToRandom(citizen: Citizen, state: ChatSimState, lastS
             newSearchDirection += randomTurnIfOutOfBound;
         } else {
             citizenMoveTo(citizen, newMoveTo);
-            return newSearchDirection;
+            return newSearchDirection % (Math.PI * 2);
         }
     }
+    // citizen out of bounds case?
+    console.log("citizen out of bounds?");
+    debugger;
+    newSearchDirection = calculateDirection(citizen.position, { x: 0, y: 0 });
+    const newMoveTo = {
+        x: citizen.position.x + Math.cos(newSearchDirection) * 200,
+        y: citizen.position.y + Math.sin(newSearchDirection) * 200,
+    }
+    citizenMoveTo(citizen, newMoveTo);
+    return newSearchDirection % (Math.PI * 2);
 }
 
 export function addCitizen(user: string, state: ChatSimState): Citizen | undefined {

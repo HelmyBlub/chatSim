@@ -223,16 +223,9 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     const timeOfDay = getTimeOfDay(state.time, state);
     const transitionTime = 0.05;
 
-    if (timeOfDay < state.sunriseAt + transitionTime || timeOfDay > state.sunsetAt - transitionTime) {
-        const nightAlpha = 0.55;
-        let transitionAlpha = nightAlpha;
-        if (Math.abs(state.sunriseAt - timeOfDay + transitionTime) < transitionTime) {
-            transitionAlpha *= (state.sunriseAt - timeOfDay + transitionTime) / transitionTime;
-        } else if (Math.abs(state.sunsetAt - timeOfDay - transitionTime) < transitionTime) {
-            transitionAlpha *= (timeOfDay - state.sunsetAt + transitionTime) / transitionTime;
-        }
+    if (state.map.lightPerCent < 1) {
         ctx.fillStyle = "black";
-        ctx.globalAlpha = transitionAlpha;
+        ctx.globalAlpha = 1 - state.map.lightPerCent;
         ctx.fillRect(paintDataMap.paintOffset.x, paintDataMap.paintOffset.y, paintDataMap.paintWidth, paintDataMap.paintHeight);
         ctx.globalAlpha = 1;
     }

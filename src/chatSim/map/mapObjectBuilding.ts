@@ -50,8 +50,12 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     if (!mapPosition) return;
     const building = createBuilding(owner, mapPosition, buildingType);
     const success = mapAddObject(building, state);
-    if (success) state.map.buildings.push(building);
-    return building;
+    if (success) {
+        state.map.buildings.push(building);
+        return building;
+    }
+    debugger;
+    return undefined;
 }
 
 export function marketGetCounterPosition(market: BuildingMarket): Position {

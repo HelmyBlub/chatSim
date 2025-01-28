@@ -1,7 +1,5 @@
 Tasks:
 - citizen view distance depending on what
-    - Mushroom small can't see that far. Building can be seen a lot further
-    - cut down tree not visible as far as standing tree
     - at night can see as far
     - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving

@@ -42,7 +42,6 @@ export type CitizenStateSearchData = {
     searchFor: {
         type: string,
         intention?: string,
-        viewDistance: number,
         condition?: SearchCondition,
     }[],
     lastSearchDirection?: number,
@@ -231,12 +230,12 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             if (itemName === INVENTORY_MUSHROOM) {
                 citizenSetEquipment(citizen, ["Basket"]);
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for growing ${INVENTORY_MUSHROOM}.`, state);
-                searchData.searchFor.push({ type: MAP_OBJECT_MUSHROOM, viewDistance: viewDistance });
+                searchData.searchFor.push({ type: MAP_OBJECT_MUSHROOM });
 
                 if (citizen.money < 4 && citizen.happinessData.happiness < 0 && citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
                     if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i would steal for ${INVENTORY_MUSHROOM}.`, state);
                     searchData.searchFor.push({
-                        type: MAP_OBJECT_BUILDING, viewDistance: viewDistance, intention: "steal", condition:
+                        type: MAP_OBJECT_BUILDING, intention: "steal", condition:
                             (building: Building, citizen: Citizen, state: ChatSimState) => {
                                 let inventoryItem = building.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
                                 return inventoryItem !== undefined && inventoryItem.counter > 0;
@@ -246,12 +245,12 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             }
             if (itemName === INVENTORY_WOOD) {
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for trees.`, state);
-                searchData.searchFor.push({ type: MAP_OBJECT_TREE, viewDistance: viewDistance });
+                searchData.searchFor.push({ type: MAP_OBJECT_TREE });
             }
             if (citizen.money >= 2 && !data.ignoreMarkets && data.amount !== undefined) {
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for Markets selling ${itemName}.`, state);
                 searchData.searchFor.push({
-                    type: MAP_OBJECT_BUILDING, viewDistance: viewDistance, condition:
+                    type: MAP_OBJECT_BUILDING, condition:
                         (building: Building, citizen: Citizen, state: ChatSimState) => {
                             return buildingSellsItem(building, citizen, state, itemName);
                         }
@@ -268,7 +267,7 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const data = citizen.stateInfo.stack[0].data as CitizenStateSearchData;
         for (let search of data.searchFor) {
-            const found = getClosest(citizen, search.viewDistance, search.type, state, search.condition);
+            const found = getClosest(citizen, search.type, state, search.condition);
             if (found) {
                 const successData: CitizenStateSearchSuccessData = { type: CITIZEN_STATE_SEARCH, found: found, foundType: search.type, intention: search.intention };
                 citizenStateStackTaskSuccessWithData(citizen, successData);
@@ -279,10 +278,12 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
     }
 }
 
-function getClosest(citizen: Citizen, visionDistance: number, key: string, state: ChatSimState, searchCondition: SearchCondition | undefined = undefined): any | undefined {
+function getClosest(citizen: Citizen, key: string, state: ChatSimState, searchCondition: SearchCondition | undefined = undefined): any | undefined {
     let closest: any | undefined = undefined;
     let closestDistance: number = 0;
-    const objectTypeVisionDistance = visionDistance * mapGetMaxObjectVisionDistanceFactor(key);
+    const baseVisionDistance = citizenGetVisionDistance(citizen, state);
+    const lightModifiedVisionDistance = baseVisionDistance * state.map.lightPerCent;
+    const objectTypeVisionDistance = lightModifiedVisionDistance * mapGetMaxObjectVisionDistanceFactor(key);
     const chunks = mapGetChunksInDistance(citizen.position, state.map, objectTypeVisionDistance);
     const getObjectSpecificVisionDistance = MAP_OBJECTS_FUNCTIONS[key].getVisionDistanceFactor;
     for (let chunk of chunks) {
@@ -292,7 +293,7 @@ function getClosest(citizen: Citizen, visionDistance: number, key: string, state
         for (let object of mapObjects) {
             const distance = calculateDistance(citizen.position, (object as any).position);
             if (getObjectSpecificVisionDistance) {
-                objectVisionDistance = visionDistance * getObjectSpecificVisionDistance(object);
+                objectVisionDistance = lightModifiedVisionDistance * getObjectSpecificVisionDistance(object);
             }
             if (distance > objectVisionDistance) continue;
             if (closest !== undefined && distance > closestDistance) continue;

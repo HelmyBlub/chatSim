@@ -1,7 +1,7 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { Building, tickBuildings } from "./mapObjectBuilding.js";
 import { Citizen } from "../citizen.js";
-import { calculateDistance, nextRandom } from "../main.js";
+import { calculateDistance, getTimeOfDay, nextRandom } from "../main.js";
 import { MapChunkTileObject, mapObjectsTickGlobal } from "./mapObject.js";
 
 export type TilePosition = {
@@ -41,6 +41,7 @@ export type ChatSimMap = {
     treeCounter: number,
     mapChunks: { [key: string]: MapChunk },
     buildings: Building[],
+    lightPerCent: number,
 }
 
 export type MapChunk = {
@@ -80,6 +81,7 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
         zeroChunkTopLeft: { x: 100, y: 50 },
         mapChunks: {},
         buildings: [],
+        lightPerCent: 1,
     }
     fillAllChunksAtStart(map);
     return map;
@@ -177,9 +179,29 @@ export function mapGetVisionBorderPositionClosestToPoint(position: Position, map
 }
 
 export function tickChatSimMap(state: ChatSimState) {
+    tickSetLightPerCent(state);
     mapObjectsTickGlobal(state);
     tickBuildings(state);
 }
+
+function tickSetLightPerCent(state: ChatSimState) {
+    const timeOfDay = getTimeOfDay(state.time, state);
+    const transitionTime = 0.05;
+
+    if (timeOfDay < state.sunriseAt + transitionTime || timeOfDay > state.sunsetAt - transitionTime) {
+        const nightDarkening = 0.75;
+        let transitionValue = nightDarkening;
+        if (Math.abs(state.sunriseAt - timeOfDay + transitionTime) < transitionTime) {
+            transitionValue *= (state.sunriseAt - timeOfDay + transitionTime) / transitionTime;
+        } else if (Math.abs(state.sunsetAt - timeOfDay - transitionTime) < transitionTime) {
+            transitionValue *= (timeOfDay - state.sunsetAt + transitionTime) / transitionTime;
+        }
+        state.map.lightPerCent = 1 - transitionValue;
+    } else {
+        state.map.lightPerCent = 1;
+    }
+}
+
 
 export function mapGetRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string[]): { tileIndex: number, chunkKey: string } | undefined {
     const maxTries = 10;
@@ -226,13 +248,14 @@ export function mapGetChunkForPosition(position: Position, map: ChatSimMap): Map
 }
 
 export function mapGetChunkAndTileForPosition(position: Position, map: ChatSimMap): { chunk: MapChunk, tileX: number, tileY: number } | undefined {
-    const chunk = mapGetChunkForPosition(position, map);
+    const chunkXY = mapPositionToChunkXy(position, map);
+    const chunkKey = mapChunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
+    const chunk = map.mapChunks[chunkKey];
     if (chunk === undefined) return undefined;
+    const chunkTopLeft = mapChunkXyToPosition(chunkXY.chunkX, chunkXY.chunkY, map);
     const chunkSize = map.defaultChunkLength * map.tileSize;
-    let tileX = Math.floor((position.x % chunkSize) / map.tileSize);
-    if (tileX < 0) tileX += map.defaultChunkLength;
-    let tileY = Math.floor((position.y % chunkSize) / map.tileSize);
-    if (tileY < 0) tileY += map.defaultChunkLength;
+    let tileX = Math.floor((position.x - chunkTopLeft.x) / map.tileSize);
+    let tileY = Math.floor((position.y - chunkTopLeft.y) / map.tileSize);
     return { chunk, tileX, tileY };
 }
 
