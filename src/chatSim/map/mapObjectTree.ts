@@ -3,9 +3,9 @@ import { ChatSimState, Position } from "../chatSimModels.js";
 import { ChatSimMap, PaintDataMap } from "./map.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapChunkTileObject } from "./mapObject.js";
+import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapObject } from "./mapObject.js";
 
-export type Tree = MapChunkTileObject & {
+export type Tree = MapObject & {
     woodValue: number,
     position: Position,
     trunkDamagePerCent: number,
@@ -19,7 +19,7 @@ export function loadMapObjectTree() {
         create: createTree,
         getVisionDistanceFactor: getVisionDistanceFactor,
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
-        onDelete: onDelete,
+        onDeleteOnTile: onDelete,
         paint: paintTree,
         tickGlobal: tickTreeSpawn,
     }
@@ -42,7 +42,7 @@ function tickTreeSpawn(state: ChatSimState) {
     }
 }
 
-function onDelete(object: MapChunkTileObject, map: ChatSimMap) {
+function onDelete(object: MapObject, map: ChatSimMap) {
     map.treeCounter--;
 }
 

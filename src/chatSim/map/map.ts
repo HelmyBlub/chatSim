@@ -2,7 +2,7 @@ import { ChatSimState, Position } from "../chatSimModels.js";
 import { Building, tickBuildings } from "./mapObjectBuilding.js";
 import { Citizen } from "../citizen.js";
 import { calculateDistance, getTimeOfDay, nextRandom } from "../main.js";
-import { MapChunkTileObject, mapObjectsTickGlobal } from "./mapObject.js";
+import { MapObject, mapObjectsTickGlobal } from "./mapObject.js";
 
 export type TilePosition = {
     tileX: number,
@@ -49,7 +49,7 @@ export type MapChunk = {
     tilesVertical: number,
     usedTiles: Tile[],
     emptyTiles: TilePosition[],
-    tileObjects: Map<string, MapChunkTileObject[]>,
+    tileObjects: Map<string, MapObject[]>,
 }
 
 export function createDefaultMap(): ChatSimMap {

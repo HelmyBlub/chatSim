@@ -8,10 +8,10 @@ import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
 import { ChatSimMap, mapGetRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { MAP_OBJECTS_FUNCTIONS, mapAddObject, MapChunkTileObject, mapDeleteObject } from "./mapObject.js";
+import { MAP_OBJECTS_FUNCTIONS, mapAddObject, MapObject, mapDeleteTileObject } from "./mapObject.js";
 
 export type BuildingType = "Market" | "House"
-export type Building = MapChunkTileObject & {
+export type Building = MapObject & {
     buildingType: BuildingType
     owner: Citizen
     inhabitedBy?: Citizen
@@ -36,7 +36,7 @@ export const MAP_OBJECT_BUILDING = "building";
 export function loadMapObjectBuilding() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_BUILDING] = {
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
-        onDelete: onDelete,
+        onDeleteOnTile: onDelete,
         paint: paint,
     }
 }
@@ -126,7 +126,7 @@ export function tickBuildings(state: ChatSimState) {
         } else if (building.brokeDownTime !== undefined) {
             const breakDownTime = BUILDING_DATA[building.buildingType].woodAmount * 60000;
             if (building.brokeDownTime + breakDownTime < state.time) {
-                mapDeleteObject(building, state.map);
+                mapDeleteTileObject(building, state.map);
             }
         }
     }

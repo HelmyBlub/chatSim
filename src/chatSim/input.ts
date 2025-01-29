@@ -8,7 +8,7 @@ import { chatSimTick } from "./tick.js";
 import { MAP_OBJECT_TREE, Tree } from "./map/mapObjectTree.js";
 import { MAP_OBJECT_BUILDING } from "./map/mapObjectBuilding.js";
 import { MAP_OBJECT_MUSHROOM } from "./map/mapObjectMushroom.js";
-import { MapChunkTileObject } from "./map/mapObject.js";
+import { MapObject } from "./map/mapObject.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -91,7 +91,7 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
                 if (closest === undefined || closestObject.distance < closestDistance) {
                     closest = {
                         object: closestObject.object,
-                        type: toCheck.type ?? (closestObject.object as MapChunkTileObject).type,
+                        type: toCheck.type ?? (closestObject.object as MapObject).type,
                     }
                     closestDistance = closestObject.distance;
                 }

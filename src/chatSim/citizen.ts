@@ -18,6 +18,7 @@ import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
 import { CitizenTraits } from "./traits/trait.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";
 import { Mushroom } from "./map/mapObjectMushroom.js";
+import { MapObject } from "./map/mapObject.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -100,7 +101,7 @@ export type CitizenMemory = {
     }
 }
 
-export type Citizen = {
+export type Citizen = MapObject & {
     job: CitizenJob,
     happinessData: CitizenHappiness,
     tradePaw?: {
@@ -124,7 +125,6 @@ export type Citizen = {
     name: string,
     stateInfo: CitizenStateInfo,
     speed: number,
-    position: Position,
     moveTo?: Position,
     foodPerCent: number,
     energyPerCent: number,
@@ -149,7 +149,7 @@ export type LogEntry = {
 
 export const CITIZEN_STATE_TYPE_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
 };
-
+export const MAP_OBJECT_CITIZEN = "citizen";
 export const CITIZEN_TAGS_AND_FACTORS = new Map<string, number>()
 export const TAG_DOING_NOTHING = "doing nothing"
 CITIZEN_TAGS_AND_FACTORS.set(TAG_DOING_NOTHING, 1.5);
@@ -242,6 +242,7 @@ export function addCitizen(user: string, state: ChatSimState): Citizen | undefin
 
 export function citizenCreateDefault(citizenName: string, state: ChatSimState): Citizen {
     const citizen: Citizen = {
+        type: MAP_OBJECT_CITIZEN,
         name: citizenName,
         goToBedTime: (0.9 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1)) % 1,
         sleepDuration: 0.36 * (nextRandom(state.randomSeed) * 0.4 - 0.2 + 1),

@@ -7,7 +7,7 @@ import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { playChatSimSound, SOUND_PATH_PICKUP } from "../sounds.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
-import { mapDeleteObject } from "../map/mapObject.js";
+import { mapDeleteTileObject } from "../map/mapObject.js";
 
 type GatherData = {
     mushroomPosition: Position,
@@ -42,7 +42,7 @@ function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) 
 }
 
 function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroom) {
-    mapDeleteObject(mushroom, state.map);
+    mapDeleteTileObject(mushroom, state.map);
     let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
     if (inventoryMushroom === undefined) {
         inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0 };

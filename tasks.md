@@ -1,7 +1,6 @@
 Tasks:
-- citizen view distance depending on what
-    - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving
+- bots using different characters like "Best̹ viewers"
 - check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
 - check citizen names remember counter beeing to high. Maybe interacting with same citizen twice has incorrect logic?

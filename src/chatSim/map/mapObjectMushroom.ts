@@ -3,9 +3,9 @@ import { ChatSimState, Position } from "../chatSimModels.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { ChatSimMap, PaintDataMap } from "./map.js";
-import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapChunkTileObject } from "./mapObject.js";
+import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapObject } from "./mapObject.js";
 
-export type Mushroom = MapChunkTileObject & {
+export type Mushroom = MapObject & {
     position: Position,
 }
 
@@ -15,7 +15,7 @@ export function loadMapObjectMushroom() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_MUSHROOM] = {
         create: create,
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
-        onDelete: onDelete,
+        onDeleteOnTile: onDelete,
         paint: paint,
         tickGlobal: tickMushroomSpawn,
     }
@@ -45,7 +45,7 @@ function tickMushroomSpawn(state: ChatSimState) {
     }
 }
 
-function onDelete(object: MapChunkTileObject, map: ChatSimMap) {
+function onDelete(object: MapObject, map: ChatSimMap) {
     map.mushroomCounter--;
 }
 

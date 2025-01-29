@@ -4,17 +4,17 @@ import { ChatSimMap, MapChunk, mapChunkKeyAndTileToPosition, mapGetChunkAndTileF
 import { loadMapObjectBuilding } from "./mapObjectBuilding.js";
 import { loadMapObjectMushroom } from "./mapObjectMushroom.js";
 
-export type MapChunkTileObject = {
+export type MapObject = {
     type: string,
     position: Position,
 }
 
 export type FunctionsMapObject = {
-    create?(position: Position, state: ChatSimState): MapChunkTileObject,
+    create?(position: Position, state: ChatSimState): MapObject,
     getMaxVisionDistanceFactor(): number,
-    getVisionDistanceFactor?(object: MapChunkTileObject): number,
-    onDelete?(object: MapChunkTileObject, map: ChatSimMap): void,
-    paint(ctx: CanvasRenderingContext2D, object: MapChunkTileObject, paintDataMap: PaintDataMap, state: ChatSimState): void,
+    getVisionDistanceFactor?(object: MapObject): number,
+    onDeleteOnTile?(object: MapObject, map: ChatSimMap): void,
+    paint?(ctx: CanvasRenderingContext2D, object: MapObject, paintDataMap: PaintDataMap, state: ChatSimState): void,
     tickGlobal?(state: ChatSimState): void,
 }
 
@@ -28,7 +28,7 @@ export function loadMapObjectsFunctions() {
     loadMapObjectMushroom();
 }
 
-export function mapAddObjectRandomPosition(objectType: string, state: ChatSimState): MapChunkTileObject | undefined {
+export function mapAddObjectRandomPosition(objectType: string, state: ChatSimState): MapObject | undefined {
     const chunks = Object.keys(state.map.mapChunks);
     const emptyTileInfo = mapGetRandomEmptyTileInfo(state, chunks);
     if (!emptyTileInfo) return;
@@ -59,7 +59,7 @@ export function mapAddObjectRandomPosition(objectType: string, state: ChatSimSta
     return object;
 }
 
-export function mapAddObject(object: MapChunkTileObject, state: ChatSimState): boolean {
+export function mapAddObject(object: MapObject, state: ChatSimState): boolean {
     const chunkAndTile = mapGetChunkAndTileForPosition(object.position, state.map);
     if (chunkAndTile === undefined) return false;
     const chunk = chunkAndTile.chunk;
@@ -87,6 +87,7 @@ export function mapPaintChunkObjects(ctx: CanvasRenderingContext2D, chunks: MapC
             const objects = chunk.tileObjects.get(type);
             if (!objects) continue;
             const objectFunctions = MAP_OBJECTS_FUNCTIONS[type];
+            if (!objectFunctions.paint) continue;
             for (let object of objects) {
                 objectFunctions.paint(ctx, object, paintDataMap, state);
             }
@@ -109,7 +110,7 @@ export function mapObjectsTickGlobal(state: ChatSimState) {
     }
 }
 
-export function mapDeleteObject(object: MapChunkTileObject, map: ChatSimMap) {
+export function mapDeleteTileObject(object: MapObject, map: ChatSimMap) {
     const chunk = mapGetChunkForPosition(object.position, map);
     if (!chunk) return;
     const usedTileIndex = chunk.usedTiles.findIndex(t => t.object === object);
@@ -121,7 +122,7 @@ export function mapDeleteObject(object: MapChunkTileObject, map: ChatSimMap) {
     mapObjects.splice(objectIndex, 1);
     const usedTile = chunk.usedTiles.splice(usedTileIndex, 1)[0];
     const objectFunctions = MAP_OBJECTS_FUNCTIONS[object.type];
-    if (objectFunctions && objectFunctions.onDelete) objectFunctions.onDelete(object, map);
+    if (objectFunctions && objectFunctions.onDeleteOnTile) objectFunctions.onDeleteOnTile(object, map);
     chunk.emptyTiles.push({
         tileX: usedTile.position.tileX,
         tileY: usedTile.position.tileY,

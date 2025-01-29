@@ -9,7 +9,7 @@ import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
 import { isCitizenInInteractionDistance } from "../jobs/job.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { playChatSimSound, SOUND_PATH_CUT, SOUND_PATH_TREE_FALL } from "../sounds.js";
-import { mapDeleteObject } from "../map/mapObject.js";
+import { mapDeleteTileObject } from "../map/mapObject.js";
 
 export const CITIZEN_STATE_GATHER_WOOD = "GatherWood";
 type Data = {
@@ -123,7 +123,7 @@ function cutTreeForWood(citizen: Citizen, tree: Tree, state: ChatSimState) {
     tree.woodValue--;
     inventoryWood.counter++;
     citizenAddLogEntry(citizen, `cut tree for 1x${INVENTORY_WOOD}, in inventory: ${inventoryWood.counter}x${INVENTORY_WOOD}`, state);
-    if (tree.woodValue === 0) mapDeleteObject(tree, state.map);
+    if (tree.woodValue === 0) mapDeleteTileObject(tree, state.map);
 
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
