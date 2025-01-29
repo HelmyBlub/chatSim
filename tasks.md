@@ -1,6 +1,4 @@
 Tasks:
-- bug: citizen out of bound
-    - why does it happen?
 - citizen view distance depending on what
     - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving

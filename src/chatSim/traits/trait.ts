@@ -21,18 +21,22 @@ type CitizenTraitFunction = {
 export const CITIZEN_TRAIT_FUNCTIONS: { [key: string]: CitizenTraitFunction } = {
 }
 
-const TRAIT_EARLY_BIRD = "Early Bird";
-const TRAIT_NIGHT_OWL = "Night Owl";
+const CITIZEN_TRAIT_EARLY_BIRD = "Early Bird";
+const CITIZEN_TRAIT_NIGHT_OWL = "Night Owl";
 const CITIZEN_TRAIT_BAD_NAME_MEMORY = "Bad Name Memory";
 const CITIZEN_TRAIT_GOOD_NAME_MEMORY = "Good Name Memory";
+const CITIZEN_TRAIT_GOOD_VISION = "Good Eye Vision";
+const CITIZEN_TRAIT_BAD_VISION = "Bad Eye Vision";
 export const CITIZEN_TRAIT_ROBOT = "Robot";
 
 export function loadTraits() {
-    CITIZEN_TRAIT_FUNCTIONS[TRAIT_EARLY_BIRD] = { apply: applyEarlyBird, trait: { name: TRAIT_EARLY_BIRD, opposite: TRAIT_NIGHT_OWL, type: "neutral" } };
-    CITIZEN_TRAIT_FUNCTIONS[TRAIT_NIGHT_OWL] = { apply: applyNightOwl, trait: { name: TRAIT_NIGHT_OWL, opposite: TRAIT_EARLY_BIRD, type: "neutral" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_EARLY_BIRD] = { apply: applyEarlyBird, trait: { name: CITIZEN_TRAIT_EARLY_BIRD, opposite: CITIZEN_TRAIT_NIGHT_OWL, type: "neutral" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_NIGHT_OWL] = { apply: applyNightOwl, trait: { name: CITIZEN_TRAIT_NIGHT_OWL, opposite: CITIZEN_TRAIT_EARLY_BIRD, type: "neutral" } };
     CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_ROBOT] = { apply: applyRobot, trait: { name: CITIZEN_TRAIT_ROBOT, type: "shouldNotBeAppliedRandomly" } };
     CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_BAD_NAME_MEMORY] = { apply: applyBadNameMemory, trait: { name: CITIZEN_TRAIT_BAD_NAME_MEMORY, opposite: CITIZEN_TRAIT_GOOD_NAME_MEMORY, type: "negative" } };
     CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_GOOD_NAME_MEMORY] = { apply: applyGoodNameMemory, trait: { name: CITIZEN_TRAIT_GOOD_NAME_MEMORY, opposite: CITIZEN_TRAIT_BAD_NAME_MEMORY, type: "positive" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_BAD_VISION] = { apply: applyBadEyeVision, trait: { name: CITIZEN_TRAIT_BAD_VISION, opposite: CITIZEN_TRAIT_GOOD_VISION, type: "negative" } };
+    CITIZEN_TRAIT_FUNCTIONS[CITIZEN_TRAIT_GOOD_VISION] = { apply: applyGoodEyeVision, trait: { name: CITIZEN_TRAIT_GOOD_VISION, opposite: CITIZEN_TRAIT_BAD_VISION, type: "positive" } };
 }
 
 export function handleChatterAddTraitMessage(chatter: ChatterData, citizen: Citizen, trait: string, state: ChatSimState) {
@@ -103,6 +107,14 @@ function applyBadNameMemory(citizen: Citizen, state: ChatSimState) {
 
 function applyGoodNameMemory(citizen: Citizen, state: ChatSimState) {
     citizen.memory.metCitizensData.maxNamesRemember = Math.floor(CITIZEN_DEFAULT_NAMES_REMEMBER * 1.4);
+}
+
+function applyBadEyeVision(citizen: Citizen, state: ChatSimState) {
+    citizen.visionFactor = 0.5 + nextRandom(state.randomSeed) * 0.3;
+}
+
+function applyGoodEyeVision(citizen: Citizen, state: ChatSimState) {
+    citizen.visionFactor = 1.2 + nextRandom(state.randomSeed) * 0.8;
 }
 
 function applyNightOwl(citizen: Citizen, state: ChatSimState) {

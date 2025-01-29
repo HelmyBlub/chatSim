@@ -139,6 +139,7 @@ export type Citizen = {
     displayedEquipments: CitizenEquipmentData[],
     paintBehindBuildings?: boolean,
     stealCounter: number,
+    visionFactor: number,
 }
 
 export type LogEntry = {
@@ -308,6 +309,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         job: createJob(CITIZEN_JOB_FOOD_GATHERER, state)!,
         log: [],
         maxLogLength: 100,
+        visionFactor: 0.9 + nextRandom(state.randomSeed) * 0.2,
         stealCounter: 0,
     };
     setUpHappinessTags(citizen, state);
@@ -504,7 +506,7 @@ export function paintCititzenSpeechBubbles(ctx: CanvasRenderingContext2D, state:
 }
 
 export function citizenGetVisionDistance(citizen: Citizen, state: ChatSimState): number {
-    return 180;
+    return 180 * citizen.visionFactor;
 }
 
 export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Citizen, state: ChatSimState) {
