@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
 import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory } from "../citizen.js";
 import { inventoryGetAvailableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { calculateDistance } from "../main.js";
+import { calculateDistance, nextRandom } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
@@ -273,6 +273,9 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
                 citizenStateStackTaskSuccessWithData(citizen, successData);
                 return;
             }
+        }
+        if (nextRandom(state.randomSeed) < 0.2) {
+            if (citizenCheckTodoList(citizen, state, 4)) return;
         }
         data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
     }

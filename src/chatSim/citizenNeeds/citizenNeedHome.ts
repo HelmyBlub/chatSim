@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo } from "../citizen.js";
+import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory } from "../citizen.js";
 import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { isCitizenInVisionDistance } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -19,6 +19,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > 0.2) {
         if (citizen.home.deletedFromMap) {
             citizen.home = undefined;
+            citizenMemorizeHomeInventory(citizen);
             citizenAddThought(citizen, `My home disappeared.`, state);
             return false;
         } else {

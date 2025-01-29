@@ -1,10 +1,13 @@
 Tasks:
+- bug: citizen out of bound
+    - why does it happen?
 - citizen view distance depending on what
     - add citizen trait good/bad vision
 - citizen can ask other citizen for food if starving
 - check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
 - check citizen names remember counter beeing to high. Maybe interacting with same citizen twice has incorrect logic?
+- check function "citizenCheckTodoList", why condition number?. Change it?
 - improve UI?
     - instead of growing list of displayed things
     - make it easier to find citizen
