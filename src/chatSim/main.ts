@@ -315,37 +315,33 @@ function updateLocalStorageDataToNewVersion(oldData: string[]): ChatterData[] {
 }
 
 async function runner(app: App) {
-    try {
-        let loopStart: number = 0;
-        const maxFrameInterval = 50;
-        while (true) {
-            if (app.runningTests) testRunner(app);
-            loopStart = performance.now();
-            const state = app.state;
-            let startIndex = 0;
-            if (state.gameSpeed % 1 !== 0) {
-                startIndex++;
-                if (app.gameSpeedRemainder === undefined) app.gameSpeedRemainder = 0;
-                app.gameSpeedRemainder += state.gameSpeed % 1;
-                if (app.gameSpeedRemainder >= 1) {
-                    app.gameSpeedRemainder--;
-                    chatSimTick(state);
-                }
-            }
-            state.gameSpeedLimited = undefined;
-            for (let i = startIndex; i < state.gameSpeed; i++) {
+    let loopStart: number = 0;
+    const maxFrameInterval = 50;
+    while (true) {
+        if (app.runningTests) testRunner(app);
+        loopStart = performance.now();
+        const state = app.state;
+        let startIndex = 0;
+        if (state.gameSpeed % 1 !== 0) {
+            startIndex++;
+            if (app.gameSpeedRemainder === undefined) app.gameSpeedRemainder = 0;
+            app.gameSpeedRemainder += state.gameSpeed % 1;
+            if (app.gameSpeedRemainder >= 1) {
+                app.gameSpeedRemainder--;
                 chatSimTick(state);
-                if (performance.now() - loopStart > maxFrameInterval) {
-                    state.gameSpeedLimited = i;
-                    break;
-                }
             }
-            paintChatSim(app.state, state.gameSpeed);
-            if (state.inputData.map.moveX || state.inputData.map.moveY) moveMapCameraBy(state.inputData.map.moveX, state.inputData.map.moveY, state);
-            await sleep(16);
         }
-    } catch (e) {
-        throw e;
+        state.gameSpeedLimited = undefined;
+        for (let i = startIndex; i < state.gameSpeed; i++) {
+            chatSimTick(state);
+            if (performance.now() - loopStart > maxFrameInterval) {
+                state.gameSpeedLimited = i;
+                break;
+            }
+        }
+        paintChatSim(app.state, state.gameSpeed);
+        if (state.inputData.map.moveX || state.inputData.map.moveY) moveMapCameraBy(state.inputData.map.moveX, state.inputData.map.moveY, state);
+        await sleep(16);
     }
 }
 

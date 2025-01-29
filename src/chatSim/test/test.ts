@@ -299,7 +299,7 @@ function createCitizenWithFullfiledNeeds(citizenName: string, testState: ChatSim
 }
 
 function createTestMapSmall(): ChatSimMap {
-    return createMap(5, 5, 2, 1);
+    return createMap(5, 5, 3, 1);
 }
 
 function createTestMapMiddle(): ChatSimMap {

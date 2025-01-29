@@ -1,7 +1,7 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { mapChunkKeyToPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
+import { MapChunk, mapChunkKeyToPosition, mapGetChunkForPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
 import { Building } from "./map/mapObjectBuilding.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
@@ -18,7 +18,7 @@ import { CITIZEN_STATE_EAT } from "./citizenState/citizenStateEat.js";
 import { CitizenTraits } from "./traits/trait.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "./tick.js";
 import { Mushroom } from "./map/mapObjectMushroom.js";
-import { MapObject } from "./map/mapObject.js";
+import { MAP_OBJECTS_FUNCTIONS, MapObject } from "./map/mapObject.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -140,6 +140,7 @@ export type Citizen = MapObject & {
     paintBehindBuildings?: boolean,
     stealCounter: number,
     visionFactor: number,
+    currentMapChunk?: MapChunk,
 }
 
 export type LogEntry = {
@@ -175,6 +176,10 @@ export const CITIZEN_DEFAULT_NAMES_REMEMBER = 15;
 export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_WORKING_JOB] = tickCitizenJob;
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_CHANGE_JOB] = tickCitizenTypeChangeJob;
+
+    MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_CITIZEN] = {
+        getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
+    }
 }
 
 export function citizenMoveTo(citizen: Citizen, moveTo: Position) {
@@ -519,6 +524,24 @@ export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Cit
     paintChatBubbles(ctx, citizen, citizen.lastChat, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 4 }, state);
 }
 
+function citizenCheckMapChunk(citizen: Citizen, state: ChatSimState) {
+    if (state.time % (state.tickInterval * 10) !== 0) return;
+    const chunk = mapGetChunkForPosition(citizen.position, state.map);
+    if (!chunk || chunk === citizen.currentMapChunk) return;
+    if (citizen.currentMapChunk) {
+        const oldChunkObjects = citizen.currentMapChunk.tileObjects.get(MAP_OBJECT_CITIZEN) as Citizen[];
+        const index = oldChunkObjects.findIndex(c => c === citizen);
+        oldChunkObjects.splice(index, 1);
+    }
+    citizen.currentMapChunk = chunk;
+    let objects = chunk.tileObjects.get(MAP_OBJECT_CITIZEN) as Citizen[];
+    if (objects === undefined) {
+        objects = [];
+        chunk.tileObjects.set(MAP_OBJECT_CITIZEN, objects);
+    }
+    objects.push(citizen);
+}
+
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintBehindBuildings);
@@ -720,6 +743,7 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     tickCitizenState(citizen, state);
     citizenMoveToTick(citizen);
     citizenHappinessTick(citizen);
+    citizenCheckMapChunk(citizen, state);
 }
 
 function citizenHappinessTick(citizen: Citizen) {
@@ -867,4 +891,6 @@ function citizenMoveToTick(citizen: Citizen) {
     }
 }
 
-
+function getMaxVisionDistanceFactor() {
+    return 1;
+}
