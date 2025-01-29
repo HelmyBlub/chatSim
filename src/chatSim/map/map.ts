@@ -112,12 +112,10 @@ export function mapChunkKeyAndTileToPosition(chunkKey: string, tileXY: TilePosit
 }
 
 export function mapIsPositionOutOfBounds(position: Position, map: ChatSimMap): boolean {
-    const chunk = mapGetChunkForPosition(position, map);
-    if (!chunk) return true;
-    const chunkDefaultSize = map.tileSize * map.defaultChunkLength;
-    const positionChunkX = position.x % chunkDefaultSize;
-    const positionChunkY = position.y % chunkDefaultSize;
-    if (chunk.tilesHorizontal * map.tileSize > positionChunkX && chunk.tilesVertical * map.tileSize > positionChunkY) {
+    const chunkAndTile = mapGetChunkAndTileForPosition(position, map);
+    if (!chunkAndTile) return true;
+    const chunk = chunkAndTile.chunk;
+    if (chunk.tilesHorizontal > chunkAndTile.tileX && chunk.tilesVertical > chunkAndTile.tileY) {
         return false;
     }
     return true;

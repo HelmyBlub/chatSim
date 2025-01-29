@@ -222,7 +222,7 @@ export function citizenMoveToRandom(citizen: Citizen, state: ChatSimState, lastS
     }
     // citizen out of bounds case?
     console.log("citizen out of bounds?");
-    //debugger;
+    mapIsPositionOutOfBounds(citizen.position, state.map);
     newSearchDirection = calculateDirection(citizen.position, mapChunkKeyToPosition("0_0", state.map)!);
     const newMoveTo = {
         x: citizen.position.x + Math.cos(newSearchDirection) * 200,
