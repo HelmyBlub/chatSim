@@ -166,14 +166,70 @@ export function handleChatMessage(user: string, message: string, state: ChatSimS
         }
     }
 
-    if (message.indexOf("add me on discord") > -1
-        || message.indexOf("Cheap viewers") > -1
-        || message.indexOf("Best viewers") > -1
-    ) {
-        handleChatterAddTraitMessage(chatter, citizen, CITIZEN_TRAIT_ROBOT, state);
-        addChatterChangeLog(`${citizen.name} added trait ${CITIZEN_TRAIT_ROBOT}`, state);
-        saveLocalStorageChatter(state.chatterData);
+    if (checkIsChatterMessageABot(message)) {
+        setChatterToBot(chatter, citizen, state);
     }
+}
+
+function setChatterToBotByName(userName: string, state: ChatSimState) {
+    const chatter = state.chatterData.find(c => c.name === userName);
+    if (!chatter) {
+        console.log(`chatter ${userName} not found`);
+        return;
+    }
+    const citizen = state.map.citizens.find(c => c.name === userName);
+    if (!citizen) {
+        console.log(`citizen ${userName} not found`);
+        return;
+    }
+    setChatterToBot(chatter, citizen, state);
+}
+
+function setChatterToBot(chatter: ChatterData, citizen: Citizen, state: ChatSimState) {
+    handleChatterAddTraitMessage(chatter, citizen, CITIZEN_TRAIT_ROBOT, state);
+    addChatterChangeLog(`${citizen.name} added trait ${CITIZEN_TRAIT_ROBOT}`, state);
+    saveLocalStorageChatter(state.chatterData);
+}
+
+function checkIsChatterMessageABot(message: string) {
+    const stringsToCheck = [
+        "add me on discord",
+        "cheap viewers",
+        "best viewers",
+    ];
+    for (let toCheck of stringsToCheck) {
+        if (message.indexOf(toCheck) > -1) {
+            return true;
+        }
+        let toCheckIndex = 0;
+        let missMatchCount = 0;
+        let matchCount = 0;
+        for (let i = 0; i < message.length; i++) {
+            if (message[i].toLowerCase() === toCheck[toCheckIndex].toLowerCase()) {
+                matchCount++;
+                toCheckIndex++;
+                if (toCheckIndex >= toCheck.length) return true;
+                continue;
+            }
+            if (toCheckIndex + 1 < toCheck.length && message[i].toLowerCase() === toCheck[toCheckIndex + 1].toLowerCase()) {
+                matchCount++;
+                toCheckIndex += 2;
+                if (toCheckIndex >= toCheck.length) return true;
+                continue;
+            }
+            if (matchCount > 0) {
+                missMatchCount++;
+                if (missMatchCount > 1) {
+                    matchCount = 0;
+                    missMatchCount = 0;
+                    toCheckIndex = 0;
+                    continue;
+                }
+                if (toCheckIndex >= toCheck.length) return true;
+            }
+        }
+    }
+    return false;
 }
 
 function chatSimStateInit(streamer: string): App {
@@ -209,7 +265,6 @@ function initMyApp() {
     }
     //@ts-ignore
     ComfyJS.Init(state.streamer);
-
     runner(app);
 }
 
