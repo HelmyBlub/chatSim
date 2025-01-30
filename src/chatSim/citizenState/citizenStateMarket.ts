@@ -4,7 +4,8 @@ import { ChatSimState } from "../chatSimModels.js";
 import { TAG_DOING_NOTHING, TAG_QUEUING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, citizenMoveTo } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { isCitizenAtPosition, isCitizenInInteractionDistance } from "../jobs/job.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
+import { isCitizenInInteractionDistance } from "../citizen.js";
 import { JobMarketState, marketCanServeCustomer, marketServeCustomer, TRADE_DATA, TradeData } from "../jobs/jobMarket.js";
 import { Inventory, InventoryItem, inventoryPutItemInto } from "../inventory.js";
 

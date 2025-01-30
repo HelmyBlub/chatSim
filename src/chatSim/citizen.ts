@@ -7,9 +7,9 @@ import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
-import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, isCitizenInInteractionDistance, tickCitizenJob } from "./jobs/job.js";
+import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
-import { calculateDirection, nextRandom } from "./main.js";
+import { calculateDirection, calculateDistance, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
@@ -172,6 +172,7 @@ export const CITIZEN_STATE_THINKING = "thinking";
 export const CITIZEN_TIME_PER_THOUGHT_LINE = 2000;
 export const CITIZEN_PAINT_SIZE = 40;
 export const CITIZEN_DEFAULT_NAMES_REMEMBER = 15;
+export const CITIZEN_INTERACTION_DISTANCE = 40;
 
 export function loadCitizenStateTypeFunctions() {
     CITIZEN_STATE_TYPE_TICK_FUNCTIONS[CITIZEN_STATE_TYPE_WORKING_JOB] = tickCitizenJob;
@@ -201,6 +202,11 @@ export function citizenStopMoving(citizen: Citizen) {
         citizen.stateInfo.tags.add(TAG_AT_HOME);
         citizen.stateInfo.tags.delete(TAG_OUTSIDE);
     }
+}
+
+export function isCitizenInInteractionDistance(citizen: Citizen, target: Position) {
+    const distance = calculateDistance(citizen.position, target);
+    return distance <= CITIZEN_INTERACTION_DISTANCE;
 }
 
 export function citizenMoveToRandom(citizen: Citizen, state: ChatSimState, lastSearchDirection: number | undefined = undefined): number {
@@ -894,3 +900,4 @@ function citizenMoveToTick(citizen: Citizen) {
 function getMaxVisionDistanceFactor() {
     return 1;
 }
+

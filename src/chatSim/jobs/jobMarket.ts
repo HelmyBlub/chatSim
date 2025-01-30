@@ -5,7 +5,8 @@ import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizen
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition, isCitizenInInteractionDistance } from "./job.js"
+import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition } from "./job.js"
+import { isCitizenInInteractionDistance } from "../citizen.js";
 import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";

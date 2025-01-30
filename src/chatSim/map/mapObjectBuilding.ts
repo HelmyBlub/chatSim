@@ -3,7 +3,7 @@ import { ChatSimState, Position } from "../chatSimModels.js";
 import { Citizen } from "../citizen.js";
 import { IMAGES } from "../images.js";
 import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } from "../inventory.js";
-import { isCitizenInInteractionDistance } from "../jobs/job.js";
+import { isCitizenInInteractionDistance } from "../citizen.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
 import { ChatSimMap, mapGetRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";

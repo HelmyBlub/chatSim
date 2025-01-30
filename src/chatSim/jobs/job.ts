@@ -66,10 +66,7 @@ export function isCitizenAtPosition(citizen: Citizen, target: Position) {
     const distance = calculateDistance(citizen.position, target);
     return distance <= citizen.speed;
 }
-export function isCitizenInInteractionDistance(citizen: Citizen, target: Position) {
-    const distance = calculateDistance(citizen.position, target);
-    return distance <= 40;
-}
+
 export function isCitizenInVisionDistance(citizen: Citizen, target: Position) {
     const distance = calculateDistance(citizen.position, target);
     return distance <= 120;

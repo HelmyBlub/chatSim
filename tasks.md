@@ -1,7 +1,6 @@
 Tasks:
 - citizen can ask other citizen for food if starving
     - citizen needs to be part of chunk
-        - citizen object need to remember in what chunk it is
         - citizen should check in interval if chunk is still correct
             - check if it matters if done on each tick or just every x seconds
                 - matters, but why so much?
@@ -11,6 +10,7 @@ Tasks:
     - create some chat
         - outcome of chat should be a trade of food in good case
         - should not interact with the same citizen twice for same reason
+- check "isCitizenInVisionDistance", does not use citize vision. Replace it?
 - check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
 - check citizen names remember counter beeing to high. Maybe interacting with same citizen twice has incorrect logic?
