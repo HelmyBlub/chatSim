@@ -39,7 +39,7 @@ export type ChatSimMap = {
     mushroomCounter: number,
     maxTrees: number,
     treeCounter: number,
-    mapChunks: { [key: string]: MapChunk },
+    mapChunks: Map<string, MapChunk>,
     buildings: Building[],
     lightPerCent: number,
 }
@@ -79,7 +79,7 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
         maxTrees: maxTrees,
         treeCounter: 0,
         zeroChunkTopLeft: { x: 100, y: 50 },
-        mapChunks: {},
+        mapChunks: new Map(),
         buildings: [],
         lightPerCent: 1,
     }
@@ -208,8 +208,8 @@ export function mapGetRandomEmptyTileInfo(state: ChatSimState, chunkKeys: string
         tryCounter++;
         const randomChunkKeyIndex = Math.floor(nextRandom(state.randomSeed) * chunkKeys.length);
         const randomChunkKey = chunkKeys[randomChunkKeyIndex];
-        const randomChunk = state.map.mapChunks[randomChunkKey];
-        if (randomChunk.emptyTiles.length > 0) {
+        const randomChunk = state.map.mapChunks.get(randomChunkKey);
+        if (randomChunk && randomChunk.emptyTiles.length > 0) {
             const randomTileIndex = Math.floor(nextRandom(state.randomSeed) * randomChunk.emptyTiles.length);
             return { tileIndex: randomTileIndex, chunkKey: randomChunkKey };
         }
@@ -241,14 +241,14 @@ export function mapPositionToChunkXy(position: Position, map: ChatSimMap): { chu
 export function mapGetChunkForPosition(position: Position, map: ChatSimMap): MapChunk | undefined {
     const chunkXY = mapPositionToChunkXy(position, map);
     const chunkKey = mapChunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
-    const chunk = map.mapChunks[chunkKey];
+    const chunk = map.mapChunks.get(chunkKey);
     return chunk;
 }
 
 export function mapGetChunkAndTileForPosition(position: Position, map: ChatSimMap): { chunk: MapChunk, tileX: number, tileY: number } | undefined {
     const chunkXY = mapPositionToChunkXy(position, map);
     const chunkKey = mapChunkXyToChunkKey(chunkXY.chunkX, chunkXY.chunkY);
-    const chunk = map.mapChunks[chunkKey];
+    const chunk = map.mapChunks.get(chunkKey);
     if (chunk === undefined) return undefined;
     const chunkTopLeft = mapChunkXyToPosition(chunkXY.chunkX, chunkXY.chunkY, map);
     const chunkSize = map.defaultChunkLength * map.tileSize;
@@ -271,7 +271,7 @@ export function mapGetChunksInDistance(position: Position, map: ChatSimMap, dist
             const distanceToChunk = calculateDistanceToChunkXY(position, currentChunkX, currentChunkY, map);
             if (distanceToChunk > distance) continue;
             const key = mapChunkXyToChunkKey(currentChunkX, currentChunkY);
-            const chunk = map.mapChunks[key];
+            const chunk = map.mapChunks.get(key);
             if (chunk) mapChunks.push(chunk);
         }
     }
@@ -302,7 +302,7 @@ export function mapGetChunkKeysInDistance(position: Position, map: ChatSimMap, d
             const distanceToChunk = calculateDistanceToChunkXY(position, currentChunkX, currentChunkY, map);
             if (distanceToChunk > distance) continue;
             const key = mapChunkXyToChunkKey(currentChunkX, currentChunkY);
-            const chunk = map.mapChunks[key];
+            const chunk = map.mapChunks.get(key);
             if (chunk) mapChunkKeys.push(key);
         }
     }
@@ -329,7 +329,7 @@ function chunkKeyToChunkXy(chunkKey: string): Position | undefined {
 }
 
 function fillAllChunksAtStart(map: ChatSimMap) {
-    if (Object.keys(map.mapChunks).length > 0) return;
+    if (map.mapChunks.size > 0) return;
     const chunkSize = map.defaultChunkLength * map.tileSize;
     const horizontalChunkCoutner = Math.ceil(map.tileCounterHorizontal / map.defaultChunkLength);
     const verticalChunkCoutner = Math.ceil(map.tileCounterVertical / map.defaultChunkLength);
@@ -364,7 +364,7 @@ function fillAllChunksAtStart(map: ChatSimMap) {
                     });
                 }
             }
-            map.mapChunks[chunkKey] = chunk;
+            map.mapChunks.set(chunkKey, chunk);
         }
     }
 }

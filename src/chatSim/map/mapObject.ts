@@ -29,10 +29,10 @@ export function loadMapObjectsFunctions() {
 }
 
 export function mapAddObjectRandomPosition(objectType: string, state: ChatSimState): MapObject | undefined {
-    const chunks = Object.keys(state.map.mapChunks);
+    const chunks = Array.from(state.map.mapChunks.keys());
     const emptyTileInfo = mapGetRandomEmptyTileInfo(state, chunks);
     if (!emptyTileInfo) return;
-    const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
+    const chunk = state.map.mapChunks.get(emptyTileInfo.chunkKey)!;
     const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
     const mapPosition = mapChunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
     if (!mapPosition) return;

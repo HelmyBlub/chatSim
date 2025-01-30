@@ -196,11 +196,10 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     ctx.translate(-translateX, -translateY);
 
     ctx.fillStyle = "green";
-    const chunkKeys = Object.keys(state.map.mapChunks);
-    for (let chunkKey of chunkKeys) {
+    for (let chunkKey of state.map.mapChunks.keys()) {
         const chunkTopLeft = mapChunkKeyToPosition(chunkKey, state.map);
         if (!chunkTopLeft) continue;
-        const chunk = state.map.mapChunks[chunkKey];
+        const chunk = state.map.mapChunks.get(chunkKey)!;
         const chunkWidth = chunk.tilesHorizontal * state.map.tileSize + 1 / paintDataMap.zoom;
         const chunkHeight = chunk.tilesVertical * state.map.tileSize + 1 / paintDataMap.zoom;
         const paintMapTopLeft = mapPositionToPaintPosition(chunkTopLeft, paintDataMap);
@@ -242,7 +241,7 @@ function getChunksToPaint(state: ChatSimState): MapChunk[] {
     for (let x = 0; x < horizontalChunks; x++) {
         for (let y = 0; y < verticalChunks; y++) {
             const chunkKey = mapChunkXyToChunkKey(chunkXY.chunkX + x, chunkXY.chunkY + y);
-            const chunk = state.map.mapChunks[chunkKey];
+            const chunk = state.map.mapChunks.get(chunkKey);
             if (chunk) chunksToPaint.push(chunk);
         }
     }

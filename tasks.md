@@ -5,6 +5,7 @@ Tasks:
             - check if it matters if done on each tick or just every x seconds
                 - matters, but why so much?
             - check if map for chunks is more efficient?
+                - maybe matters but only very minor
     - put citizen into map objects
     - make search case for citizen
     - create some chat

@@ -44,7 +44,7 @@ export function loadMapObjectBuilding() {
 export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, buildingType: BuildingType, buildPositionCenter: Position): Building | undefined {
     const emptyTileInfo = mapGetRandomEmptyTileInfoInDistance(state, buildPositionCenter, 400);
     if (!emptyTileInfo) return undefined;
-    const chunk = state.map.mapChunks[emptyTileInfo.chunkKey];
+    const chunk = state.map.mapChunks.get(emptyTileInfo.chunkKey)!;
     const emptyTile = chunk.emptyTiles[emptyTileInfo.tileIndex];
     const mapPosition = mapChunkKeyAndTileToPosition(emptyTileInfo.chunkKey, emptyTile, state.map);
     if (!mapPosition) return;

@@ -38,7 +38,6 @@ function paint(ctx: CanvasRenderingContext2D, mushroom: Mushroom, paintDataMap: 
 function tickMushroomSpawn(state: ChatSimState) {
     if (state.map.mushroomCounter >= state.map.maxMushrooms) return;
     const maxSpawn = Math.min(state.map.maxMushrooms - state.map.mushroomCounter, 1000);
-    const chunks = Object.keys(state.map.mapChunks);
     for (let i = 0; i < maxSpawn; i++) {
         const result = mapAddObjectRandomPosition(MAP_OBJECT_MUSHROOM, state);
         if (result) state.map.mushroomCounter++;

@@ -531,7 +531,7 @@ export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Cit
 }
 
 function citizenCheckMapChunk(citizen: Citizen, state: ChatSimState) {
-    if (state.time % (state.tickInterval * 10) !== 0) return;
+    //if (state.time % (state.tickInterval * 10) !== 0) return;
     const chunk = mapGetChunkForPosition(citizen.position, state.map);
     if (!chunk || chunk === citizen.currentMapChunk) return;
     if (citizen.currentMapChunk) {
