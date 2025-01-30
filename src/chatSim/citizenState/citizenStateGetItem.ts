@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
-import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory, MAP_OBJECT_CITIZEN } from "../citizen.js";
 import { inventoryGetAvailableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { calculateDistance, nextRandom } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
@@ -15,6 +15,8 @@ import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
 import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
 import { MAP_OBJECTS_FUNCTIONS, mapGetMaxObjectVisionDistanceFactor } from "../map/mapObject.js";
+import { setCitizenStateStartCitizenChat } from "./citizenStateSmallTalk.js";
+import { INTENTION_STARVING_ASK_FOR_FOOD } from "./citizenChatMessageOptions.js";
 
 export type CitizenStateGetItemData = {
     name: string,
@@ -81,6 +83,7 @@ export function setCitizenStateSearchItem(citizen: Citizen, itemName: string, am
         amount,
     }
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SEARCH_ITEM, data: data, tags: new Set() });
+    citizen.memory.talkedToForCurrentIntention = [];
 }
 
 export function setCitizenStateSearch(citizen: Citizen, data: CitizenStateSearchData) {
@@ -212,6 +215,10 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             } else if (returnedData.foundType === MAP_OBJECT_TREE) {
                 const tree = returnedData.found as Tree;
                 setCitizenStateGatherWood(citizen, tree.position, data.amount);
+            } else if (returnedData.foundType === MAP_OBJECT_CITIZEN) {
+                const other = returnedData.found as Citizen;
+                citizen.memory.talkedToForCurrentIntention.push(other);
+                setCitizenStateStartCitizenChat(citizen, citizen, other, INTENTION_STARVING_ASK_FOR_FOOD);
             }
         } else if (citizenState.subState === "searching") {
             const item = citizen.inventory.items.find(i => i.name === itemName);
@@ -226,21 +233,33 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             }
         } else {
             const searchData: CitizenStateSearchData = { searchFor: [] };
-            const viewDistance = citizenGetVisionDistance(citizen, state);
             if (itemName === INVENTORY_MUSHROOM) {
                 citizenSetEquipment(citizen, ["Basket"]);
                 if (!data.firstThoughtsDone) citizenAddThought(citizen, `I will look out for growing ${INVENTORY_MUSHROOM}.`, state);
                 searchData.searchFor.push({ type: MAP_OBJECT_MUSHROOM });
 
-                if (citizen.money < 4 && citizen.happinessData.happiness < 0 && citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
-                    if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i would steal for ${INVENTORY_MUSHROOM}.`, state);
-                    searchData.searchFor.push({
-                        type: MAP_OBJECT_BUILDING, intention: "steal", condition:
-                            (building: Building, citizen: Citizen, state: ChatSimState) => {
-                                let inventoryItem = building.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-                                return inventoryItem !== undefined && inventoryItem.counter > 0;
-                            }
-                    });
+                if (citizen.stateInfo.type === CITIZEN_NEED_STARVING) {
+                    if (citizen.happinessData.happiness < 0 && citizen.money < 4) {
+                        if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i would steal for ${INVENTORY_MUSHROOM}.`, state);
+                        searchData.searchFor.push({
+                            type: MAP_OBJECT_BUILDING, intention: "steal", condition:
+                                (building: Building, citizen: Citizen, state: ChatSimState) => {
+                                    let inventoryItem = building.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+                                    return inventoryItem !== undefined && inventoryItem.counter > 0;
+                                }
+                        });
+                    } else if (citizen.happinessData.happiness >= 0) {
+                        if (!data.firstThoughtsDone) citizenAddThought(citizen, `I am so hungry i will ask other citizen for ${INVENTORY_MUSHROOM}.`, state);
+                        searchData.searchFor.push({
+                            type: MAP_OBJECT_CITIZEN, condition:
+                                (other: Citizen, citizen: Citizen, state: ChatSimState) => {
+                                    if (other === citizen) return false;
+                                    const talkedToBefore = citizen.memory.talkedToForCurrentIntention.find(c => c === other);
+                                    if (talkedToBefore) return false;
+                                    return true;
+                                }
+                        });
+                    }
                 }
             }
             if (itemName === INVENTORY_WOOD) {

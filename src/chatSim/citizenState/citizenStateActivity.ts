@@ -1,10 +1,10 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenMoveToRandom, citizenStopMoving, TAG_DOING_NOTHING } from "../citizen.js";
+import { citizenMoveToRandom, TAG_DOING_NOTHING } from "../citizen.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
 import { isCitizenAtPosition, isCitizenInVisionDistance } from "../jobs/job.js";
-import { isCitizenInInteractionDistance } from "../citizen.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { setCitizenStateSmallTalk } from "./citizenStateSmallTalk.js";
+import { setCitizenStateStartCitizenChat } from "./citizenStateSmallTalk.js";
+import { INTENTION_GREETING } from "./citizenChatMessageOptions.js";
 
 type RandomMoveData = {
     lastSearchDirection?: number,
@@ -52,7 +52,7 @@ function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) 
         }
         if (data.citizenInVisionDistance) {
             data.talkStarted = true;
-            setCitizenStateSmallTalk(citizen, citizen, data.citizenInVisionDistance);
+            setCitizenStateStartCitizenChat(citizen, citizen, data.citizenInVisionDistance, INTENTION_GREETING);
             return;
         } else {
             data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);

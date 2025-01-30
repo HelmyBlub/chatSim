@@ -10,6 +10,7 @@ export type CitizenStateSmallTalkData = {
     chatStarterCitizen: Citizen,
     lastIntention?: string,
     firstInviteCitizen?: Citizen,
+    initialIntention?: string,
 }
 
 export type ChatMessageSmallTalkIntention = ChatMessageIntention & {
@@ -22,10 +23,18 @@ export function onLoadCitizenStateDefaultTickSmallTalkFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SMALL_TALK] = tickCititzenStateSmallTalk;
 }
 
-export function setCitizenStateSmallTalk(citizen: Citizen, chatStarterCitizen: Citizen, firstInviteCitizen: Citizen | undefined = undefined) {
+export function setCitizenStateStartCitizenChat(citizen: Citizen, chatStarterCitizen: Citizen, firstInviteCitizen: Citizen, initialIntention: string) {
     citizen.stateInfo.stack.unshift({
         state: CITIZEN_STATE_SMALL_TALK,
-        data: { chatStarterCitizen: chatStarterCitizen, firstInviteCitizen: firstInviteCitizen },
+        data: { chatStarterCitizen: chatStarterCitizen, firstInviteCitizen: firstInviteCitizen, initialIntention: initialIntention },
+        tags: new Set([TAG_SOCIAL_INTERACTION])
+    });
+}
+
+export function setCitizenStateJoinCitizenChat(citizen: Citizen, chatStarterCitizen: Citizen) {
+    citizen.stateInfo.stack.unshift({
+        state: CITIZEN_STATE_SMALL_TALK,
+        data: { chatStarterCitizen: chatStarterCitizen },
         tags: new Set([TAG_SOCIAL_INTERACTION])
     });
 }
@@ -37,7 +46,7 @@ export function citizenInviteToChat(invitingCitizen: Citizen, invitedCitizen: Ci
         }
         return;
     }
-    setCitizenStateSmallTalk(invitedCitizen, invitingCitizen);
+    setCitizenStateJoinCitizenChat(invitedCitizen, invitingCitizen);
     citizenStopMoving(invitedCitizen);
 }
 
@@ -119,7 +128,7 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
             if (!citizen.lastChat) {
                 citizen.lastChat = createEmptyChat();
             }
-            const messageAndIntention = getMessageForIntentionAndPhase(citizen, data.firstInviteCitizen!, INTENTION_GREETING, "initMessage", state)!;
+            const messageAndIntention = getMessageForIntentionAndPhase(citizen, data.firstInviteCitizen!, data.initialIntention!, "initMessage", state)!;
             const intention: ChatMessageSmallTalkIntention = {
                 type: CITIZEN_STATE_SMALL_TALK,
                 intention: messageAndIntention.intention!,

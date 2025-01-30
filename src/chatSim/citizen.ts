@@ -88,7 +88,7 @@ export type CitizenMemory = {
     leisure: {
         didHelp: { [key: string]: CitizenLeisureMemory },
         didNotHelp: { [key: string]: CitizenLeisureMemory },
-    }
+    },
     metCitizensData: {
         maxCitizenRemember: number,
         maxNamesRemember: number,
@@ -98,7 +98,8 @@ export type CitizenMemory = {
     home: {
         lastTimeVisited?: number,
         rememberedItems: InventoryItem[],
-    }
+    },
+    talkedToForCurrentIntention: Citizen[],
 }
 
 export type Citizen = MapObject & {
@@ -300,7 +301,8 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
             },
             home: {
                 rememberedItems: [],
-            }
+            },
+            talkedToForCurrentIntention: [],
         },
         inventory: {
             items: [],
@@ -531,7 +533,7 @@ export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Cit
 }
 
 function citizenCheckMapChunk(citizen: Citizen, state: ChatSimState) {
-    //if (state.time % (state.tickInterval * 10) !== 0) return;
+    if (state.time % (state.tickInterval * 10) !== 0) return;
     const chunk = mapGetChunkForPosition(citizen.position, state.map);
     if (!chunk || chunk === citizen.currentMapChunk) return;
     if (citizen.currentMapChunk) {
@@ -873,7 +875,13 @@ function deleteCitizens(state: ChatSimState) {
                 }
             } else {
                 if (deceased.isDead.time + 30000 < state.time) {
+                    if (deceased.currentMapChunk) {
+                        const chunkCitizens = deceased.currentMapChunk.tileObjects.get(MAP_OBJECT_CITIZEN)!;
+                        const index = chunkCitizens.findIndex(c => c === deceased);
+                        chunkCitizens.splice(index, 1);
+                    }
                     state.map.citizens.splice(i, 1);
+
                 }
             }
         }

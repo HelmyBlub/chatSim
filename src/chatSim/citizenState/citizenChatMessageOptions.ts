@@ -2,6 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Citizen } from "../citizen.js";
 import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
+import { INVENTORY_MUSHROOM, inventoryMoveItemBetween, inventoryPutItemInto } from "../inventory.js";
 import { nextRandom } from "../main.js";
 import { ChatMessageSmallTalkIntention, citizenMemoryKnowByName, citizenRememberName, CitizenStateSmallTalkData } from "./citizenStateSmallTalk.js";
 
@@ -21,11 +22,13 @@ export const INTENTION_REPLY = "reply";
 export const INTENTION_IGNORE = "ignore";
 export const INTENTION_STOP_BOTHERING = "stop bothering";
 export const INTENTION_BYE_BYE = "bye bye";
+export const INTENTION_STARVING_ASK_FOR_FOOD = "starving ask for food";
 const FUNCTIONS_INTENTIONS: { [key: string]: IntentionFunction } = {};
 FUNCTIONS_INTENTIONS[INTENTION_GREETING] = createChatGreeting;
 FUNCTIONS_INTENTIONS[INTENTION_INTRODUCTION] = createChatIntroduction;
 FUNCTIONS_INTENTIONS[INTENTION_HOW_ARE_YOU] = createChatHowAreYou;
-FUNCTIONS_INTENTIONS[INTENTION_BYE_BYE] = createChatByeBye
+FUNCTIONS_INTENTIONS[INTENTION_BYE_BYE] = createChatByeBye;
+FUNCTIONS_INTENTIONS[INTENTION_STARVING_ASK_FOR_FOOD] = createChatStarvingAskForFood;
 
 export function getMessageForIntentionAndPhase(citizen: Citizen, messageToCitizen: Citizen, intention: string, phase: ChatIntentionPhase, state: ChatSimState) {
     const intentionFunction = FUNCTIONS_INTENTIONS[intention]
@@ -57,6 +60,37 @@ function selectOption(citizen: Citizen, messageToCitizen: Citizen, list: ChatMes
     }
 }
 
+function createChatStarvingAskForFood(citizen: Citizen, messageToCitizen: Citizen, phase: ChatIntentionPhase, state: ChatSimState): ChatMessageOption | undefined {
+    switch (phase) {
+        case "initMessage":
+            return selectOption(
+                citizen, messageToCitizen, [
+                { message: ["Hi, i am starving, do you have some food to spare?"] },
+            ]);
+        case "replyMessage":
+            return selectOption(
+                citizen, messageToCitizen, [
+                {
+                    message: [`Sure!`],
+                    condition: (citizen: Citizen) => {
+                        if (citizen.happinessData.happiness < 0) return false;
+                        const inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+                        if (!inventoryMushroom) return false;
+                        if (inventoryMushroom.counter < 3) return false;
+                        return true;
+                    },
+                    intention: INTENTION_REPLY,
+                    execute: (citizen: Citizen, messageToCitizen: Citizen, state: ChatSimState) => {
+                        inventoryMoveItemBetween(INVENTORY_MUSHROOM, citizen.inventory, messageToCitizen.inventory, 1);
+                    }
+                },
+                { intention: INTENTION_IGNORE },
+            ]);
+        case "followUpIntention":
+            return undefined;
+    }
+}
+
 function createChatGreeting(citizen: Citizen, messageToCitizen: Citizen, phase: ChatIntentionPhase, state: ChatSimState): ChatMessageOption | undefined {
     switch (phase) {
         case "initMessage":
@@ -71,9 +105,9 @@ function createChatGreeting(citizen: Citizen, messageToCitizen: Citizen, phase: 
                 {
                     message: [`Let me sleep! Idiot!`],
                     condition: (citizen: Citizen) => citizenIsSleeping(citizen) && citizen.happinessData.happiness < 0,
-                    intention: "stopBothering"
+                    intention: INTENTION_STOP_BOTHERING
                 },
-                { condition: citizenIsSleeping, intention: "ignore" },
+                { condition: citizenIsSleeping, intention: INTENTION_IGNORE },
                 { message: ["Hello?", "Yes?", "Whay do you want?"], intention: INTENTION_REPLY },
             ]);
         case "followUpIntention":

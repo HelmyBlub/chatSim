@@ -1,16 +1,12 @@
 Tasks:
 - citizen can ask other citizen for food if starving
-    - citizen needs to be part of chunk
-        - citizen should check in interval if chunk is still correct
-            - check if it matters if done on each tick or just every x seconds
-                - matters, but why so much?
-            - check if map for chunks is more efficient?
-                - maybe matters but only very minor
-    - put citizen into map objects
     - make search case for citizen
     - create some chat
+        - bug: "ignore" intention message "undefined" should not happen. Does it happen for sleeping?
         - outcome of chat should be a trade of food in good case
+            - currently simplified, just happens instantly in chat
         - should not interact with the same citizen twice for same reason
+
 - check "isCitizenInVisionDistance", does not use citize vision. Replace it?
 - check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
