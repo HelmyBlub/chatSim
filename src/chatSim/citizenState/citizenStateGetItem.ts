@@ -191,7 +191,7 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
         const itemName: string = data.name;
         const returnedData = citizenState.returnedData as CitizenStateSearchSuccessData;
         if (returnedData) {
-            if (returnedData.foundType === "buildings") {
+            if (returnedData.foundType === MAP_OBJECT_BUILDING) {
                 if (returnedData.intention === undefined) {
                     const market = returnedData.found as BuildingMarket;
                     const item = citizen.inventory.items.find(i => i.name === itemName);
