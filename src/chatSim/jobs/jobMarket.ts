@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
-import { BuildingMarket } from "../map/mapObjectBuilding.js";
+import { buildingGetFirstBrokenStateDeterioration, BuildingMarket } from "../map/mapObjectBuilding.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
@@ -317,7 +317,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {
                 market.displayedItem = jobMarket.sellItemNames[0];
             }
-            if (market.deterioration > 1 / BUILDING_DATA[market.buildingType].woodAmount) {
+            if (market.deterioration > buildingGetFirstBrokenStateDeterioration("Market")) {
                 if (market.deterioration > 1) {
                     citizenAddThought(citizen, `My market broke down. I need to repair`, state);
                 } else {

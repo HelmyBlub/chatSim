@@ -118,7 +118,7 @@ export function tickBuildings(state: ChatSimState) {
     for (let i = 0; i < state.map.buildings.length; i++) {
         const building = state.map.buildings[i];
         if (building.deterioration < 1) {
-            building.deterioration += 0.00004;
+            building.deterioration += 0.00003;
             if (building.deterioration >= 1) {
                 building.inventory.items = [];
                 building.brokeDownTime = state.time;
@@ -130,6 +130,10 @@ export function tickBuildings(state: ChatSimState) {
             }
         }
     }
+}
+
+export function buildingGetFirstBrokenStateDeterioration(buildingType: BuildingType) {
+    return 0.2 + 0.8 / BUILDING_DATA[buildingType].woodAmount;
 }
 
 export function createBuilding(owner: Citizen, position: Position, type: BuildingType): Building {
@@ -193,8 +197,10 @@ function paint(ctx: CanvasRenderingContext2D, building: Building, paintDataMap: 
     ctx.font = "8px Arial";
     let buildingImageIndex = 1;
     const woodRequired = BUILDING_DATA[building.buildingType].woodAmount;
-    if (building.deterioration >= 1 / woodRequired) {
-        buildingImageIndex = Math.floor((building.deterioration * woodRequired)) + 1;
+    const firstBroken = buildingGetFirstBrokenStateDeterioration(building.buildingType);
+    if (building.deterioration >= firstBroken) {
+        const stepSize = (1 - firstBroken) / (woodRequired - 1);
+        buildingImageIndex = Math.floor(((building.deterioration - firstBroken) / stepSize)) + 2;
     }
     const paintPos = mapPositionToPaintPosition(building.position, state.paintData.map);
     let factor = (building.buildProgress !== undefined ? building.buildProgress : 1);
@@ -219,7 +225,7 @@ function paint(ctx: CanvasRenderingContext2D, building: Building, paintDataMap: 
     if (building.inhabitedBy && building.deterioration < 1) {
         const nameOffsetX = Math.floor(ctx.measureText(building.inhabitedBy.name).width / 2);
         if (building.buildingType === "House") {
-            if (building.deterioration >= 0.2) {
+            if (building.deterioration >= firstBroken) {
                 const brokenPaintY = paintPos.y + 5;
                 ctx.save();
                 ctx.translate(paintPos.x, brokenPaintY);

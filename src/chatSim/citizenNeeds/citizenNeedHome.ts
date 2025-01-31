@@ -1,7 +1,8 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenAddTodo, citizenResetStateTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenAddTodo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory } from "../citizen.js";
 import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { isCitizenInVisionDistance } from "../jobs/job.js";
+import { buildingGetFirstBrokenStateDeterioration } from "../map/mapObjectBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
 
@@ -16,7 +17,7 @@ export function loadCitizenNeedsFunctionsHome() {
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.home === undefined) return false;
-    if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > 0.2) {
+    if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > buildingGetFirstBrokenStateDeterioration("House")) {
         if (citizen.home.deletedFromMap) {
             citizen.home = undefined;
             citizenMemorizeHomeInventory(citizen);
@@ -35,7 +36,7 @@ function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
 
 export function citizenNeedTickHome(citizen: Citizen, state: ChatSimState) {
     if (citizen.stateInfo.stack.length === 0) {
-        if (citizen.home && citizen.home.deterioration <= 0.2) {
+        if (citizen.home && citizen.home.deterioration <= buildingGetFirstBrokenStateDeterioration("House")) {
             citizenNeedOnNeedFulfilled(citizen, CITIZEN_NEED_HOME, state);
             citizen.memory.home.lastTimeVisited = state.time;
             return;
@@ -59,8 +60,7 @@ export function citizenNeedTickHome(citizen: Citizen, state: ChatSimState) {
                     citizenMoveTo(citizen, citizen.home.position);
                     return;
                 }
-
-                if (citizen.home.deterioration > 0.2) {
+                if (citizen.home.deterioration > buildingGetFirstBrokenStateDeterioration("House")) {
                     if (citizen.home.deletedFromMap) {
                         citizen.home = undefined;
                         return;
@@ -80,4 +80,3 @@ export function citizenNeedTickHome(citizen: Citizen, state: ChatSimState) {
         }
     }
 }
-

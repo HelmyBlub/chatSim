@@ -71,7 +71,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
         citizenStateStackTaskSuccess(citizen);
         return;
     }
-    if (building.deterioration < 1 / BUILDING_DATA[building.buildingType].woodAmount) {
+    if (building.deterioration < 0.1) {
         citizenStateStackTaskSuccess(citizen);
         if (citizen.home === building) citizenMemorizeHomeInventory(citizen);
         return;
@@ -96,6 +96,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
                 if (data.tempStartTime + repairDuration < state.time) {
                     data.tempStartTime = undefined;
                     building.deterioration -= 1 / BUILDING_DATA[building.buildingType].woodAmount;
+                    if (building.deterioration < 0) building.deterioration = 0;
                     building.brokeDownTime = undefined;
                     inventoryWood.counter--;
                     citizenAddThought(citizen, `I repaired my building. Current deterioration: ${(building.deterioration * 100).toFixed()}%`, state);
@@ -107,7 +108,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
             }
         } else {
             const totalWood = BUILDING_DATA[building.buildingType].woodAmount;
-            const repairAmount = Math.floor(totalWood * building.deterioration);
+            const repairAmount = Math.ceil(totalWood * building.deterioration);
             hammer.data = false;
             setCitizenStateGetItem(citizen, INVENTORY_WOOD, repairAmount, true);
             return;
