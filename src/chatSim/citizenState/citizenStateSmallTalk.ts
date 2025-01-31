@@ -4,7 +4,7 @@ import { Citizen, CitizenMemoryMetCitizen, citizenMoveTo, citizenStateStackTaskS
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { getMessageForIntentionAndPhase, INTENTION_BYE_BYE, INTENTION_GREETING, INTENTION_REPLY } from "./citizenChatMessageOptions.js";
+import { getMessageForIntentionAndPhase, INTENTION_BYE_BYE, INTENTION_GREETING, INTENTION_IGNORE, INTENTION_REPLY } from "./citizenChatMessageOptions.js";
 
 export type CitizenStateSmallTalkData = {
     chatStarterCitizen: Citizen,
@@ -190,9 +190,9 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 data.lastIntention = repsonseIntention.intention;
-                addChatMessage(chat, citizen, messageAndIntention.message!, state, intention);
+                if (messageAndIntention.message !== undefined) addChatMessage(chat, citizen, messageAndIntention.message, state, intention);
                 if (messageAndIntention.execute) messageAndIntention.execute(citizen, message.by, state);
-                if (repsonseIntention.intention === INTENTION_BYE_BYE) {
+                if (repsonseIntention.intention === INTENTION_BYE_BYE || intention?.intention === INTENTION_IGNORE) {
                     citizenStateStackTaskSuccess(citizen);
                     return;
                 }

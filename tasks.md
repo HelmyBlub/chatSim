@@ -1,12 +1,10 @@
 Tasks:
-- change: building repair
-    - problem: citizens repair two times in a row because they only repair to the minimum amount
-    - change to: building visualized broken later, citizens repair home later but to a higher value
 - citizen can ask other citizen for food if starving
     - create some chat
         - bug: "ignore" intention message "undefined" should not happen. Does it happen for sleeping?
         - outcome of chat should be a trade of food in good case
             - currently simplified, just happens instantly in chat
+        - refactor: check all namings, no longer just small talk
 
 - check "isCitizenInVisionDistance", does not use citizen vision. Replace it?
 - check if "citizen search" code should be ordered differently, with more files?
