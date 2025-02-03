@@ -89,7 +89,7 @@ export function citizenRememberMeetingCitizen(citizen: Citizen, metCitizen: Citi
 export function citizenRememberName(citizen: Citizen, metCitizen: Citizen, state: ChatSimState) {
     const memory = citizen.memory.metCitizensData;
     let metData = memory.metCitizens.find(data => data.citizen === metCitizen);
-    if (metData) {
+    if (metData && !metData.knowName) {
         memory.nameRememberCounter++;
         if (memory.nameRememberCounter > memory.maxNamesRemember) {
             let forget: CitizenMemoryMetCitizen | undefined = undefined;
