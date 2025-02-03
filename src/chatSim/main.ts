@@ -194,6 +194,7 @@ function setChatterToBot(chatter: ChatterData, citizen: Citizen, state: ChatSimS
 function checkIsChatterMessageABot(message: string) {
     const stringsToCheck = [
         "add me on discord",
+        "connect on discord",
         "cheap viewers",
         "best viewers",
     ];
@@ -219,7 +220,7 @@ function checkIsChatterMessageABot(message: string) {
             }
             if (matchCount > 0) {
                 missMatchCount++;
-                if (missMatchCount > 1) {
+                if (missMatchCount > 2) {
                     matchCount = 0;
                     missMatchCount = 0;
                     toCheckIndex = 0;
