@@ -222,7 +222,7 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             }
         } else if (citizenState.subState === "searching") {
             const item = citizen.inventory.items.find(i => i.name === itemName);
-            const canCarryMore = inventoryGetAvailableCapacity(citizen.inventory, INVENTORY_MUSHROOM) > 0;
+            const canCarryMore = inventoryGetAvailableCapacity(citizen.inventory, itemName) > 0;
             const reachedLimit = !canCarryMore || (item && data.amount !== undefined && item.counter >= data.amount);
             if (reachedLimit) {
                 citizenStateStackTaskSuccess(citizen);

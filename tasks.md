@@ -1,18 +1,7 @@
 Tasks:
+- bug: wood market stuck in loop gathering wood but inventory if full
 - citizen can ask other citizen for food if starving
     - create some chat
-        - outcome of chat should be a trade of food in good case
-            - improve trade
-                - add "thank you" message
-                - add trade state
-                - check animation
-                - check thank you message still happens
-            - chat "sure" -> do trade -> finish with chat "thank you"
-                - do trade state:
-                    - needs both citizen, giver + receiver
-                    - giver puts item from his inventory into paw
-                    - receiver takes from giver paw into his paw
-                    - receiver puts into his inventory
         - refactor: check all namings, no longer just small talk
 
 - check "isCitizenInVisionDistance", does not use citizen vision. Replace it?
