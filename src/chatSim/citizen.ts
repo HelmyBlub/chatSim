@@ -345,6 +345,25 @@ export function citizenMemorizeHomeInventory(citizen: Citizen) {
     citizen.memory.home.rememberedItems = rememberedItems;
 }
 
+export function citizenIsInVisionDistanceForMapObject(citizen: Citizen, mapObject: MapObject, state: ChatSimState): boolean {
+    const visionDistanceForObject = citizenGetVisionDistanceForMapObject(citizen, mapObject, state);
+    const distaneTo = calculateDistance(citizen.position, mapObject.position);
+    return distaneTo <= visionDistanceForObject;
+}
+
+export function citizenGetVisionDistanceForMapObject(citizen: Citizen, mapObject: MapObject, state: ChatSimState): number {
+    const citizenVision = citizenGetVisionDistance(citizen, state);
+    const withLight = citizenVision * state.map.lightPerCent;
+    const objectFunction = MAP_OBJECTS_FUNCTIONS[mapObject.type];
+    let forMapObject = withLight;
+    if (objectFunction.getVisionDistanceFactor) {
+        forMapObject *= objectFunction.getVisionDistanceFactor(mapObject);
+    } else {
+        forMapObject *= objectFunction.getMaxVisionDistanceFactor();
+    }
+    return forMapObject;
+}
+
 export function citizenRemoveTodo(citizen: Citizen, stateType: string) {
     const todoData = citizen.memory.todosData;
     const existingIndex = todoData.todos.findIndex(t => t.stateType === stateType);

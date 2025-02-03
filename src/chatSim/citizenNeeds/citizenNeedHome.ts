@@ -1,7 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, citizenAddTodo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenAddTodo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory, citizenGetVisionDistance, citizenIsInVisionDistanceForMapObject } from "../citizen.js";
 import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
-import { isCitizenInVisionDistance } from "../jobs/job.js";
 import { buildingGetFirstBrokenStateDeterioration } from "../map/mapObjectBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
@@ -17,7 +16,7 @@ export function loadCitizenNeedsFunctionsHome() {
 
 function isFulfilled(citizen: Citizen, state: ChatSimState): boolean {
     if (citizen.home === undefined) return false;
-    if (isCitizenInVisionDistance(citizen, citizen.home.position) && citizen.home.deterioration > buildingGetFirstBrokenStateDeterioration("House")) {
+    if (citizenIsInVisionDistanceForMapObject(citizen, citizen.home, state) && citizen.home.deterioration > buildingGetFirstBrokenStateDeterioration("House")) {
         if (citizen.home.deletedFromMap) {
             citizen.home = undefined;
             citizenMemorizeHomeInventory(citizen);
@@ -55,7 +54,7 @@ export function citizenNeedTickHome(citizen: Citizen, state: ChatSimState) {
         }
         if (citizen.home) {
             if (citizen.moveTo === undefined) {
-                if (state.time - citizen.memory.home.lastTimeVisited! > state.timPerDay * 2 && !isCitizenInVisionDistance(citizen, citizen.home.position)) {
+                if (state.time - citizen.memory.home.lastTimeVisited! > state.timPerDay * 2 && !citizenIsInVisionDistanceForMapObject(citizen, citizen.home, state)) {
                     citizenAddThought(citizen, `I go check on my home, Has been a long time.`, state);
                     citizenMoveTo(citizen, citizen.home.position);
                     return;

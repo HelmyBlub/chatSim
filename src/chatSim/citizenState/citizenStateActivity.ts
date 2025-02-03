@@ -1,7 +1,7 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenMoveToRandom, TAG_DOING_NOTHING } from "../citizen.js";
+import { citizenIsInVisionDistanceForMapObject, citizenMoveToRandom, TAG_DOING_NOTHING } from "../citizen.js";
 import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
-import { isCitizenAtPosition, isCitizenInVisionDistance } from "../jobs/job.js";
+import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateStartCitizenChat } from "./citizenStateChat.js";
 import { INTENTION_GREETING } from "./citizenChatMessageOptions.js";
@@ -48,7 +48,7 @@ function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) 
             return;
         }
         if (!data.citizenInVisionDistance) {
-            data.citizenInVisionDistance = state.map.citizens.find(c => c !== citizen && isCitizenInVisionDistance(citizen, c.position));
+            data.citizenInVisionDistance = state.map.citizens.find(c => c !== citizen && citizenIsInVisionDistanceForMapObject(citizen, c, state));
         }
         if (data.citizenInVisionDistance) {
             data.talkStarted = true;
