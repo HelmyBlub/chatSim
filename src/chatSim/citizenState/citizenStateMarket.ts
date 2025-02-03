@@ -240,7 +240,7 @@ function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState)
         if (data.market.inhabitedBy && isCitizenAtPosition(data.market.inhabitedBy, data.market.position)) {
             const queuePosition = marketGetQueuePosition(citizen, data.market);
             const mapPosition = marketGetQueueMapPosition(citizen, data.market);
-            if (citizenCheckTodoList(citizen, state, 5)) return;
+            if (citizenCheckTodoList(citizen, state)) return;
             if (queuePosition === 0) {
                 if (data.stepState === undefined) {
                     if (isCitizenAtPosition(citizen, mapPosition)) {

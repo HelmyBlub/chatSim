@@ -293,7 +293,7 @@ function stateNegotiationWithCustomer(citizen: Citizen, job: CitizenJob, state: 
 
 function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
     citizen.paintBehindBuildings = true;
-    if (citizenCheckTodoList(citizen, state, 2)) return;
+    if (citizenCheckTodoList(citizen, state)) return;
 }
 
 function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
@@ -310,7 +310,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             citizenStateStackTaskSuccess(citizen);
             return;
         }
-        if (citizenCheckTodoList(citizen, state, 2)) return;
+        if (citizenCheckTodoList(citizen, state)) return;
         if (isCitizenAtPosition(citizen, job.marketBuilding.position)) {
             const market = job.marketBuilding as BuildingMarket;
             setupReserved(market, jobMarket);

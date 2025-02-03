@@ -1,5 +1,4 @@
 Tasks:
-- check citizen names remember counter beeing to high. Maybe interacting with same citizen twice has incorrect logic?
 - check function "citizenCheckTodoList", why condition number?. Change it?
 - improve UI?
     - instead of growing list of displayed things

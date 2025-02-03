@@ -53,7 +53,7 @@ export function createJob(jobname: string, state: ChatSimState): CitizenJob | un
 }
 
 export function tickCitizenJob(citizen: Citizen, state: ChatSimState) {
-    if (citizenCheckTodoList(citizen, state)) return;
+    if (citizen.stateInfo.stack.length <= 0 && citizenCheckTodoList(citizen, state)) return;
     const jobFunctions = state.functionsCitizenJobs[citizen.job.name];
     if (jobFunctions === undefined) {
         console.log("job functions missing for job " + citizen.job);

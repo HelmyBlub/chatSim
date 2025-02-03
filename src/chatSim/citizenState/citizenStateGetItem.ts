@@ -228,7 +228,7 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
             if (reachedLimit) {
                 citizenStateStackTaskSuccess(citizen);
             } else {
-                const switchTodo = citizenCheckTodoList(citizen, state, 4);
+                const switchTodo = citizenCheckTodoList(citizen, state);
                 if (switchTodo) return;
                 citizenState.subState = undefined;
             }
@@ -295,7 +295,7 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
             }
         }
         if (nextRandom(state.randomSeed) < 0.2) {
-            if (citizenCheckTodoList(citizen, state, 4)) return;
+            if (citizenCheckTodoList(citizen, state)) return;
         }
         if (data.searchDestination) {
             data.lastSearchDirection = calculateDirection(citizen.position, data.searchDestination);

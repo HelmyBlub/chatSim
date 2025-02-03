@@ -469,8 +469,8 @@ export function tickCitizens(state: ChatSimState) {
     deleteCitizens(state);
 }
 
-export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState, conditionStackLength: number = 0): boolean {
-    if (!citizen.stateInfo.isImportantNeed && citizen.stateInfo.stack.length <= conditionStackLength) {
+export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState): boolean {
+    if (!citizen.stateInfo.isImportantNeed) {
         if (citizen.memory.todosData.todos.length > 0) {
             const todo = citizen.memory.todosData.todos[0];
             if (todo && todo.stateType !== citizen.stateInfo.type) {
