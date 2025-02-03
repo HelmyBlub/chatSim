@@ -108,6 +108,7 @@ export function citizenRememberName(citizen: Citizen, metCitizen: Citizen, state
                     }
                 }
             }
+            memory.nameRememberCounter--;
             forget!.knowName = false;
         }
         metData.knowName = true;
