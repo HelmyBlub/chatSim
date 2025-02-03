@@ -2,7 +2,7 @@ import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE
 import { Chat, paintChatBubbles } from "./chatBubble.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { MapChunk, mapChunkKeyToPosition, mapGetChunkForPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
-import { Building } from "./map/mapObjectBuilding.js";
+import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "./citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "./images.js";
@@ -25,6 +25,7 @@ export type CitizenStateInfo = {
     isImportantNeed?: boolean,
     stack: CitizenState[],
     previousTaskFailed?: boolean,
+    returnedData?: CitizenStateSuccessData,
     actionStartTime?: number,
     thoughts?: string[],
     tags: Set<string>,
@@ -89,6 +90,7 @@ export type CitizenMemory = {
         didHelp: { [key: string]: CitizenLeisureMemory },
         didNotHelp: { [key: string]: CitizenLeisureMemory },
     },
+    lastMarket?: BuildingMarket,
     metCitizensData: {
         maxCitizenRemember: number,
         maxNamesRemember: number,
@@ -414,7 +416,11 @@ export function citizenStateStackTaskSuccess(citizen: Citizen) {
 
 export function citizenStateStackTaskSuccessWithData(citizen: Citizen, data: CitizenStateSuccessData) {
     citizen.stateInfo.stack.shift();
-    if (citizen.stateInfo.stack.length > 0) citizen.stateInfo.stack[0].returnedData = data;
+    if (citizen.stateInfo.stack.length > 0) {
+        citizen.stateInfo.stack[0].returnedData = data;
+    } else {
+        citizen.stateInfo.returnedData = data;
+    }
     citizen.stateInfo.previousTaskFailed = undefined;
 }
 

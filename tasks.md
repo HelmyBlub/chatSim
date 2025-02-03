@@ -1,7 +1,8 @@
 Tasks:
-- check "isCitizenInVisionDistance", does not use citizen vision. Replace it?
-- check if "citizen search" code should be ordered differently, with more files?
 - remember markets near home
+    - when gatherer jobs are full, they should search for a market to sell instead of just standing around when none is in vision distance
+    - remember markets position where citizen successfuly sold stuff, so search might not be necessary
+        - improve search logic to allow setting a position where to walk to
 - check citizen names remember counter beeing to high. Maybe interacting with same citizen twice has incorrect logic?
 - check function "citizenCheckTodoList", why condition number?. Change it?
 - improve UI?

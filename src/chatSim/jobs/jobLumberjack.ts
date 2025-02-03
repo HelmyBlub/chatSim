@@ -1,13 +1,15 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenSetThought } from "../citizen.js";
-import { citizenChangeJob, CitizenJob } from "./job.js";
+import { Citizen, citizenAddThought, citizenSetThought } from "../citizen.js";
+import { citizenChangeJob, CitizenJob, isCitizenAtPosition } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { Tree } from "../map/mapObjectTree.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { setCitizenStateSearchItem, setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
+import { CitizenStateSearchData, setCitizenStateSearch, setCitizenStateSearchItem, setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
 import { setCitizenStateSellItem } from "../citizenState/citizenStateSellItem.js";
+import { Building, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
+import { jobCitizenGathererSell } from "./jobFoodGatherer.js";
 
 export type CitizenJobLuberjack = CitizenJob & {
     actionEndTime?: number,
@@ -43,20 +45,18 @@ function tick(citizen: Citizen, job: CitizenJobLuberjack, state: ChatSimState) {
                 ], state);
                 setCitizenStateTransportItemToBuilding(citizen, citizen.home, INVENTORY_WOOD);
             } else {
-                if (!citizen.stateInfo.previousTaskFailed) {
-                    setCitizenStateSellItem(citizen, INVENTORY_WOOD);
+                if (citizen.dreamJob !== job.name) {
+                    const reason = [
+                        `I can not carry more ${INVENTORY_WOOD}.`,
+                        `There is no ${CITIZEN_JOB_WOOD_MARKET} to sell to.`,
+                        `I become a ${CITIZEN_JOB_WOOD_MARKET} myself,`,
+                        `so i can sell my ${INVENTORY_WOOD}.`
+                    ];
+                    citizenChangeJob(citizen, CITIZEN_JOB_WOOD_MARKET, state, reason);
                     return;
                 } else {
-                    if (citizen.dreamJob !== job.name) {
-                        const reason = [
-                            `I can not carry more ${INVENTORY_WOOD}.`,
-                            `There is no ${CITIZEN_JOB_WOOD_MARKET} to sell to.`,
-                            `I become a ${CITIZEN_JOB_WOOD_MARKET} myself,`,
-                            `so i can sell my ${INVENTORY_WOOD}.`
-                        ];
-                        citizenChangeJob(citizen, CITIZEN_JOB_WOOD_MARKET, state, reason);
-                        return;
-                    }
+                    jobCitizenGathererSell(citizen, INVENTORY_WOOD, state);
+                    return;
                 }
             }
         }

@@ -1,8 +1,8 @@
-import { ChatSimState } from "../chatSimModels.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
 import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
 import { citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, citizenMoveToRandom, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenGetVisionDistance, citizenCanCarryMore, citizenCheckTodoList, citizenMemorizeHomeInventory, MAP_OBJECT_CITIZEN } from "../citizen.js";
 import { inventoryGetAvailableCapacity, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { calculateDistance, nextRandom } from "../main.js";
+import { calculateDirection, calculateDistance, nextRandom } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateGatherMushroom } from "./citizenStateGatherMushroom.js";
@@ -46,6 +46,7 @@ export type CitizenStateSearchData = {
         intention?: string,
         condition?: SearchCondition,
     }[],
+    searchDestination?: Position,
     lastSearchDirection?: number,
 }
 
@@ -296,7 +297,14 @@ function tickCitizenStateSearch(citizen: Citizen, state: ChatSimState) {
         if (nextRandom(state.randomSeed) < 0.2) {
             if (citizenCheckTodoList(citizen, state, 4)) return;
         }
-        data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
+        if (data.searchDestination) {
+            data.lastSearchDirection = calculateDirection(citizen.position, data.searchDestination);
+            citizenMoveToRandom(citizen, state, data.lastSearchDirection);
+            const distance = calculateDistance(data.searchDestination, citizen.position);
+            if (distance < 60) data.searchDestination = undefined;
+        } else {
+            data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
+        }
     }
 }
 
