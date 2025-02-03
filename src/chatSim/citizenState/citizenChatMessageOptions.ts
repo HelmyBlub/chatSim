@@ -4,7 +4,7 @@ import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.j
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { INVENTORY_MUSHROOM, inventoryMoveItemBetween, inventoryPutItemInto } from "../inventory.js";
 import { nextRandom } from "../main.js";
-import { ChatMessageSmallTalkIntention, citizenMemoryKnowByName, citizenRememberName, CitizenStateSmallTalkData } from "./citizenStateSmallTalk.js";
+import { ChatMessageChatIntention, citizenMemoryKnowByName, citizenRememberName, CitizenStateChatData } from "./citizenStateChat.js";
 import { setCitizenStateTrade } from "./citizenStateTradeItem.js";
 
 type IntentionFunction = (citizen: Citizen, messageToCitizen: Citizen, phase: ChatIntentionPhase, state: ChatSimState) => ChatMessageOption | undefined;
@@ -204,11 +204,11 @@ function createChatThankYou(citizen: Citizen, messageToCitizen: Citizen, phase: 
 
 function alreadyAskedHowAreYou(citizen: Citizen, messageToCitizen: Citizen): boolean {
     const citizenState = citizen.stateInfo.stack[0];
-    const data = citizenState.data as CitizenStateSmallTalkData;
+    const data = citizenState.data as CitizenStateChatData;
     const chat = data.chatStarterCitizen.lastChat;
     if (!chat) return true;
     for (let message of chat.messages) {
-        const intention = message.intention as ChatMessageSmallTalkIntention;
+        const intention = message.intention as ChatMessageChatIntention;
         if (message.intention && message.by === citizen && intention.intention === INTENTION_HOW_ARE_YOU) {
             return true;
         }

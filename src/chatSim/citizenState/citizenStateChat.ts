@@ -6,26 +6,26 @@ import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { getMessageForIntentionAndPhase, INTENTION_BYE_BYE, INTENTION_GREETING, INTENTION_IGNORE, INTENTION_REPLY } from "./citizenChatMessageOptions.js";
 
-export type CitizenStateSmallTalkData = {
+export type CitizenStateChatData = {
     chatStarterCitizen: Citizen,
     lastIntention?: string,
     firstInviteCitizen?: Citizen,
     initialIntention?: string,
 }
 
-export type ChatMessageSmallTalkIntention = ChatMessageIntention & {
+export type ChatMessageChatIntention = ChatMessageIntention & {
     intention: string,
 }
 
-export const CITIZEN_STATE_SMALL_TALK = "Small Talk";
+export const CITIZEN_STATE_CHAT = "Citizen Chat";
 
-export function onLoadCitizenStateDefaultTickSmallTalkFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SMALL_TALK] = tickCititzenStateSmallTalk;
+export function onLoadCitizenStateDefaultTickChatFuntions() {
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_CHAT] = tickCititzenStateChat;
 }
 
 export function setCitizenStateStartCitizenChat(citizen: Citizen, chatStarterCitizen: Citizen, firstInviteCitizen: Citizen, initialIntention: string) {
     citizen.stateInfo.stack.unshift({
-        state: CITIZEN_STATE_SMALL_TALK,
+        state: CITIZEN_STATE_CHAT,
         data: { chatStarterCitizen: chatStarterCitizen, firstInviteCitizen: firstInviteCitizen, initialIntention: initialIntention },
         tags: new Set([TAG_SOCIAL_INTERACTION])
     });
@@ -33,7 +33,7 @@ export function setCitizenStateStartCitizenChat(citizen: Citizen, chatStarterCit
 
 export function setCitizenStateJoinCitizenChat(citizen: Citizen, chatStarterCitizen: Citizen) {
     citizen.stateInfo.stack.unshift({
-        state: CITIZEN_STATE_SMALL_TALK,
+        state: CITIZEN_STATE_CHAT,
         data: { chatStarterCitizen: chatStarterCitizen },
         tags: new Set([TAG_SOCIAL_INTERACTION])
     });
@@ -120,17 +120,17 @@ export function citizenMemoryKnowByName(citizen: Citizen, metCitizen: Citizen): 
     return (metData !== undefined && metData.knowName);
 }
 
-function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
+function tickCititzenStateChat(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
-    const data = citizenState.data as CitizenStateSmallTalkData;
+    const data = citizenState.data as CitizenStateChatData;
     if (!citizenState.subState) {
         if (data.chatStarterCitizen === citizen) {
             if (!citizen.lastChat) {
                 citizen.lastChat = createEmptyChat();
             }
             const messageAndIntention = getMessageForIntentionAndPhase(citizen, data.firstInviteCitizen!, data.initialIntention!, "initMessage", state)!;
-            const intention: ChatMessageSmallTalkIntention = {
-                type: CITIZEN_STATE_SMALL_TALK,
+            const intention: ChatMessageChatIntention = {
+                type: CITIZEN_STATE_CHAT,
                 intention: messageAndIntention.intention!,
             }
             data.lastIntention = intention.intention;
@@ -157,7 +157,7 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
             return;
         }
         if (message.by === citizen) return;
-        const repsonseIntention = message.intention as ChatMessageSmallTalkIntention;
+        const repsonseIntention = message.intention as ChatMessageChatIntention;
         if (repsonseIntention) {
             if (repsonseIntention.intention === INTENTION_REPLY) {
                 // find next intention
@@ -169,7 +169,7 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                 const messageAndIntention = getMessageForIntentionAndPhase(citizen, message.by, followUpIntention.intention, "initMessage", state);
                 if (!messageAndIntention) throw "should not happen";
                 const intention = {
-                    type: CITIZEN_STATE_SMALL_TALK,
+                    type: CITIZEN_STATE_CHAT,
                     intention: messageAndIntention.intention,
                 }
                 data.lastIntention = intention.intention;
@@ -182,10 +182,10 @@ function tickCititzenStateSmallTalk(citizen: Citizen, state: ChatSimState) {
                     citizenStateStackTaskSuccess(citizen);
                     return;
                 }
-                let intention: ChatMessageSmallTalkIntention | undefined = undefined;
+                let intention: ChatMessageChatIntention | undefined = undefined;
                 if (messageAndIntention.intention) {
                     intention = {
-                        type: CITIZEN_STATE_SMALL_TALK,
+                        type: CITIZEN_STATE_CHAT,
                         intention: messageAndIntention.intention,
                     }
                 }

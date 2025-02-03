@@ -15,7 +15,7 @@ import { CITIZEN_NEED_STARVING } from "../citizenNeeds/citizenNeedStarving.js";
 import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
 import { MAP_OBJECTS_FUNCTIONS, mapGetMaxObjectVisionDistanceFactor } from "../map/mapObject.js";
-import { setCitizenStateStartCitizenChat } from "./citizenStateSmallTalk.js";
+import { setCitizenStateStartCitizenChat } from "./citizenStateChat.js";
 import { INTENTION_STARVING_ASK_FOR_FOOD } from "./citizenChatMessageOptions.js";
 
 export type CitizenStateGetItemData = {

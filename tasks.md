@@ -1,5 +1,4 @@
 Tasks:
-- bug: wood market stuck in loop gathering wood but inventory if full
 - citizen can ask other citizen for food if starving
     - create some chat
         - refactor: check all namings, no longer just small talk
