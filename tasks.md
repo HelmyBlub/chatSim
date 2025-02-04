@@ -1,15 +1,12 @@
 Tasks:
 - improve UI?
     - steps:
-        - UI rectangles
-            - citizen:
-                - display steal counter
-                - add gifted food counter
-                - think about how to better visualize
         - bottom centered:
             - buttons to press
             - citizen button
                 - citizens
+                    - list of citizen
+                    - can be clicked to move camera to citizen and select him
                 - citizen death reasons + select citizen option 
                 - option to add "robot" to citizen and chatter
             - statistics button
@@ -20,6 +17,9 @@ Tasks:
                         - graphs: average citizen happines over time
             - chat commands button
                 - chat commands
+        - UI rectangles
+            - citizen:
+                - think about how to better visualize
 
 
     - instead of growing list of displayed things

@@ -1,6 +1,7 @@
 import { Chatter } from "../obsOverlayApp/mainModels.js";
-import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
+import { Position, ChatSimState, App, RandomSeed, ChatterData, UiButton } from "./chatSimModels.js";
 import { addCitizen, Citizen, citizenSetDreamJob, loadCitizenStateTypeFunctions } from "./citizen.js";
+import { createCitizenInformationWindowButton } from "./citizenInformationWindow.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
@@ -105,7 +106,8 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
                 cameraPosition: { x: 0, y: 0 },
                 zoom: 1,
                 lockCameraToSelected: true,
-            }
+            },
+            buttons: [],
         },
         inputData: {
             lastMouseDownTime: 0,
@@ -126,6 +128,32 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
     loadCitizenJobsFunctions(state);
     onLoadCitizenStateDefaultTickFuntions();
     return state;
+}
+
+function addUiButton(uiButton: UiButton, state: ChatSimState) {
+    state.paintData.buttons.push(uiButton);
+    uiButtonsResetPosition(state);
+}
+
+export function uiButtonsResetPosition(state: ChatSimState) {
+    if (!state.canvas) return;
+    const buttonSize = 40;
+    const padding = 5;
+    const buttonY = state.canvas.height - buttonSize - padding;
+    const centerX = state.canvas.width / 2;
+    const buttonLeftX = centerX - state.paintData.buttons.length * (buttonSize + padding) / 2;
+    for (let i = 0; i < state.paintData.buttons.length; i++) {
+        const button = state.paintData.buttons[i];
+        if (!button.rect) {
+            button.rect = {
+                topLeft: { x: 0, y: buttonY },
+                height: buttonSize,
+                width: buttonSize,
+            };
+        }
+        button.rect.topLeft.y = buttonY;
+        button.rect.topLeft.x = buttonLeftX + i * (buttonSize + padding);
+    }
 }
 
 export function addChatterChangeLog(message: string, state: ChatSimState) {
@@ -252,6 +280,7 @@ function chatSimStateInit(streamer: string): App {
     state.soundVolume = 1;
     const app: App = { state: state };
     state.canvas = canvas;
+    addUiButton(createCitizenInformationWindowButton(), state);
     chatSimAddInputEventListeners(app, canvas);
     state.logger = { log: (message, data) => console.log(message, data) };
     return app;

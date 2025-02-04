@@ -1,7 +1,7 @@
 import { App, ChatSimState, Position, SelectedObject, UiRectangle } from "./chatSimModels.js";
 import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
 import { addCitizen } from "./citizen.js";
-import { addChatterChangeLog, calculateDistance } from "./main.js";
+import { addChatterChangeLog, calculateDistance, uiButtonsResetPosition } from "./main.js";
 import { mapPositionToPaintPosition, paintDataSetCurrenTab } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
@@ -51,6 +51,7 @@ function fitCanvasToWindow(canvas: HTMLCanvasElement, state: ChatSimState) {
     canvas.height = window.innerHeight;
     state.paintData.map.paintWidth = window.innerWidth;
     state.paintData.map.paintHeight = window.innerHeight;
+    uiButtonsResetPosition(state);
 }
 
 function mouseDown(event: MouseEvent, state: ChatSimState) {
@@ -70,11 +71,26 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
             x: event.clientX - boundingRect.left,
             y: event.clientY - boundingRect.top,
         }
-        if (!clickedUiTab(relativeMouse, state)) {
+        if (!clickedUiTab(relativeMouse, state) && !clickedUiButton(relativeMouse, state)) {
             selectObject(relativeMouse, state);
             createSelectedUiRectangle(state);
         }
     }
+}
+
+function clickedUiButton(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
+    for (let button of state.paintData.buttons) {
+        if (!button.rect) continue;
+        const rect = button.rect;
+        if (rect.topLeft.x > relativeMouseToCanvas.x || rect.topLeft.x + rect.width < relativeMouseToCanvas.x
+            || rect.topLeft.y > relativeMouseToCanvas.y || rect.topLeft.y + rect.height < relativeMouseToCanvas.y
+        ) {
+            continue;
+        }
+        button.clicked(state);
+        return true;
+    }
+    return false;
 }
 
 function clickedUiTab(relativeMouseToCanvas: Position, state: ChatSimState): boolean {

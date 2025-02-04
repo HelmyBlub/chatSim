@@ -4,7 +4,7 @@ import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChu
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
-import { getTimeOfDay, getTimeAndDayString, getTimeOfDayString, getDay } from "./main.js";
+import { getTimeOfDay, getTimeAndDayString, getTimeOfDayString, getDay, uiButtonsResetPosition } from "./main.js";
 import { Tree } from "./map/mapObjectTree.js";
 import { CITIZEN_TRAIT_FUNCTIONS } from "./traits/trait.js";
 import { mapPaintChunkObjects } from "./map/mapObject.js";
@@ -19,8 +19,9 @@ export function paintChatSim(state: ChatSimState, gameSpeed: number) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     paintMap(ctx, state, state.paintData.map);
     paintMapBorder(ctx, state.paintData.map);
-    paintSelectedData(ctx, state);
+    paintUiRectangleData(ctx, state);
     paintData(ctx, state, gameSpeed);
+    paintButtons(ctx, state);
     paintChatMessageOptions(ctx, state, 1200, 500);
     paintChatterChangeLog(ctx, state);
 }
@@ -79,10 +80,27 @@ export function paintDataSetCurrenTab(uiTab: UiRectangleTab, rectUI: UiRectangle
     }
 }
 
-function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
-    const selected = state.inputData.selected;
+function paintButtons(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    const buttons = state.paintData.buttons;
+    ctx.globalAlpha = 0.5;
+    for (let button of buttons) {
+        if (!button.rect) {
+            uiButtonsResetPosition(state);
+        }
+        const rect = button.rect!;
+        ctx.fillStyle = "white";
+        ctx.fillRect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
+        ctx.beginPath();
+        ctx.strokeStyle = "black";
+        ctx.rect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
+        ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function paintUiRectangleData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const rectUI = state.paintData.displaySelected;
-    if (!selected || !rectUI) return;
+    if (!rectUI) return;
     const padding = 5;
     const fontSize = 20;
     if (rectUI.currentTab === undefined) {
