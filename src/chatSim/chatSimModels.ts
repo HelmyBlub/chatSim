@@ -54,7 +54,7 @@ export type ChatSimState = {
     randomSeed: RandomSeed,
     map: ChatSimMap,
     paintData: {
-        selectionRectangle?: UiRectangle,
+        displaySelected?: UiRectangle,
         map: PaintDataMap,
     }
     inputData: {
@@ -74,17 +74,17 @@ export type ChatSimState = {
 }
 
 export type UiRectangle = {
-    rect: Rectangle,
+    mainRect: Rectangle,
+    tabs: UiRectangleTab[],
     heading?: string,
-    tabs: UiRectangleTab[]
-    currentTab?: UiRectangleTab
-    currentTabYOffset: number,
+    currentTab?: UiRectangleTab,
+    tabConntentRect?: Rectangle,
 }
 
 export type UiRectangleTab = {
     name: string,
-    paint: (ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) => void,
-    rect?: Rectangle,
+    paint: (ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) => void,
+    clickRect?: Rectangle,
 }
 
 export type Rectangle = {

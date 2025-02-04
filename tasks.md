@@ -3,10 +3,15 @@ Tasks:
     - steps:
         - UI rectangles
             - improve tabs
+                - heading
+                - margin/padding tab selection area
+                - set currentTabRectangle up, not part of main rectangle
             - citizen:
                 - separate data more
                 - visualize data as bars?
                 - think about how to better visualize
+                - display steal counter
+                - add gifted food counter
                     
         - bottom centered:
             - buttons to press

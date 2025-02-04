@@ -66,59 +66,66 @@ function paintChatMessageOptions(ctx: CanvasRenderingContext2D, state: ChatSimSt
 
 function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const selected = state.inputData.selected;
-    const rectUI = state.paintData.selectionRectangle;
+    const rectUI = state.paintData.displaySelected;
     if (!selected || !rectUI) return;
+    const padding = 5;
+    const fontSize = 20;
     if (rectUI.currentTab === undefined) {
         rectUI.currentTab = rectUI.tabs[0];
+        rectUI.tabConntentRect = {
+            topLeft: { x: rectUI.mainRect.topLeft.x, y: rectUI.mainRect.topLeft.y },
+            height: rectUI.mainRect.height,
+            width: rectUI.mainRect.width,
+        }
+        if (rectUI.heading) {
+            rectUI.tabConntentRect.topLeft.y += fontSize + padding * 2;
+        }
+        if (rectUI.tabs.length > 1) {
+            rectUI.tabConntentRect.topLeft.y += fontSize + padding * 2;
+        }
     }
+    rectUI.mainRect.height = rectUI.tabConntentRect!.topLeft.y - rectUI.mainRect.topLeft.y + rectUI.tabConntentRect!.height;
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = "white";
-    const rect = rectUI.rect;
-    ctx.fillRect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
+    const mainRect = rectUI.mainRect;
+    ctx.fillRect(mainRect.topLeft.x, mainRect.topLeft.y, mainRect.width, mainRect.height);
     ctx.globalAlpha = 1;
+
+    let tabY = mainRect.topLeft.y;
+    ctx.font = `${fontSize}px Arial`
+    if (rectUI.heading) {
+        ctx.fillStyle = "black";
+        const headingTextWidth = ctx.measureText(rectUI.heading).width;
+        const centeredOffset = rectUI.mainRect.width / 2 - headingTextWidth / 2;
+        ctx.fillText(rectUI.heading, rectUI.mainRect.topLeft.x + centeredOffset, rectUI.mainRect.topLeft.y + fontSize + padding);
+        tabY += fontSize + padding * 2;
+    }
     if (rectUI.tabs.length > 1) {
-        const fontSize = 20;
-        rectUI.currentTabYOffset = fontSize;
         let tabOffsetX = 0;
-        ctx.font = `${fontSize}px Arial`
         for (let tab of rectUI.tabs) {
-            if (tab.rect === undefined) {
+            if (tab.clickRect === undefined) {
                 const textWidth = ctx.measureText(tab.name).width;
-                tab.rect = {
-                    topLeft: { x: rect.topLeft.x + tabOffsetX, y: rect.topLeft.y },
-                    width: textWidth,
-                    height: fontSize,
+                tab.clickRect = {
+                    topLeft: { x: mainRect.topLeft.x + tabOffsetX, y: tabY },
+                    width: textWidth + padding * 2,
+                    height: fontSize + padding * 2,
                 }
+            }
+            if (tab === rectUI.currentTab) {
+                ctx.fillStyle = "lightblue";
+                ctx.fillRect(tab.clickRect.topLeft.x, tab.clickRect.topLeft.y, tab.clickRect.width, tab.clickRect.height);
             }
             ctx.beginPath();
             ctx.strokeStyle = "black";
-            ctx.rect(tab.rect.topLeft.x, tab.rect.topLeft.y, tab.rect.width, tab.rect.height);
+            ctx.rect(tab.clickRect.topLeft.x, tab.clickRect.topLeft.y, tab.clickRect.width, tab.clickRect.height);
             ctx.stroke();
             ctx.fillStyle = "black";
-            ctx.fillText(tab.name, tab.rect.topLeft.x, tab.rect.topLeft.y + fontSize);
-            tabOffsetX += tab.rect.width + 5;
+            ctx.fillText(tab.name, tab.clickRect.topLeft.x + padding, tab.clickRect.topLeft.y + fontSize + padding);
+            tabOffsetX += tab.clickRect.width + 5;
         }
     }
 
-    rectUI.currentTab.paint(ctx, rectUI, state);
-}
-
-function paintSelectedDataOld(ctx: CanvasRenderingContext2D, state: ChatSimState) {
-    const selected = state.inputData.selected;
-    if (!selected) return;
-    const fontSize = 18;
-    ctx.font = `${fontSize}px Arial`;
-    ctx.fillStyle = "black";
-    const offsetX = ctx.canvas.width - 600 + fontSize;
-    const offsetY = 50;
-    let lineCounter = 0;
-    const lineSpacing = fontSize + 5;
-    if (selected.type === "citizen") {
-    } else if (selected.type === "building") {
-        const building: Building = selected.object;
-    } else if (selected.type === "mushroom") {
-        const mushroom: Mushroom = selected.object;
-    }
+    rectUI.currentTab.paint(ctx, rectUI.tabConntentRect!, state);
 }
 
 function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataMap: PaintDataMap) {

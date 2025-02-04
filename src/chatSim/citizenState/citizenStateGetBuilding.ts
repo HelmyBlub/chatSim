@@ -193,7 +193,7 @@ function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
                         return;
                     }
                 }
-                citizenAddLogEntry(citizen, `building in Progress ${building.buildProgress} `, state);
+                citizenAddLogEntry(citizen, `building in Progress ${(building.buildProgress * 100).toFixed()}% `, state);
                 if (buildingInventoryWood.counter > 0) {
                     buildingInventoryWood.counter--;
                 }

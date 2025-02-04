@@ -78,20 +78,20 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
 }
 
 function clickedUiTab(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
-    if (!state.paintData.selectionRectangle) return false;
-    const rect = state.paintData.selectionRectangle.rect;
+    if (!state.paintData.displaySelected) return false;
+    const rect = state.paintData.displaySelected.mainRect;
     if (rect.topLeft.x > relativeMouseToCanvas.x || rect.topLeft.x + rect.width < relativeMouseToCanvas.x
         || rect.topLeft.y > relativeMouseToCanvas.y || rect.topLeft.y + rect.height < relativeMouseToCanvas.y
     ) {
         return false;
     }
 
-    for (let tab of state.paintData.selectionRectangle.tabs) {
-        if (!tab.rect) continue;
-        if (tab.rect.topLeft.x <= relativeMouseToCanvas.x && tab.rect.topLeft.x + tab.rect.width >= relativeMouseToCanvas.x
-            && tab.rect.topLeft.y <= relativeMouseToCanvas.y && tab.rect.topLeft.y + tab.rect.height >= relativeMouseToCanvas.y
+    for (let tab of state.paintData.displaySelected.tabs) {
+        if (!tab.clickRect) continue;
+        if (tab.clickRect.topLeft.x <= relativeMouseToCanvas.x && tab.clickRect.topLeft.x + tab.clickRect.width >= relativeMouseToCanvas.x
+            && tab.clickRect.topLeft.y <= relativeMouseToCanvas.y && tab.clickRect.topLeft.y + tab.clickRect.height >= relativeMouseToCanvas.y
         ) {
-            state.paintData.selectionRectangle.currentTab = tab;
+            state.paintData.displaySelected.currentTab = tab;
             return true;
         }
     }
@@ -102,14 +102,14 @@ function clickedUiTab(relativeMouseToCanvas: Position, state: ChatSimState): boo
 function createSelectedUiRectangle(state: ChatSimState) {
     const selected = state.inputData.selected;
     if (selected === undefined) {
-        state.paintData.selectionRectangle = undefined;
+        state.paintData.displaySelected = undefined;
         return;
     }
     const mapObjectFunctions = MAP_OBJECTS_FUNCTIONS[selected.type];
     if (mapObjectFunctions && mapObjectFunctions.createSelectionData) {
-        state.paintData.selectionRectangle = mapObjectFunctions.createSelectionData(state);
+        state.paintData.displaySelected = mapObjectFunctions.createSelectionData(state);
     } else {
-        state.paintData.selectionRectangle = undefined;
+        state.paintData.displaySelected = undefined;
     }
 }
 

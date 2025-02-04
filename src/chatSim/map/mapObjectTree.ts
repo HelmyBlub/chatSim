@@ -1,5 +1,5 @@
 import { IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG } from "../../drawHelper.js";
-import { ChatSimState, Position, UiRectangle } from "../chatSimModels.js";
+import { ChatSimState, Position, Rectangle, UiRectangle } from "../chatSimModels.js";
 import { ChatSimMap, PaintDataMap } from "./map.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
@@ -29,37 +29,37 @@ export function loadMapObjectTree() {
 function createSelectionData(state: ChatSimState): UiRectangle {
     const width = 500;
     const citizenUiRectangle: UiRectangle = {
-        rect: {
+        mainRect: {
             topLeft: { x: state.canvas!.width - width, y: 0 },
             height: 100,
             width: width,
         },
         tabs: [
             {
-                name: "Generel",
+                name: "Generell",
                 paint: paintSelectionData,
             },
         ],
-        currentTabYOffset: 0,
+        heading: "Tree:",
     }
     return citizenUiRectangle;
 }
 
-function paintSelectionData(ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) {
+function paintSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const tree: Tree = state.inputData.selected?.object as Tree;
     if (!tree) return;
     const fontSize = 18;
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = "black";
-    let offsetX = uiRec.rect.topLeft.x;
-    let offsetY = uiRec.rect.topLeft.y + fontSize + uiRec.currentTabYOffset;
-    const lineSpacing = fontSize + 5;
+    const padding = 5;
+    let offsetX = rect.topLeft.x + padding;
+    let offsetY = rect.topLeft.y + fontSize + padding;
+    const lineSpacing = fontSize + padding;
     let lineCounter = 0;
-    ctx.fillText(`Tree:`, offsetX, offsetY + lineSpacing * lineCounter++);
-    ctx.fillText(`    wood: ${tree.woodValue}`, offsetX, offsetY + lineSpacing * lineCounter++);
-    ctx.fillText(`    trunkDamage: ${(tree.trunkDamagePerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`wood: ${tree.woodValue}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`trunkDamage: ${(tree.trunkDamagePerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
 
-    uiRec.rect.height = lineSpacing * lineCounter + uiRec.currentTabYOffset;
+    rect.height = lineSpacing * lineCounter + padding * 2;
 }
 
 function getMaxVisionDistanceFactor() {

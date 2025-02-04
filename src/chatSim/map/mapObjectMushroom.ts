@@ -1,5 +1,5 @@
 import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
-import { ChatSimState, Position, UiRectangle } from "../chatSimModels.js";
+import { ChatSimState, Position, Rectangle, UiRectangle } from "../chatSimModels.js";
 import { MUSHROOM_FOOD_VALUE } from "../citizenNeeds/citizenNeedFood.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
@@ -26,36 +26,36 @@ export function loadMapObjectMushroom() {
 function createSelectionData(state: ChatSimState): UiRectangle {
     const width = 500;
     const citizenUiRectangle: UiRectangle = {
-        rect: {
+        mainRect: {
             topLeft: { x: state.canvas!.width - width, y: 0 },
             height: 100,
             width: width,
         },
         tabs: [
             {
-                name: "Generel",
+                name: "Generell",
                 paint: paintSelectionData,
             },
         ],
-        currentTabYOffset: 0,
+        heading: "Mushroom",
     }
     return citizenUiRectangle;
 }
 
-function paintSelectionData(ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) {
+function paintSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const mushroom = state.inputData.selected?.object as Mushroom;
     if (!mushroom) return;
     const fontSize = 18;
+    const padding = 5;
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = "black";
-    let offsetX = uiRec.rect.topLeft.x;
-    let offsetY = uiRec.rect.topLeft.y + fontSize + uiRec.currentTabYOffset;
+    let offsetX = rect.topLeft.x + padding;
+    let offsetY = rect.topLeft.y + fontSize + padding;
     const lineSpacing = fontSize + 5;
     let lineCounter = 0;
-    ctx.fillText(`Mushroom:`, offsetX, offsetY + lineSpacing * lineCounter++);
-    ctx.fillText(`    foodValue: ${MUSHROOM_FOOD_VALUE}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`foodValue: ${MUSHROOM_FOOD_VALUE}`, offsetX, offsetY + lineSpacing * lineCounter++);
 
-    uiRec.rect.height = lineSpacing * lineCounter + uiRec.currentTabYOffset;
+    rect.height = lineSpacing * lineCounter + padding * 2;
 }
 
 function getMaxVisionDistanceFactor() {
