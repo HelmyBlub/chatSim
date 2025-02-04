@@ -67,6 +67,15 @@ export function getDay(state: ChatSimState): number {
 
 export function getTimeOfDayString(time: number, state: ChatSimState): string {
     const timeOfDayNumber = getTimeOfDay(time, state) * 24;
+    const hours = Math.floor(timeOfDayNumber);
+    const hoursString = hours >= 10 ? hours : `0${hours}`;
+    const minutes = Math.floor((timeOfDayNumber - hours) * 60);
+    const minutesString = minutes >= 10 ? minutes : `0${minutes}`;
+    return `Time ${hoursString}:${minutesString}`;
+}
+
+export function getTimeAndDayString(time: number, state: ChatSimState): string {
+    const timeOfDayNumber = getTimeOfDay(time, state) * 24;
     const days = Math.floor(time / state.timPerDay) + 1;
     const hours = Math.floor(timeOfDayNumber);
     const hoursString = hours >= 10 ? hours : `0${hours}`;
@@ -235,9 +244,11 @@ function checkIsChatterMessageABot(message: string) {
 
 function chatSimStateInit(streamer: string): App {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.width = window.innerWidth - 10;
-    canvas.height = window.innerHeight - 10;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     const state = createDefaultChatSimState(streamer, Math.random());
+    state.paintData.map.paintWidth = canvas.width;
+    state.paintData.map.paintHeight = canvas.height;
     state.soundVolume = 1;
     const app: App = { state: state };
     state.canvas = canvas;

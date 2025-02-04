@@ -4,7 +4,7 @@ import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChu
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
 import { MUSHROOM_FOOD_VALUE } from "./citizenNeeds/citizenNeedFood.js";
-import { getTimeOfDay, getTimeOfDayString } from "./main.js";
+import { getTimeOfDay, getTimeAndDayString, getTimeOfDayString, getDay } from "./main.js";
 import { Tree } from "./map/mapObjectTree.js";
 import { CITIZEN_TRAIT_FUNCTIONS } from "./traits/trait.js";
 import { mapPaintChunkObjects } from "./map/mapObject.js";
@@ -70,7 +70,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const fontSize = 18;
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = "black";
-    const offsetX = state.paintData.map.paintWidth + fontSize;
+    const offsetX = ctx.canvas.width - 600 + fontSize;
     const offsetY = 50;
     let lineCounter = 0;
     const lineSpacing = fontSize + 5;
@@ -146,7 +146,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
             ctx.fillText(`    Action Log:`, offsetX, offsetY + lineSpacing * lineCounter++);
             for (let i = 0; i < Math.min(14, citizen.log.length); i++) {
                 const logEntry = citizen.log[i];
-                const time = getTimeOfDayString(logEntry.time, state);
+                const time = getTimeAndDayString(logEntry.time, state);
                 ctx.fillText(`        ${time}, ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
             }
         }
@@ -258,18 +258,28 @@ function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMa
 }
 
 function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState, gameSpeed: number) {
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "black";
-    const offsetX = state.paintData.map.paintWidth + 20;
-    const citizenCounter = state.map.citizens.length;
-    const gameSpeedLimited = state.gameSpeedLimited ? `(${state.gameSpeedLimited})` : "";
-    ctx.fillText(`${getTimeOfDayString(state.time, state)}, speed: ${gameSpeed.toFixed(2)}${gameSpeedLimited},     zoom:${state.paintData.map.zoom.toFixed(2)}, citizens: ${citizenCounter}, steal: ${state.stealCounter}`, offsetX, 25);
-    if (state.inputData.selected === undefined) {
-        for (let i = 0; i < Math.min(20, state.map.citizens.length); i++) {
-            const citizen = state.map.citizens[i];
-            ctx.fillText(`${citizen.name}`, offsetX, 45 + 20 * i);
-            ctx.fillText(`$${citizen.money}`, offsetX + 240, 45 + 20 * i);
-            ctx.fillText(`job:${citizen.job.name}`, offsetX + 300, 45 + 20 * i);
-        }
+    const fontSize = 20;
+    ctx.font = `${fontSize}px Arial`;
+    const displayTexts = [
+        getTimeOfDayString(state.time, state),
+        "Day: " + getDay(state),
+        "Citizen: " + state.map.citizens.length,
+        "Speed:" + gameSpeed.toFixed(2),
+        "Steal: " + state.stealCounter,
+    ];
+
+    const margin = 5;
+    const padding = 5;
+    let xOffset = margin + padding;
+    let yOffset = fontSize + margin + padding;
+    for (let text of displayTexts) {
+        const textWidth = ctx.measureText(text).width;
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "white";
+        ctx.fillRect(xOffset - padding, yOffset - fontSize - padding, textWidth + padding * 2, fontSize + padding * 2);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "black";
+        ctx.fillText(text, xOffset, yOffset - 1);
+        xOffset += ctx.measureText(text).width + margin + padding * 2;
     }
 }

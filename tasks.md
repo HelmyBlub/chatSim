@@ -1,12 +1,36 @@
 Tasks:
-- check function "citizenCheckTodoList", why condition number?. Change it?
 - improve UI?
+    - steps:
+        - fullscreen map by default
+        - top row display:
+            - easy to add new simple values stuff
+            - day + time
+            - citizen counter
+            - game speed
+        - bottom centered:
+            - buttons to press
+            - citizen button
+                - citizens
+                - citizen death reasons + select citizen option 
+                - option to add "robot" to citizen and chatter
+            - statistics button
+                - open "window" on right side (defineable), 
+                    - should be usable also for citizen/map object selection
+                    - multiple tabs
+                        - displaying "steal counter" and "food gifted counter" and more in future
+                        - graphs: average citizen happines over time
+            - chat commands button
+                - chat commands
+
+
     - instead of growing list of displayed things
     - make it easier to find citizen
     - display death reasons not only in console.log
     - some statistics?
         - wealth distribution
         - death reason counter
+- check citizen building second if first not finished
+
 
 what next ideas:
 - bad citizens behavior:
