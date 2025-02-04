@@ -54,6 +54,7 @@ export type ChatSimState = {
     randomSeed: RandomSeed,
     map: ChatSimMap,
     paintData: {
+        selectionRectangle?: UiRectangle,
         map: PaintDataMap,
     }
     inputData: {
@@ -72,4 +73,22 @@ export type ChatSimState = {
     stealCounter: number,
 }
 
+export type UiRectangle = {
+    rect: Rectangle,
+    heading?: string,
+    tabs: UiRectangleTab[]
+    currentTab?: UiRectangleTab
+    currentTabYOffset: number,
+}
 
+export type UiRectangleTab = {
+    name: string,
+    paint: (ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) => void,
+    rect?: Rectangle,
+}
+
+export type Rectangle = {
+    topLeft: Position,
+    width: number,
+    height: number,
+}

@@ -66,6 +66,45 @@ function paintChatMessageOptions(ctx: CanvasRenderingContext2D, state: ChatSimSt
 
 function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const selected = state.inputData.selected;
+    const rectUI = state.paintData.selectionRectangle;
+    if (!selected || !rectUI) return;
+    if (rectUI.currentTab === undefined) {
+        rectUI.currentTab = rectUI.tabs[0];
+    }
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "white";
+    const rect = rectUI.rect;
+    ctx.fillRect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
+    ctx.globalAlpha = 1;
+    if (rectUI.tabs.length > 1) {
+        const fontSize = 20;
+        rectUI.currentTabYOffset = fontSize;
+        let tabOffsetX = 0;
+        ctx.font = `${fontSize}px Arial`
+        for (let tab of rectUI.tabs) {
+            if (tab.rect === undefined) {
+                const textWidth = ctx.measureText(tab.name).width;
+                tab.rect = {
+                    topLeft: { x: rect.topLeft.x + tabOffsetX, y: rect.topLeft.y },
+                    width: textWidth,
+                    height: fontSize,
+                }
+            }
+            ctx.beginPath();
+            ctx.strokeStyle = "black";
+            ctx.rect(tab.rect.topLeft.x, tab.rect.topLeft.y, tab.rect.width, tab.rect.height);
+            ctx.stroke();
+            ctx.fillStyle = "black";
+            ctx.fillText(tab.name, tab.rect.topLeft.x, tab.rect.topLeft.y + fontSize);
+            tabOffsetX += tab.rect.width + 5;
+        }
+    }
+
+    rectUI.currentTab.paint(ctx, rectUI, state);
+}
+
+function paintSelectedDataOld(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    const selected = state.inputData.selected;
     if (!selected) return;
     const fontSize = 18;
     ctx.font = `${fontSize}px Arial`;
@@ -75,110 +114,10 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     let lineCounter = 0;
     const lineSpacing = fontSize + 5;
     if (selected.type === "citizen") {
-        const citizen: Citizen = selected.object;
-        ctx.fillText(`Citizen: ${citizen.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        if (citizen.isDead) {
-            ctx.fillText(`    Death Reason: ${citizen.isDead.reason}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        if (citizen.dreamJob) {
-            ctx.fillText(`    Dream Job: ${citizen.dreamJob}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%,     Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Happiness: ${(citizen.happinessData.happiness * 100).toFixed(3)}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    socialBattery: ${(citizen.happinessData.socialBattery * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    ${citizen.happinessData.isExtrovert ? "Extrovert" : "Introvert"}(${citizen.happinessData.socialBatteryFactor.toFixed(2)})`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        if (citizen.stateInfo.tags.size > 0) {
-            let tagsString = "";
-            citizen.stateInfo.tags.forEach(t => tagsString += t + ",");
-            ctx.fillText(`       Tags: ${tagsString}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        if (citizen.stateInfo.stack.length > 0) {
-            const citizenState = citizen.stateInfo.stack[0];
-            ctx.fillText(`        ${citizenState.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            if (citizenState.subState) ctx.fillText(`            ${citizenState.subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            if (citizenState.tags) {
-                let tagsString = "";
-                citizenState.tags.forEach(t => tagsString += t + ",");
-                ctx.fillText(`       Tags: ${tagsString}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            }
-        }
-        if (citizen.traitsData.traits.length > 0) {
-            let traitsText = `    Traits:`;
-            for (let trait of citizen.traitsData.traits) {
-                traitsText += ` ${trait},`;
-            }
-            ctx.fillText(traitsText, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        if (citizen.happinessData.happinessTagFactors.size > 0) {
-            let happinessText = `    HappinessTags:`;
-            for (let tag of citizen.happinessData.happinessTagFactors) {
-                happinessText += ` ${tag[0]}(${tag[1].toFixed(1)}),`;
-            }
-            ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        if (citizen.happinessData.unhappinessTagFactors.size > 0) {
-            let happinessText = `    unhappinessTags:`;
-            for (let tag of citizen.happinessData.unhappinessTagFactors) {
-                happinessText += ` ${tag[0]}(${tag[1].toFixed(1)}),`;
-            }
-            ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
-        for (let item of citizen.inventory.items) {
-            ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        if (citizen.home) {
-            ctx.fillText(`    Home Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
-            for (let item of citizen.home.inventory.items) {
-                ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            }
-        }
-        if (citizen.memory.todosData.todos.length > 0) {
-            ctx.fillText(`    Memory Todos:`, offsetX, offsetY + lineSpacing * lineCounter++);
-            for (let todo of citizen.memory.todosData.todos) {
-                ctx.fillText(`        ${todo.stateType}: ${todo.reasonThought}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            }
-        }
-        if (citizen.log.length > 0) {
-            ctx.fillText(`    Action Log:`, offsetX, offsetY + lineSpacing * lineCounter++);
-            for (let i = 0; i < Math.min(14, citizen.log.length); i++) {
-                const logEntry = citizen.log[i];
-                const time = getTimeAndDayString(logEntry.time, state);
-                ctx.fillText(`        ${time}, ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            }
-        }
     } else if (selected.type === "building") {
         const building: Building = selected.object;
-        ctx.fillText(`Building: ${building.buildingType}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Owner: ${building.owner.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        if (building.inhabitedBy !== undefined) ctx.fillText(`    Inhabited by: ${building.inhabitedBy.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        if (building.buildProgress !== undefined) ctx.fillText(`    Build Progress: ${(building.buildProgress * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Deterioration: ${(building.deterioration * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
-        for (let item of building.inventory.items) {
-            ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        }
-        if (building.buildingType === "Market") {
-            const market = building as BuildingMarket;
-            ctx.fillText(`    Counter:`, offsetX, offsetY + lineSpacing * lineCounter++);
-            ctx.fillText(`        money: ${market.counter.money}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            ctx.fillText(`        items:`, offsetX, offsetY + lineSpacing * lineCounter++);
-            for (let item of market.counter.items) {
-                ctx.fillText(`            ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
-            }
-        }
-    } else if (selected.type === "tree") {
-        const tree: Tree = selected.object;
-        ctx.fillText(`Tree:`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    wood: ${tree.woodValue}`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    trunkDamage: ${(tree.trunkDamagePerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
     } else if (selected.type === "mushroom") {
         const mushroom: Mushroom = selected.object;
-        ctx.fillText(`Mushroom:`, offsetX, offsetY + lineSpacing * lineCounter++);
-        ctx.fillText(`    foodValue: ${MUSHROOM_FOOD_VALUE}`, offsetX, offsetY + lineSpacing * lineCounter++);
     }
 }
 

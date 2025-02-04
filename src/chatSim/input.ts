@@ -1,4 +1,4 @@
-import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
+import { App, ChatSimState, Position, SelectedObject, UiRectangle } from "./chatSimModels.js";
 import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
 import { addCitizen } from "./citizen.js";
 import { addChatterChangeLog, calculateDistance } from "./main.js";
@@ -8,7 +8,7 @@ import { chatSimTick } from "./tick.js";
 import { MAP_OBJECT_TREE, Tree } from "./map/mapObjectTree.js";
 import { MAP_OBJECT_BUILDING } from "./map/mapObjectBuilding.js";
 import { MAP_OBJECT_MUSHROOM } from "./map/mapObjectMushroom.js";
-import { MapObject } from "./map/mapObject.js";
+import { MAP_OBJECTS_FUNCTIONS, MapObject } from "./map/mapObject.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -70,7 +70,46 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
             x: event.clientX - boundingRect.left,
             y: event.clientY - boundingRect.top,
         }
-        selectObject(relativeMouse, state);
+        if (!clickedUiTab(relativeMouse, state)) {
+            selectObject(relativeMouse, state);
+            createSelectedUiRectangle(state);
+        }
+    }
+}
+
+function clickedUiTab(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
+    if (!state.paintData.selectionRectangle) return false;
+    const rect = state.paintData.selectionRectangle.rect;
+    if (rect.topLeft.x > relativeMouseToCanvas.x || rect.topLeft.x + rect.width < relativeMouseToCanvas.x
+        || rect.topLeft.y > relativeMouseToCanvas.y || rect.topLeft.y + rect.height < relativeMouseToCanvas.y
+    ) {
+        return false;
+    }
+
+    for (let tab of state.paintData.selectionRectangle.tabs) {
+        if (!tab.rect) continue;
+        if (tab.rect.topLeft.x <= relativeMouseToCanvas.x && tab.rect.topLeft.x + tab.rect.width >= relativeMouseToCanvas.x
+            && tab.rect.topLeft.y <= relativeMouseToCanvas.y && tab.rect.topLeft.y + tab.rect.height >= relativeMouseToCanvas.y
+        ) {
+            state.paintData.selectionRectangle.currentTab = tab;
+            return true;
+        }
+    }
+
+    return true;
+}
+
+function createSelectedUiRectangle(state: ChatSimState) {
+    const selected = state.inputData.selected;
+    if (selected === undefined) {
+        state.paintData.selectionRectangle = undefined;
+        return;
+    }
+    const mapObjectFunctions = MAP_OBJECTS_FUNCTIONS[selected.type];
+    if (mapObjectFunctions && mapObjectFunctions.createSelectionData) {
+        state.paintData.selectionRectangle = mapObjectFunctions.createSelectionData(state);
+    } else {
+        state.paintData.selectionRectangle = undefined;
     }
 }
 

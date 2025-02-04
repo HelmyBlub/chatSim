@@ -1,5 +1,5 @@
 import { IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_WOOD_PLANK, drawTextWithOutline } from "../../drawHelper.js";
-import { ChatSimState, Position } from "../chatSimModels.js";
+import { ChatSimState, Position, UiRectangle } from "../chatSimModels.js";
 import { Citizen } from "../citizen.js";
 import { IMAGES } from "../images.js";
 import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } from "../inventory.js";
@@ -35,6 +35,7 @@ export const MAP_OBJECT_BUILDING = "building";
 
 export function loadMapObjectBuilding() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_BUILDING] = {
+        createSelectionData: createSelectionData,
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
         onDeleteOnTile: onDelete,
         paint: paint,
@@ -175,6 +176,57 @@ export function createBuilding(owner: Citizen, position: Position, type: Buildin
     return building;
 }
 
+
+function createSelectionData(state: ChatSimState): UiRectangle {
+    const width = 500;
+    const citizenUiRectangle: UiRectangle = {
+        rect: {
+            topLeft: { x: state.canvas!.width - width, y: 0 },
+            height: 100,
+            width: width,
+        },
+        tabs: [
+            {
+                name: "Generel",
+                paint: paintSelectionData,
+            },
+        ],
+        currentTabYOffset: 0,
+    }
+    return citizenUiRectangle;
+}
+
+function paintSelectionData(ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) {
+    const building = state.inputData.selected?.object as Building;
+    if (!building) return;
+    const fontSize = 18;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.fillStyle = "black";
+    let offsetX = uiRec.rect.topLeft.x;
+    let offsetY = uiRec.rect.topLeft.y + fontSize + uiRec.currentTabYOffset;
+    const lineSpacing = fontSize + 5;
+    let lineCounter = 0;
+    ctx.fillText(`Building: ${building.buildingType}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    Owner: ${building.owner.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    if (building.inhabitedBy !== undefined) ctx.fillText(`    Inhabited by: ${building.inhabitedBy.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    if (building.buildProgress !== undefined) ctx.fillText(`    Build Progress: ${(building.buildProgress * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    Deterioration: ${(building.deterioration * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
+    for (let item of building.inventory.items) {
+        ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    if (building.buildingType === "Market") {
+        const market = building as BuildingMarket;
+        ctx.fillText(`    Counter:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`        money: ${market.counter.money}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        ctx.fillText(`        items:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        for (let item of market.counter.items) {
+            ctx.fillText(`            ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    }
+
+    uiRec.rect.height = lineSpacing * lineCounter + uiRec.currentTabYOffset;
+}
 
 function getMaxVisionDistanceFactor() {
     return 2;

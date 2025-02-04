@@ -1,12 +1,13 @@
 Tasks:
 - improve UI?
     - steps:
-        - fullscreen map by default
-        - top row display:
-            - easy to add new simple values stuff
-            - day + time
-            - citizen counter
-            - game speed
+        - selection display
+            - windows with tabs
+            - display citizen data
+            - tab for log
+            - tab for citizen state
+        
+            
         - bottom centered:
             - buttons to press
             - citizen button
@@ -30,6 +31,8 @@ Tasks:
         - wealth distribution
         - death reason counter
 - check citizen building second if first not finished
+- check: move cititzen to mapObjects?
+- check citizen file very big. Split up?
 
 
 what next ideas:

@@ -1,5 +1,5 @@
 import { IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG } from "../../drawHelper.js";
-import { ChatSimState, Position } from "../chatSimModels.js";
+import { ChatSimState, Position, UiRectangle } from "../chatSimModels.js";
 import { ChatSimMap, PaintDataMap } from "./map.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
@@ -17,12 +17,49 @@ export const MAP_OBJECT_TREE = "tree";
 export function loadMapObjectTree() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_TREE] = {
         create: createTree,
+        createSelectionData: createSelectionData,
         getVisionDistanceFactor: getVisionDistanceFactor,
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
         onDeleteOnTile: onDelete,
         paint: paintTree,
         tickGlobal: tickTreeSpawn,
     }
+}
+
+function createSelectionData(state: ChatSimState): UiRectangle {
+    const width = 500;
+    const citizenUiRectangle: UiRectangle = {
+        rect: {
+            topLeft: { x: state.canvas!.width - width, y: 0 },
+            height: 100,
+            width: width,
+        },
+        tabs: [
+            {
+                name: "Generel",
+                paint: paintSelectionData,
+            },
+        ],
+        currentTabYOffset: 0,
+    }
+    return citizenUiRectangle;
+}
+
+function paintSelectionData(ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) {
+    const tree: Tree = state.inputData.selected?.object as Tree;
+    if (!tree) return;
+    const fontSize = 18;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.fillStyle = "black";
+    let offsetX = uiRec.rect.topLeft.x;
+    let offsetY = uiRec.rect.topLeft.y + fontSize + uiRec.currentTabYOffset;
+    const lineSpacing = fontSize + 5;
+    let lineCounter = 0;
+    ctx.fillText(`Tree:`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    wood: ${tree.woodValue}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    trunkDamage: ${(tree.trunkDamagePerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+
+    uiRec.rect.height = lineSpacing * lineCounter + uiRec.currentTabYOffset;
 }
 
 function getMaxVisionDistanceFactor() {

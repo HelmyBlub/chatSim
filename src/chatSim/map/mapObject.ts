@@ -1,4 +1,4 @@
-import { ChatSimState, Position } from "../chatSimModels.js";
+import { ChatSimState, Position, UiRectangle } from "../chatSimModels.js";
 import { loadMapObjectTree } from "./mapObjectTree.js";
 import { ChatSimMap, MapChunk, mapChunkKeyAndTileToPosition, mapGetChunkAndTileForPosition, mapGetChunkForPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
 import { loadMapObjectBuilding } from "./mapObjectBuilding.js";
@@ -11,6 +11,7 @@ export type MapObject = {
 
 export type FunctionsMapObject = {
     create?(position: Position, state: ChatSimState): MapObject,
+    createSelectionData?(state: ChatSimState): UiRectangle,
     getMaxVisionDistanceFactor(): number,
     getVisionDistanceFactor?(object: MapObject): number,
     onDeleteOnTile?(object: MapObject, map: ChatSimMap): void,

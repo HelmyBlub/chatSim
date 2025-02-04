@@ -1,6 +1,6 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Position } from "./chatSimModels.js";
+import { ChatSimState, Position, UiRectangle } from "./chatSimModels.js";
 import { MapChunk, mapChunkKeyToPosition, mapGetChunkForPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";
@@ -9,7 +9,7 @@ import { IMAGES } from "./images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "./inventory.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "./jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "./jobs/jobFoodGatherer.js";
-import { calculateDirection, calculateDistance, nextRandom } from "./main.js";
+import { calculateDirection, calculateDistance, getTimeAndDayString, nextRandom } from "./main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "./paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "./paintCitizenEquipment.js";
@@ -183,6 +183,7 @@ export function loadCitizenStateTypeFunctions() {
 
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_CITIZEN] = {
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
+        createSelectionData: createSelectionData,
     }
 }
 
@@ -481,6 +482,106 @@ export function citizenCheckTodoList(citizen: Citizen, state: ChatSimState): boo
         }
     }
     return false;
+}
+
+function paintCititzenSelectionDataLog(ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) {
+    const citizen: Citizen = state.inputData.selected?.object as Citizen;
+    if (!citizen) return;
+    const fontSize = 18;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.fillStyle = "black";
+    let offsetX = uiRec.rect.topLeft.x;
+    let offsetY = uiRec.rect.topLeft.y + fontSize + uiRec.currentTabYOffset;
+    const lineSpacing = fontSize + 5;
+    let lineCounter = 0;
+    if (citizen.log.length > 0) {
+        ctx.fillText(`    Action Log:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        for (let i = 0; i < Math.min(14, citizen.log.length); i++) {
+            const logEntry = citizen.log[i];
+            const time = getTimeAndDayString(logEntry.time, state);
+            ctx.fillText(`        ${time}, ${logEntry.message}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    }
+    uiRec.rect.height = lineSpacing * lineCounter + uiRec.currentTabYOffset;
+}
+
+export function paintCititzenSelectionData(ctx: CanvasRenderingContext2D, uiRec: UiRectangle, state: ChatSimState) {
+    const citizen: Citizen = state.inputData.selected?.object as Citizen;
+    if (!citizen) return;
+    const fontSize = 18;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.fillStyle = "black";
+    let offsetX = uiRec.rect.topLeft.x;
+    let offsetY = uiRec.rect.topLeft.y + fontSize + uiRec.currentTabYOffset;
+    const lineSpacing = fontSize + 5;
+    let lineCounter = 0;
+    ctx.fillText(`Citizen: ${citizen.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    if (citizen.isDead) {
+        ctx.fillText(`    Death Reason: ${citizen.isDead.reason}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    if (citizen.dreamJob) {
+        ctx.fillText(`    Dream Job: ${citizen.dreamJob}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    ctx.fillText(`    Food: ${(citizen.foodPerCent * 100).toFixed()}%,     Energy: ${(citizen.energyPerCent * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    Happiness: ${(citizen.happinessData.happiness * 100).toFixed(3)}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    socialBattery: ${(citizen.happinessData.socialBattery * 100).toFixed()}%`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    Job: ${citizen.job.name}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    ${citizen.happinessData.isExtrovert ? "Extrovert" : "Introvert"}(${citizen.happinessData.socialBatteryFactor.toFixed(2)})`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`    State: ${citizen.stateInfo.type}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    if (citizen.stateInfo.tags.size > 0) {
+        let tagsString = "";
+        citizen.stateInfo.tags.forEach(t => tagsString += t + ",");
+        ctx.fillText(`       Tags: ${tagsString}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    if (citizen.stateInfo.stack.length > 0) {
+        const citizenState = citizen.stateInfo.stack[0];
+        ctx.fillText(`        ${citizenState.state}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizenState.subState) ctx.fillText(`            ${citizenState.subState}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        if (citizenState.tags) {
+            let tagsString = "";
+            citizenState.tags.forEach(t => tagsString += t + ",");
+            ctx.fillText(`       Tags: ${tagsString}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    }
+    if (citizen.traitsData.traits.length > 0) {
+        let traitsText = `    Traits:`;
+        for (let trait of citizen.traitsData.traits) {
+            traitsText += ` ${trait},`;
+        }
+        ctx.fillText(traitsText, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    if (citizen.happinessData.happinessTagFactors.size > 0) {
+        let happinessText = `    HappinessTags:`;
+        for (let tag of citizen.happinessData.happinessTagFactors) {
+            happinessText += ` ${tag[0]}(${tag[1].toFixed(1)}),`;
+        }
+        ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    if (citizen.happinessData.unhappinessTagFactors.size > 0) {
+        let happinessText = `    unhappinessTags:`;
+        for (let tag of citizen.happinessData.unhappinessTagFactors) {
+            happinessText += ` ${tag[0]}(${tag[1].toFixed(1)}),`;
+        }
+        ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    ctx.fillText(`    Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
+    for (let item of citizen.inventory.items) {
+        ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    }
+    if (citizen.home) {
+        ctx.fillText(`    Home Inventory:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        for (let item of citizen.home.inventory.items) {
+            ctx.fillText(`        ${item.name}: ${item.counter}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    }
+    if (citizen.memory.todosData.todos.length > 0) {
+        ctx.fillText(`    Memory Todos:`, offsetX, offsetY + lineSpacing * lineCounter++);
+        for (let todo of citizen.memory.todosData.todos) {
+            ctx.fillText(`        ${todo.stateType}: ${todo.reasonThought}`, offsetX, offsetY + lineSpacing * lineCounter++);
+        }
+    }
+    uiRec.rect.height = lineSpacing * lineCounter + uiRec.currentTabYOffset;
 }
 
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
@@ -932,5 +1033,28 @@ function citizenMoveToTick(citizen: Citizen) {
 
 function getMaxVisionDistanceFactor() {
     return 1;
+}
+
+function createSelectionData(state: ChatSimState): UiRectangle {
+    const width = 500;
+    const citizenUiRectangle: UiRectangle = {
+        rect: {
+            topLeft: { x: state.canvas!.width - width, y: 0 },
+            height: 100,
+            width: width,
+        },
+        tabs: [
+            {
+                name: "Generel",
+                paint: paintCititzenSelectionData,
+            },
+            {
+                name: "log",
+                paint: paintCititzenSelectionDataLog,
+            }
+        ],
+        currentTabYOffset: 0,
+    }
+    return citizenUiRectangle;
 }
 
