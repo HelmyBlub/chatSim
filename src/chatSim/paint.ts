@@ -1,5 +1,5 @@
 import { drawTextWithOutline } from "../drawHelper.js";
-import { ChatSimState, Position } from "./chatSimModels.js";
+import { ChatSimState, Position, UiRectangle, UiRectangleTab } from "./chatSimModels.js";
 import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
@@ -64,6 +64,21 @@ function paintChatMessageOptions(ctx: CanvasRenderingContext2D, state: ChatSimSt
     }
 }
 
+export function paintDataSetCurrenTab(uiTab: UiRectangleTab, rectUI: UiRectangle, fontSize: number = 20, padding: number = 5) {
+    rectUI.currentTab = uiTab;
+    rectUI.tabConntentRect = {
+        topLeft: { x: rectUI.mainRect.topLeft.x, y: rectUI.mainRect.topLeft.y },
+        height: rectUI.mainRect.height,
+        width: rectUI.mainRect.width,
+    }
+    if (rectUI.heading) {
+        rectUI.tabConntentRect.topLeft.y += fontSize + padding * 2;
+    }
+    if (rectUI.tabs.length > 1) {
+        rectUI.tabConntentRect.topLeft.y += fontSize + padding * 2;
+    }
+}
+
 function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const selected = state.inputData.selected;
     const rectUI = state.paintData.displaySelected;
@@ -71,18 +86,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const padding = 5;
     const fontSize = 20;
     if (rectUI.currentTab === undefined) {
-        rectUI.currentTab = rectUI.tabs[0];
-        rectUI.tabConntentRect = {
-            topLeft: { x: rectUI.mainRect.topLeft.x, y: rectUI.mainRect.topLeft.y },
-            height: rectUI.mainRect.height,
-            width: rectUI.mainRect.width,
-        }
-        if (rectUI.heading) {
-            rectUI.tabConntentRect.topLeft.y += fontSize + padding * 2;
-        }
-        if (rectUI.tabs.length > 1) {
-            rectUI.tabConntentRect.topLeft.y += fontSize + padding * 2;
-        }
+        paintDataSetCurrenTab(rectUI.tabs[0], rectUI);
     }
     rectUI.mainRect.height = rectUI.tabConntentRect!.topLeft.y - rectUI.mainRect.topLeft.y + rectUI.tabConntentRect!.height;
     ctx.globalAlpha = 0.5;
@@ -125,7 +129,7 @@ function paintSelectedData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         }
     }
 
-    rectUI.currentTab.paint(ctx, rectUI.tabConntentRect!, state);
+    rectUI.currentTab!.paint(ctx, rectUI.tabConntentRect!, state);
 }
 
 function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataMap: PaintDataMap) {

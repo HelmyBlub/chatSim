@@ -141,7 +141,10 @@ export type Citizen = MapObject & {
     maxLogLength: number,
     displayedEquipments: CitizenEquipmentData[],
     paintBehindBuildings?: boolean,
-    stealCounter: number,
+    stats: {
+        stealCounter: number,
+        giftedFoodCounter: number,
+    }
     visionFactor: number,
     currentMapChunk?: MapChunk,
 }
@@ -327,7 +330,10 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         log: [],
         maxLogLength: 100,
         visionFactor: 0.9 + nextRandom(state.randomSeed) * 0.2,
-        stealCounter: 0,
+        stats: {
+            stealCounter: 0,
+            giftedFoodCounter: 0,
+        }
     };
     setUpHappinessTags(citizen, state);
     const jobs = Object.keys(state.functionsCitizenJobs);
@@ -951,7 +957,7 @@ function createSelectionData(state: ChatSimState): UiRectangle {
             },
             {
                 name: "Data",
-                paint: paintCititzenSelectionDataOld,
+                paint: paintCititzenSelectionData,
             },
             {
                 name: "State",
@@ -1094,7 +1100,7 @@ function paintCititzenSelectionDataState(ctx: CanvasRenderingContext2D, rect: Re
 }
 
 
-function paintCititzenSelectionDataOld(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintCititzenSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const citizen: Citizen = state.inputData.selected?.object as Citizen;
     if (!citizen) return;
     const fontSize = 18;
@@ -1133,5 +1139,7 @@ function paintCititzenSelectionDataOld(ctx: CanvasRenderingContext2D, rect: Rect
         }
         ctx.fillText(happinessText, offsetX, offsetY + lineSpacing * lineCounter++);
     }
+    ctx.fillText(`steal: ${citizen.stats.stealCounter}`, offsetX, offsetY + lineSpacing * lineCounter++)
+    ctx.fillText(`gifted Food: ${citizen.stats.giftedFoodCounter}`, offsetX, offsetY + lineSpacing * lineCounter++)
     rect.height = lineSpacing * lineCounter;
 }

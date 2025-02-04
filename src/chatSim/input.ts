@@ -2,7 +2,7 @@ import { App, ChatSimState, Position, SelectedObject, UiRectangle } from "./chat
 import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
 import { addCitizen } from "./citizen.js";
 import { addChatterChangeLog, calculateDistance } from "./main.js";
-import { mapPositionToPaintPosition } from "./paint.js";
+import { mapPositionToPaintPosition, paintDataSetCurrenTab } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";
 import { chatSimTick } from "./tick.js";
 import { MAP_OBJECT_TREE, Tree } from "./map/mapObjectTree.js";
@@ -107,7 +107,13 @@ function createSelectedUiRectangle(state: ChatSimState) {
     }
     const mapObjectFunctions = MAP_OBJECTS_FUNCTIONS[selected.type];
     if (mapObjectFunctions && mapObjectFunctions.createSelectionData) {
+        const oldDisplay = state.paintData.displaySelected;
         state.paintData.displaySelected = mapObjectFunctions.createSelectionData(state);
+        if (oldDisplay && oldDisplay.currentTab) {
+            const selectByTabName = oldDisplay.currentTab.name;
+            const currentTab = state.paintData.displaySelected.tabs.find(t => t.name === selectByTabName);
+            if (currentTab) paintDataSetCurrenTab(currentTab, state.paintData.displaySelected);
+        }
     } else {
         state.paintData.displaySelected = undefined;
     }
@@ -331,6 +337,7 @@ function switchThroughVisibleCitizens(state: ChatSimState) {
                 object: citizen,
                 type: "citizen",
             };
+            createSelectedUiRectangle(state);
             return;
         }
     }

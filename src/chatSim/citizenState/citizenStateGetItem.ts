@@ -204,7 +204,7 @@ function tickCitizenStateSearchItem(citizen: Citizen, state: ChatSimState) {
                     const building = returnedData.found as Building;
                     citizenAddThought(citizen, `I will steal ${itemName} from building inhabited by ${building.inhabitedBy?.name}.`, state);
                     setCitizenStateGetItemFromBuilding(citizen, building, itemName, 1);
-                    citizen.stealCounter++;
+                    citizen.stats.stealCounter++;
                     state.stealCounter++;
                     return;
                 } else {

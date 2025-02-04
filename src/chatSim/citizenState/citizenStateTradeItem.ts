@@ -50,6 +50,7 @@ function tickCititzenStateTrade(citizen: Citizen, state: ChatSimState) {
             citizenState.subState = "putIntoPaw";
         } else {
             if (citizen.tradePaw === undefined) {
+                citizen.stats.giftedFoodCounter++;
                 citizenStateStackTaskSuccess(citizen);
                 return;
             } else if (citizen.tradePaw.startTime + citizen.tradePaw.duration + 2000 < state.time) {
