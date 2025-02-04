@@ -1,13 +1,13 @@
 Tasks:
 - improve UI?
     - steps:
-        - selection display
-            - windows with tabs
-            - display citizen data
-            - tab for log
-            - tab for citizen state
-        
-            
+        - UI rectangles
+            - improve tabs
+            - citizen:
+                - separate data more
+                - visualize data as bars?
+                - think about how to better visualize
+                    
         - bottom centered:
             - buttons to press
             - citizen button
