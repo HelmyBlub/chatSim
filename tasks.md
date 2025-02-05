@@ -2,16 +2,12 @@ Tasks:
 - improve UI?
     - steps:
         - bottom centered:
-            - chat commands button
-                - chat commands
+            - statistics uibutton
+                - graphs: average citizen happines over time
+                - money distribution
+                - death statistics
             - citizen button
                 - check code for clean ups
-            - statistics button
-                - open "window" on right side (defineable), 
-                    - should be usable also for citizen/map object selection
-                    - multiple tabs
-                        - displaying "steal counter" and "food gifted counter" and more in future
-                        - graphs: average citizen happines over time
             - option to add "robot" to citizen and chatter
         - UI rectangles
             - citizen:

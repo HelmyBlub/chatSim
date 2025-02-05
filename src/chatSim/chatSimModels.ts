@@ -3,6 +3,7 @@ import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map/map.js"
 import { UiButton, UiRectangle } from "./rectangle.js"
 import { TestData } from "./test/test.js"
+import { LineChart } from "./window/windowStatistics.js"
 
 export type Position = {
     x: number,
@@ -60,6 +61,11 @@ export type ChatSimState = {
         map: PaintDataMap,
         buttons: UiButton[],
     }
+    statistics: {
+        lineCharts: LineChart[],
+        stealCounter: number,
+        giftedCounter: number,
+    }
     inputData: {
         mousePosition: Position,
         lastMouseDownTime: number,
@@ -74,6 +80,5 @@ export type ChatSimState = {
     }
     functionsCitizenJobs: FunctionsCitizenJobs,
     chatterData: ChatterData[],
-    stealCounter: number,
 }
 

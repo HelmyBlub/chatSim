@@ -14,6 +14,7 @@ import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 import { citizenAddTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits, citizenAddRandomTrait } from "./traits/trait.js";
 import { createButtonWindowChatCommands } from "./window/windowChatCommands.js";
+import { createButtonWindowStatistics, statisticsCreateHappinessLineChart } from "./window/windowStatistics.js";
 
 export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
@@ -125,7 +126,11 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
                 log: [],
             }
         },
-        stealCounter: 0,
+        statistics: {
+            lineCharts: [statisticsCreateHappinessLineChart()],
+            stealCounter: 0,
+            giftedCounter: 0,
+        },
         deceasedCitizens: [],
     }
     loadCitizenJobsFunctions(state);
@@ -292,6 +297,7 @@ function chatSimStateInit(streamer: string): App {
 function addUiButtons(state: ChatSimState) {
     addUiButton(createButtonCitizenInformationWindow(), state);
     addUiButton(createButtonWindowChatCommands(), state);
+    addUiButton(createButtonWindowStatistics(), state);
 }
 
 function initMyApp() {
