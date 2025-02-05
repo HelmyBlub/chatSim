@@ -1,5 +1,6 @@
 import { Chatter } from "../obsOverlayApp/mainModels.js";
-import { Position, ChatSimState, App, RandomSeed, ChatterData, UiButton } from "./chatSimModels.js";
+import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
+import { UiButton } from "./rectangle.js";
 import { addCitizen, Citizen, citizenSetDreamJob, loadCitizenStateTypeFunctions } from "./citizen.js";
 import { createCitizenInformationWindowButton } from "./citizenInformationWindow.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";

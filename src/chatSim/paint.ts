@@ -1,5 +1,6 @@
 import { drawTextWithOutline } from "../drawHelper.js";
-import { ChatSimState, Position, UiRectangle, UiRectangleTab } from "./chatSimModels.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
+import { UiRectangle, UiRectangleTab } from "./rectangle.js";
 import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";

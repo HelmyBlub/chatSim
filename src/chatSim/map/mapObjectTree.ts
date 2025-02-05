@@ -1,5 +1,7 @@
 import { IMAGE_PATH_TREE, IMAGE_PATH_TREE_LOG } from "../../drawHelper.js";
-import { ChatSimState, Position, Rectangle, UiRectangle } from "../chatSimModels.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { UiRectangle } from "../rectangle.js";
+import { Rectangle } from "../rectangle.js";
 import { ChatSimMap, PaintDataMap } from "./map.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";

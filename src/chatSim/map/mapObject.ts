@@ -1,4 +1,5 @@
-import { ChatSimState, Position, UiRectangle } from "../chatSimModels.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { UiRectangle } from "../rectangle.js";
 import { loadMapObjectTree } from "./mapObjectTree.js";
 import { ChatSimMap, MapChunk, mapChunkKeyAndTileToPosition, mapGetChunkAndTileForPosition, mapGetChunkForPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
 import { loadMapObjectBuilding } from "./mapObjectBuilding.js";

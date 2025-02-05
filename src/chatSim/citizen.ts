@@ -1,6 +1,8 @@
 import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../drawHelper.js";
 import { Chat, paintChatBubbles } from "./chatBubble.js";
-import { ChatSimState, Position, Rectangle, UiRectangle } from "./chatSimModels.js";
+import { ChatSimState, Position } from "./chatSimModels.js";
+import { UiRectangle } from "./rectangle.js";
+import { Rectangle } from "./rectangle.js";
 import { MapChunk, mapChunkKeyToPosition, mapGetChunkForPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map/map.js";
 import { Building, BuildingMarket } from "./map/mapObjectBuilding.js";
 import { checkCitizenNeeds } from "./citizenNeeds/citizenNeed.js";

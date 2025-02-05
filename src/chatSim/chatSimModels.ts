@@ -1,6 +1,7 @@
 import { LogEntry } from "./citizen.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map/map.js"
+import { UiButton, UiRectangle } from "./rectangle.js"
 import { TestData } from "./test/test.js"
 
 export type Position = {
@@ -75,28 +76,3 @@ export type ChatSimState = {
     stealCounter: number,
 }
 
-export type UiRectangle = {
-    mainRect: Rectangle,
-    tabs: UiRectangleTab[],
-    heading?: string,
-    currentTab?: UiRectangleTab,
-    tabConntentRect?: Rectangle,
-}
-
-export type UiButton = {
-    rect?: Rectangle,
-    clicked: (state: ChatSimState) => void,
-}
-
-export type UiRectangleTab = {
-    name: string,
-    paint: (ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) => void,
-    click?: (relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) => void,
-    clickRect?: Rectangle,
-}
-
-export type Rectangle = {
-    topLeft: Position,
-    width: number,
-    height: number,
-}
