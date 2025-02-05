@@ -126,6 +126,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
             }
         },
         stealCounter: 0,
+        deceasedCitizens: [],
     }
     loadCitizenJobsFunctions(state);
     onLoadCitizenStateDefaultTickFuntions();

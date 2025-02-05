@@ -7,7 +7,8 @@ import { createSelectedUiRectangle } from "./rectangle.js";
 
 
 type CitizenInformationUiRectanlge = UiRectangle & {
-    citizenInformationData: CitizenInformationData
+    citizenInformationData: CitizenInformationData,
+    deceasedCitizenInformationData: CitizenInformationData,
 }
 
 type CitizenInformationData = {
@@ -26,7 +27,7 @@ export function createCitizenInformationWindowButton(): UiButton {
     }
 }
 
-function setupData(state: ChatSimState): CitizenInformationData {
+function setupData(state: ChatSimState, citizens: Citizen[]): CitizenInformationData {
     const canvasHeight = state.canvas?.height ?? 400;
     const estimatedContentRectHeight = canvasHeight - 80;
     const fontSize = 18;
@@ -40,7 +41,7 @@ function setupData(state: ChatSimState): CitizenInformationData {
         fontSize,
         padding,
     }
-    const sortedCitizens = state.map.citizens.toSorted((a, b) => a.name.localeCompare(b.name));
+    const sortedCitizens = citizens.toSorted((a, b) => a.name.localeCompare(b.name));
     let pageIndex = -1;
     for (let i = 0; i < sortedCitizens.length; i++) {
         if (i % data.citizensPerPage === 0) {
@@ -64,23 +65,40 @@ function clickedButton(state: ChatSimState) {
         },
         tabs: [
             {
-                name: "Generell",
-                paint: paintCitizenInformation,
-                click: clickedCititizenWindow,
+                name: "Living",
+                paint: paintLivingCitizenInformation,
+                click: clickedLivingCititizenWindow,
+            },
+            {
+                name: "Deceased",
+                paint: paintDeceasedCitizenInformation,
+                click: clickedDeceasedCititizenWindow,
             },
         ],
         heading: "Citizen Information:",
-        citizenInformationData: setupData(state),
+        citizenInformationData: setupData(state, state.map.citizens),
+        deceasedCitizenInformationData: setupData(state, state.deceasedCitizens),
     }
     state.paintData.displaySelected = citizenUiRectangle;
 }
 
-function clickedCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
+function clickedLivingCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
     const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
     if (!uiRect) return;
     const data = uiRect.citizenInformationData;
+    clickedCititizenWindow(relativeMouseToCanvas, rect, state, data);
+}
+
+function clickedDeceasedCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
+    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
+    if (!uiRect) return;
+    const data = uiRect.deceasedCitizenInformationData;
+    clickedCititizenWindow(relativeMouseToCanvas, rect, state, data);
+}
+
+function clickedCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState, data: CitizenInformationData) {
     if (clickedPagination(relativeMouseToCanvas, data)) return;
-    const hoverIndex = getHoverCitizenIndex(state);
+    const hoverIndex = getHoverCitizenIndex(state, data);
     if (hoverIndex < 0) return;
     const closest = {
         object: data.citizenPages[data.currentPageIndex][hoverIndex],
@@ -104,19 +122,16 @@ function clickedPagination(relativeMouseToCanvas: Position, data: CitizenInforma
     return false;
 }
 
-
 /**
  * return -1 if nothing hovered
  */
-function getHoverCitizenIndex(state: ChatSimState): number {
+function getHoverCitizenIndex(state: ChatSimState, data: CitizenInformationData): number {
+    if (data.citizenPages.length === 0) return -1;
     if (!state.canvas) return -1;
     const rect = state.paintData.displaySelected?.tabConntentRect;
     if (!rect) return -1;
     const relativeMouseToCanvas = inputMouseClientPositionToRelativeCanvasPosition(state.inputData.mousePosition, state.canvas);
     if (relativeMouseToCanvas.x < rect.topLeft.x || relativeMouseToCanvas.x > rect.topLeft.x + rect.width) return -1;
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
-    if (!uiRect) return -1;
-    const data = uiRect.citizenInformationData;
     const lineSpacing = data.fontSize + data.padding;
     const reltiveToCitizenListY = relativeMouseToCanvas.y - data.citizenListStartY;
     const hoverIndex = Math.floor(reltiveToCitizenListY / lineSpacing);
@@ -124,10 +139,21 @@ function getHoverCitizenIndex(state: ChatSimState): number {
     return hoverIndex;
 }
 
-function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintDeceasedCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
+    if (!uiRect) return;
+    const data = uiRect.deceasedCitizenInformationData;
+    paintCitizenInformation(ctx, rect, state, data);
+}
+
+function paintLivingCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
     if (!uiRect) return;
     const data = uiRect.citizenInformationData;
+    paintCitizenInformation(ctx, rect, state, data);
+}
+
+function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState, data: CitizenInformationData) {
     const fontSize = 18;
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = "black";
@@ -137,7 +163,7 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
     let offsetY = rect.topLeft.y;
     const lineSpacing = fontSize + padding;
     let lineCounter = 0;
-    const hoverIndex = getHoverCitizenIndex(state);
+    const hoverIndex = getHoverCitizenIndex(state, data);
     if (data.citizenPages.length > 1) {
         let paginationButtonOffsetX = offsetX;
         if (!data.paginationButtons) {
@@ -161,6 +187,7 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
     }
     data.citizenListStartY = offsetY;
     offsetY += fontSize + padding;
+    if (data.citizenPages.length === 0) return;
     for (let i = 0; i < data.citizenPages[data.currentPageIndex].length; i++) {
         const citizen = data.citizenPages[data.currentPageIndex][i];
         ctx.fillText(`${citizen.name}`, offsetX, offsetY + lineSpacing * lineCounter);

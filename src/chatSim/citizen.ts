@@ -915,6 +915,7 @@ function deleteCitizens(state: ChatSimState) {
                         chunkCitizens.splice(index, 1);
                     }
                     state.map.citizens.splice(i, 1);
+                    state.deceasedCitizens.push(deceased);
 
                 }
             }

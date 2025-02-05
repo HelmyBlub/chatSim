@@ -3,9 +3,10 @@ Tasks:
     - steps:
         - bottom centered:
             - citizen button
-                - check code for clean ups
+                - deceased citizen list
                 - citizen death reasons + select citizen option 
                 - option to add "robot" to citizen and chatter
+                - check code for clean ups
             - statistics button
                 - open "window" on right side (defineable), 
                     - should be usable also for citizen/map object selection

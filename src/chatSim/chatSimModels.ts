@@ -1,4 +1,4 @@
-import { LogEntry } from "./citizen.js"
+import { Citizen, LogEntry } from "./citizen.js"
 import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map/map.js"
 import { UiButton, UiRectangle } from "./rectangle.js"
@@ -54,6 +54,7 @@ export type ChatSimState = {
     sunsetAt: number,
     randomSeed: RandomSeed,
     map: ChatSimMap,
+    deceasedCitizens: Citizen[],
     paintData: {
         displaySelected?: UiRectangle,
         map: PaintDataMap,
