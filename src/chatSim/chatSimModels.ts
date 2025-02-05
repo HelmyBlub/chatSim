@@ -59,6 +59,7 @@ export type ChatSimState = {
         buttons: UiButton[],
     }
     inputData: {
+        mousePosition: Position,
         lastMouseDownTime: number,
         lastMouseDownPosition: Position,
         selected?: SelectedObject,
@@ -90,6 +91,7 @@ export type UiButton = {
 export type UiRectangleTab = {
     name: string,
     paint: (ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) => void,
+    click?: (relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) => void,
     clickRect?: Rectangle,
 }
 

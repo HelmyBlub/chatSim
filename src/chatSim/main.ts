@@ -110,6 +110,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
             buttons: [],
         },
         inputData: {
+            mousePosition: { x: 0, y: 0 },
             lastMouseDownTime: 0,
             lastMouseDownPosition: { x: 0, y: 0 },
             map: {

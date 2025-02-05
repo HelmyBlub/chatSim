@@ -46,6 +46,27 @@ export function moveMapCameraBy(moveX: number, moveY: number, state: ChatSimStat
     state.paintData.map.lockCameraToSelected = false;
 }
 
+export function selectMapObject(selectedObject: SelectedObject | undefined, state: ChatSimState) {
+    if (selectedObject) {
+        state.inputData.selected = selectedObject;
+        if (selectedObject.type === "citizen") {
+            state.paintData.map.lockCameraToSelected = true;
+        } else {
+            state.paintData.map.lockCameraToSelected = false;
+        }
+        return;
+    }
+    state.inputData.selected = undefined;
+}
+
+export function inputMouseClientPositionToRelativeCanvasPosition(mouseClientPos: Position, canvas: HTMLCanvasElement): Position {
+    const boundingRect = canvas.getBoundingClientRect();
+    return {
+        x: mouseClientPos.x - boundingRect.left,
+        y: mouseClientPos.y - boundingRect.top,
+    }
+}
+
 function fitCanvasToWindow(canvas: HTMLCanvasElement, state: ChatSimState) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -66,16 +87,24 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
     if (!state.canvas) return;
     state.inputData.map.mouseMoveMap = false;
     if (performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME) {
-        const boundingRect = state.canvas.getBoundingClientRect();
-        const relativeMouse = {
-            x: event.clientX - boundingRect.left,
-            y: event.clientY - boundingRect.top,
-        }
+        const relativeMouse = inputMouseClientPositionToRelativeCanvasPosition({ x: event.clientX, y: event.clientY }, state.canvas);
         if (!clickedUiTab(relativeMouse, state) && !clickedUiButton(relativeMouse, state)) {
             selectObject(relativeMouse, state);
             createSelectedUiRectangle(state);
         }
     }
+}
+
+function clickedUiTabContentRectangle(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
+    const rect = state.paintData.displaySelected?.tabConntentRect;
+    if (rect && rect.topLeft.x <= relativeMouseToCanvas.x && rect.topLeft.x + rect.width >= relativeMouseToCanvas.x
+        && rect.topLeft.y <= relativeMouseToCanvas.y && rect.topLeft.y + rect.height >= relativeMouseToCanvas.y
+    ) {
+        const currentTab = state.paintData.displaySelected?.currentTab;
+        if (currentTab && currentTab.click) currentTab.click(relativeMouseToCanvas, rect, state);
+        return true;
+    }
+    return false;
 }
 
 function clickedUiButton(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
@@ -111,11 +140,11 @@ function clickedUiTab(relativeMouseToCanvas: Position, state: ChatSimState): boo
             return true;
         }
     }
-
+    clickedUiTabContentRectangle(relativeMouseToCanvas, state);
     return true;
 }
 
-function createSelectedUiRectangle(state: ChatSimState) {
+export function createSelectedUiRectangle(state: ChatSimState) {
     const selected = state.inputData.selected;
     if (selected === undefined) {
         state.paintData.displaySelected = undefined;
@@ -160,16 +189,7 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
                 }
             }
         }
-        if (closest) {
-            state.inputData.selected = closest;
-            if (closest.type === "citizen") {
-                state.paintData.map.lockCameraToSelected = true;
-            } else {
-                state.paintData.map.lockCameraToSelected = false;
-            }
-            return;
-        }
-        state.inputData.selected = undefined;
+        selectMapObject(closest, state);
     }
 }
 
@@ -233,6 +253,8 @@ function isObjectClicked(objectPosition: Position, objectSize: number, relativMo
 }
 
 function mouseMove(event: MouseEvent, state: ChatSimState) {
+    state.inputData.mousePosition.x = event.clientX;
+    state.inputData.mousePosition.y = event.clientY;
     const mightBeAClick = performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME;
     const movedEnoughToNoBeAClick = calculateDistance(state.inputData.lastMouseDownPosition, { x: event.clientX, y: event.clientY }) >= INPUT_CONSIDERED_MIN_MOVING_DISTANCE;
     if (state.inputData.map.mouseMoveMap && (!mightBeAClick || movedEnoughToNoBeAClick)) {

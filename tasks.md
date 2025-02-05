@@ -1,6 +1,5 @@
 Tasks:
 - improve UI?
-    - check stream overlay overlaying chatSim stuff
     - steps:
         - bottom centered:
             - buttons to press
@@ -8,6 +7,7 @@ Tasks:
                 - citizens
                     - list of citizen
                     - can be clicked to move camera to citizen and select him
+                    - hover effect
                 - citizen death reasons + select citizen option 
                 - option to add "robot" to citizen and chatter
             - statistics button
