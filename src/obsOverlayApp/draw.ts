@@ -98,26 +98,32 @@ function drawCommandInfo(ctx: CanvasRenderingContext2D) {
         "sunglasses"
     ];
 
+    const maxWidth = 500;
     ctx.font = `bold ${fontSize}px Arial`;
-    drawTextWithOutline(ctx, headingText, ctx.canvas.width - 340 - cornerOffset, cornerOffset + fontSize);
+    const headingTextWidth = ctx.measureText(headingText).width;
+    drawTextWithOutline(ctx, headingText, ctx.canvas.width - maxWidth - headingTextWidth - cornerOffset, cornerOffset + fontSize);
     ctx.font = `${fontSize}px Arial`;
-    let maxWidth = 0;
-    for (let text of textList) {
-        const tempWidth = ctx.measureText(text).width;
-        if (tempWidth > maxWidth) maxWidth = tempWidth;
-    }
-    const left = ctx.canvas.width - 250 - cornerOffset;
-    const top = cornerOffset + fontSize + 5;
+    const left = ctx.canvas.width - maxWidth - cornerOffset;
+    const top = cornerOffset + 5;
+    const maxRows = 3;
     ctx.globalAlpha = 0.7;
     ctx.fillStyle = "white";
-    ctx.fillRect(left - 5, top, maxWidth + 10, textList.length * fontSize + 5);
+    ctx.fillRect(left - 5, top, maxWidth + 10, maxRows * fontSize + 5);
     ctx.beginPath();
-    ctx.rect(left - 5, top, maxWidth + 10, textList.length * fontSize + 5);
+    ctx.rect(left - 5, top, maxWidth + 10, maxRows * fontSize + 5);
     ctx.strokeStyle = "black";
     ctx.stroke();
     ctx.globalAlpha = 1;
+    let offsetY = 0;
+    let rowCounter = 0;
     for (let i = 0; i < textList.length; i++) {
-        const command = textList[i];
-        drawTextWithOutline(ctx, command, left, top + fontSize * (i + 1));
+        const command = textList[i] + "   ";
+        const commandWidth = ctx.measureText(command).width;
+        if (offsetY + commandWidth > maxWidth) {
+            offsetY = 0;
+            rowCounter++;
+        }
+        drawTextWithOutline(ctx, command, left + offsetY, top + fontSize * (rowCounter + 1));
+        offsetY += commandWidth;
     }
 }

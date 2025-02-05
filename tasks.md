@@ -1,5 +1,6 @@
 Tasks:
 - improve UI?
+    - check stream overlay overlaying chatSim stuff
     - steps:
         - bottom centered:
             - buttons to press
