@@ -1,8 +1,7 @@
-import { Chatter } from "../obsOverlayApp/mainModels.js";
 import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
 import { UiButton } from "./rectangle.js";
 import { addCitizen, Citizen, citizenSetDreamJob, loadCitizenStateTypeFunctions } from "./citizen.js";
-import { createCitizenInformationWindowButton } from "./citizenInformationWindow.js";
+import { createButtonCitizenInformationWindow } from "./window/windowCitizenInformation.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";
 import { chatSimAddInputEventListeners, moveMapCameraBy } from "./input.js";
@@ -14,6 +13,7 @@ import { loadChatSimSounds } from "./sounds.js";
 import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 import { citizenAddTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits, citizenAddRandomTrait } from "./traits/trait.js";
+import { createButtonWindowChatCommands } from "./window/windowChatCommands.js";
 
 export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
@@ -283,10 +283,15 @@ function chatSimStateInit(streamer: string): App {
     state.soundVolume = 1;
     const app: App = { state: state };
     state.canvas = canvas;
-    addUiButton(createCitizenInformationWindowButton(), state);
+    addUiButtons(state);
     chatSimAddInputEventListeners(app, canvas);
     state.logger = { log: (message, data) => console.log(message, data) };
     return app;
+}
+
+function addUiButtons(state: ChatSimState) {
+    addUiButton(createButtonCitizenInformationWindow(), state);
+    addUiButton(createButtonWindowChatCommands(), state);
 }
 
 function initMyApp() {

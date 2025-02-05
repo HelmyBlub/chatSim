@@ -27,7 +27,6 @@ export function paintChatSim(state: ChatSimState, gameSpeed: number) {
     paintUiRectangleData(ctx, state);
     paintData(ctx, state, gameSpeed);
     paintButtons(ctx, state);
-    paintChatMessageOptions(ctx, state, 1200, 500);
     paintChatterChangeLog(ctx, state);
 }
 
@@ -46,27 +45,6 @@ function paintChatterChangeLog(ctx: CanvasRenderingContext2D, state: ChatSimStat
         const job = logData.log[i];
         if (job.time + 10000 < performance.now()) continue;
         drawTextWithOutline(ctx, job.message, 10, 30 + i * fontSize);
-    }
-}
-
-function paintChatMessageOptions(ctx: CanvasRenderingContext2D, state: ChatSimState, paintX: number, paintY: number) {
-    if (state.inputData.selected) return;
-    const jobList = Object.keys(state.functionsCitizenJobs);
-    let textLineCounter = 0;
-    const fontSize = 16;
-    ctx.font = `${fontSize}px Arial`;
-    ctx.fillStyle = "black";
-    ctx.fillText("Chat Commands:", paintX, paintY + fontSize * textLineCounter++);
-    ctx.fillText("    !job <jobname>", paintX, paintY + fontSize * textLineCounter++);
-    for (let i = 0; i < jobList.length; i++) {
-        const job = jobList[i];
-        ctx.fillText(`        ${job}`, paintX, paintY + fontSize * textLineCounter++);
-    }
-    const traitList = Object.keys(CITIZEN_TRAIT_FUNCTIONS);
-    ctx.fillText("    !trait <trait>", paintX, paintY + fontSize * textLineCounter++);
-    for (let i = 0; i < traitList.length; i++) {
-        const trait = traitList[i];
-        ctx.fillText(`        ${trait}`, paintX, paintY + fontSize * textLineCounter++);
     }
 }
 

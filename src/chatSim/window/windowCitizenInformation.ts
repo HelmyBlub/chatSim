@@ -1,14 +1,14 @@
-import { ChatSimState, Position } from "./chatSimModels.js";
-import { rectangleClickedInside, rectanglePaint, UiButton, UiRectangle } from "./rectangle.js";
-import { Rectangle } from "./rectangle.js";
-import { Citizen } from "./citizen.js";
-import { inputMouseClientPositionToRelativeCanvasPosition, selectMapObject } from "./input.js";
-import { createSelectedUiRectangle } from "./rectangle.js";
-import { IMAGES } from "./images.js";
-import { IMAGE_PATH_CITIZEN } from "../drawHelper.js";
+import { ChatSimState, Position } from "../chatSimModels.js";
+import { rectangleClickedInside, rectanglePaint, UiButton, UiRectangle } from "../rectangle.js";
+import { Rectangle } from "../rectangle.js";
+import { Citizen } from "../citizen.js";
+import { inputMouseClientPositionToRelativeCanvasPosition, selectMapObject } from "../input.js";
+import { createSelectedUiRectangle } from "../rectangle.js";
+import { IMAGES } from "../images.js";
+import { IMAGE_PATH_CITIZEN } from "../../drawHelper.js";
 
 
-type CitizenInformationUiRectanlge = UiRectangle & {
+type CitizenInformationUiRectangle = UiRectangle & {
     citizenInformationData: CitizenInformationData,
     deceasedCitizenInformationData: CitizenInformationData,
 }
@@ -27,7 +27,7 @@ type CitizenInformationData = {
 const WINDOW_TAB_TYPE_DECEASED = "Deceased"
 const WINDOW_TAB_TYPE_LIVING = "Living"
 
-export function createCitizenInformationWindowButton(): UiButton {
+export function createButtonCitizenInformationWindow(): UiButton {
     return {
         clicked: clickedButton,
         paintIcon: paintIcon,
@@ -74,7 +74,7 @@ function setupData(state: ChatSimState, citizens: Citizen[], type: string): Citi
 
 function clickedButton(state: ChatSimState) {
     const width = 500;
-    const citizenUiRectangle: CitizenInformationUiRectanlge = {
+    const citizenUiRectangle: CitizenInformationUiRectangle = {
         mainRect: {
             topLeft: { x: state.canvas!.width - width, y: 0 },
             height: 100,
@@ -100,14 +100,14 @@ function clickedButton(state: ChatSimState) {
 }
 
 function clickedLivingCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
+    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
     if (!uiRect) return;
     const data = uiRect.citizenInformationData;
     clickedCititizenWindow(relativeMouseToCanvas, rect, state, data);
 }
 
 function clickedDeceasedCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
+    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
     if (!uiRect) return;
     const data = uiRect.deceasedCitizenInformationData;
     clickedCititizenWindow(relativeMouseToCanvas, rect, state, data);
@@ -157,14 +157,14 @@ function getHoverCitizenIndex(state: ChatSimState, data: CitizenInformationData)
 }
 
 function paintDeceasedCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
+    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
     if (!uiRect) return;
     const data = uiRect.deceasedCitizenInformationData;
     paintCitizenInformation(ctx, rect, state, data);
 }
 
 function paintLivingCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectanlge;
+    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
     if (!uiRect) return;
     const data = uiRect.citizenInformationData;
     paintCitizenInformation(ctx, rect, state, data);
