@@ -33,9 +33,5 @@ export function chatSimTick(state: ChatSimState) {
     state.time += state.tickInterval;
     tickCitizens(state);
     tickChatSimMap(state);
-    if (state.paintData.map.lockCameraToSelected && state.inputData.selected) {
-        const position = state.inputData.selected.object.position as Position;
-        state.paintData.map.cameraPosition = { x: position.x, y: position.y };
-    }
 }
 

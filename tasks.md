@@ -2,14 +2,8 @@ Tasks:
 - improve UI?
     - steps:
         - bottom centered:
-            - buttons to press
             - citizen button
-                - citizens
-                    - how to handle large amounts of citizen
-                    - i guess this should help find any citizen by name (consider up to 200 citizens for now)
-                        - 30citizen per page
-                        -210/30 = ~7
-                    - pagination: x citizen per page, page is prefixed with letter of starting citizens
+                - check code for clean ups
                 - citizen death reasons + select citizen option 
                 - option to add "robot" to citizen and chatter
             - statistics button

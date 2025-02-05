@@ -18,6 +18,10 @@ export function paintChatSim(state: ChatSimState, gameSpeed: number) {
     if (!state.canvas) return;
     const ctx = state.canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (state.paintData.map.lockCameraToSelected && state.inputData.selected) {
+        const position = state.inputData.selected.object.position as Position;
+        state.paintData.map.cameraPosition = { x: position.x, y: position.y };
+    }
     paintMap(ctx, state, state.paintData.map);
     paintMapBorder(ctx, state.paintData.map);
     paintUiRectangleData(ctx, state);
