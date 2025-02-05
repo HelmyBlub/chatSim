@@ -3,7 +3,6 @@ Tasks:
     - steps:
         - bottom centered:
             - citizen button
-                - deceased citizen list
                 - citizen death reasons + select citizen option 
                 - option to add "robot" to citizen and chatter
                 - check code for clean ups
