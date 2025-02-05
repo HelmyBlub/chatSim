@@ -4,6 +4,8 @@ import { Rectangle } from "./rectangle.js";
 import { Citizen } from "./citizen.js";
 import { inputMouseClientPositionToRelativeCanvasPosition, selectMapObject } from "./input.js";
 import { createSelectedUiRectangle } from "./rectangle.js";
+import { IMAGES } from "./images.js";
+import { IMAGE_PATH_CITIZEN } from "../drawHelper.js";
 
 
 type CitizenInformationUiRectanlge = UiRectangle & {
@@ -28,7 +30,17 @@ const WINDOW_TAB_TYPE_LIVING = "Living"
 export function createCitizenInformationWindowButton(): UiButton {
     return {
         clicked: clickedButton,
+        paintIcon: paintIcon,
     }
+}
+
+function paintIcon(ctx: CanvasRenderingContext2D, rect: Rectangle) {
+    ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN], 0, 0, 200, 200,
+        rect.topLeft.x,
+        rect.topLeft.y,
+        rect.width,
+        rect.height
+    );
 }
 
 function setupData(state: ChatSimState, citizens: Citizen[], type: string): CitizenInformationData {
@@ -170,21 +182,40 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
     let lineCounter = 0;
     const hoverIndex = getHoverCitizenIndex(state, data);
     if (data.citizenPages.length > 1) {
-        let paginationButtonOffsetX = offsetX;
         if (!data.paginationButtons) {
             data.paginationButtons = [];
             for (let i = 0; i < data.citizenPages.length; i++) {
                 data.paginationButtons.push({
-                    topLeft: { x: paginationButtonOffsetX, y: offsetY },
+                    topLeft: { x: offsetX, y: offsetY },
                     height: fontSize + padding * 2,
                     width: fontSize + padding * 2,
                 });
-                paginationButtonOffsetX += 40;
             }
         }
         for (let i = 0; i < data.paginationButtons.length; i++) {
             const pageButton = data.paginationButtons[i];
-            const text = data.citizenPages[i][0].name.substring(0, 2);
+            let text;
+            if (i === 0) {
+                text = data.citizenPages[i][0].name.substring(0, 1);
+            } else {
+                const beforeCitizen = data.citizenPages[i - 1][data.citizenPages[i - 1].length - 1].name;
+                const currentCititzen = data.citizenPages[i][0].name;
+                let diffCharIndex = 1;
+                for (let i = 0; i < beforeCitizen.length; i++) {
+                    if (beforeCitizen[i] === currentCititzen[i]) {
+                        diffCharIndex++;
+                    } else {
+                        break;
+                    }
+                }
+                text = currentCititzen.substring(0, diffCharIndex);
+            }
+            text += "..";
+            const textWidht = ctx.measureText(text).width;
+            pageButton.width = textWidht + padding * 2;
+            if (data.paginationButtons.length > i + 1) {
+                data.paginationButtons[i + 1].topLeft.x = pageButton.topLeft.x + pageButton.width + padding;
+            }
             const fillColor = i === data.currentPageIndex ? "lightblue" : undefined;
             rectanglePaint(ctx, pageButton, fillColor, { text, fontSize, padding });
         }

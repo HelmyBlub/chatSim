@@ -18,6 +18,7 @@ export type UiRectangle = {
 
 export type UiButton = {
     rect?: Rectangle
+    paintIcon?: (ctx: CanvasRenderingContext2D, rect: Rectangle) => void,
     clicked: (state: ChatSimState) => void
 }
 

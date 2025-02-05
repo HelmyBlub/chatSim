@@ -87,8 +87,8 @@ export function paintDataSetCurrenTab(uiTab: UiRectangleTab, rectUI: UiRectangle
 
 function paintButtons(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     const buttons = state.paintData.buttons;
-    ctx.globalAlpha = 0.5;
     for (let button of buttons) {
+        ctx.globalAlpha = 0.5;
         if (!button.rect) {
             uiButtonsResetPosition(state);
         }
@@ -99,8 +99,9 @@ function paintButtons(ctx: CanvasRenderingContext2D, state: ChatSimState) {
         ctx.strokeStyle = "black";
         ctx.rect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
         ctx.stroke();
+        ctx.globalAlpha = 1;
+        if (button.paintIcon) button.paintIcon(ctx, rect);
     }
-    ctx.globalAlpha = 1;
 }
 
 function paintUiRectangleData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
