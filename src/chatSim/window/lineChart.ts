@@ -18,29 +18,19 @@ export function lineChartAddPoint(point: Position, lineChart: LineChart) {
 }
 
 export function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle) {
-    const height = rect.height;
-    const width = rect.width;
-    const topLeft = rect.topLeft;
-    const fontSize = 14;
-    ctx.font = `${fontSize}px Arial`;
-    ctx.strokeStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(topLeft.x, topLeft.y);
-    ctx.lineTo(topLeft.x, topLeft.y + height);
-    ctx.lineTo(topLeft.x + width, topLeft.y + height);
-    ctx.stroke();
-    //axis labels
-    ctx.fillStyle = "black";
-    paintXAxisLabels(ctx, rect, lineChart);
-    paintYAxisLabels(ctx, rect, lineChart);
+    paintXAxis(ctx, rect, lineChart);
+    paintYAxis(ctx, rect, lineChart);
+    paintPoints(ctx, rect, lineChart);
+}
 
-    //points
+function paintPoints(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
     if (lineChart.points.length < 2) return;
+    ctx.strokeStyle = "black";
     ctx.beginPath();
     for (let i = 0; i < lineChart.points.length; i++) {
         const point = lineChart.points[i];
-        const paintX = pointXToPaintX(rect, lineChart, point.x);
-        const paintY = pointXToPaintY(rect, lineChart, point.y);
+        const paintX = pointXToPaintX(paintRect, lineChart, point.x);
+        const paintY = pointXToPaintY(paintRect, lineChart, point.y);
         if (i === 0) {
             ctx.moveTo(paintX, paintY);
         } else {
@@ -50,11 +40,16 @@ export function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineCha
     ctx.stroke();
 }
 
-function paintXAxisLabels(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
-    const fontSize = 14;
-    ctx.font = `${fontSize}px Arial`;
+function paintXAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
     ctx.strokeStyle = "black";
     ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(paintRect.topLeft.x, paintRect.topLeft.y + paintRect.height);
+    ctx.lineTo(paintRect.topLeft.x + paintRect.width, paintRect.topLeft.y + paintRect.height);
+    ctx.stroke();
+
+    const fontSize = 14;
+    ctx.font = `${fontSize}px Arial`;
     ctx.fillText(lineChart.xLabel, paintRect.topLeft.x + paintRect.width, paintRect.topLeft.y + paintRect.height + fontSize / 2);
     if (lineChart.points.length < 2) return;
 
@@ -75,11 +70,16 @@ function paintXAxisLabels(ctx: CanvasRenderingContext2D, paintRect: Rectangle, l
     }
 }
 
-function paintYAxisLabels(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
-    const fontSize = 14;
-    ctx.font = `${fontSize}px Arial`;
+function paintYAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
     ctx.strokeStyle = "black";
     ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(paintRect.topLeft.x, paintRect.topLeft.y);
+    ctx.lineTo(paintRect.topLeft.x, paintRect.topLeft.y + paintRect.height);
+    ctx.stroke();
+
+    const fontSize = 14;
+    ctx.font = `${fontSize}px Arial`;
     ctx.fillText(lineChart.yLabel, paintRect.topLeft.x, paintRect.topLeft.y + fontSize / 2);
     if (lineChart.points.length < 2) return;
 
