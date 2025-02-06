@@ -207,11 +207,15 @@ function paintMapBorder(ctx: CanvasRenderingContext2D, paintDataMap: PaintDataMa
 function paintData(ctx: CanvasRenderingContext2D, state: ChatSimState, gameSpeed: number) {
     const fontSize = 20;
     ctx.font = `${fontSize}px Arial`;
+    let speedText = `Speed: ${gameSpeed.toFixed(2)}`;
+    if (state.gameSpeedLimited !== undefined) {
+        speedText += `(${state.gameSpeedLimited.toFixed()})`;
+    }
     const displayTexts = [
         getTimeOfDayString(state.time, state),
         "Day: " + getDay(state),
         "Citizen: " + state.map.citizens.length,
-        "Speed:" + gameSpeed.toFixed(2),
+        speedText,
     ];
 
     const margin = 5;

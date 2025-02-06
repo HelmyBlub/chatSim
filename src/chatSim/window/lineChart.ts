@@ -18,9 +18,18 @@ export function lineChartAddPoint(point: Position, lineChart: LineChart) {
 }
 
 export function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle) {
-    paintXAxis(ctx, rect, lineChart);
-    paintYAxis(ctx, rect, lineChart);
-    paintPoints(ctx, rect, lineChart);
+    const padding = 20;
+    const paintRectWithLabelingSpace: Rectangle = {
+        topLeft: {
+            x: rect.topLeft.x + padding,
+            y: rect.topLeft.y + padding,
+        },
+        width: rect.width - padding * 2,
+        height: rect.height - padding * 2,
+    }
+    paintXAxis(ctx, paintRectWithLabelingSpace, lineChart);
+    paintYAxis(ctx, paintRectWithLabelingSpace, lineChart);
+    paintPoints(ctx, paintRectWithLabelingSpace, lineChart);
 }
 
 function paintPoints(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
@@ -66,7 +75,7 @@ function paintXAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineCha
         ctx.moveTo(x, y);
         ctx.lineTo(x, y + 10);
         ctx.stroke();
-        ctx.fillText(i.toFixed(toFixed), x - 5, y + fontSize + 10);
+        ctx.fillText(i.toFixed(toFixed), x - fontSize / 2, y + fontSize + 10);
     }
 }
 
@@ -80,7 +89,10 @@ function paintYAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineCha
 
     const fontSize = 14;
     ctx.font = `${fontSize}px Arial`;
-    ctx.fillText(lineChart.yLabel, paintRect.topLeft.x, paintRect.topLeft.y + fontSize / 2);
+    const text = lineChart.yLabel;
+    const textWidth = ctx.measureText(text).width;
+    const textOffsetX = Math.min(textWidth / 2, 20);
+    ctx.fillText(lineChart.yLabel, paintRect.topLeft.x - textOffsetX, paintRect.topLeft.y - 5);
     if (lineChart.points.length < 2) return;
 
     for (let i = 0; i <= 1; i += 0.2) {
