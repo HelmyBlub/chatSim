@@ -6,6 +6,7 @@ import { inputMouseClientPositionToRelativeCanvasPosition, selectMapObject } fro
 import { createSelectedUiRectangle } from "../rectangle.js";
 import { IMAGES } from "../images.js";
 import { IMAGE_PATH_CITIZEN } from "../../drawHelper.js";
+import { getDay, getDayForTime } from "../main.js";
 
 
 type CitizenInformationUiRectangle = UiRectangle & {
@@ -229,6 +230,7 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
         let text = `${citizen.name}`;
         if (data.type === WINDOW_TAB_TYPE_DECEASED && citizen.isDead) {
             text += ` ${citizen.isDead.reason}`;
+            text += ` on day ${getDayForTime(citizen.isDead.time, state)}`;
         }
         ctx.fillText(text, offsetX, offsetY + lineSpacing * lineCounter);
         if (i === hoverIndex) {

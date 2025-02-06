@@ -68,6 +68,10 @@ export function getDay(state: ChatSimState): number {
     return Math.floor(state.time / state.timPerDay) + 1;
 }
 
+export function getDayForTime(time: number, state: ChatSimState): number {
+    return Math.floor(time / state.timPerDay) + 1;
+}
+
 export function getTimeOfDayString(time: number, state: ChatSimState): string {
     const timeOfDayNumber = getTimeOfDay(time, state) * 24;
     const hours = Math.floor(timeOfDayNumber);

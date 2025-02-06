@@ -1,14 +1,13 @@
 Tasks:
 - improve UI?
     - steps:
-        - bottom centered:
-            - statistics uibutton
-                - graphs: average citizen happines over time
-                - money distribution
-                - death statistics
-            - citizen button
-                - check code for clean ups
-            - option to add "robot" to citizen and chatter
+        - statistics uibutton
+            - graphs: average citizen happines over time
+            - money distribution
+            - death statistics
+        - citizen button
+            - check code for clean ups
+        - option to add "robot" to citizen and chatter
         - UI rectangles
             - citizen:
                 - think about how to better visualize
