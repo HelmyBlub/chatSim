@@ -3,7 +3,7 @@ import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map/map.js"
 import { UiButton, UiRectangle } from "./rectangle.js"
 import { TestData } from "./test/test.js"
-import { LineChart } from "./window/windowStatistics.js"
+import { LineChart } from "./window/lineChart.js"
 
 export type Position = {
     x: number,

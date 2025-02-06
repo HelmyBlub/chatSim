@@ -1,17 +1,8 @@
-import { ChatSimState, Position } from "../chatSimModels.js";
+import { ChatSimState } from "../chatSimModels.js";
 import { getDay } from "../main.js";
 import { UiButton, UiRectangle } from "../rectangle.js";
 import { Rectangle } from "../rectangle.js";
-import { lineChartAddPoint, paintLineChart } from "./lineChart.js";
-
-export type LineChart = {
-    name: string,
-    points: Position[],
-    xLabel: string,
-    yLabel: string,
-    currentMaxY: number,
-    currentMinY: number,
-}
+import { createLineChart, LineChart, lineChartAddPoint, paintLineChart } from "./lineChart.js";
 
 export function createButtonWindowStatistics(): UiButton {
     return {
@@ -21,7 +12,7 @@ export function createButtonWindowStatistics(): UiButton {
 }
 
 export function statisticsCreateHappinessLineChart(): LineChart {
-    return { name: "Happiness", points: [], xLabel: "Day", yLabel: "Happiness", currentMaxY: 0, currentMinY: 0 };
+    return createLineChart("Happiness", "Day", "Happiness");
 }
 
 export function statisticsHappinessTick(state: ChatSimState) {
