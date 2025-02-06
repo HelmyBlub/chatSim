@@ -3,7 +3,13 @@ Tasks:
     - steps:
         - statistics uibutton
             - graphs: average citizen happines over time
+                - switch between points and points2. different time interval
             - money distribution
+                - column chart 
+                - try area graph for money over time
+                    - y axis- money%
+                    - x axis seperate citizens in 10% intervals
+                - switch between different graphs
             - death statistics
         - citizen button
             - check code for clean ups
