@@ -48,17 +48,19 @@ export function statisticsMoneyTick(state: ChatSimState) {
     }) as ColumnChart;
     if (!columnChart) return;
     const sortedCitizensByMoney = state.map.citizens.toSorted((a, b) => a.money - b.money);
-    const bracketsCount = 5;
+    const bracketsCount = Math.min(10, sortedCitizensByMoney.length);
     let currentIndex = 0;
     const indexsPerBracket = sortedCitizensByMoney.length / bracketsCount;
     const bars: ColumnChartBar[] = [];
     for (let i = 0; i < bracketsCount; i++) {
         let bracketMoney = 0;
+        let counter = 0;
         for (let j = currentIndex; j < (i + 1) * indexsPerBracket; j++) {
             currentIndex++;
+            counter++;
             bracketMoney += sortedCitizensByMoney[j].money;
         }
-        bars.push({ label: i.toFixed(), value: bracketMoney });
+        bars.push({ label: `${((i) * 100 / bracketsCount).toFixed()}%`, value: bracketMoney / counter });
     }
     columnChartSetData(bars, columnChart);
 }
@@ -104,7 +106,7 @@ function clickedButton(state: ChatSimState) {
 
 function paintMoneyChart(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const padding = 10;
-    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + padding }, width: 300, height: 300 };
+    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + padding }, width: 400, height: 300 };
     if (state.statistics.graphs.length > 1) graphPaint(ctx, state.statistics.graphs[1], chartRect);
     rect.height = chartRect.height + padding * 2;
 }

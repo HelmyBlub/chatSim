@@ -76,13 +76,22 @@ function paintBars(ctx: CanvasRenderingContext2D, paintRect: Rectangle, columnCh
     ctx.strokeStyle = "black";
     ctx.beginPath();
     const barWidth = paintRect.width / columnChart.bars.length / 2;
+    const maxBarLabelWidth = barWidth * 1.2;
     let barX = paintRect.topLeft.x + barWidth / 2;
     for (let i = 0; i < columnChart.bars.length; i++) {
         const bar = columnChart.bars[i];
         const paintX = barX + barWidth * i * 2;
         const barHeight = paintRect.topLeft.y + paintRect.height - barValueToPaintY(paintRect, bar.value, columnChart.maxY);
         ctx.fillRect(paintX, paintRect.topLeft.y + paintRect.height, barWidth, -barHeight);
-        ctx.fillText(bar.label, paintX, paintRect.topLeft.y + paintRect.height + fontSize + 5);
+
+        let tempFontSize = fontSize;
+        ctx.font = `${fontSize}px Arial`;
+        let labelWidth = ctx.measureText(bar.label).width;
+        if (labelWidth > maxBarLabelWidth) {
+            tempFontSize = fontSize * maxBarLabelWidth / labelWidth;
+            ctx.font = `${tempFontSize}px Arial`;
+        }
+        ctx.fillText(bar.label, paintX, paintRect.topLeft.y + paintRect.height + tempFontSize + 5);
     }
     ctx.stroke();
 }
