@@ -62,7 +62,8 @@ export function statisticsMoneyTick(state: ChatSimState) {
             counter++;
             bracketMoney += sortedCitizensByMoney[j].money;
         }
-        bars.push({ label: `${((i) * 100 / bracketsCount).toFixed()}%`, value: bracketMoney / counter });
+        bracketMoney /= counter;
+        bars.push({ label: `${((i) * 100 / bracketsCount).toFixed()}%`, value: bracketMoney });
     }
     columnChartSetData(bars, columnChart);
 

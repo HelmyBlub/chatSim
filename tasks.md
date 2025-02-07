@@ -2,11 +2,10 @@ Tasks:
 - improve UI?
     - steps:
         - statistics uibutton
-            - money distribution
-                - try area graph for money over time
-                    - y axis- money%
-                    - x axis seperate citizens in 10% intervals
+            - money distribution area graph
+                - something still of with y-axis max value
             - death statistics
+        - check code for clean up with graphs
         - citizen button
             - check code for clean ups
         - option to add "robot" to citizen and chatter
