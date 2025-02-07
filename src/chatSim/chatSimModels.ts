@@ -3,7 +3,8 @@ import { FunctionsCitizenJobs } from "./jobs/job.js"
 import { ChatSimMap, PaintDataMap } from "./map/map.js"
 import { UiButton, UiRectangle } from "./rectangle.js"
 import { TestData } from "./test/test.js"
-import { LineChart } from "./window/lineChart.js"
+import { LineChart } from "./graph/lineChart.js"
+import { Graph } from "./graph/graph.js"
 
 export type Position = {
     x: number,
@@ -62,7 +63,7 @@ export type ChatSimState = {
         buttons: UiButton[],
     }
     statistics: {
-        lineCharts: LineChart[],
+        graphs: Graph[],
         stealCounter: number,
         giftedCounter: number,
     }

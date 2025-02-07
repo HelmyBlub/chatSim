@@ -2,8 +2,6 @@ Tasks:
 - improve UI?
     - steps:
         - statistics uibutton
-            - graphs: average citizen happines over time
-                - switch between points and points2. different time interval
             - money distribution
                 - column chart 
                 - try area graph for money over time

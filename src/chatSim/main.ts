@@ -14,7 +14,8 @@ import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 import { citizenAddTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits, citizenAddRandomTrait } from "./traits/trait.js";
 import { createButtonWindowChatCommands } from "./window/windowChatCommands.js";
-import { createButtonWindowStatistics, statisticsCreateHappinessLineChart } from "./window/windowStatistics.js";
+import { createButtonWindowStatistics, statisticsCreateHappinessLineChart, statisticsCreateMoneyColumnChart } from "./window/windowStatistics.js";
+import { onloadGraphsFunctions } from "./graph/graph.js";
 
 export const SKILL_GATHERING = "Gathering";
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
@@ -131,7 +132,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
             }
         },
         statistics: {
-            lineCharts: [statisticsCreateHappinessLineChart()],
+            graphs: [statisticsCreateHappinessLineChart(), statisticsCreateMoneyColumnChart()],
             stealCounter: 0,
             giftedCounter: 0,
         },
@@ -314,6 +315,7 @@ function initMyApp() {
     loadChatSimSounds();
     loadCitizenStateTypeFunctions();
     loadMapObjectsFunctions();
+    onloadGraphsFunctions();
     //@ts-ignore
     ComfyJS.onChat = (user, message, flags, self, extra) => {
         handleChatMessage(user, message, state);

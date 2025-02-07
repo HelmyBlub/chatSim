@@ -1,8 +1,10 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { Rectangle, rectangleClickedInside, rectanglePaint, UiRectangle } from "../rectangle.js";
+import { Graph, GRAPHS_FUNCTIONS } from "./graph.js";
 
 const POINT_LIMIT = 100;
-export type LineChart = {
+
+export type LineChart = Graph & {
     name: string;
     pointSetIndex: number,
     pointSets: {
@@ -18,12 +20,21 @@ export type LineChart = {
     currentMinY: number;
 };
 
+export const GRAPH_LINE_CHART = "LineChart";
+
+export function loadGraphLineChart() {
+    GRAPHS_FUNCTIONS[GRAPH_LINE_CHART] = {
+        paint: paintLineChart,
+    }
+}
+
 export function createLineChart(name: string, xLabel: string, yLabel: string, buttonsLabelPrefix: number, levels: number = 2): LineChart {
     const pointSets = [];
     for (let i = 0; i < levels; i++) {
         pointSets.push({ points: [], pointsAveragedCounter: i === 0 ? undefined : 0 });
     }
     return {
+        type: GRAPH_LINE_CHART,
         name,
         pointSetIndex: 0,
         pointSets: pointSets,
@@ -67,7 +78,7 @@ export function lineChartAddPoint(point: Position, lineChart: LineChart) {
     } while (currentPointSet !== undefined);
 }
 
-export function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle) {
+function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle) {
     const padding = 20;
     let yOffset = rect.topLeft.y;
     yOffset += paintHeading(ctx, lineChart, rect);
@@ -148,7 +159,7 @@ function paintPoints(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineCh
     for (let i = 0; i < points.length; i++) {
         const point = points[i];
         const paintX = pointXToPaintX(paintRect, points, point.x);
-        const paintY = pointXToPaintY(paintRect, point.y);
+        const paintY = pointYToPaintY(paintRect, point.y);
         if (i === 0) {
             ctx.moveTo(paintX, paintY);
         } else {
@@ -206,7 +217,7 @@ function paintYAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineCha
 
     for (let i = 0; i <= 1; i += 0.2) {
         const x = paintRect.topLeft.x;
-        const y = pointXToPaintY(paintRect, i);
+        const y = pointYToPaintY(paintRect, i);
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x - 10, y);
@@ -228,7 +239,7 @@ function pointXToPaintX(paintRect: Rectangle, points: Position[], pointX: number
     return paintX;
 }
 
-function pointXToPaintY(paintRect: Rectangle, pointY: number): number {
+function pointYToPaintY(paintRect: Rectangle, pointY: number): number {
     return paintRect.topLeft.y + paintRect.height - pointY * paintRect.height;
 }
 

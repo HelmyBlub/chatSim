@@ -1,8 +1,9 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { getDay } from "../main.js";
 import { UiButton, UiRectangle } from "../rectangle.js";
 import { Rectangle } from "../rectangle.js";
-import { createLineChart, LineChart, lineChartAddPoint, lineChartClickedInside, paintLineChart } from "./lineChart.js";
+import { createLineChart, GRAPH_LINE_CHART, LineChart, lineChartAddPoint, lineChartClickedInside } from "../graph/lineChart.js";
+import { graphPaint } from "../graph/graph.js";
+import { ColumnChart, ColumnChartBar, columnChartCreate, columnChartSetData, GRAPH_COLUMN_CHART } from "../graph/columnChart.js";
 
 export function createButtonWindowStatistics(): UiButton {
     return {
@@ -11,15 +12,24 @@ export function createButtonWindowStatistics(): UiButton {
     }
 }
 
-const LINE_CHART_HAPPINESS = "Average Citizen Happiness"
+const GRAPH_HAPPINESS = "Average Citizen Happiness";
+const GRAPH_Money = "Money Distribution";
 
 export function statisticsCreateHappinessLineChart(): LineChart {
-    return createLineChart(LINE_CHART_HAPPINESS, "Day", "Happiness", 5);
+    return createLineChart(GRAPH_HAPPINESS, "Day", "Happiness", 5);
+}
+
+export function statisticsCreateMoneyColumnChart(): ColumnChart {
+    return columnChartCreate(GRAPH_Money, "Citzen Bracket", "Money");
 }
 
 export function statisticsHappinessTick(state: ChatSimState) {
     if (state.time % (state.tickInterval * 500) !== 0) return;
-    const lineChart = state.statistics.lineCharts.find(l => l.name === LINE_CHART_HAPPINESS);
+    const lineChart = state.statistics.graphs.find(l => {
+        if (l.type !== GRAPH_LINE_CHART) return false;
+        const lineChart = l as LineChart;
+        return lineChart.name === GRAPH_HAPPINESS;
+    }) as LineChart;
     if (!lineChart) return;
     const lineChartDayXValue = state.time / state.timPerDay + 1;
     let lineChartHappinessYValue = 0;
@@ -27,6 +37,30 @@ export function statisticsHappinessTick(state: ChatSimState) {
         lineChartHappinessYValue += citizen.happinessData.happiness / state.map.citizens.length;
     }
     lineChartAddPoint({ x: lineChartDayXValue, y: lineChartHappinessYValue }, lineChart);
+}
+
+export function statisticsMoneyTick(state: ChatSimState) {
+    if (state.time % (state.tickInterval * 500) !== 0) return;
+    const columnChart = state.statistics.graphs.find(l => {
+        if (l.type !== GRAPH_COLUMN_CHART) return false;
+        const lineChart = l as ColumnChart;
+        return lineChart.name === GRAPH_Money;
+    }) as ColumnChart;
+    if (!columnChart) return;
+    const sortedCitizensByMoney = state.map.citizens.toSorted((a, b) => a.money - b.money);
+    const bracketsCount = 5;
+    let currentIndex = 0;
+    const indexsPerBracket = sortedCitizensByMoney.length / bracketsCount;
+    const bars: ColumnChartBar[] = [];
+    for (let i = 0; i < bracketsCount; i++) {
+        let bracketMoney = 0;
+        for (let j = currentIndex; j < (i + 1) * indexsPerBracket; j++) {
+            currentIndex++;
+            bracketMoney += sortedCitizensByMoney[j].money;
+        }
+        bars.push({ label: i.toFixed(), value: bracketMoney });
+    }
+    columnChartSetData(bars, columnChart);
 }
 
 function paintIcon(ctx: CanvasRenderingContext2D, rect: Rectangle) {
@@ -48,27 +82,46 @@ function clickedButton(state: ChatSimState) {
         },
         tabs: [
             {
-                name: "Graph1",
-                paint: paintCommands,
+                name: "Data",
+                paint: paintSimpleData,
+            },
+            {
+                name: "Happiness",
+                paint: paintHappinessChart,
+                click: lineChartClickedInside,
+            },
+            {
+                name: "Money",
+                paint: paintMoneyChart,
                 click: lineChartClickedInside,
             },
         ],
-        data: state.statistics.lineCharts[0],
+        data: state.statistics.graphs[0],
         heading: "Statistics:",
     }
     state.paintData.displaySelected = citizenUiRectangle;
 }
 
+function paintMoneyChart(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+    const padding = 10;
+    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + padding }, width: 300, height: 300 };
+    if (state.statistics.graphs.length > 1) graphPaint(ctx, state.statistics.graphs[1], chartRect);
+    rect.height = chartRect.height + padding * 2;
+}
 
-function paintCommands(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintSimpleData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const fontSize = 20;
     ctx.font = `${fontSize}px Arial`;
     const padding = 10;
     let lineCounter = 0;
     ctx.fillText(`steal: ${state.statistics.stealCounter}`, rect.topLeft.x, rect.topLeft.y + fontSize + lineCounter++ * fontSize);
     ctx.fillText(`gifted food: ${state.statistics.giftedCounter}`, rect.topLeft.x, rect.topLeft.y + fontSize + lineCounter++ * fontSize);
-    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + lineCounter * fontSize + padding }, width: 300, height: 300 };
-    if (state.statistics.lineCharts.length > 0) paintLineChart(ctx, state.statistics.lineCharts[0], chartRect);
+    rect.height = lineCounter * fontSize + padding;
+}
 
-    rect.height = lineCounter * fontSize + chartRect.height + padding * 2;
+function paintHappinessChart(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+    const padding = 10;
+    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + padding }, width: 300, height: 300 };
+    if (state.statistics.graphs.length > 0) graphPaint(ctx, state.statistics.graphs[0], chartRect);
+    rect.height = chartRect.height + padding * 2;
 }
