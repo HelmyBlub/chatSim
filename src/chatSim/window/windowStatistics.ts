@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { getDay } from "../main.js";
 import { UiButton, UiRectangle } from "../rectangle.js";
 import { Rectangle } from "../rectangle.js";
-import { createLineChart, LineChart, lineChartAddPoint, paintLineChart } from "./lineChart.js";
+import { createLineChart, LineChart, lineChartAddPoint, lineChartClickedInside, paintLineChart } from "./lineChart.js";
 
 export function createButtonWindowStatistics(): UiButton {
     return {
@@ -11,13 +11,15 @@ export function createButtonWindowStatistics(): UiButton {
     }
 }
 
+const LINE_CHART_HAPPINESS = "Average Citizen Happiness"
+
 export function statisticsCreateHappinessLineChart(): LineChart {
-    return createLineChart("Happiness", "Day", "Happiness");
+    return createLineChart(LINE_CHART_HAPPINESS, "Day", "Happiness", 5);
 }
 
 export function statisticsHappinessTick(state: ChatSimState) {
     if (state.time % (state.tickInterval * 500) !== 0) return;
-    const lineChart = state.statistics.lineCharts.find(l => l.name === "Happiness");
+    const lineChart = state.statistics.lineCharts.find(l => l.name === LINE_CHART_HAPPINESS);
     if (!lineChart) return;
     const lineChartDayXValue = state.time / state.timPerDay + 1;
     let lineChartHappinessYValue = 0;
@@ -48,8 +50,10 @@ function clickedButton(state: ChatSimState) {
             {
                 name: "Graph1",
                 paint: paintCommands,
+                click: lineChartClickedInside,
             },
         ],
+        data: state.statistics.lineCharts[0],
         heading: "Statistics:",
     }
     state.paintData.displaySelected = citizenUiRectangle;
@@ -63,7 +67,7 @@ function paintCommands(ctx: CanvasRenderingContext2D, rect: Rectangle, state: Ch
     let lineCounter = 0;
     ctx.fillText(`steal: ${state.statistics.stealCounter}`, rect.topLeft.x, rect.topLeft.y + fontSize + lineCounter++ * fontSize);
     ctx.fillText(`gifted food: ${state.statistics.giftedCounter}`, rect.topLeft.x, rect.topLeft.y + fontSize + lineCounter++ * fontSize);
-    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + lineCounter * fontSize + padding }, width: 200, height: 200 };
+    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + lineCounter * fontSize + padding }, width: 300, height: 300 };
     if (state.statistics.lineCharts.length > 0) paintLineChart(ctx, state.statistics.lineCharts[0], chartRect);
 
     rect.height = lineCounter * fontSize + chartRect.height + padding * 2;

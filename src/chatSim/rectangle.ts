@@ -3,30 +3,31 @@ import { MAP_OBJECTS_FUNCTIONS } from "./map/mapObject.js";
 import { paintDataSetCurrenTab } from "./paint.js";
 
 export type Rectangle = {
-    topLeft: Position
-    width: number
-    height: number
+    topLeft: Position,
+    width: number,
+    height: number,
 }
 
 export type UiRectangle = {
-    mainRect: Rectangle
-    tabs: UiRectangleTab[]
-    heading?: string
-    currentTab?: UiRectangleTab
-    tabConntentRect?: Rectangle
+    mainRect: Rectangle,
+    tabs: UiRectangleTab[],
+    heading?: string,
+    currentTab?: UiRectangleTab,
+    tabConntentRect?: Rectangle,
+    data?: any,
 }
 
 export type UiButton = {
-    rect?: Rectangle
+    rect?: Rectangle,
     paintIcon?: (ctx: CanvasRenderingContext2D, rect: Rectangle) => void,
-    clicked: (state: ChatSimState) => void
+    clicked: (state: ChatSimState) => void,
 }
 
 export type UiRectangleTab = {
-    name: string
-    paint: (ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) => void
-    click?: (relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) => void
-    clickRect?: Rectangle
+    name: string,
+    paint: (ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) => void,
+    click?: (relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) => void,
+    clickRect?: Rectangle,
 }
 
 export function rectangleClickedInside(relativeMouseToCanvas: Position, rect: Rectangle | undefined): boolean {
