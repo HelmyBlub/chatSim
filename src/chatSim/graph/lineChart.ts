@@ -1,11 +1,10 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { Rectangle, rectangleClickedInside, rectanglePaint, UiRectangle } from "../rectangle.js";
-import { Graph, GRAPHS_FUNCTIONS } from "./graph.js";
+import { Graph, graphPaintHeading, graphPaintXAxis, graphPaintYAxis, GRAPHS_FUNCTIONS } from "./graph.js";
 
 const POINT_LIMIT = 100;
 
 export type LineChart = Graph & {
-    name: string;
     pointSetIndex: number,
     pointSets: {
         label?: string,
@@ -35,7 +34,7 @@ export function createLineChart(name: string, xLabel: string, yLabel: string, bu
     }
     return {
         type: GRAPH_LINE_CHART,
-        name,
+        heading: name,
         pointSetIndex: 0,
         pointSets: pointSets,
         xLabel,
@@ -81,7 +80,7 @@ export function lineChartAddPoint(point: Position, lineChart: LineChart) {
 function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle) {
     const padding = 20;
     let yOffset = rect.topLeft.y;
-    yOffset += paintHeading(ctx, lineChart, rect);
+    yOffset += graphPaintHeading(ctx, lineChart, rect);
     yOffset += paintSelectButtons(ctx, lineChart, rect, yOffset);
     const buttonHeight = lineChart.chooseLevelButtons.length > 1 ? lineChart.chooseLevelButtons[0].height : 0;
 
@@ -94,8 +93,14 @@ function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rec
         height: rect.height - buttonHeight - padding * 3,
     }
     const points = lineChart.pointSets[lineChart.pointSetIndex].points;
-    paintXAxis(ctx, paintRectWithLabelingSpace, lineChart, points);
-    paintYAxis(ctx, paintRectWithLabelingSpace, lineChart);
+    let firstPointX = 0;
+    let lastPointX = 0;
+    if (points.length >= 2) {
+        firstPointX = points[0].x;
+        lastPointX = points[points.length - 1].x;
+    }
+    graphPaintXAxis(ctx, paintRectWithLabelingSpace, lineChart.xLabel, firstPointX, lastPointX);
+    graphPaintYAxis(ctx, paintRectWithLabelingSpace, lineChart.yLabel, 0, 1);
     paintPoints(ctx, paintRectWithLabelingSpace, lineChart, points);
 }
 
@@ -110,16 +115,6 @@ export function lineChartClickedInside(relativeMouseToCanvas: Position, rect: Re
             break;
         }
     }
-}
-
-function paintHeading(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle): number {
-    const padding = 5;
-    const fontSize = 20;
-    ctx.font = `${fontSize}px Arial`;
-    const text = lineChart.name;
-    const textWidth = ctx.measureText(text).width;
-    ctx.fillText(text, rect.topLeft.x + rect.width / 2 - textWidth / 2, rect.topLeft.y + fontSize);
-    return fontSize + padding;
 }
 
 function paintSelectButtons(ctx: CanvasRenderingContext2D, lineChart: LineChart, rect: Rectangle, offsetY: number): number {
@@ -168,66 +163,6 @@ function paintPoints(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineCh
     }
     ctx.stroke();
 }
-
-function paintXAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart, points: Position[]) {
-    ctx.strokeStyle = "black";
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(paintRect.topLeft.x, paintRect.topLeft.y + paintRect.height);
-    ctx.lineTo(paintRect.topLeft.x + paintRect.width, paintRect.topLeft.y + paintRect.height);
-    ctx.stroke();
-
-    const fontSize = 14;
-    ctx.font = `${fontSize}px Arial`;
-    ctx.fillText(lineChart.xLabel, paintRect.topLeft.x + paintRect.width, paintRect.topLeft.y + paintRect.height + fontSize / 2);
-    if (points.length < 2) return;
-
-    const firstPointX = points[0].x;
-    const lastPointX = points[points.length - 1].x;
-    const firstLastDifference = lastPointX - firstPointX;
-    let stepSizeX = Math.pow(10, Math.floor(Math.log10(firstLastDifference)));
-    const toFixed = Math.max(0, - Math.log10(firstLastDifference) + 1);
-    const startX = Math.ceil(firstPointX / stepSizeX) * stepSizeX;
-    for (let i = startX; i <= lastPointX; i += stepSizeX) {
-        const x = pointXToPaintX(paintRect, points, i);
-        const y = paintRect.topLeft.y + paintRect.height;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + 10);
-        ctx.stroke();
-        ctx.fillText(i.toFixed(toFixed), x - fontSize / 2, y + fontSize + 10);
-    }
-}
-
-function paintYAxis(ctx: CanvasRenderingContext2D, paintRect: Rectangle, lineChart: LineChart) {
-    ctx.strokeStyle = "black";
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(paintRect.topLeft.x, paintRect.topLeft.y);
-    ctx.lineTo(paintRect.topLeft.x, paintRect.topLeft.y + paintRect.height);
-    ctx.stroke();
-
-    const fontSize = 14;
-    ctx.font = `${fontSize}px Arial`;
-    const text = lineChart.yLabel;
-    const textWidth = ctx.measureText(text).width;
-    const textOffsetX = Math.min(textWidth / 2, 20);
-    ctx.fillText(lineChart.yLabel, paintRect.topLeft.x - textOffsetX, paintRect.topLeft.y - 5);
-    //if (lineChart.points.length < 2) return;
-
-    for (let i = 0; i <= 1; i += 0.2) {
-        const x = paintRect.topLeft.x;
-        const y = pointYToPaintY(paintRect, i);
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - 10, y);
-        ctx.stroke();
-        const text = i.toFixed(1);
-        const textWidht = ctx.measureText(text).width;
-        ctx.fillText(i.toFixed(1), x - textWidht - 10, y + fontSize / 2 - 1);
-    }
-}
-
 
 function pointXToPaintX(paintRect: Rectangle, points: Position[], pointX: number): number {
     const firstPointX = points[0].x;

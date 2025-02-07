@@ -14,7 +14,7 @@ import { testRunner } from "./test/test.js";
 import { chatSimTick, onLoadCitizenStateDefaultTickFuntions } from "./tick.js";
 import { citizenAddTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loadTraits, citizenAddRandomTrait } from "./traits/trait.js";
 import { createButtonWindowChatCommands } from "./window/windowChatCommands.js";
-import { createButtonWindowStatistics, statisticsCreateHappinessLineChart, statisticsCreateMoneyColumnChart } from "./window/windowStatistics.js";
+import { createButtonWindowStatistics, statisticsCreateGraphs } from "./window/windowStatistics.js";
 import { onloadGraphsFunctions } from "./graph/graph.js";
 
 export const SKILL_GATHERING = "Gathering";
@@ -132,7 +132,7 @@ export function createDefaultChatSimState(streamerName: string, seed: number): C
             }
         },
         statistics: {
-            graphs: [statisticsCreateHappinessLineChart(), statisticsCreateMoneyColumnChart()],
+            graphs: statisticsCreateGraphs(),
             stealCounter: 0,
             giftedCounter: 0,
         },
@@ -240,6 +240,7 @@ function setChatterToBot(chatter: ChatterData, citizen: Citizen, state: ChatSimS
     addChatterChangeLog(`${citizen.name} added trait ${CITIZEN_TRAIT_ROBOT}`, state);
     saveLocalStorageChatter(state.chatterData);
 }
+console.log(checkIsChatterMessageABot("B͐est vie̵we͖rs"));
 
 function checkIsChatterMessageABot(message: string) {
     const stringsToCheck = [
@@ -270,7 +271,7 @@ function checkIsChatterMessageABot(message: string) {
             }
             if (matchCount > 0) {
                 missMatchCount++;
-                if (missMatchCount > 2) {
+                if (missMatchCount > 3) {
                     matchCount = 0;
                     missMatchCount = 0;
                     toCheckIndex = 0;
