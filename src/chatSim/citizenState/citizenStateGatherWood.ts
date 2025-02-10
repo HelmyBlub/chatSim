@@ -1,12 +1,12 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE, CITIZEN_INTERACTION_DISTANCE } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, TAG_PHYSICALLY_ACTIVE, CITIZEN_INTERACTION_DISTANCE } from "../map/citizen.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { mapGetChunkForPosition, mapGetChunksInDistance } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { MAP_OBJECT_TREE, Tree } from "../map/mapObjectTree.js";
-import { isCitizenInInteractionDistance } from "../citizen.js";
+import { isCitizenInInteractionDistance } from "../map/citizen.js";
 import { citizenGetEquipmentData, citizenSetEquipment } from "../paintCitizenEquipment.js";
 import { playChatSimSound, SOUND_PATH_CUT, SOUND_PATH_TREE_FALL } from "../sounds.js";
 import { mapDeleteTileObject } from "../map/mapObject.js";

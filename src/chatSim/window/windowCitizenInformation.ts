@@ -1,7 +1,7 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { rectangleClickedInside, rectanglePaint, UiButton, UiRectangle } from "../rectangle.js";
 import { Rectangle } from "../rectangle.js";
-import { Citizen } from "../citizen.js";
+import { Citizen } from "../map/citizen.js";
 import { inputMouseClientPositionToRelativeCanvasPosition, selectMapObject } from "../input.js";
 import { rectangleCreateSelectedUi } from "../rectangle.js";
 import { IMAGES } from "../images.js";

@@ -1,5 +1,5 @@
 import { ChatSimState } from "./chatSimModels.js";
-import { Citizen, tickCitizens } from "./citizen.js";
+import { Citizen, tickCitizens } from "./map/citizen.js";
 import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./citizenState/citizenStateGatherMushroom.js";
 import { onLoadCitizenStateDefaultTickGatherWoodFuntions } from "./citizenState/citizenStateGatherWood.js";
 import { onLoadCitizenStateDefaultTickMarketFuntions } from "./citizenState/citizenStateMarket.js";

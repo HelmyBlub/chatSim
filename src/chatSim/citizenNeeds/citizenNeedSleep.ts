@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, citizenAddTodo, citizenIsThinking, citizenStopMoving, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenAddTodo, citizenIsThinking, citizenStopMoving, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS } from "../map/citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { calculateDistance, getTimeOfDay } from "../main.js";
 import { playChatSimSound, SOUND_PATH_SNORE } from "../sounds.js";

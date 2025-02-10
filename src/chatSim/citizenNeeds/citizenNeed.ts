@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRemoveTodo, citizenResetStateTo } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_WORKING_JOB, citizenRemoveTodo, citizenResetStateTo } from "../map/citizen.js";
 import { CITIZEN_NEED_FOOD, loadCitizenNeedsFunctionsFood } from "./citizenNeedFood.js";
 import { CITIZEN_NEED_HAPPINESS, loadCitizenNeedsFunctionsHappiness } from "./citizenNeedHappiness.js";
 import { CITIZEN_NEED_HOME, loadCitizenNeedsFunctionsHome } from "./citizenNeedHome.js";

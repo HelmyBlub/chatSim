@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
+import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../map/citizen.js";
 import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { mapGetChunkForPosition } from "../map/map.js";

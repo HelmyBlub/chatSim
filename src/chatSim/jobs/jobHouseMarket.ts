@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen } from "../citizen.js";
+import { Citizen } from "../map/citizen.js";
 import { nextRandom } from "../main.js";
 import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";

@@ -1,5 +1,5 @@
 import { App, ChatSimState, Logger } from "../chatSimModels.js";
-import { Citizen, citizenCreateDefault } from "../citizen.js";
+import { Citizen, citizenCreateDefault } from "../map/citizen.js";
 import { CITIZEN_NEED_FOOD_AT_HOME, CITIZEN_NEED_FOOD_IN_INVENTORY } from "../citizenNeeds/citizenNeedFood.js";
 import { CITIZEN_STARVING_FOOD_PER_CENT } from "../citizenNeeds/citizenNeedStarving.js";
 import { createJob } from "../jobs/job.js";

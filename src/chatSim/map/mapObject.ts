@@ -1,9 +1,11 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { UiRectangle } from "../rectangle.js";
-import { loadMapObjectTree } from "./mapObjectTree.js";
+import { loadMapObjectTree, Tree } from "./mapObjectTree.js";
 import { ChatSimMap, MapChunk, mapChunkKeyAndTileToPosition, mapGetChunkAndTileForPosition, mapGetChunkForPosition, mapGetRandomEmptyTileInfo, PaintDataMap } from "./map.js";
-import { loadMapObjectBuilding } from "./mapObjectBuilding.js";
-import { loadMapObjectMushroom } from "./mapObjectMushroom.js";
+import { Building, loadMapObjectBuilding } from "./mapObjectBuilding.js";
+import { loadMapObjectMushroom, Mushroom } from "./mapObjectMushroom.js";
+import { mapPositionToPaintPosition } from "../paint.js";
+import { Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js";
 
 export type MapObject = {
     type: string,
@@ -129,4 +131,41 @@ export function mapDeleteTileObject(object: MapObject, map: ChatSimMap) {
         tileX: usedTile.position.tileX,
         tileY: usedTile.position.tileY,
     });
+}
+
+export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+    if (state.inputData.selected) {
+        let position: Position | undefined;
+        let size = 0;
+        switch (state.inputData.selected.type) {
+            case "citizen":
+                const citizen: Citizen = state.inputData.selected.object;
+                position = citizen.position;
+                size = CITIZEN_PAINT_SIZE;
+                break;
+            case "building":
+                const building: Building = state.inputData.selected.object;
+                position = building.position;
+                size = 60;
+                break;
+            case "tree":
+                const tree: Tree = state.inputData.selected.object;
+                position = tree.position;
+                size = 60;
+                break;
+            case "mushroom":
+                const mushroom: Mushroom = state.inputData.selected.object;
+                position = mushroom.position;
+                size = 20;
+                break;
+        }
+        if (position) {
+            const paintPos = mapPositionToPaintPosition(position, state.paintData.map);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.rect(Math.floor(paintPos.x - size / 2), Math.floor(paintPos.y - size / 2), size, size);
+            ctx.stroke();
+        }
+    }
 }

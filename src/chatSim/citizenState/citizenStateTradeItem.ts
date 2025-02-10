@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenStateStackTaskSuccess, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { Citizen, citizenStateStackTaskSuccess, TAG_SOCIAL_INTERACTION } from "../map/citizen.js";
 import { InventoryItem, inventoryPutItemInto } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 

@@ -1,12 +1,12 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../map/citizen.js";
 import { buildingGetFirstBrokenStateDeterioration, BuildingMarket } from "../map/mapObjectBuilding.js";
-import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../citizen.js"
+import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../map/citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
 import { getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition } from "./job.js"
-import { isCitizenInInteractionDistance } from "../citizen.js";
+import { isCitizenInInteractionDistance } from "../map/citizen.js";
 import { BUILDING_DATA, CITIZEN_JOB_BUILDING_CONSTRUCTION } from "./jobBuildingContruction.js";
 import { CITIZEN_JOB_LUMBERJACK } from "./jobLumberjack.js";
 import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatMessageMarketTradeIntention } from "../chatBubble.js";

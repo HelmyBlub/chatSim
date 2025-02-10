@@ -1,6 +1,6 @@
 import { Position, ChatSimState, App, RandomSeed, ChatterData } from "./chatSimModels.js";
 import { UiButton } from "./rectangle.js";
-import { addCitizen, Citizen, citizenSetDreamJob, loadCitizenStateTypeFunctions } from "./citizen.js";
+import { addCitizen, Citizen, citizenSetDreamJob, loadCitizenStateTypeFunctions } from "./map/citizen.js";
 import { createButtonCitizenInformationWindow } from "./window/windowCitizenInformation.js";
 import { loadCitizenNeedsFunctions } from "./citizenNeeds/citizenNeed.js";
 import { loadImages } from "./images.js";

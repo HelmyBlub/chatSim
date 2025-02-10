@@ -1,6 +1,6 @@
 import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js"
-import { citizenAddLogEntry, Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js"
+import { citizenAddLogEntry, Citizen, CITIZEN_PAINT_SIZE } from "./map/citizen.js"
 import { mapPositionToPaintPosition } from "./paint.js";
 
 export type Chat = {

@@ -1,6 +1,6 @@
 import { IMAGE_PATH_MONEY, IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { citizenAddLogEntry, Citizen } from "./citizen.js";
+import { citizenAddLogEntry, Citizen } from "./map/citizen.js";
 import { IMAGES } from "./images.js";
 import { isCitizenAtPosition } from "./jobs/job.js";
 

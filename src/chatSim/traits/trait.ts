@@ -1,5 +1,5 @@
 import { ChatSimState, ChatterData, RandomSeed } from "../chatSimModels.js";
-import { Citizen, CITIZEN_DEFAULT_NAMES_REMEMBER } from "../citizen.js";
+import { Citizen, CITIZEN_DEFAULT_NAMES_REMEMBER } from "../map/citizen.js";
 import { nextRandom } from "../main.js";
 
 export type CitizenTraits = {

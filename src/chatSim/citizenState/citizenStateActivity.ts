@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenIsInVisionDistanceForMapObject, citizenMoveToRandom, TAG_DOING_NOTHING } from "../citizen.js";
-import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../citizen.js";
+import { citizenIsInVisionDistanceForMapObject, citizenMoveToRandom, TAG_DOING_NOTHING } from "../map/citizen.js";
+import { citizenAddLogEntry, citizenAddThought, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../map/citizen.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateStartCitizenChat } from "./citizenStateChat.js";

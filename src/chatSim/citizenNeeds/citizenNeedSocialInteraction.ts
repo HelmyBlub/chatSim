@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenAddThought, citizenAddTodo } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenAddThought, citizenAddTodo } from "../map/citizen.js";
 import { setCitizenStateTalkToSomebody } from "../citizenState/citizenStateActivity.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";

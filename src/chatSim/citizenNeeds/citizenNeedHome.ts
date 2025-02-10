@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, citizenAddTodo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory, citizenGetVisionDistance, citizenIsInVisionDistanceForMapObject } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenAddTodo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMoveTo, citizenMemorizeHomeInventory, citizenGetVisionDistance, citizenIsInVisionDistanceForMapObject } from "../map/citizen.js";
 import { findBuilding, setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { buildingGetFirstBrokenStateDeterioration } from "../map/mapObjectBuilding.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";

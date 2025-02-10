@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen } from "../citizen.js";
+import { Citizen } from "../map/citizen.js";
 import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { INVENTORY_MUSHROOM, inventoryMoveItemBetween, inventoryPutItemInto } from "../inventory.js";

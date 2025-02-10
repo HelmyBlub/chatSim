@@ -1,6 +1,6 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { Building, tickBuildings } from "./mapObjectBuilding.js";
-import { Citizen } from "../citizen.js";
+import { Citizen } from "./citizen.js";
 import { calculateDistance, getTimeOfDay, nextRandom } from "../main.js";
 import { MapObject, mapObjectsTickGlobal } from "./mapObject.js";
 

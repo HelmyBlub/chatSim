@@ -1,6 +1,6 @@
 import { IMAGE_PATH_AXE, IMAGE_PATH_BASKET, IMAGE_PATH_HAMMER, IMAGE_PATH_HELMET, IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
-import { Citizen } from "./citizen.js";
+import { Citizen } from "./map/citizen.js";
 import { IMAGES } from "./images.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "./inventory.js";
 import { mapPositionToPaintPosition } from "./paint.js";

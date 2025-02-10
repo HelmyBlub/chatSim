@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMemorizeHomeInventory } from "../citizen.js";
+import { Citizen, citizenIsThinking, citizenSetThought, citizenAddThought, citizenResetStateTo, citizenStateStackTaskSuccess, citizenAddTodo, citizenRemoveTodo, citizenMoveTo, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenMemorizeHomeInventory } from "../map/citizen.js";
 import { CITIZEN_STATE_EAT, setCitizenStateEat } from "../citizenState/citizenStateEat.js";
 import { setCitizenStateTransportItemToBuilding, setCitizenStateGetItem } from "../citizenState/citizenStateGetItem.js";
 import { isCitizenAtPosition } from "../jobs/job.js";

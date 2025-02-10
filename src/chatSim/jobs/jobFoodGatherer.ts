@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { citizenAddThought, Citizen, citizenSetThought, CitizenStateSuccessData } from "../citizen.js";
+import { citizenAddThought, Citizen, citizenSetThought, CitizenStateSuccessData } from "../map/citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenAtPosition } from "./job.js";
 import { CITIZEN_JOB_FOOD_MARKET } from "./jobFoodMarket.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";

@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenAddThought, citizenAddTodo, citizenSetThought, citizenStateStackTaskSuccess, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../citizen.js";
+import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenAddThought, citizenAddTodo, citizenSetThought, citizenStateStackTaskSuccess, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../map/citizen.js";
 import { setCitizenStateDoNothingAtHome, setCitizenStateTalkToSomebody, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";

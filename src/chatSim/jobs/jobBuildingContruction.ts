@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingType, createBuildingOnRandomTile, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
-import { Citizen } from "../citizen.js";
+import { Citizen } from "../map/citizen.js";
 import { CitizenJob } from "./job.js";
 import { nextRandom } from "../main.js";
 import { INVENTORY_WOOD } from "../inventory.js";

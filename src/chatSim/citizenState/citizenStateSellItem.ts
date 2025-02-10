@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Building, BuildingMarket, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
-import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../citizen.js";
+import { Citizen, citizenStateStackTaskFailed, citizenStateStackTaskSuccess } from "../map/citizen.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { calculateDistance } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";

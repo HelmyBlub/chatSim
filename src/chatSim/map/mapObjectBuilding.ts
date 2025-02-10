@@ -2,10 +2,10 @@ import { IMAGE_PATH_CITIZEN_HOUSE, IMAGE_PATH_BUILDING_MARKET, IMAGE_PATH_WOOD_P
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { UiRectangle } from "../rectangle.js";
 import { Rectangle } from "../rectangle.js";
-import { Citizen } from "../citizen.js";
+import { Citizen } from "./citizen.js";
 import { IMAGES } from "../images.js";
 import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } from "../inventory.js";
-import { isCitizenInInteractionDistance } from "../citizen.js";
+import { isCitizenInInteractionDistance } from "./citizen.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
 import { ChatSimMap, mapGetRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";

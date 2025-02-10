@@ -1,10 +1,6 @@
 Tasks:
-- improve UI?
-    - display death reasons not only in console.log
-        - order by day? i want to see the latests death
-- check citizen building second if first not finished
-- check: move cititzen to mapObjects?
 - check citizen file very big. Split up?
+- think about next feature/steps?
 
 
 what next ideas:

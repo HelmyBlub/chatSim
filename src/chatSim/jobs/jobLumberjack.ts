@@ -1,5 +1,5 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddThought, citizenSetThought } from "../citizen.js";
+import { Citizen, citizenAddThought, citizenSetThought } from "../map/citizen.js";
 import { citizenChangeJob, CitizenJob, isCitizenAtPosition } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../inventory.js";

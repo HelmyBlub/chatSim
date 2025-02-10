@@ -1,7 +1,7 @@
 import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
 import { rectangleClickedUi, rectangleCreateSelectedUi, UiRectangle } from "./rectangle.js";
 import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
-import { addCitizen } from "./citizen.js";
+import { addCitizen } from "./map/citizen.js";
 import { addChatterChangeLog, calculateDistance, uiButtonsResetPosition } from "./main.js";
 import { mapPositionToPaintPosition } from "./paint.js";
 import { startTests, stopTests } from "./test/test.js";

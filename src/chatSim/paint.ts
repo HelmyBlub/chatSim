@@ -2,7 +2,8 @@ import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { UiRectangle, UiRectangleTab } from "./rectangle.js";
 import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
-import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens, paintSelectionBox } from "./citizen.js";
+import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens } from "./map/citizen.js";
+import { paintSelectionBox } from "./map/mapObject.js";
 import { getTimeOfDay, getTimeOfDayString, getDay, uiButtonsResetPosition } from "./main.js";
 import { mapPaintChunkObjects } from "./map/mapObject.js";
 
