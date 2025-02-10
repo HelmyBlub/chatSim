@@ -1,3 +1,4 @@
+import { ChatSimState } from "../chatSimModels.js";
 import { Rectangle } from "../rectangle.js";
 import { loadGraphAreaGraph } from "./areaGraph.js";
 import { loadGraphColumnChart } from "./columnChart.js";
@@ -6,6 +7,9 @@ import { loadGraphLineChart } from "./lineChart.js";
 export type Graph = {
     type: string;
     heading: string,
+    tickAlways?(graph: Graph, state: ChatSimState): void,
+    tickOnlyWhenPainted?(graph: Graph, state: ChatSimState): void,
+    lastPaintedTick?: number,
 };
 
 export type GraphFunctions = {
@@ -22,8 +26,21 @@ export function onloadGraphsFunctions() {
     loadGraphAreaGraph();
 }
 
-export function graphPaint(ctx: CanvasRenderingContext2D, graph: Graph, rect: Rectangle) {
+export function graphPaint(ctx: CanvasRenderingContext2D, graph: Graph, rect: Rectangle, state: ChatSimState) {
+    if (graph.tickOnlyWhenPainted) {
+        if (graph.lastPaintedTick === undefined || graph.lastPaintedTick + 500 < state.time) {
+            graph.lastPaintedTick = state.time;
+            graph.tickOnlyWhenPainted(graph, state);
+        }
+    }
+
     GRAPHS_FUNCTIONS[graph.type].paint(ctx, graph, rect);
+}
+
+export function graphTickAlways(state: ChatSimState) {
+    for (let graph of state.statistics.graphs) {
+        if (graph.tickAlways) graph.tickAlways(graph, state);
+    }
 }
 
 export function graphPaintHeading(ctx: CanvasRenderingContext2D, graph: Graph, rect: Rectangle): number {

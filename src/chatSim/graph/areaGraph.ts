@@ -27,14 +27,14 @@ export function loadGraphAreaGraph() {
     }
 }
 
-export function createAreaGraph(name: string, xLabel: string, yLabel: string, buttonsLabelPrefix: number, levels: number = 2): AreaGraph {
+export function createAreaGraph(heading: string, xLabel: string, yLabel: string, buttonsLabelPrefix: number, levels: number = 2, tickAlways: (graph: Graph, state: ChatSimState) => void): AreaGraph {
     const pointSets = [];
     for (let i = 0; i < levels; i++) {
         pointSets.push({ pointSets: [], pointsAveragedCounter: i === 0 ? undefined : 0 });
     }
     return {
         type: GRAPH_AREA_GRAPH,
-        heading: name,
+        heading: heading,
         pointSetIndex: 0,
         pointLevelSets: pointSets,
         xLabel,
@@ -42,7 +42,8 @@ export function createAreaGraph(name: string, xLabel: string, yLabel: string, bu
         currentMaxY: 0,
         currentMinY: 0,
         chooseLevelButtons: [],
-        buttonsLabelPrefix: buttonsLabelPrefix
+        buttonsLabelPrefix: buttonsLabelPrefix,
+        tickAlways,
     };
 }
 

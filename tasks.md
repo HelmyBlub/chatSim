@@ -1,23 +1,16 @@
 Tasks:
 - improve UI?
     - steps:
-        - statistics uibutton
-            - death statistics
-        - check code for clean up with graphs
+        - statistics
+            - check code for clean up with graphs
         - citizen button
             - check code for clean ups
         - option to add "robot" to citizen and chatter
         - UI rectangles
             - citizen:
                 - think about how to better visualize
-
-
-    - instead of growing list of displayed things
-    - make it easier to find citizen
     - display death reasons not only in console.log
-    - some statistics?
-        - wealth distribution
-        - death reason counter
+        - order by day? i want to see the latests death
 - check citizen building second if first not finished
 - check: move cititzen to mapObjects?
 - check citizen file very big. Split up?

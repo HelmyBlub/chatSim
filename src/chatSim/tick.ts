@@ -1,6 +1,5 @@
-import { ChatSimState, Position } from "./chatSimModels.js";
+import { ChatSimState } from "./chatSimModels.js";
 import { Citizen, tickCitizens } from "./citizen.js";
-import { moveMapCameraBy } from "./input.js";
 import { onLoadCitizenStateDefaultTickGatherMushroomsFuntions } from "./citizenState/citizenStateGatherMushroom.js";
 import { onLoadCitizenStateDefaultTickGatherWoodFuntions } from "./citizenState/citizenStateGatherWood.js";
 import { onLoadCitizenStateDefaultTickMarketFuntions } from "./citizenState/citizenStateMarket.js";
@@ -12,7 +11,7 @@ import { onLoadCitizenStateDefaultTickEatFuntions } from "./citizenState/citizen
 import { onLoadCitizenStateDefaultTickActivityFuntions } from "./citizenState/citizenStateActivity.js";
 import { onLoadCitizenStateDefaultTickChatFuntions } from "./citizenState/citizenStateChat.js";
 import { onLoadCitizenStateDefaultTickTradeFuntions } from "./citizenState/citizenStateTradeItem.js";
-import { statisticsTick } from "./window/windowStatistics.js";
+import { graphTickAlways } from "./graph/graph.js";
 
 export const CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS: { [key: string]: (citizen: Citizen, state: ChatSimState) => void } = {
 };
@@ -34,6 +33,6 @@ export function chatSimTick(state: ChatSimState) {
     state.time += state.tickInterval;
     tickCitizens(state);
     tickChatSimMap(state);
-    statisticsTick(state);
+    graphTickAlways(state);
 }
 

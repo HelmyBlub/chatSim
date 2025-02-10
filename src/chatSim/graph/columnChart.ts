@@ -1,3 +1,4 @@
+import { ChatSimState } from "../chatSimModels.js";
 import { Rectangle } from "../rectangle.js";
 import { Graph, graphPaintHeading, graphPaintYAxis, GRAPHS_FUNCTIONS } from "./graph.js";
 
@@ -21,14 +22,15 @@ export function loadGraphColumnChart() {
     }
 }
 
-export function columnChartCreate(name: string, xLabel: string, yLabel: string): ColumnChart {
+export function columnChartCreate(hading: string, xLabel: string, yLabel: string, tick: (graph: Graph, state: ChatSimState) => void): ColumnChart {
     return {
         type: GRAPH_COLUMN_CHART,
-        heading: name,
+        heading: hading,
         xLabel,
         yLabel,
         maxY: 0,
         bars: [],
+        tickOnlyWhenPainted: tick,
     };
 }
 

@@ -27,14 +27,14 @@ export function loadGraphLineChart() {
     }
 }
 
-export function createLineChart(name: string, xLabel: string, yLabel: string, buttonsLabelPrefix: number, levels: number = 2): LineChart {
+export function createLineChart(heading: string, xLabel: string, yLabel: string, buttonsLabelPrefix: number, levels: number = 2, tickAlways: (graph: Graph, state: ChatSimState) => void): LineChart {
     const pointSets = [];
     for (let i = 0; i < levels; i++) {
         pointSets.push({ points: [], pointsAveragedCounter: i === 0 ? undefined : 0 });
     }
     return {
         type: GRAPH_LINE_CHART,
-        heading: name,
+        heading: heading,
         pointSetIndex: 0,
         pointSets: pointSets,
         xLabel,
@@ -42,7 +42,8 @@ export function createLineChart(name: string, xLabel: string, yLabel: string, bu
         currentMaxY: 0,
         currentMinY: 0,
         chooseLevelButtons: [],
-        buttonsLabelPrefix: buttonsLabelPrefix
+        buttonsLabelPrefix: buttonsLabelPrefix,
+        tickAlways,
     };
 
 }
