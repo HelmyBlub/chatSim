@@ -16,16 +16,24 @@ export function createButtonWindowStatistics(): UiButton {
 const GRAPH_HAPPINESS = "Average Citizen Happiness";
 const GRAPH_MONEY = "Current Money Distribution";
 const GRAPH_AREA_MONEY = "Money Distribution Over Time";
+const GRAPH_DEATH = "Death Reasons";
 
 export function statisticsCreateGraphs(): Graph[] {
     const graphs: Graph[] = [];
     graphs.push(createLineChart(GRAPH_HAPPINESS, "Day", "Happiness", 5));
     graphs.push(columnChartCreate(GRAPH_MONEY, "Citizen Bracket", "Money"));
     graphs.push(createAreaGraph(GRAPH_AREA_MONEY, "Day", "Money", 5));
+    graphs.push(columnChartCreate(GRAPH_DEATH, "Death Reason", "Count"));
     return graphs;
 }
 
-export function statisticsHappinessTick(state: ChatSimState) {
+export function statisticsTick(state: ChatSimState) {
+    statisticsHappinessTick(state);
+    statisticsMoneyTick(state);
+    statisticsDeath(state);
+}
+
+function statisticsHappinessTick(state: ChatSimState) {
     if (state.time % (state.tickInterval * 500) !== 0) return;
     const lineChart = state.statistics.graphs.find(l => {
         if (l.type !== GRAPH_LINE_CHART) return false;
@@ -41,7 +49,30 @@ export function statisticsHappinessTick(state: ChatSimState) {
     lineChartAddPoint({ x: lineChartDayXValue, y: lineChartHappinessYValue }, lineChart);
 }
 
-export function statisticsMoneyTick(state: ChatSimState) {
+function statisticsDeath(state: ChatSimState) {
+    if (state.time % (state.tickInterval * 500) !== 0) return;
+    const columnChart = state.statistics.graphs.find(l => {
+        if (l.type !== GRAPH_COLUMN_CHART) return false;
+        const lineChart = l as ColumnChart;
+        return lineChart.heading === GRAPH_DEATH;
+    }) as ColumnChart;
+    if (!columnChart) return;
+    const deadCitizens = state.deceasedCitizens;
+    const bars: ColumnChartBar[] = [];
+    for (let i = 0; i < deadCitizens.length; i++) {
+        const citizen = deadCitizens[i];
+        let bar = bars.find(b => b.label === citizen.isDead?.reason);
+        if (!bar) {
+            bar = { label: citizen.isDead!.reason, value: 0 };
+            bars.push(bar);
+        }
+        bar.value++;
+    }
+    columnChartSetData(bars, columnChart);
+}
+
+
+function statisticsMoneyTick(state: ChatSimState) {
     if (state.time % (state.tickInterval * 500) !== 0) return;
     const columnChart = state.statistics.graphs.find(l => {
         if (l.type !== GRAPH_COLUMN_CHART) return false;
@@ -133,6 +164,10 @@ function clickedButton(state: ChatSimState) {
                 paint: paintMoneyAreaGraph,
                 click: areaGraphClickedInside,
             },
+            {
+                name: "Death",
+                paint: paintDeathChart,
+            },
         ],
         data: state.statistics.graphs[0],
         heading: "Statistics:",
@@ -144,6 +179,13 @@ function paintMoneyChart(ctx: CanvasRenderingContext2D, rect: Rectangle, state: 
     const padding = 10;
     const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + padding }, width: 400, height: 300 };
     if (state.statistics.graphs.length > 1) graphPaint(ctx, state.statistics.graphs[1], chartRect);
+    rect.height = chartRect.height + padding * 2;
+}
+
+function paintDeathChart(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+    const padding = 10;
+    const chartRect: Rectangle = { topLeft: { x: rect.topLeft.x + padding, y: rect.topLeft.y + padding }, width: 400, height: 300 };
+    if (state.statistics.graphs.length > 1) graphPaint(ctx, state.statistics.graphs[3], chartRect);
     rect.height = chartRect.height + padding * 2;
 }
 
