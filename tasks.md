@@ -1,7 +1,18 @@
 Tasks:
 - cititzen visualization for starving/happiness/energy
     - drag citizen dog by code
-
+    - draw head
+        - draw eyes
+        - draw mouth
+        - draw ears
+        - rotate down if unhappy
+    - draw body
+        - draw body
+            - afftected by "starving"
+        - draw arms
+        - draw feet
+    - remember sleeping citizen
+    - remember eating cititzen
 
 what next ideas:
 - more images:
