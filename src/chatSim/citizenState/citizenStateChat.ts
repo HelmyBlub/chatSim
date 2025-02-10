@@ -1,6 +1,6 @@
 import { addChatMessage, ChatMessageIntention, createEmptyChat } from "../chatBubble.js";
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, CitizenMemoryMetCitizen, citizenMoveTo, citizenStateStackTaskSuccess, citizenStopMoving, TAG_SOCIAL_INTERACTION } from "../citizen.js";
+import { Citizen, CitizenMemoryMetCitizen, citizenMoveTo, citizenStateStackTaskSuccess, citizenStopMoving, isCitizenInInteractionDistance, TAG_SOCIAL_INTERACTION } from "../citizen.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
@@ -144,6 +144,7 @@ function tickCititzenStateChat(citizen: Citizen, state: ChatSimState) {
         } else {
             citizenRememberMeetingCitizen(citizen, data.chatStarterCitizen, state);
             citizenState.subState = "waitingForResponse";
+            return;
         }
     }
     if (data.chatStarterCitizen.moveTo) return;
@@ -156,6 +157,9 @@ function tickCititzenStateChat(citizen: Citizen, state: ChatSimState) {
         if (message.time + 5000 < state.time) {
             citizenStateStackTaskSuccess(citizen);
             return;
+        }
+        if (citizen === data.chatStarterCitizen && !isCitizenInInteractionDistance(citizen, data.firstInviteCitizen!.position)) {
+            citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + 20, y: data.firstInviteCitizen!.position.y });
         }
         if (message.by === citizen) return;
         const repsonseIntention = message.intention as ChatMessageChatIntention;

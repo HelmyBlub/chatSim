@@ -1,4 +1,5 @@
 Tasks:
+- bug: smal talk over long range
 - improve UI?
     - steps:
         - statistics uibutton
