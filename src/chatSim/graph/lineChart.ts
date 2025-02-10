@@ -106,7 +106,7 @@ function paintLineChart(ctx: CanvasRenderingContext2D, lineChart: LineChart, rec
 }
 
 export function lineChartClickedInside(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as UiRectangle;
+    const uiRect = state.paintData.currentUiRectangle as UiRectangle;
     if (!uiRect) return;
     const lineChart = uiRect.data as LineChart;
 

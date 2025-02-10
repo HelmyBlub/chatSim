@@ -1,5 +1,5 @@
 import { App, ChatSimState, Position, SelectedObject } from "./chatSimModels.js";
-import { createSelectedUiRectangle, UiRectangle } from "./rectangle.js";
+import { rectangleClickedUi, rectangleCreateSelectedUi, UiRectangle } from "./rectangle.js";
 import { mapCanvasPositionToMapPosition, mapGetChunkForPosition, mapIsPositionVisible, PaintDataMap } from "./map/map.js";
 import { addCitizen } from "./citizen.js";
 import { addChatterChangeLog, calculateDistance, uiButtonsResetPosition } from "./main.js";
@@ -90,21 +90,11 @@ function mouseUp(event: MouseEvent, state: ChatSimState) {
     state.inputData.map.mouseMoveMap = false;
     if (performance.now() - state.inputData.lastMouseDownTime < INPUT_CONSIDERED_CLICK_MAX_TIME) {
         const relativeMouse = inputMouseClientPositionToRelativeCanvasPosition({ x: event.clientX, y: event.clientY }, state.canvas);
-        if (!clickedUiTab(relativeMouse, state) && !clickedUiButton(relativeMouse, state)) {
+        if (!rectangleClickedUi(relativeMouse, state) && !clickedUiButton(relativeMouse, state)) {
             selectObject(relativeMouse, state);
-            createSelectedUiRectangle(state);
+            rectangleCreateSelectedUi(state);
         }
     }
-}
-
-function clickedUiTabContentRectangle(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
-    const rect = state.paintData.displaySelected?.tabConntentRect;
-    if (rect && rectangleClickedInside(relativeMouseToCanvas, rect)) {
-        const currentTab = state.paintData.displaySelected?.currentTab;
-        if (currentTab && currentTab.click) currentTab.click(relativeMouseToCanvas, rect, state);
-        return true;
-    }
-    return false;
 }
 
 function clickedUiButton(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
@@ -116,21 +106,6 @@ function clickedUiButton(relativeMouseToCanvas: Position, state: ChatSimState): 
         return true;
     }
     return false;
-}
-
-function clickedUiTab(relativeMouseToCanvas: Position, state: ChatSimState): boolean {
-    if (!state.paintData.displaySelected) return false;
-    const rect = state.paintData.displaySelected.mainRect;
-    if (!rectangleClickedInside(relativeMouseToCanvas, rect)) return false;
-
-    for (let tab of state.paintData.displaySelected.tabs) {
-        if (rectangleClickedInside(relativeMouseToCanvas, tab.clickRect)) {
-            state.paintData.displaySelected.currentTab = tab;
-            return true;
-        }
-    }
-    clickedUiTabContentRectangle(relativeMouseToCanvas, state);
-    return true;
 }
 
 function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
@@ -344,7 +319,7 @@ function switchThroughVisibleCitizens(state: ChatSimState) {
                 object: citizen,
                 type: "citizen",
             };
-            createSelectedUiRectangle(state);
+            rectangleCreateSelectedUi(state);
             return;
         }
     }

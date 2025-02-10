@@ -3,19 +3,19 @@ import { rectangleClickedInside, rectanglePaint, UiButton, UiRectangle } from ".
 import { Rectangle } from "../rectangle.js";
 import { Citizen } from "../citizen.js";
 import { inputMouseClientPositionToRelativeCanvasPosition, selectMapObject } from "../input.js";
-import { createSelectedUiRectangle } from "../rectangle.js";
+import { rectangleCreateSelectedUi } from "../rectangle.js";
 import { IMAGES } from "../images.js";
 import { IMAGE_PATH_CITIZEN } from "../../drawHelper.js";
-import { getDay, getDayForTime } from "../main.js";
+import { getDayForTime } from "../main.js";
 
 
 type CitizenInformationUiRectangle = UiRectangle & {
-    citizenInformationData: CitizenInformationData,
-    deceasedCitizenInformationData: CitizenInformationData,
+    citizenData: CitizenInformationData,
 }
 
 type CitizenInformationData = {
     type: string,
+    sortType?: string,
     citizensPerPage: number,
     currentPageIndex: number,
     citizenPages: Citizen[][],
@@ -25,6 +25,7 @@ type CitizenInformationData = {
     citizenListStartY: number,
 }
 
+const WINDOW_TAB_TYPE_DECEASED_2 = "Deceased 2"
 const WINDOW_TAB_TYPE_DECEASED = "Deceased"
 const WINDOW_TAB_TYPE_LIVING = "Living"
 
@@ -44,7 +45,7 @@ function paintIcon(ctx: CanvasRenderingContext2D, rect: Rectangle) {
     );
 }
 
-function setupData(state: ChatSimState, citizens: Citizen[], type: string): CitizenInformationData {
+function setupData(state: ChatSimState, citizens: Citizen[], type: string, sortType?: string): CitizenInformationData {
     const canvasHeight = state.canvas?.height ?? 400;
     const estimatedContentRectHeight = canvasHeight - 80;
     const fontSize = 18;
@@ -58,8 +59,14 @@ function setupData(state: ChatSimState, citizens: Citizen[], type: string): Citi
         fontSize,
         padding,
         type,
+        sortType,
     }
-    const sortedCitizens = citizens.toSorted((a, b) => a.name.localeCompare(b.name));
+    let sortedCitizens: Citizen[];
+    if (sortType === "deathtime") {
+        sortedCitizens = citizens.toSorted((a, b) => b.isDead!.time - a.isDead!.time);
+    } else {
+        sortedCitizens = citizens.toSorted((a, b) => a.name.localeCompare(b.name));
+    }
     let pageIndex = -1;
     for (let i = 0; i < sortedCitizens.length; i++) {
         if (i % data.citizensPerPage === 0) {
@@ -84,33 +91,46 @@ function clickedButton(state: ChatSimState) {
         tabs: [
             {
                 name: WINDOW_TAB_TYPE_LIVING,
-                paint: paintLivingCitizenInformation,
+                paint: paintCitizenInformation,
                 click: clickedLivingCititizenWindow,
+                onSelect: (tabName, state2) => onSelectSetupData(state2, state2.map.citizens, tabName),
             },
             {
                 name: WINDOW_TAB_TYPE_DECEASED,
-                paint: paintDeceasedCitizenInformation,
+                paint: paintCitizenInformation,
                 click: clickedDeceasedCititizenWindow,
+                onSelect: (tabName, state2) => onSelectSetupData(state2, state2.deceasedCitizens, tabName),
+            },
+            {
+                name: WINDOW_TAB_TYPE_DECEASED_2,
+                paint: paintCitizenInformation,
+                click: clickedDeceasedCititizenWindow,
+                onSelect: (tabName, state2) => onSelectSetupData(state2, state2.deceasedCitizens, tabName, "deathtime"),
             },
         ],
         heading: "Citizen Information:",
-        citizenInformationData: setupData(state, state.map.citizens, WINDOW_TAB_TYPE_LIVING),
-        deceasedCitizenInformationData: setupData(state, state.deceasedCitizens, WINDOW_TAB_TYPE_DECEASED),
+        citizenData: setupData(state, state.map.citizens, WINDOW_TAB_TYPE_LIVING),
     }
-    state.paintData.displaySelected = citizenUiRectangle;
+    state.paintData.currentUiRectangle = citizenUiRectangle;
+}
+
+function onSelectSetupData(state: ChatSimState, citizens: Citizen[], type: string, sortType?: string) {
+    const uiRectangle = state.paintData.currentUiRectangle as CitizenInformationUiRectangle;
+    if (!uiRectangle) return;
+    uiRectangle.citizenData = setupData(state, citizens, type, sortType);
 }
 
 function clickedLivingCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
+    const uiRect = state.paintData.currentUiRectangle as CitizenInformationUiRectangle;
     if (!uiRect) return;
-    const data = uiRect.citizenInformationData;
+    const data = uiRect.citizenData;
     clickedCititizenWindow(relativeMouseToCanvas, rect, state, data);
 }
 
 function clickedDeceasedCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
+    const uiRect = state.paintData.currentUiRectangle as CitizenInformationUiRectangle;
     if (!uiRect) return;
-    const data = uiRect.deceasedCitizenInformationData;
+    const data = uiRect.citizenData;
     clickedCititizenWindow(relativeMouseToCanvas, rect, state, data);
 }
 
@@ -123,7 +143,7 @@ function clickedCititizenWindow(relativeMouseToCanvas: Position, rect: Rectangle
         type: "citizen",
     }
     if (state.inputData.selected?.object === closest.object) {
-        createSelectedUiRectangle(state);
+        rectangleCreateSelectedUi(state);
     } else {
         selectMapObject(closest, state);
     }
@@ -146,7 +166,7 @@ function clickedPagination(relativeMouseToCanvas: Position, data: CitizenInforma
 function getHoverCitizenIndex(state: ChatSimState, data: CitizenInformationData): number {
     if (data.citizenPages.length === 0) return -1;
     if (!state.canvas) return -1;
-    const rect = state.paintData.displaySelected?.tabConntentRect;
+    const rect = state.paintData.currentUiRectangle?.tabConntentRect;
     if (!rect) return -1;
     const relativeMouseToCanvas = inputMouseClientPositionToRelativeCanvasPosition(state.inputData.mousePosition, state.canvas);
     if (relativeMouseToCanvas.x < rect.topLeft.x || relativeMouseToCanvas.x > rect.topLeft.x + rect.width) return -1;
@@ -157,21 +177,11 @@ function getHoverCitizenIndex(state: ChatSimState, data: CitizenInformationData)
     return hoverIndex;
 }
 
-function paintDeceasedCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
-    if (!uiRect) return;
-    const data = uiRect.deceasedCitizenInformationData;
-    paintCitizenInformation(ctx, rect, state, data);
-}
 
-function paintLivingCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as CitizenInformationUiRectangle;
+function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+    const uiRect = state.paintData.currentUiRectangle as CitizenInformationUiRectangle;
     if (!uiRect) return;
-    const data = uiRect.citizenInformationData;
-    paintCitizenInformation(ctx, rect, state, data);
-}
-
-function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState, data: CitizenInformationData) {
+    const data = uiRect.citizenData;
     const fontSize = 18;
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = "black";
@@ -196,20 +206,24 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
         for (let i = 0; i < data.paginationButtons.length; i++) {
             const pageButton = data.paginationButtons[i];
             let text;
-            if (i === 0) {
-                text = data.citizenPages[i][0].name.substring(0, 1);
+            if (data.type === WINDOW_TAB_TYPE_DECEASED_2) {
+                text = getDayForTime(data.citizenPages[i][0].isDead!.time, state).toFixed();
             } else {
-                const beforeCitizen = data.citizenPages[i - 1][data.citizenPages[i - 1].length - 1].name;
-                const currentCititzen = data.citizenPages[i][0].name;
-                let diffCharIndex = 1;
-                for (let i = 0; i < beforeCitizen.length; i++) {
-                    if (beforeCitizen[i] === currentCititzen[i]) {
-                        diffCharIndex++;
-                    } else {
-                        break;
+                if (i === 0) {
+                    text = data.citizenPages[i][0].name.substring(0, 1);
+                } else {
+                    const beforeCitizen = data.citizenPages[i - 1][data.citizenPages[i - 1].length - 1].name;
+                    const currentCititzen = data.citizenPages[i][0].name;
+                    let diffCharIndex = 1;
+                    for (let i = 0; i < beforeCitizen.length; i++) {
+                        if (beforeCitizen[i] === currentCititzen[i]) {
+                            diffCharIndex++;
+                        } else {
+                            break;
+                        }
                     }
+                    text = currentCititzen.substring(0, diffCharIndex);
                 }
-                text = currentCititzen.substring(0, diffCharIndex);
             }
             text += "..";
             const textWidht = ctx.measureText(text).width;
@@ -228,7 +242,7 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
     for (let i = 0; i < data.citizenPages[data.currentPageIndex].length; i++) {
         const citizen = data.citizenPages[data.currentPageIndex][i];
         let text = `${citizen.name}`;
-        if (data.type === WINDOW_TAB_TYPE_DECEASED && citizen.isDead) {
+        if ((data.type === WINDOW_TAB_TYPE_DECEASED || data.type === WINDOW_TAB_TYPE_DECEASED_2) && citizen.isDead) {
             text += ` ${citizen.isDead.reason}`;
             text += ` on day ${getDayForTime(citizen.isDead.time, state)}`;
         }

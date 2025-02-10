@@ -78,7 +78,7 @@ function paintButtons(ctx: CanvasRenderingContext2D, state: ChatSimState) {
 }
 
 function paintUiRectangleData(ctx: CanvasRenderingContext2D, state: ChatSimState) {
-    const rectUI = state.paintData.displaySelected;
+    const rectUI = state.paintData.currentUiRectangle;
     if (!rectUI) return;
     const padding = 5;
     const fontSize = 20;

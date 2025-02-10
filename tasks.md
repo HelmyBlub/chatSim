@@ -1,14 +1,5 @@
 Tasks:
 - improve UI?
-    - steps:
-        - statistics
-            - check code for clean up with graphs
-        - citizen button
-            - check code for clean ups
-        - option to add "robot" to citizen and chatter
-        - UI rectangles
-            - citizen:
-                - think about how to better visualize
     - display death reasons not only in console.log
         - order by day? i want to see the latests death
 - check citizen building second if first not finished

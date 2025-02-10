@@ -62,7 +62,7 @@ function clickedButton(state: ChatSimState) {
         data: state.statistics.graphs[0],
         heading: "Statistics:",
     }
-    state.paintData.displaySelected = citizenUiRectangle;
+    state.paintData.currentUiRectangle = citizenUiRectangle;
 }
 
 function statisticsHappinessTick(graph: Graph, state: ChatSimState) {

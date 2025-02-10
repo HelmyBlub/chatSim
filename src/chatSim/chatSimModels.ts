@@ -58,7 +58,7 @@ export type ChatSimState = {
     map: ChatSimMap,
     deceasedCitizens: Citizen[],
     paintData: {
-        displaySelected?: UiRectangle,
+        currentUiRectangle?: UiRectangle,
         map: PaintDataMap,
         buttons: UiButton[],
     }

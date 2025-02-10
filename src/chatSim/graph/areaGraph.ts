@@ -109,7 +109,7 @@ function paint(ctx: CanvasRenderingContext2D, areaGraph: AreaGraph, rect: Rectan
 }
 
 export function areaGraphClickedInside(relativeMouseToCanvas: Position, rect: Rectangle, state: ChatSimState) {
-    const uiRect = state.paintData.displaySelected as UiRectangle;
+    const uiRect = state.paintData.currentUiRectangle as UiRectangle;
     if (!uiRect) return;
     state.statistics.graphs
     const areaGraph = state.statistics.graphs[2] as AreaGraph;

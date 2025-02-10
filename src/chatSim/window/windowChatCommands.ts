@@ -37,7 +37,7 @@ function clickedButton(state: ChatSimState) {
         ],
         heading: "Chat Commands:",
     }
-    state.paintData.displaySelected = citizenUiRectangle;
+    state.paintData.currentUiRectangle = citizenUiRectangle;
 }
 
 
