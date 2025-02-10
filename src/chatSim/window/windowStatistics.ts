@@ -14,8 +14,8 @@ export function createButtonWindowStatistics(): UiButton {
 }
 
 const GRAPH_HAPPINESS = "Average Citizen Happiness";
-const GRAPH_MONEY = "Money Distribution";
-const GRAPH_AREA_MONEY = "Money Distribution 2";
+const GRAPH_MONEY = "Current Money Distribution";
+const GRAPH_AREA_MONEY = "Money Distribution Over Time";
 
 export function statisticsCreateGraphs(): Graph[] {
     const graphs: Graph[] = [];
