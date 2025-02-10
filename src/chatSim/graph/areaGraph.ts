@@ -161,10 +161,14 @@ function paintPoints(ctx: CanvasRenderingContext2D, paintRect: Rectangle, areaGr
         yOffsets.push(0);
     }
 
-    for (let i = 0; i < pointSets[0].length; i++) {
+    const startLength = pointSets[0].length;
+    for (let i = 0; i < startLength; i++) {
         ctx.beginPath();
         for (let j = 0; j < pointSets.length; j++) {
-            const point = pointSets[j][i];
+            const currentSet = pointSets[j];
+            const offsetI = i + (currentSet.length - startLength);
+            if (offsetI < 0) break;
+            const point = pointSets[j][offsetI];
             if (!point) break;
             const paintX = paintRect.topLeft.x + graphValueToPaintOffset(paintRect.width, startValueX, diffX, point.x);
             yOffsets[j] += point.y;

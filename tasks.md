@@ -1,8 +1,10 @@
 Tasks:
-- bug: smal talk over long range
 - improve UI?
     - steps:
         - statistics uibutton
+            - crash when no cititzen alive
+            - when citizen count below 10 graph should cut bottom
+            - make percent based
             - money distribution area graph
                 - something still of with y-axis max value
             - death statistics

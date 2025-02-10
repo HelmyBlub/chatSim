@@ -67,16 +67,31 @@ export function statisticsMoneyTick(state: ChatSimState) {
     }
     columnChartSetData(bars, columnChart);
 
+    const perCentMoney: number[] = [];
+    let totalMoney = 0;
+    for (let bar of bars) {
+        totalMoney += bar.value;
+    }
+    for (let bar of bars) {
+        perCentMoney.push(bar.value / totalMoney);
+    }
+
     const areaGraph = state.statistics.graphs.find(l => {
         if (l.type !== GRAPH_AREA_GRAPH) return false;
         const lineChart = l as ColumnChart;
         return lineChart.heading === GRAPH_AREA_MONEY;
     }) as AreaGraph;
     const areaGraphPointSet: Position[] = [];
-    for (let bar of bars) {
+    for (let entry of perCentMoney) {
         areaGraphPointSet.push({
             x: state.time / state.timPerDay + 1,
-            y: bar.value,
+            y: entry,
+        });
+    }
+    if (areaGraphPointSet.length === 0) {
+        areaGraphPointSet.push({
+            x: state.time / state.timPerDay + 1,
+            y: 0,
         });
     }
     areaGraphAddPointSet(areaGraphPointSet, areaGraph);
