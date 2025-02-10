@@ -11,8 +11,11 @@ Tasks:
             - afftected by "starving"
         - draw arms
         - draw feet
-    - remember sleeping citizen
-    - remember eating cititzen
+    - remember 
+        - sleeping citizen
+        - eating cititzen
+        - dead cititien
+        - move paws with tools?
 
 what next ideas:
 - more images:

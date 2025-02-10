@@ -15,6 +15,16 @@ export const IMAGE_PATH_CITIZEN_SLEEPING = "images/citizenSleeping.png";
 export const IMAGE_PATH_CITIZEN_EAT = "images/citizenEat.png";
 export const IMAGE_PATH_MONEY = "images/money.png";
 
+export const IMAGE_PATH_CITIZEN_PART_BODY = "images/citizenPartBody.png";
+export const IMAGE_PATH_CITIZEN_PART_EAR_LEFT = "images/citizenPartEarLeft.png";
+export const IMAGE_PATH_CITIZEN_PART_EAR_RIGHT = "images/citizenPartEarRight.png";
+export const IMAGE_PATH_CITIZEN_PART_EAR_SIDE = "images/citizenPartEarSide.png";
+export const IMAGE_PATH_CITIZEN_PART_FOOT = "images/citizenPartFoot.png";
+export const IMAGE_PATH_CITIZEN_PART_HEAD = "images/citizenPartHead.png";
+export const IMAGE_PATH_CITIZEN_PART_HEAD_SIDE = "images/citizenPartHeadSideways.png";
+export const IMAGE_PATH_CITIZEN_PART_PAW = "images/citizenPartPaw.png";
+
+
 export function loadImage(path: string) {
     const imageChatter = new Image();
     imageChatter.src = path;
