@@ -1,31 +1,40 @@
 Tasks:
-- check citizen file very big. Split up?
-- think about next feature/steps?
+- cititzen visualization for starving/happiness/energy
+    - drag citizen dog by code
 
 
 what next ideas:
-- bad citizens behavior:
-    - stealing 
-        - if citizen is starving and has no money, no food, is unhappy
-            - citizen will try to steal food from homes
-                - just steals the minimum at the start
-                - might increase stealing habbit
-                    - might steal more often
-        - citizen should not always know stuff was stolen. So they need to memorize and when checking inventory realize its missing
-    - fist fight
-        - if someone steals and is found out
 - more images:
     - dog:
-        - starving dog => thin dog
-        - unhappy dog => mouth down
-        - low energy dog => slow dog
+        - starving dog => thin dog, body, see rips
+        - unhappy dog => mouth down, head down, eyelash down, tear
+        - low energy dog => sleep deprived, eyes, eyes closed alot
+        - fat dog => full on food, 
         - in combination
+- change starving
+    - cititzen get fattness stat
+        - if citizen is full and eats he gets fat
+        - if citizen is starving his fat will be used up to slow down how fast he starves
+        - happines tag "eating"
+                - citizen will get happy if eats
+        - leisure: eating
+            - gets fat if already full
+        - fattness reduces to normal amount when "physically active"
+        - image: fat citizen, thin/starving citizen
 - farmer job
     - when done. mushrooms do not instant regrow
 - city builder route
     - assign building areas for houses(housing discrict) and markets(comercial district), farmland
 - use chatting system for markets
     - be able to better customize chats between customer and cashier
+- bad citizens behavior:
+    - stealing 
+        - might increase stealing habbit
+            - might steal more often
+            - might steal more than needed
+            - if not punished
+    - fist fight
+        - if someone steals and is found out
 
 
 - check: leisure activity put from hekpfull to unhelpful if just failed once? should reduce counter instead?
