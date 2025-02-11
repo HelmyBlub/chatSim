@@ -20,7 +20,7 @@ import { CitizenTraits } from "../traits/trait.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { MAP_OBJECTS_FUNCTIONS, MapObject } from "./mapObject.js";
 import { citizenCreateSelectionData } from "./citizenSelectionData.js";
-import { paintCitizenBody } from "./citizenBodyPaint.js";
+import { citizenTailTick, paintCitizenBody } from "./citizenBodyPaint.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -145,6 +145,9 @@ export type Citizen = MapObject & {
     paintData: {
         paintBehindBuildings?: boolean,
         blinkStartedTime?: number,
+        tailEndPos: Position,
+        tailControlPoint: Position,
+        tailMoveTo?: Position,
     }
     stats: {
         stealCounter: number,
@@ -339,7 +342,10 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
             stealCounter: 0,
             giftedFoodCounter: 0,
         },
-        paintData: {},
+        paintData: {
+            tailControlPoint: { x: 0, y: 5 },
+            tailEndPos: { x: -6, y: 6 },
+        },
     };
     setUpHappinessTags(citizen, state);
     const jobs = Object.keys(state.functionsCitizenJobs);
@@ -758,6 +764,7 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     citizenMoveToTick(citizen);
     citizenHappinessTick(citizen);
     citizenCheckMapChunk(citizen, state);
+    citizenTailTick(citizen);
 }
 
 function citizenHappinessTick(citizen: Citizen) {

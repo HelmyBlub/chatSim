@@ -2,6 +2,7 @@ import { IMAGE_PATH_CITIZEN_PART_BODY, IMAGE_PATH_CITIZEN_PART_EAR_LEFT, IMAGE_P
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "../images.js";
+import { calculateDistance } from "../main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "../paint.js";
 import { Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js";
 import { PaintDataMap } from "./map.js";
@@ -44,6 +45,7 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     if (!paintInThisLayer) return;
     const cititzenFattness = citizen.foodPerCent + 0.5;
     const paintParts: CititzenPaintPart[] = [
+        { type: "function", func: paintTail } as CititzenPaintPartFunction,
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, cititzenFattness),
@@ -135,8 +137,81 @@ function paintMouth(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: P
     const cpY = citizen.happinessData.happiness * 5;
     ctx.moveTo(paintPos.x - 3, paintPos.y + mouthY);
     ctx.quadraticCurveTo(paintPos.x, paintPos.y + cpY + mouthY, paintPos.x + 3, paintPos.y + mouthY)
-    ctx.lineTo(paintPos.x + 3, paintPos.y + mouthY);
     ctx.stroke();
+}
+
+export function citizenTailTick(citizen: Citizen) {
+    const paintData = citizen.paintData;
+    if (paintData.tailMoveTo === undefined) {
+        paintData.tailMoveTo = {
+            x: -paintData.tailEndPos.x,
+            y: paintData.tailEndPos.y,
+        }
+    }
+    const diffX = paintData.tailEndPos.x - paintData.tailMoveTo.x;
+    const diffY = paintData.tailEndPos.y - paintData.tailMoveTo.y;
+    const distance = calculateDistance(paintData.tailEndPos, paintData.tailMoveTo);
+    paintData.tailEndPos.x -= diffX / distance * 0.2;
+    paintData.tailEndPos.y -= diffY / distance * 0.2;
+    if (calculateDistance(paintData.tailMoveTo, paintData.tailEndPos) < 0.5) {
+        paintData.tailEndPos.x = paintData.tailMoveTo.x;
+        paintData.tailEndPos.y = paintData.tailMoveTo.y;
+        paintData.tailMoveTo = undefined;
+    }
+}
+
+function paintTail(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+    const paintData = citizen.paintData;
+    const tailPos = {
+        x: paintPos.x,
+        y: paintPos.y + 7,
+    };
+    const tailSize = 1;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 0.25;
+    ctx.beginPath();
+    const offsetStart = getPerpendicularOffset({ x: 0, y: 0 }, paintData.tailControlPoint, tailSize);
+    const offsetEnd = getPerpendicularOffset(paintData.tailControlPoint, paintData.tailEndPos, tailSize);
+    const offsetMid = {
+        x: (offsetStart.x + offsetEnd.x) / 2,
+        y: (offsetStart.y + offsetEnd.y) / 2,
+    }
+    ctx.moveTo(tailPos.x + offsetStart.x, tailPos.y + offsetStart.y);
+    ctx.quadraticCurveTo(
+        tailPos.x + paintData.tailControlPoint.x + offsetMid.x,
+        tailPos.y + paintData.tailControlPoint.y + offsetMid.y,
+        tailPos.x + paintData.tailEndPos.x + offsetEnd.x,
+        tailPos.y + paintData.tailEndPos.y + offsetEnd.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x + paintData.tailEndPos.x + offsetEnd.y,
+        tailPos.y + paintData.tailEndPos.y - offsetEnd.x,
+        tailPos.x + paintData.tailEndPos.x - offsetEnd.x,
+        tailPos.y + paintData.tailEndPos.y - offsetEnd.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x + paintData.tailControlPoint.x - offsetMid.x,
+        tailPos.y + paintData.tailControlPoint.y - offsetMid.y,
+        tailPos.x - offsetStart.x,
+        tailPos.y - offsetStart.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x - offsetStart.y,
+        tailPos.y + offsetStart.x,
+        tailPos.x + offsetStart.x,
+        tailPos.y + offsetStart.y
+    );
+
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.stroke();
+}
+
+function getPerpendicularOffset(p1: Position, p2: Position, distance: number): Position {
+    const diffx = p2.x - p1.x;
+    const diffy = p2.y - p1.y;
+    const len = Math.sqrt(diffx * diffx + diffy * diffy);
+    return { x: -diffy * distance / len, y: diffx * distance / len };
 }
 
 function createScaleAnimationPaintPart(imagePath: string, offsetX: number, offsetY: number, verticalScale: number, horizontalScale: number, interval: number, intervalOffset: number, citizen: Citizen, state: ChatSimState) {
