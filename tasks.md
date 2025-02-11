@@ -1,9 +1,10 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
-    - continue:
-        - in file citizen uncommend "paintCitizenBody"
-        - continue in file citizenBodyPaint
     - draw citizen dog by code
+        - side paint
+        - eyes
+        - mouth
+        - tail
     - draw head
         - draw eyes
         - draw mouth

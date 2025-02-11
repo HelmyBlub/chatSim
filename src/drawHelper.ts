@@ -20,6 +20,7 @@ export const IMAGE_PATH_CITIZEN_PART_EAR_LEFT = "images/citizenPartEarLeft.png";
 export const IMAGE_PATH_CITIZEN_PART_EAR_RIGHT = "images/citizenPartEarRight.png";
 export const IMAGE_PATH_CITIZEN_PART_EAR_SIDE = "images/citizenPartEarSide.png";
 export const IMAGE_PATH_CITIZEN_PART_FOOT = "images/citizenPartFoot.png";
+export const IMAGE_PATH_CITIZEN_PART_FOOT_SIDE = "images/citizenPartFootSide.png";
 export const IMAGE_PATH_CITIZEN_PART_HEAD = "images/citizenPartHead.png";
 export const IMAGE_PATH_CITIZEN_PART_HEAD_SIDE = "images/citizenPartHeadSideways.png";
 export const IMAGE_PATH_CITIZEN_PART_PAW = "images/citizenPartPaw.png";
