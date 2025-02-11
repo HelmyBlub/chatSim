@@ -292,7 +292,7 @@ function stateNegotiationWithCustomer(citizen: Citizen, job: CitizenJob, state: 
 }
 
 function stateWaitingForCustomers(citizen: Citizen, job: CitizenJob, state: ChatSimState) {
-    citizen.paintBehindBuildings = true;
+    citizen.paintData.paintBehindBuildings = true;
     if (citizenCheckTodoList(citizen, state)) return;
 }
 
@@ -355,7 +355,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
             stateInfo.tags.clear();
             stateInfo.tags.add(TAG_DOING_NOTHING);
             citizen.displayedEquipments = [];
-            citizen.paintBehindBuildings = true;
+            citizen.paintData.paintBehindBuildings = true;
         } else {
             citizenMoveTo(citizen, job.marketBuilding.position);
         }

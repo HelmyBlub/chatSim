@@ -14,6 +14,7 @@ export const IMAGE_PATH_HAMMER = "images/hammer.png";
 export const IMAGE_PATH_CITIZEN_SLEEPING = "images/citizenSleeping.png";
 export const IMAGE_PATH_CITIZEN_EAT = "images/citizenEat.png";
 export const IMAGE_PATH_MONEY = "images/money.png";
+export const IMAGE_PATH_PUPILS = "images/pupils.png";
 
 export const IMAGE_PATH_CITIZEN_PART_BODY = "images/citizenPartBody.png";
 export const IMAGE_PATH_CITIZEN_PART_EAR_LEFT = "images/citizenPartEarLeft.png";

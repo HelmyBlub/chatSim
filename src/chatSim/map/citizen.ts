@@ -142,7 +142,10 @@ export type Citizen = MapObject & {
     lastChat?: Chat,
     maxLogLength: number,
     displayedEquipments: CitizenEquipmentData[],
-    paintBehindBuildings?: boolean,
+    paintData: {
+        paintBehindBuildings?: boolean,
+        blinkStartedTime?: number,
+    }
     stats: {
         stealCounter: number,
         giftedFoodCounter: number,
@@ -335,7 +338,8 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         stats: {
             stealCounter: 0,
             giftedFoodCounter: 0,
-        }
+        },
+        paintData: {},
     };
     setUpHappinessTags(citizen, state);
     const jobs = Object.keys(state.functionsCitizenJobs);
@@ -413,7 +417,7 @@ export function citizenSetDreamJob(citizen: Citizen, dreamJob: string | undefine
 export function citizenResetStateTo(citizen: Citizen, type: string) {
     citizen.stateInfo = { type: type, stack: [], tags: citizen.stateInfo.tags };
     citizenStopMoving(citizen);
-    citizen.paintBehindBuildings = undefined;
+    citizen.paintData.paintBehindBuildings = undefined;
     citizen.displayedEquipments = [];
 }
 
@@ -549,7 +553,7 @@ function citizenCheckMapChunk(citizen: Citizen, state: ChatSimState) {
 
 function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: number, paintDataMap: PaintDataMap, nameFontSize: number, nameLineWidth: number, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
-    const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintBehindBuildings);
+    const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintData.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintData.paintBehindBuildings);
     if (citizen.isDead) {
         ctx.drawImage(IMAGES[IMAGE_PATH_CITIZEN_DEAD], 0, 0, 200, 200,
             paintPos.x - CITIZEN_PAINT_SIZE / 2,

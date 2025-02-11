@@ -72,7 +72,7 @@ export function citizenNeedTickSleep(citizen: Citizen, state: ChatSimState) {
         if (citizen.moveTo === undefined && !citizenIsThinking(citizen, state)) {
             citizenAddThought(citizen, `I am falling asleep.`, state);
             citizen.stateInfo.stack[0].state = CITIZEN_NEED_STATE_SLEEPING;
-            citizen.paintBehindBuildings = true;
+            citizen.paintData.paintBehindBuildings = true;
         }
     }
 

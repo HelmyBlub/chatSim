@@ -1,10 +1,10 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
     - draw citizen dog by code
-        - side paint
         - eyes
-        - mouth
+            - similar to stream overlay chatter dog
         - tail
+        - side paint
     - draw head
         - draw eyes
         - draw mouth
