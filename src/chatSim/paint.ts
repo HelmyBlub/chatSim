@@ -2,7 +2,7 @@ import { drawTextWithOutline } from "../drawHelper.js";
 import { ChatSimState, Position } from "./chatSimModels.js";
 import { UiRectangle, UiRectangleTab } from "./rectangle.js";
 import { mapChunkKeyToPosition, mapCanvasPositionToMapPosition, MapChunk, mapChunkXyToChunkKey, mapPositionToChunkXy, PaintDataMap } from "./map/map.js";
-import { Citizen, paintCititzenSpeechBubbles, paintCitizenComplete, paintCitizens } from "./map/citizen.js";
+import { Citizen, paintCitizenSpeechBubbles, paintCitizenComplete, paintCitizens } from "./map/citizen.js";
 import { paintSelectionBox } from "./map/mapObject.js";
 import { getTimeOfDay, getTimeOfDayString, getDay, uiButtonsResetPosition } from "./main.js";
 import { mapPaintChunkObjects } from "./map/mapObject.js";
@@ -158,7 +158,7 @@ function paintMap(ctx: CanvasRenderingContext2D, state: ChatSimState, paintDataM
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_BEFORE_HOUSES);
     paintSelectionBox(ctx, state);
     paintCitizens(ctx, state, PAINT_LAYER_CITIZEN_AFTER_HOUSES);
-    paintCititzenSpeechBubbles(ctx, state);
+    paintCitizenSpeechBubbles(ctx, state);
     if (state.inputData.selected && state.inputData.selected.type === "citizen") {
         const citizen = state.inputData.selected.object as Citizen;
         paintCitizenComplete(ctx, citizen, state);

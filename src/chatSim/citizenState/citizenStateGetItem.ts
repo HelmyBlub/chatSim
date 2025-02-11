@@ -65,7 +65,7 @@ export const CITIZEN_STATE_SEARCH = "Search";
 export const CITIZEN_STATE_SEARCH_ITEM = "SearchItem";
 
 export function onLoadCitizenStateDefaultTickGetItemFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM] = tickCititzenStateGetItem;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM] = tickCitizenStateGetItem;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_ITEM_FROM_BUILDING] = tickCitizenStateGetItemFromBuilding;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TRANSPORT_ITEM_TO_BUILDING] = tickCitizenStateTransportItemToBuilding;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SEARCH] = tickCitizenStateSearch;
@@ -133,7 +133,7 @@ function tickCitizenStateGetItemFromBuilding(citizen: Citizen, state: ChatSimSta
     }
 }
 
-function tickCititzenStateGetItem(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateGetItem(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const item = citizenState.data as CitizenStateGetItemData;
     const citizenInventory = citizen.inventory.items.find(i => i.name === item.name);

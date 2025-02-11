@@ -20,7 +20,7 @@ type Data = {
 }
 
 export function onLoadCitizenStateDefaultTickGatherWoodFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCititzenStateGatherWood;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_WOOD] = tickCitizenStateGatherWood;
 }
 
 export function setCitizenStateGatherWood(citizen: Citizen, treePosition: Position, amount?: number) {
@@ -29,7 +29,7 @@ export function setCitizenStateGatherWood(citizen: Citizen, treePosition: Positi
     citizenSetEquipment(citizen, ["Axe", "WoodPlanks"]);
 }
 
-export function tickCititzenStateGatherWood(citizen: Citizen, state: ChatSimState) {
+export function tickCitizenStateGatherWood(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
 
     if (citizen.moveTo === undefined) {

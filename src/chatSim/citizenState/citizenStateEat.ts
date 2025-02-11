@@ -13,7 +13,7 @@ export type CitizenStateEatData = {
 export const CITIZEN_STATE_EAT = "Eat";
 
 export function onLoadCitizenStateDefaultTickEatFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_EAT] = tickCititzenStateEat;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_EAT] = tickCitizenStateEat;
 }
 
 export function setCitizenStateEat(citizen: Citizen, inventoryFood: InventoryItem, inventoryName: string) {
@@ -21,7 +21,7 @@ export function setCitizenStateEat(citizen: Citizen, inventoryFood: InventoryIte
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_EAT, data: data, tags: new Set() });
 }
 
-function tickCititzenStateEat(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateEat(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data = citizenState.data as CitizenStateEatData;
 

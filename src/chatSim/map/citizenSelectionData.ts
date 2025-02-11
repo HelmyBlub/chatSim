@@ -15,23 +15,23 @@ export function citizenCreateSelectionData(state: ChatSimState): UiRectangle {
         tabs: [
             {
                 name: "Generell",
-                paint: paintCititzenSelectionDataGenerell,
+                paint: paintCitizenSelectionDataGenerell,
             },
             {
                 name: "Data",
-                paint: paintCititzenSelectionData,
+                paint: paintCitizenSelectionData,
             },
             {
                 name: "State",
-                paint: paintCititzenSelectionDataState,
+                paint: paintCitizenSelectionDataState,
             },
             {
                 name: "Inventory",
-                paint: paintCititzenSelectionDataInventory,
+                paint: paintCitizenSelectionDataInventory,
             },
             {
                 name: "Action Log",
-                paint: paintCititzenSelectionDataLog,
+                paint: paintCitizenSelectionDataLog,
             }
         ],
         heading: `Citizen ${citizenName}:`,
@@ -39,7 +39,7 @@ export function citizenCreateSelectionData(state: ChatSimState): UiRectangle {
     return citizenUiRectangle;
 }
 
-function paintCititzenSelectionDataGenerell(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintCitizenSelectionDataGenerell(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const citizen: Citizen = state.inputData.selected?.object as Citizen;
     if (!citizen) return;
     const padding = 5;
@@ -82,7 +82,7 @@ function paintBar(ctx: CanvasRenderingContext2D, topLeft: Position, fillAmount: 
     ctx.fillText(`${label}`, topLeft.x, topLeft.y + fontSize - 1);
 }
 
-function paintCititzenSelectionDataLog(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintCitizenSelectionDataLog(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const citizen: Citizen = state.inputData.selected?.object as Citizen;
     if (!citizen) return;
     const fontSize = 18;
@@ -102,7 +102,7 @@ function paintCititzenSelectionDataLog(ctx: CanvasRenderingContext2D, rect: Rect
     rect.height = lineSpacing * lineCounter;
 }
 
-function paintCititzenSelectionDataInventory(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintCitizenSelectionDataInventory(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const citizen: Citizen = state.inputData.selected?.object as Citizen;
     if (!citizen) return;
     const fontSize = 18;
@@ -126,7 +126,7 @@ function paintCititzenSelectionDataInventory(ctx: CanvasRenderingContext2D, rect
     rect.height = lineSpacing * lineCounter;
 }
 
-function paintCititzenSelectionDataState(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintCitizenSelectionDataState(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const citizen: Citizen = state.inputData.selected?.object as Citizen;
     if (!citizen) return;
     const fontSize = 18;
@@ -162,7 +162,7 @@ function paintCititzenSelectionDataState(ctx: CanvasRenderingContext2D, rect: Re
 }
 
 
-function paintCititzenSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
+function paintCitizenSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const citizen: Citizen = state.inputData.selected?.object as Citizen;
     if (!citizen) return;
     const fontSize = 18;

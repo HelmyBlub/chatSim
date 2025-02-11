@@ -22,7 +22,7 @@ export type CitizenStateItemAndMarketData = {
 export const CITIZEN_STATE_SELL_ITEM = "SellItem";
 
 export function onLoadCitizenStateDefaultTickSellItemFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SELL_ITEM] = tickCititzenStateSellItem;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_SELL_ITEM] = tickCitizenStateSellItem;
 }
 
 export function setCitizenStateSellItem(citizen: Citizen, itemName: string, itemAmount: number | undefined = undefined) {
@@ -36,7 +36,7 @@ export function setCitizenStateSellItem(citizen: Citizen, itemName: string, item
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_SELL_ITEM, data: data, tags: new Set() });
 }
 
-function tickCititzenStateSellItem(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateSellItem(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const item = citizenState.data as CitizenStateSellItemData;
     const citizenInventory = citizen.inventory.items.find(i => i.name === item.name);

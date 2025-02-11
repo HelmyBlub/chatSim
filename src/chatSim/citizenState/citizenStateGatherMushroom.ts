@@ -16,7 +16,7 @@ type GatherData = {
 export const CITIZEN_STATE_GATHER_MUSHROOM = "GatherMushroom";
 
 export function onLoadCitizenStateDefaultTickGatherMushroomsFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_MUSHROOM] = tickCititzenStateGatherMushroom;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GATHER_MUSHROOM] = tickCitizenStateGatherMushroom;
 }
 
 export function setCitizenStateGatherMushroom(citizen: Citizen, mushroomPosition: Position) {
@@ -24,7 +24,7 @@ export function setCitizenStateGatherMushroom(citizen: Citizen, mushroomPosition
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_GATHER_MUSHROOM, data: data, tags: new Set() });
 }
 
-function tickCititzenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     if (citizen.moveTo === undefined) {
         const data: GatherData = citizenState.data;

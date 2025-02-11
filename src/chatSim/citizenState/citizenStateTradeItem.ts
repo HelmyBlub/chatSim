@@ -13,7 +13,7 @@ export type CitizenStateTradeData = {
 export const CITIZEN_STATE_TRADE = "trade";
 
 export function onLoadCitizenStateDefaultTickTradeFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TRADE] = tickCititzenStateTrade;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TRADE] = tickCitizenStateTrade;
 }
 
 export function setCitizenStateTrade(giver: Citizen, receiver: Citizen, itemName: string, itemAmount: number) {
@@ -23,7 +23,7 @@ export function setCitizenStateTrade(giver: Citizen, receiver: Citizen, itemName
     receiver.stateInfo.stack.unshift({ state: CITIZEN_STATE_TRADE, data: receiverData, tags: new Set([TAG_SOCIAL_INTERACTION]) });
 }
 
-function tickCititzenStateTrade(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateTrade(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data = citizenState.data as CitizenStateTradeData;
 

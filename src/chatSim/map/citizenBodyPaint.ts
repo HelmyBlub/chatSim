@@ -6,7 +6,7 @@ import { Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js";
 import { PaintDataMap } from "./map.js";
 
 
-export function paintCititzenBody(ctx: CanvasRenderingContext2D, citizen: Citizen, paintDataMap: PaintDataMap, layer: number, state: ChatSimState) {
+export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen, paintDataMap: PaintDataMap, layer: number, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintBehindBuildings);
     if (!paintInThisLayer) return;

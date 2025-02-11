@@ -21,10 +21,10 @@ export const CITIZEN_STATE_BUILD_BUILDING = "BuildBuilding";
 export const CITIZEN_STATE_REPAIR_BUILDING = "RepairBuilding";
 
 export function onLoadCitizenStateDefaultTickGetBuildingFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING] = tickCititzenStateGetBuilding;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS] = tickCititzenStateGetBuildingCheckRequirements;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUILD_BUILDING] = tickCititzenStateBuildBuilding;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_REPAIR_BUILDING] = tickCititzenStateRepairBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING] = tickCitizenStateGetBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_GET_BUILDING_CHECK_REQUIREMENTS] = tickCitizenStateGetBuildingCheckRequirements;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_BUILD_BUILDING] = tickCitizenStateBuildBuilding;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_REPAIR_BUILDING] = tickCitizenStateRepairBuilding;
 }
 
 export function setCitizenStateGetBuilding(citizen: Citizen, buildingType: BuildingType) {
@@ -63,7 +63,7 @@ export function findBuilding(citizen: Citizen, buildingType: BuildingType, state
     return undefined;
 }
 
-function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateRepairBuilding(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data: RepairBuildingData = citizenState.data;
     const building = data.building;
@@ -117,7 +117,7 @@ function tickCititzenStateRepairBuilding(citizen: Citizen, state: ChatSimState) 
 }
 
 
-function tickCititzenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const buildingType = citizenState.data as BuildingType;
     const building = findBuilding(citizen, buildingType, state);
@@ -128,7 +128,7 @@ function tickCititzenStateGetBuilding(citizen: Citizen, state: ChatSimState) {
     }
 }
 
-function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateGetBuildingCheckRequirements(citizen: Citizen, state: ChatSimState) {
     const buildingType = citizen.stateInfo.stack[0].data as BuildingType;
     const building = findBuilding(citizen, buildingType, state);
     if (building) {
@@ -157,7 +157,7 @@ function tickCititzenStateGetBuildingCheckRequirements(citizen: Citizen, state: 
     }
 }
 
-function tickCititzenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateBuildBuilding(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo === undefined) {
         const citizenState = citizen.stateInfo.stack[0];
         const building = citizenState.data as Building;

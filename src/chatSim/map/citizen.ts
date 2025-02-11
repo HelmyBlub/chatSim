@@ -20,7 +20,7 @@ import { CitizenTraits } from "../traits/trait.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { MAP_OBJECTS_FUNCTIONS, MapObject } from "./mapObject.js";
 import { citizenCreateSelectionData } from "./citizenSelectionData.js";
-import { paintCititzenBody } from "./citizenBodyPaint.js";
+import { paintCitizenBody } from "./citizenBodyPaint.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -508,7 +508,7 @@ export function paintCitizens(ctx: CanvasRenderingContext2D, state: ChatSimState
     }
 }
 
-export function paintCititzenSpeechBubbles(ctx: CanvasRenderingContext2D, state: ChatSimState) {
+export function paintCitizenSpeechBubbles(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     let sortedForPaintCitizens = state.map.citizens.toSorted((a, b) => a.position.y - b.position.y);
     for (let citizen of sortedForPaintCitizens) {
         const paintPos = mapPositionToPaintPosition(citizen.position, state.paintData.map);
@@ -560,8 +560,8 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
         return;
     }
     if (paintInThisLayer) {
-        //paintCititzenBody(ctx, citizen, paintDataMap, layer, state);
-        oldCititzenPaintPart(ctx, citizen, paintPos, state);
+        paintCitizenBody(ctx, citizen, paintDataMap, layer, state);
+        //oldCitizenPaintPart(ctx, citizen, paintPos, state);
         paintCitizenEquipments(ctx, citizen, state);
     }
 
@@ -600,7 +600,7 @@ function paintCitizen(ctx: CanvasRenderingContext2D, citizen: Citizen, layer: nu
     }
 }
 
-function oldCititzenPaintPart(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+function oldCitizenPaintPart(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
     if (citizen.moveTo) {
         const frames = 4;
         const frameTime = 100;

@@ -22,9 +22,9 @@ export const CITIZEN_STATE_WALKING_AROUND_RANDOMLY = "walking around randomly";
 export const CITIZEN_STATE_TALK_TO_SOMEBODY = "talk to somebody";
 
 export function onLoadCitizenStateDefaultTickActivityFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_DO_NOTHING_AT_HOME] = tickCititzenStateDoNothingAtHome;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_WALKING_AROUND_RANDOMLY] = tickCititzenStateWalkingAroundRandomly;
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TALK_TO_SOMEBODY] = tickCititzenStateTalkToSomebody;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_DO_NOTHING_AT_HOME] = tickCitizenStateDoNothingAtHome;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_WALKING_AROUND_RANDOMLY] = tickCitizenStateWalkingAroundRandomly;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TALK_TO_SOMEBODY] = tickCitizenStateTalkToSomebody;
 }
 
 export function setCitizenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState) {
@@ -40,7 +40,7 @@ export function setCitizenStateTalkToSomebody(citizen: Citizen) {
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_TALK_TO_SOMEBODY, tags: new Set(), data: {} });
 }
 
-function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) {
     if (!citizen.moveTo) {
         const data = citizen.stateInfo.stack[0].data as TalkToSomebodyData;
         if (data.talkStarted) {
@@ -60,7 +60,7 @@ function tickCititzenStateTalkToSomebody(citizen: Citizen, state: ChatSimState) 
     }
 }
 
-function tickCititzenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSimState) {
     if (!citizen.moveTo) {
         if (citizen.happinessData.happiness > 0.5) {
             citizenAddThought(citizen, "I feel happy again.", state);
@@ -79,7 +79,7 @@ function tickCititzenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSim
     }
 }
 
-function tickCititzenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState) {
     if (!citizen.home) {
         citizenStateStackTaskSuccess(citizen);
         return;

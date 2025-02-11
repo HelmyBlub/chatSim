@@ -213,16 +213,16 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
                     text = data.citizenPages[i][0].name.substring(0, 1);
                 } else {
                     const beforeCitizen = data.citizenPages[i - 1][data.citizenPages[i - 1].length - 1].name;
-                    const currentCititzen = data.citizenPages[i][0].name;
+                    const currentCitizen = data.citizenPages[i][0].name;
                     let diffCharIndex = 1;
                     for (let i = 0; i < beforeCitizen.length; i++) {
-                        if (beforeCitizen[i] === currentCititzen[i]) {
+                        if (beforeCitizen[i] === currentCitizen[i]) {
                             diffCharIndex++;
                         } else {
                             break;
                         }
                     }
-                    text = currentCititzen.substring(0, diffCharIndex);
+                    text = currentCitizen.substring(0, diffCharIndex);
                 }
             }
             text += "..";

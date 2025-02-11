@@ -1,6 +1,9 @@
 Tasks:
-- cititzen visualization for starving/happiness/energy
-    - drag citizen dog by code
+- citizen visualization for starving/happiness/energy
+    - continue:
+        - in file citizen uncommend "paintCitizenBody"
+        - continue in file citizenBodyPaint
+    - draw citizen dog by code
     - draw head
         - draw eyes
         - draw mouth
@@ -13,8 +16,8 @@ Tasks:
         - draw feet
     - remember 
         - sleeping citizen
-        - eating cititzen
-        - dead cititien
+        - eating citizen
+        - dead citizien
         - move paws with tools?
 
 what next ideas:
@@ -26,7 +29,7 @@ what next ideas:
         - fat dog => full on food, 
         - in combination
 - change starving
-    - cititzen get fattness stat
+    - citizen get fattness stat
         - if citizen is full and eats he gets fat
         - if citizen is starving his fat will be used up to slow down how fast he starves
         - happines tag "eating"

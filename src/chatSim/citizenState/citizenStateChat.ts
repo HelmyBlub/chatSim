@@ -20,7 +20,7 @@ export type ChatMessageChatIntention = ChatMessageIntention & {
 export const CITIZEN_STATE_CHAT = "Citizen Chat";
 
 export function onLoadCitizenStateDefaultTickChatFuntions() {
-    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_CHAT] = tickCititzenStateChat;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_CHAT] = tickCitizenStateChat;
 }
 
 export function setCitizenStateStartCitizenChat(citizen: Citizen, chatStarterCitizen: Citizen, firstInviteCitizen: Citizen, initialIntention: string) {
@@ -121,7 +121,7 @@ export function citizenMemoryKnowByName(citizen: Citizen, metCitizen: Citizen): 
     return (metData !== undefined && metData.knowName);
 }
 
-function tickCititzenStateChat(citizen: Citizen, state: ChatSimState) {
+function tickCitizenStateChat(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data = citizenState.data as CitizenStateChatData;
     if (!citizenState.subState) {
