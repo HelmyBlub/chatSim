@@ -78,7 +78,7 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
 
 function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
     const paintParts: CititzenPaintPart[] = [
-        { type: "function", func: paintTail } as CititzenPaintPartFunction,
+        { type: "function", func: paintTailSide } as CititzenPaintPartFunction,
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 0, citizen, state),
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 250, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
@@ -317,6 +317,61 @@ function paintTail(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
     ctx.quadraticCurveTo(
         tailPos.x + paintData.tailControlPoint.x - offsetMid.x,
         tailPos.y + paintData.tailControlPoint.y - offsetMid.y,
+        tailPos.x - offsetStart.x,
+        tailPos.y - offsetStart.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x - offsetStart.y,
+        tailPos.y + offsetStart.x,
+        tailPos.x + offsetStart.x,
+        tailPos.y + offsetStart.y
+    );
+
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.stroke();
+}
+
+function paintTailSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+    const paintData = citizen.paintData;
+    const tailPos = {
+        x: paintPos.x + 6.5,
+        y: paintPos.y + 7,
+    };
+    const tailSize = 1;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 0.25;
+    ctx.beginPath();
+    const tailControlPointSide: Position = {
+        x: paintData.tailControlPoint.x / 2 + 3,
+        y: paintData.tailControlPoint.y,
+    }
+    const tailEndPosSide: Position = {
+        x: paintData.tailEndPos.x / 2 + 5,
+        y: paintData.tailEndPos.y,
+    }
+    const offsetStart = getPerpendicularOffset({ x: 0, y: 0 }, tailControlPointSide, tailSize);
+    const offsetEnd = getPerpendicularOffset(tailControlPointSide, tailEndPosSide, tailSize);
+    const offsetMid = {
+        x: (offsetStart.x + offsetEnd.x) / 2,
+        y: (offsetStart.y + offsetEnd.y) / 2,
+    }
+    ctx.moveTo(tailPos.x + offsetStart.x, tailPos.y + offsetStart.y);
+    ctx.quadraticCurveTo(
+        tailPos.x + tailControlPointSide.x + offsetMid.x,
+        tailPos.y + tailControlPointSide.y + offsetMid.y,
+        tailPos.x + tailEndPosSide.x + offsetEnd.x,
+        tailPos.y + tailEndPosSide.y + offsetEnd.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x + tailEndPosSide.x + offsetEnd.y,
+        tailPos.y + tailEndPosSide.y - offsetEnd.x,
+        tailPos.x + tailEndPosSide.x - offsetEnd.x,
+        tailPos.y + tailEndPosSide.y - offsetEnd.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x + tailControlPointSide.x - offsetMid.x,
+        tailPos.y + tailControlPointSide.y - offsetMid.y,
         tailPos.x - offsetStart.x,
         tailPos.y - offsetStart.y
     );
