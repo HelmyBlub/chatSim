@@ -9,10 +9,17 @@ import { PaintDataMap } from "./map.js";
 
 
 type CititzenPaintPart = {
-    type: "Image" | "function",
+    type: "Image" | "function" | "paintPartsContainer",
 }
 
-type CititzenPaintPartFunction = CititzenPaintPart & {
+type CitizenPaintPartContainer = CititzenPaintPart & {
+    type: "paintPartsContainer",
+    parts: CititzenPaintPart[],
+    rotate: number,
+    rotationOffset?: Position,
+}
+
+type CitizenPaintPartFunction = CititzenPaintPart & {
     type: "function",
     func: (ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) => void,
 }
@@ -77,16 +84,23 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
 }
 
 function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
+    const rotate = citizen.happinessData.happiness < -0.5 ? (citizen.happinessData.happiness + 0.5) * Math.PI : 0;
     const paintParts: CititzenPaintPart[] = [
-        { type: "function", func: paintTailSide } as CititzenPaintPartFunction,
+        { type: "function", func: paintTailSide } as CitizenPaintPartFunction,
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 0, citizen, state),
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 250, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, -25, -50),
-        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_SIDE, 20, -45, "bounce", 100, citizen, state),
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20, Math.PI * 0.5, { x: 0, y: 0 }, 500, 0, citizen, state),
-        { type: "function", func: paintMouthSide } as CititzenPaintPartFunction,
-        { type: "function", func: paintEyeSide } as CititzenPaintPartFunction,
+        {
+            type: "paintPartsContainer",
+            parts: [
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, -25, -50),
+                createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_SIDE, 20, -45, "bounce", 100, citizen, state),
+                { type: "function", func: paintMouthSide } as CitizenPaintPartFunction,
+                { type: "function", func: paintEyeSide } as CitizenPaintPartFunction,
+            ],
+            rotate: rotate,
+        } as CitizenPaintPartContainer,
     ];
     return paintParts;
 }
@@ -101,7 +115,7 @@ function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CititzenPai
         createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
-        { type: "function", func: paintTail } as CititzenPaintPartFunction,
+        { type: "function", func: paintTail } as CitizenPaintPartFunction,
     ];
     return paintParts;
 }
@@ -109,7 +123,7 @@ function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CititzenPai
 
 function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
     const paintParts: CititzenPaintPart[] = [
-        { type: "function", func: paintTail } as CititzenPaintPartFunction,
+        { type: "function", func: paintTail } as CitizenPaintPartFunction,
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
@@ -118,8 +132,8 @@ function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CititzenPa
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD, 0, -50),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -30, 20, -0.25, 0, 200, 0, citizen, state),
-        { type: "function", func: paintMouth } as CititzenPaintPartFunction,
-        { type: "function", func: paintEyes } as CititzenPaintPartFunction,
+        { type: "function", func: paintMouth } as CitizenPaintPartFunction,
+        { type: "function", func: paintEyes } as CitizenPaintPartFunction,
     ];
     return paintParts;
 }
@@ -491,8 +505,22 @@ function paintPart(ctx: CanvasRenderingContext2D, part: CititzenPaintPart, paint
         if (tempPart.rotate) {
             ctx.restore();
         }
+    } else if (part.type === "paintPartsContainer") {
+        const tempPart = part as CitizenPaintPartContainer;
+        if (tempPart.rotate) {
+            ctx.save();
+            ctx.translate(paintPos.x, paintPos.y);
+            ctx.rotate(tempPart.rotate);
+            ctx.translate(-paintPos.x, -paintPos.y);
+        }
+        for (let tempPartPart of tempPart.parts) {
+            paintPart(ctx, tempPartPart, paintPos, citizen, state);
+        }
+        if (tempPart.rotate) {
+            ctx.restore();
+        }
     } else {
-        const tempPart = part as CititzenPaintPartFunction;
+        const tempPart = part as CitizenPaintPartFunction;
         tempPart.func(ctx, citizen, paintPos, state);
     }
 }

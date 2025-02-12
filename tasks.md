@@ -1,22 +1,11 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
-    - draw citizen dog by code
-        - side paint
     - draw head
-        - draw eyes
-        - draw mouth
-        - draw ears
-        - rotate down if unhappy
-    - draw body
-        - draw body
-            - afftected by "starving"
-        - draw arms
-        - draw feet
+        - rotate head down if unhappy
     - remember 
         - sleeping citizen
         - eating citizen
         - dead citizien
-        - move paws with tools?
 
 what next ideas:
 - more images:
