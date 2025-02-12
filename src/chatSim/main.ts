@@ -35,6 +35,13 @@ export function calculateDistance(position1: Position, position2: Position): num
     return Math.sqrt(diffX * diffX + diffY * diffY);
 }
 
+/** 
+ * * 0 => direction to right, 
+ * * Math.PI / 2 => move down
+ *
+ * @return from min: (- Math.PI * 3 / 2) to max Math.PI / 2 
+ * 
+*/
 export function calculateDirection(startPos: Position, targetPos: Position): number {
     let direction = 0;
 

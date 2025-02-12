@@ -1,7 +1,6 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
     - draw citizen dog by code
-        - eyebrows
         - side paint
     - draw head
         - draw eyes

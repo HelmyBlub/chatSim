@@ -1,10 +1,10 @@
-import { IMAGE_PATH_CITIZEN_PART_BODY, IMAGE_PATH_CITIZEN_PART_EAR_LEFT, IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, IMAGE_PATH_CITIZEN_PART_FOOT, IMAGE_PATH_CITIZEN_PART_HEAD, IMAGE_PATH_CITIZEN_PART_PAW, IMAGE_PATH_PUPILS } from "../../drawHelper.js";
+import { IMAGE_PATH_CITIZEN_PART_BODY, IMAGE_PATH_CITIZEN_PART_EAR_LEFT, IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, IMAGE_PATH_CITIZEN_PART_EAR_SIDE, IMAGE_PATH_CITIZEN_PART_FOOT, IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, IMAGE_PATH_CITIZEN_PART_HEAD, IMAGE_PATH_CITIZEN_PART_HEAD_BACK, IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, IMAGE_PATH_CITIZEN_PART_PAW, IMAGE_PATH_PUPILS } from "../../drawHelper.js";
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { IMAGES } from "../images.js";
-import { calculateDistance } from "../main.js";
+import { calculateDirection, calculateDistance } from "../main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "../paint.js";
-import { Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js";
+import { Citizen } from "./citizen.js";
 import { PaintDataMap } from "./map.js";
 
 
@@ -28,6 +28,7 @@ type CititzenPaintPartImage = CititzenPaintPart & {
     horizontalScale?: number,
     verticalScale?: number,
     rotate?: number,
+    rotationOffset?: Position,
 }
 
 type ImageAdditionalData = {
@@ -40,17 +41,78 @@ const EYE_WIDTH = 4;
 const IMAGE_ADDITIONAL_DATA: { [key: string]: ImageAdditionalData } = {};
 IMAGE_ADDITIONAL_DATA[IMAGE_PATH_CITIZEN_PART_EAR_LEFT] = { horizontalFrames: 3, verticalFrames: 1 };
 IMAGE_ADDITIONAL_DATA[IMAGE_PATH_CITIZEN_PART_EAR_RIGHT] = { horizontalFrames: 3, verticalFrames: 1 };
+IMAGE_ADDITIONAL_DATA[IMAGE_PATH_CITIZEN_PART_EAR_SIDE] = { horizontalFrames: 3, verticalFrames: 1 };
 
 export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen, paintDataMap: PaintDataMap, layer: number, state: ChatSimState) {
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintData.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintData.paintBehindBuildings);
     if (!paintInThisLayer) return;
-    const cititzenFattness = citizen.foodPerCent + 0.5;
+    let paintParts: CititzenPaintPart[];
+    let direction = citizen.moveTo ? calculateDirection(citizen.position, citizen.moveTo) : 0;
+    let mirror = false;
+    if (Math.PI * 0.25 < direction || direction < -Math.PI * 1.25) {
+        paintParts = setupPaintPartsFront(citizen, state);
+    } else if (-Math.PI * 0.75 < direction && direction < -Math.PI * 0.25) {
+        paintParts = setupPaintPartsBack(citizen, state);
+    } else {
+        if (-Math.PI * 0.25 < direction && direction < Math.PI * 0.25) {
+            mirror = true;
+        }
+        paintParts = setupPaintPartsSide(citizen, state);
+    }
+
+    if (mirror) {
+        ctx.save();
+        ctx.translate(paintPos.x, paintPos.y);
+        ctx.scale(-1, 1);
+        ctx.translate(-paintPos.x, -paintPos.y);
+    }
+
+    for (let part of paintParts) {
+        paintPart(ctx, part, paintPos, citizen, state);
+    }
+    if (mirror) {
+        ctx.restore();
+    }
+}
+
+function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
+    const paintParts: CititzenPaintPart[] = [
+        { type: "function", func: paintTail } as CititzenPaintPartFunction,
+        createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 0, citizen, state),
+        createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 250, citizen, state),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, -25, -50),
+        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_SIDE, 20, -45, "bounce", 100, citizen, state),
+        createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20, Math.PI * 0.5, { x: 0, y: 0 }, 500, 0, citizen, state),
+        { type: "function", func: paintMouthSide } as CititzenPaintPartFunction,
+        { type: "function", func: paintEyeSide } as CititzenPaintPartFunction,
+    ];
+    return paintParts;
+}
+
+function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
+    const paintParts: CititzenPaintPart[] = [
+        createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
+        createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -30, 20, -0.25, 0, 200, 0, citizen, state),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_BACK, 0, -50),
+        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
+        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
+        createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
+        createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
+        { type: "function", func: paintTail } as CititzenPaintPartFunction,
+    ];
+    return paintParts;
+}
+
+
+function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
     const paintParts: CititzenPaintPart[] = [
         { type: "function", func: paintTail } as CititzenPaintPartFunction,
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, cititzenFattness),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
         createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
         createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD, 0, -50),
@@ -59,10 +121,7 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
         { type: "function", func: paintMouth } as CititzenPaintPartFunction,
         { type: "function", func: paintEyes } as CititzenPaintPartFunction,
     ];
-
-    for (let part of paintParts) {
-        paintPart(ctx, part, paintPos, citizen, state);
-    }
+    return paintParts;
 }
 
 function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
@@ -88,6 +147,38 @@ function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
 
     paintSingleEye(ctx, { x: eyesX + eyeXOffset + EYE_WIDTH / 2, y: eyesY }, blinkingFactor, sleepy, sad, false);
     paintSingleEye(ctx, { x: eyesX - eyeXOffset - EYE_WIDTH / 2, y: eyesY }, blinkingFactor, sleepy, sad, true);
+
+    if (citizen.paintData.blinkStartedTime === undefined) {
+        if (Math.random() < 0.005) {
+            citizen.paintData.blinkStartedTime = state.time;
+        }
+    } else if (citizen.paintData.blinkStartedTime + blinkDuration < state.time) {
+        citizen.paintData.blinkStartedTime = undefined;
+    }
+}
+
+function paintEyeSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+    const eyesX = paintPos.x - 5;
+    const eyesY = paintPos.y - 14;
+    const eyeXOffset = 1;
+    const blinkDuration = 150;
+
+    let blinkingFactor = 1;
+    if (citizen.paintData.blinkStartedTime !== undefined) {
+        const timePassedSinceBlinkStart = state.time - citizen.paintData.blinkStartedTime;
+        blinkingFactor = Math.max(Math.abs(timePassedSinceBlinkStart - blinkDuration / 2) / (blinkDuration / 2), 0);
+    }
+
+    let sleepy = false;
+    if (citizenIsSleeping(citizen)) {
+        blinkingFactor = 0;
+    } else if (citizen.energyPerCent < 0.5) {
+        blinkingFactor *= citizen.energyPerCent * 2;
+        if (citizen.energyPerCent < 0.25) sleepy = true;
+    }
+    const sad = citizen.happinessData.happiness < -0.5;
+
+    paintSingleEye(ctx, { x: eyesX + eyeXOffset + EYE_WIDTH / 2, y: eyesY }, blinkingFactor, sleepy, sad, false);
 
     if (citizen.paintData.blinkStartedTime === undefined) {
         if (Math.random() < 0.005) {
@@ -158,6 +249,19 @@ function paintMouth(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: P
     const cpY = citizen.happinessData.happiness * 5;
     ctx.moveTo(paintPos.x - 3, paintPos.y + mouthY);
     ctx.quadraticCurveTo(paintPos.x, paintPos.y + cpY + mouthY, paintPos.x + 3, paintPos.y + mouthY)
+    ctx.stroke();
+}
+
+function paintMouthSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+    const mouthLeftX = paintPos.x - 16;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 0.25;
+    ctx.beginPath();
+    const mouthLeftY = -6;
+    const mouthRightY = mouthLeftY - citizen.happinessData.happiness * 1.5;
+    const cpY = citizen.happinessData.happiness * 2;
+    ctx.moveTo(mouthLeftX, paintPos.y + mouthLeftY);
+    ctx.quadraticCurveTo(mouthLeftX + 3, paintPos.y + cpY + mouthLeftY, mouthLeftX + 5, paintPos.y + mouthRightY)
     ctx.stroke();
 }
 
@@ -235,6 +339,19 @@ function getPerpendicularOffset(p1: Position, p2: Position, distance: number): P
     return { x: -diffy * distance / len, y: diffx * distance / len };
 }
 
+function createRotateAnimationPaintPart(imagePath: string, offsetX: number, offsetY: number, rotateMaxAngle: number, rotationOffset: Position, interval: number, intervalOffset: number, citizen: Citizen, state: ChatSimState) {
+    const paintPart = createDefaultPaintPartImage(imagePath, offsetX, offsetY);
+    if (citizen.moveTo) {
+        let factor = ((state.time + intervalOffset) % interval) / interval * 2;
+        if (factor > 1) factor -= (factor - 1) * 2;
+        factor -= 0.5;
+        paintPart.rotate = rotateMaxAngle * factor;
+        paintPart.rotationOffset = rotationOffset;
+    }
+    return paintPart;
+}
+
+
 function createScaleAnimationPaintPart(imagePath: string, offsetX: number, offsetY: number, verticalScale: number, horizontalScale: number, interval: number, intervalOffset: number, citizen: Citizen, state: ChatSimState) {
     const paintPart = createDefaultPaintPartImage(imagePath, offsetX, offsetY);
     if (citizen.moveTo) {
@@ -305,11 +422,20 @@ function paintPart(ctx: CanvasRenderingContext2D, part: CititzenPaintPart, paint
             scaledHeight *= tempPart.verticalScale;
         }
         let index = tempPart.index ?? 0;
+        if (tempPart.rotate) {
+            ctx.save();
+            ctx.translate(paintPos.x, paintPos.y);
+            ctx.rotate(tempPart.rotate);
+            ctx.translate(-paintPos.x, -paintPos.y);
+        }
         ctx.drawImage(imagePart, index * tempPart.width, 0, tempPart.width, tempPart.height,
             paintPos.x - scaledWidth / 2 + tempPart.offsetX * scaleFactor,
             paintPos.y - scaledHeight / 2 + tempPart.offsetY * scaleFactor,
             scaledWidth, scaledHeight
         );
+        if (tempPart.rotate) {
+            ctx.restore();
+        }
     } else {
         const tempPart = part as CititzenPaintPartFunction;
         tempPart.func(ctx, citizen, paintPos, state);
