@@ -1,6 +1,7 @@
-import { IMAGE_PATH_CITIZEN_PART_BODY, IMAGE_PATH_CITIZEN_PART_EAR_LEFT, IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, IMAGE_PATH_CITIZEN_PART_EAR_SIDE, IMAGE_PATH_CITIZEN_PART_FOOT, IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, IMAGE_PATH_CITIZEN_PART_HEAD, IMAGE_PATH_CITIZEN_PART_HEAD_BACK, IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, IMAGE_PATH_CITIZEN_PART_PAW, IMAGE_PATH_PUPILS } from "../../drawHelper.js";
+import { IMAGE_PATH_CITIZEN_PART_BODY, IMAGE_PATH_CITIZEN_PART_EAR_LEFT, IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, IMAGE_PATH_CITIZEN_PART_EAR_SIDE, IMAGE_PATH_CITIZEN_PART_FOOT, IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, IMAGE_PATH_CITIZEN_PART_HEAD, IMAGE_PATH_CITIZEN_PART_HEAD_BACK, IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, IMAGE_PATH_CITIZEN_PART_PAW, IMAGE_PATH_MUSHROOM, IMAGE_PATH_PUPILS } from "../../drawHelper.js";
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
+import { citizenIsEating } from "../citizenState/citizenStateEat.js";
 import { IMAGES } from "../images.js";
 import { calculateDirection, calculateDistance } from "../main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "../paint.js";
@@ -8,23 +9,23 @@ import { Citizen } from "./citizen.js";
 import { PaintDataMap } from "./map.js";
 
 
-type CititzenPaintPart = {
+type CitizenPaintPart = {
     type: "Image" | "function" | "paintPartsContainer",
 }
 
-type CitizenPaintPartContainer = CititzenPaintPart & {
+type CitizenPaintPartContainer = CitizenPaintPart & {
     type: "paintPartsContainer",
-    parts: CititzenPaintPart[],
+    parts: CitizenPaintPart[],
     rotate: number,
     rotationOffset?: Position,
 }
 
-type CitizenPaintPartFunction = CititzenPaintPart & {
+type CitizenPaintPartFunction = CitizenPaintPart & {
     type: "function",
     func: (ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) => void,
 }
 
-type CititzenPaintPartImage = CititzenPaintPart & {
+type CitizenPaintPartImage = CitizenPaintPart & {
     type: "Image",
     imagePath: string,
     width: number,
@@ -54,7 +55,7 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     const paintPos = mapPositionToPaintPosition(citizen.position, paintDataMap);
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintData.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintData.paintBehindBuildings);
     if (!paintInThisLayer) return;
-    let paintParts: CititzenPaintPart[];
+    let paintParts: CitizenPaintPart[];
     let mirror = false;
     if (Math.PI * 0.25 < citizen.direction || citizen.direction < -Math.PI * 1.25) {
         paintParts = setupPaintPartsFront(citizen, state);
@@ -82,9 +83,9 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     }
 }
 
-function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
+function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
     const rotate = citizen.happinessData.happiness < -0.5 ? (citizen.happinessData.happiness + 0.5) * Math.PI : 0;
-    const paintParts: CititzenPaintPart[] = [
+    const paintParts: CitizenPaintPart[] = [
         { type: "function", func: paintTailSide } as CitizenPaintPartFunction,
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 0, citizen, state),
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 250, citizen, state),
@@ -104,8 +105,8 @@ function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CititzenPai
     return paintParts;
 }
 
-function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
-    const paintParts: CititzenPaintPart[] = [
+function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    const paintParts: CitizenPaintPart[] = [
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -30, 20, -0.25, 0, 200, 0, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
@@ -120,8 +121,8 @@ function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CititzenPai
 }
 
 
-function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CititzenPaintPart[] {
-    const paintParts: CititzenPaintPart[] = [
+function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    const paintParts: CitizenPaintPart[] = [
         { type: "function", func: paintTail } as CitizenPaintPartFunction,
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
@@ -129,12 +130,34 @@ function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CititzenPa
         createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
         createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD, 0, -50),
-        createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
-        createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -30, 20, -0.25, 0, 200, 0, citizen, state),
         { type: "function", func: paintMouth } as CitizenPaintPartFunction,
         { type: "function", func: paintEyes } as CitizenPaintPartFunction,
+        ...createPawFrontPart(citizen, state),
     ];
     return paintParts;
+}
+
+function createPawFrontPart(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    let result: CitizenPaintPart[];
+    if (citizenIsEating(citizen)) {
+        const handEatRotation = Math.PI * 0.8;
+        const offsetX = 30;
+        const offsetY = 20;
+        const rotateOffsetY = -16;
+        result = [
+            createRotatedPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, offsetX, offsetY, handEatRotation, { x: offsetX, y: offsetY + rotateOffsetY }),
+            createRotatedPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -offsetX, offsetY, -handEatRotation, { x: -offsetX, y: offsetY + rotateOffsetY }),
+            createDefaultPaintPartImage(IMAGE_PATH_MUSHROOM, 0, -20, 0.2, 0.2),
+        ]
+    } else {
+        result = [
+            createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
+            createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -30, 20, -0.25, 0, 200, 0, citizen, state),
+        ]
+    }
+
+    return result;
+
 }
 
 function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
@@ -419,6 +442,12 @@ function createRotateAnimationPaintPart(imagePath: string, offsetX: number, offs
     return paintPart;
 }
 
+function createRotatedPaintPart(imagePath: string, offsetX: number, offsetY: number, rotateAngle: number, rotationOffset?: Position) {
+    const paintPart = createDefaultPaintPartImage(imagePath, offsetX, offsetY);
+    paintPart.rotate = rotateAngle;
+    paintPart.rotationOffset = rotationOffset;
+    return paintPart;
+}
 
 function createScaleAnimationPaintPart(imagePath: string, offsetX: number, offsetY: number, verticalScale: number, horizontalScale: number, interval: number, intervalOffset: number, citizen: Citizen, state: ChatSimState) {
     const paintPart = createDefaultPaintPartImage(imagePath, offsetX, offsetY);
@@ -433,7 +462,7 @@ function createScaleAnimationPaintPart(imagePath: string, offsetX: number, offse
     return paintPart;
 }
 
-function createDefaultPaintPartImage(imagePath: string, offsetX: number, offsetY: number, horizontalScale?: number): CititzenPaintPartImage {
+function createDefaultPaintPartImage(imagePath: string, offsetX: number, offsetY: number, horizontalScale?: number, verticalScale?: number): CitizenPaintPartImage {
     const imagePart = IMAGES[imagePath];
     let width = imagePart.width;
     let height = imagePart.height;
@@ -450,6 +479,7 @@ function createDefaultPaintPartImage(imagePath: string, offsetX: number, offsetY
         width,
         height,
         horizontalScale,
+        verticalScale,
     }
 }
 
@@ -476,10 +506,10 @@ function createFlipBookPaintPart(imagePath: string, offsetX: number, offsetY: nu
     return paintPart;
 }
 
-function paintPart(ctx: CanvasRenderingContext2D, part: CititzenPaintPart, paintPos: Position, citizen: Citizen, state: ChatSimState) {
+function paintPart(ctx: CanvasRenderingContext2D, part: CitizenPaintPart, paintPos: Position, citizen: Citizen, state: ChatSimState) {
     const scaleFactor = 40 / 200;
     if (part.type === "Image") {
-        const tempPart = part as CititzenPaintPartImage;
+        const tempPart = part as CitizenPaintPartImage;
         const imagePart = IMAGES[tempPart.imagePath];
         let scaledWidth = tempPart.width * scaleFactor;
         if (tempPart.horizontalScale !== undefined) {
@@ -492,9 +522,12 @@ function paintPart(ctx: CanvasRenderingContext2D, part: CititzenPaintPart, paint
         let index = tempPart.index ?? 0;
         if (tempPart.rotate) {
             ctx.save();
-            ctx.translate(paintPos.x, paintPos.y);
+            let rotationOffset = tempPart.rotationOffset ?? { x: 0, y: 0 };
+            const translateX = paintPos.x + rotationOffset.x * scaleFactor;
+            const translateY = paintPos.y + rotationOffset.y * scaleFactor;
+            ctx.translate(translateX, translateY);
             ctx.rotate(tempPart.rotate);
-            ctx.translate(-paintPos.x, -paintPos.y);
+            ctx.translate(-translateX, -translateY);
         }
         ctx.drawImage(imagePart, index * tempPart.width, 0, tempPart.width, tempPart.height,
             paintPos.x - scaledWidth / 2 + tempPart.offsetX * scaleFactor,

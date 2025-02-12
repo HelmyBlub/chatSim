@@ -16,6 +16,10 @@ export function onLoadCitizenStateDefaultTickEatFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_EAT] = tickCitizenStateEat;
 }
 
+export function citizenIsEating(citizen: Citizen): boolean {
+    return citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_EAT;
+}
+
 export function setCitizenStateEat(citizen: Citizen, inventoryFood: InventoryItem, inventoryName: string) {
     const data: CitizenStateEatData = { inventoryFood: inventoryFood, inventoryName: inventoryName };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_EAT, data: data, tags: new Set() });
@@ -30,6 +34,7 @@ function tickCitizenStateEat(citizen: Citizen, state: ChatSimState) {
         return;
     }
     if (data.tempStartTime === undefined) data.tempStartTime = state.time;
+    citizen.direction = Math.PI / 2;
     if (citizen.moveTo) citizenStopMoving(citizen);
     const eatDuration = 1000;
     if (data.tempStartTime + eatDuration < state.time) {

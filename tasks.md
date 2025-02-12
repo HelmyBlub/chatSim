@@ -1,11 +1,10 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
-    - keep last citizen look direction for when citizen is not moving
-    - certain actions need to set it if citizen should look down
-        - chatting => look down
+    - eating citizen
+        -
+    - head down for front/back paint. just some y offset
     - remember 
         - sleeping citizen
-        - eating citizen
         - dead citizien
 - feature: fattness
 
