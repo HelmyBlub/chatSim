@@ -1,11 +1,13 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
-    - draw head
-        - rotate head down if unhappy
+    - keep last citizen look direction for when citizen is not moving
+    - certain actions need to set it if citizen should look down
+        - chatting => look down
     - remember 
         - sleeping citizen
         - eating citizen
         - dead citizien
+- feature: fattness
 
 what next ideas:
 - more images:

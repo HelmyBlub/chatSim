@@ -55,14 +55,13 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     const paintInThisLayer = (layer === PAINT_LAYER_CITIZEN_BEFORE_HOUSES && citizen.paintData.paintBehindBuildings) || (layer === PAINT_LAYER_CITIZEN_AFTER_HOUSES && !citizen.paintData.paintBehindBuildings);
     if (!paintInThisLayer) return;
     let paintParts: CititzenPaintPart[];
-    let direction = citizen.moveTo ? calculateDirection(citizen.position, citizen.moveTo) : 0;
     let mirror = false;
-    if (Math.PI * 0.25 < direction || direction < -Math.PI * 1.25) {
+    if (Math.PI * 0.25 < citizen.direction || citizen.direction < -Math.PI * 1.25) {
         paintParts = setupPaintPartsFront(citizen, state);
-    } else if (-Math.PI * 0.75 < direction && direction < -Math.PI * 0.25) {
+    } else if (-Math.PI * 0.75 < citizen.direction && citizen.direction < -Math.PI * 0.25) {
         paintParts = setupPaintPartsBack(citizen, state);
     } else {
-        if (-Math.PI * 0.25 < direction && direction < Math.PI * 0.25) {
+        if (-Math.PI * 0.25 < citizen.direction && citizen.direction < Math.PI * 0.25) {
             mirror = true;
         }
         paintParts = setupPaintPartsSide(citizen, state);

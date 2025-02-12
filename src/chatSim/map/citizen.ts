@@ -131,6 +131,7 @@ export type Citizen = MapObject & {
     stateInfo: CitizenStateInfo,
     speed: number,
     moveTo?: Position,
+    direction: number,
     foodPerCent: number,
     energyPerCent: number,
     inventory: Inventory,
@@ -286,6 +287,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         },
         birthTime: state.time,
         speed: 2,
+        direction: 0,
         foodPerCent: 1,
         energyPerCent: 1,
         position: { x: 0, y: 0 },
@@ -904,6 +906,7 @@ function deleteCitizens(state: ChatSimState) {
 
 function citizenMoveToTick(citizen: Citizen) {
     if (citizen.moveTo) {
+        citizen.direction = calculateDirection(citizen.position, citizen.moveTo);
         const diffX = citizen.moveTo.x - citizen.position.x;
         const diffY = citizen.moveTo.y - citizen.position.y;
         const distance = Math.sqrt(diffX * diffX + diffY * diffY);

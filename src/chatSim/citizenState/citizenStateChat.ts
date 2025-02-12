@@ -2,7 +2,7 @@ import { addChatMessage, ChatMessageIntention, createEmptyChat } from "../chatBu
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, CitizenMemoryMetCitizen, citizenMoveTo, citizenStateStackTaskSuccess, citizenStopMoving, isCitizenInInteractionDistance, TAG_SOCIAL_INTERACTION } from "../map/citizen.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
-import { nextRandom } from "../main.js";
+import { calculateDirection, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { getMessageForIntentionAndPhase, INTENTION_BYE_BYE, INTENTION_GREETING, INTENTION_IGNORE, INTENTION_REPLY } from "./citizenChatMessageOptions.js";
 
@@ -124,6 +124,7 @@ export function citizenMemoryKnowByName(citizen: Citizen, metCitizen: Citizen): 
 function tickCitizenStateChat(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data = citizenState.data as CitizenStateChatData;
+    const spaceBetweenCititzens = 35;
     if (!citizenState.subState) {
         if (data.chatStarterCitizen === citizen) {
             if (!citizen.lastChat) {
@@ -137,7 +138,7 @@ function tickCitizenStateChat(citizen: Citizen, state: ChatSimState) {
             data.lastIntention = intention.intention;
             addChatMessage(citizen.lastChat, citizen, messageAndIntention.message!, state, intention);
             citizenRememberMeetingCitizen(citizen, data.firstInviteCitizen!, state);
-            citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + 20, y: data.firstInviteCitizen!.position.y });
+            citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + spaceBetweenCititzens, y: data.firstInviteCitizen!.position.y });
             citizenInviteToChat(citizen, data.firstInviteCitizen!, state);
             citizenState.subState = "waitingForResponse";
             return;
@@ -147,19 +148,19 @@ function tickCitizenStateChat(citizen: Citizen, state: ChatSimState) {
             return;
         }
     }
-    if (data.chatStarterCitizen.moveTo) return;
     if (!data.chatStarterCitizen.lastChat) return;
     const chat = data.chatStarterCitizen.lastChat;
     if (citizenState.subState === "waitingForResponse") {
         const message = chat.messages[chat.messages.length - 1];
         const reactionTime = message.time + 1000;
         if (reactionTime > state.time) return;
-        if (message.time + 5000 < state.time) {
+        if (message.time + 5000 < state.time || (data.lastIntention && data.lastIntention === INTENTION_BYE_BYE)) {
             citizenStateStackTaskSuccess(citizen);
             return;
         }
+        if (data.chatStarterCitizen.moveTo) return;
         if (citizen === data.chatStarterCitizen && !isCitizenInInteractionDistance(citizen, data.firstInviteCitizen!.position)) {
-            citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + 20, y: data.firstInviteCitizen!.position.y });
+            citizenMoveTo(citizen, { x: data.firstInviteCitizen!.position.x + spaceBetweenCititzens, y: data.firstInviteCitizen!.position.y });
         }
         if (message.by === citizen) return;
         const repsonseIntention = message.intention as ChatMessageChatIntention;
@@ -179,6 +180,7 @@ function tickCitizenStateChat(citizen: Citizen, state: ChatSimState) {
                 }
                 data.lastIntention = intention.intention;
                 addChatMessage(chat, citizen, messageAndIntention.message!, state, intention);
+                citizen.direction = calculateDirection(citizen.position, message.by.position);
                 if (messageAndIntention.execute) messageAndIntention.execute(citizen, message.by, state);
             } else {
                 // reply to intention
@@ -195,7 +197,10 @@ function tickCitizenStateChat(citizen: Citizen, state: ChatSimState) {
                     }
                 }
                 data.lastIntention = repsonseIntention.intention;
-                if (messageAndIntention.message !== undefined) addChatMessage(chat, citizen, messageAndIntention.message, state, intention);
+                if (messageAndIntention.message !== undefined) {
+                    addChatMessage(chat, citizen, messageAndIntention.message, state, intention)
+                    citizen.direction = calculateDirection(citizen.position, message.by.position);
+                };
                 if (messageAndIntention.execute) messageAndIntention.execute(citizen, message.by, state);
                 if (repsonseIntention.intention === INTENTION_BYE_BYE || intention?.intention === INTENTION_IGNORE) {
                     citizenStateStackTaskSuccess(citizen);
