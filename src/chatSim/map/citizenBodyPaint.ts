@@ -35,6 +35,8 @@ type ImageAdditionalData = {
     verticalFrames: number,
 }
 
+const EYE_WIDTH = 4;
+
 const IMAGE_ADDITIONAL_DATA: { [key: string]: ImageAdditionalData } = {};
 IMAGE_ADDITIONAL_DATA[IMAGE_PATH_CITIZEN_PART_EAR_LEFT] = { horizontalFrames: 3, verticalFrames: 1 };
 IMAGE_ADDITIONAL_DATA[IMAGE_PATH_CITIZEN_PART_EAR_RIGHT] = { horizontalFrames: 3, verticalFrames: 1 };
@@ -82,10 +84,10 @@ function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
         blinkingFactor *= citizen.energyPerCent * 2;
         if (citizen.energyPerCent < 0.25) sleepy = true;
     }
+    const sad = citizen.happinessData.happiness < -0.5;
 
-    const eyeWidth = 4;
-    paintSingleEye(ctx, { x: eyesX + eyeXOffset + eyeWidth / 2, y: eyesY }, blinkingFactor, sleepy);
-    paintSingleEye(ctx, { x: eyesX - eyeXOffset - eyeWidth / 2, y: eyesY }, blinkingFactor, sleepy);
+    paintSingleEye(ctx, { x: eyesX + eyeXOffset + EYE_WIDTH / 2, y: eyesY }, blinkingFactor, sleepy, sad, false);
+    paintSingleEye(ctx, { x: eyesX - eyeXOffset - EYE_WIDTH / 2, y: eyesY }, blinkingFactor, sleepy, sad, true);
 
     if (citizen.paintData.blinkStartedTime === undefined) {
         if (Math.random() < 0.005) {
@@ -96,37 +98,56 @@ function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
     }
 }
 
-function paintSingleEye(ctx: CanvasRenderingContext2D, paintPos: Position, blinkingFactor: number, sleepy: boolean) {
+function paintSingleEye(ctx: CanvasRenderingContext2D, paintPos: Position, blinkingFactor: number, sleepy: boolean, sad: boolean, isLeftEye: boolean) {
     ctx.strokeStyle = "black";
     ctx.lineWidth = 0.25;
-    const eyeWidth = 4;
-    const eyeLeft = paintPos.x - eyeWidth / 2;
-    const eyeCpYTop = eyeWidth * blinkingFactor - eyeWidth / 2;
+    const eyeLeft = paintPos.x - EYE_WIDTH / 2;
+    const eyeCpYTop = EYE_WIDTH * blinkingFactor - EYE_WIDTH / 2;
 
     const clipPath: Path2D = new Path2D();
     clipPath.moveTo(eyeLeft, paintPos.y);
-    clipPath.quadraticCurveTo(eyeLeft + eyeWidth / 2, paintPos.y - eyeCpYTop, eyeLeft + eyeWidth, paintPos.y);
-    clipPath.quadraticCurveTo(eyeLeft + eyeWidth / 2, paintPos.y + eyeWidth / 2, eyeLeft, paintPos.y);
+    clipPath.quadraticCurveTo(eyeLeft + EYE_WIDTH / 2, paintPos.y - eyeCpYTop, eyeLeft + EYE_WIDTH, paintPos.y);
+    clipPath.quadraticCurveTo(eyeLeft + EYE_WIDTH / 2, paintPos.y + EYE_WIDTH / 2, eyeLeft, paintPos.y);
     ctx.save();
     ctx.clip(clipPath);
     const pupilSize = 1.5;
     ctx.drawImage(IMAGES[IMAGE_PATH_PUPILS], 0, 0, IMAGES[IMAGE_PATH_PUPILS].width / 2, IMAGES[IMAGE_PATH_PUPILS].height,
-        eyeLeft + eyeWidth / 2 - pupilSize / 2, paintPos.y - pupilSize / 2, pupilSize, pupilSize
+        eyeLeft + EYE_WIDTH / 2 - pupilSize / 2, paintPos.y - pupilSize / 2, pupilSize, pupilSize
     );
     ctx.restore();
 
     ctx.beginPath();
     ctx.moveTo(eyeLeft, paintPos.y);
-    ctx.quadraticCurveTo(eyeLeft + eyeWidth / 2, paintPos.y - eyeCpYTop, eyeLeft + eyeWidth, paintPos.y);
-    ctx.quadraticCurveTo(eyeLeft + eyeWidth / 2, paintPos.y + eyeWidth / 2, eyeLeft, paintPos.y);
+    ctx.quadraticCurveTo(eyeLeft + EYE_WIDTH / 2, paintPos.y - eyeCpYTop, eyeLeft + EYE_WIDTH, paintPos.y);
+    ctx.quadraticCurveTo(eyeLeft + EYE_WIDTH / 2, paintPos.y + EYE_WIDTH / 2, eyeLeft, paintPos.y);
     ctx.stroke();
+
+    paintEyebrow(ctx, { x: eyeLeft, y: paintPos.y }, sad, isLeftEye);
 
     if (sleepy) {
         ctx.beginPath();
-        ctx.moveTo(eyeLeft + eyeWidth * 0.1, paintPos.y + eyeWidth / 4);
-        ctx.quadraticCurveTo(eyeLeft + eyeWidth / 2, paintPos.y + eyeWidth * 0.5, eyeLeft + eyeWidth * 0.8, paintPos.y + eyeWidth / 4);
+        ctx.moveTo(eyeLeft + EYE_WIDTH * 0.1, paintPos.y + EYE_WIDTH / 4);
+        ctx.quadraticCurveTo(eyeLeft + EYE_WIDTH / 2, paintPos.y + EYE_WIDTH * 0.5, eyeLeft + EYE_WIDTH * 0.8, paintPos.y + EYE_WIDTH / 4);
         ctx.stroke();
     }
+}
+
+function paintEyebrow(ctx: CanvasRenderingContext2D, paintLeftMiddle: Position, sad: boolean, isLeftEye: boolean) {
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 0.25;
+    const eyebrowY = paintLeftMiddle.y - EYE_WIDTH / 4;
+    const eyebrowLeftOffsetY = (sad && !isLeftEye) ? -1 : 0;
+    const eyebrowRightOffsetY = (sad && isLeftEye) ? -1 : 0;
+    const controlOffsetY = sad ? 0.8 : 0;
+    ctx.beginPath();
+    ctx.moveTo(paintLeftMiddle.x + EYE_WIDTH * 0.1, eyebrowY + eyebrowLeftOffsetY);
+    ctx.quadraticCurveTo(
+        paintLeftMiddle.x + EYE_WIDTH / 2,
+        paintLeftMiddle.y - EYE_WIDTH * 0.5 + controlOffsetY,
+        paintLeftMiddle.x + EYE_WIDTH * 0.9,
+        eyebrowY + eyebrowRightOffsetY,
+    );
+    ctx.stroke();
 }
 
 function paintMouth(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
