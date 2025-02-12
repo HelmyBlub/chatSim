@@ -3,7 +3,7 @@ import { ChatSimState, Position } from "../chatSimModels.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
 import { citizenIsEating } from "../citizenState/citizenStateEat.js";
 import { IMAGES } from "../images.js";
-import { calculateDirection, calculateDistance } from "../main.js";
+import { calculateDistance } from "../main.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "../paint.js";
 import { Citizen } from "./citizen.js";
 import { PaintDataMap } from "./map.js";
@@ -58,15 +58,19 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     if (!paintInThisLayer) return;
     let paintParts: CitizenPaintPart[];
     let mirror = false;
-    if (Math.PI * 0.25 < citizen.direction || citizen.direction < -Math.PI * 1.25) {
-        paintParts = setupPaintPartsFront(citizen, state);
-    } else if (-Math.PI * 0.75 < citizen.direction && citizen.direction < -Math.PI * 0.25) {
-        paintParts = setupPaintPartsBack(citizen, state);
+    if (citizenIsSleeping(citizen)) {
+        paintParts = setupPaintPartsSleeping(citizen, state);
     } else {
-        if (-Math.PI * 0.25 < citizen.direction && citizen.direction < Math.PI * 0.25) {
-            mirror = true;
+        if (Math.PI * 0.25 < citizen.direction || citizen.direction < -Math.PI * 1.25) {
+            paintParts = setupPaintPartsFront(citizen, state);
+        } else if (-Math.PI * 0.75 < citizen.direction && citizen.direction < -Math.PI * 0.25) {
+            paintParts = setupPaintPartsBack(citizen, state);
+        } else {
+            if (-Math.PI * 0.25 < citizen.direction && citizen.direction < Math.PI * 0.25) {
+                mirror = true;
+            }
+            paintParts = setupPaintPartsSide(citizen, state);
         }
-        paintParts = setupPaintPartsSide(citizen, state);
     }
 
     if (mirror) {
@@ -82,6 +86,35 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     if (mirror) {
         ctx.restore();
     }
+}
+
+function setupPaintPartsSleeping(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    const paintParts: CitizenPaintPart[] = [
+        {
+            type: "paintPartsContainer",
+            parts: [
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58),
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58),
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+                { type: "function", func: paintTailSleeping } as CitizenPaintPartFunction,
+                createRotatedPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20, Math.PI * 0.75),
+            ],
+            rotate: -Math.PI / 2,
+            partsOffset: { x: -5, y: 0 },
+        } as CitizenPaintPartContainer,
+        {
+            type: "paintPartsContainer",
+            parts: [
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45),
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45),
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD, 0, -50),
+                { type: "function", func: paintMouth } as CitizenPaintPartFunction,
+                { type: "function", func: paintEyes } as CitizenPaintPartFunction,
+            ],
+            partsOffset: { x: -7, y: 11 },
+        } as CitizenPaintPartContainer,
+    ];
+    return paintParts;
 }
 
 function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
@@ -109,7 +142,7 @@ function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CitizenPain
 function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
     let headHappinessOffset: Position = { x: 0, y: 0 };
     if (citizen.happinessData.happiness < -0.5) {
-        headHappinessOffset = { x: 0, y: (citizen.happinessData.happiness + 0.5) * 20 };
+        headHappinessOffset = { x: 0, y: -(citizen.happinessData.happiness + 0.5) * 20 };
     }
     const paintParts: CitizenPaintPart[] = [
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
@@ -135,7 +168,7 @@ function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CitizenPain
 function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
     let headHappinessOffset: Position = { x: 0, y: 0 };
     if (citizen.happinessData.happiness < -0.5) {
-        headHappinessOffset = { x: 0, y: (citizen.happinessData.happiness + 0.5) * 20 };
+        headHappinessOffset = { x: 0, y: -(citizen.happinessData.happiness + 0.5) * 20 };
     }
     const paintParts: CitizenPaintPart[] = [
         { type: "function", func: paintTail } as CitizenPaintPartFunction,
@@ -154,7 +187,6 @@ function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPai
             ],
             partsOffset: headHappinessOffset,
         } as CitizenPaintPartContainer,
-
     ];
     return paintParts;
 }
@@ -390,6 +422,62 @@ function paintTail(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
     ctx.stroke();
 }
 
+function paintTailSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
+    const paintData = citizen.paintData;
+    const tailPos = {
+        x: paintPos.x + 3 + citizen.foodPerCent * 4,
+        y: paintPos.y + 7,
+    };
+    const tailSize = 1;
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 0.25;
+    ctx.beginPath();
+    const tailControlPointSide: Position = {
+        x: -2,
+        y: 8,
+    }
+    const tailEndPosSide: Position = {
+        x: -14,
+        y: 0,
+    }
+    const offsetStart = getPerpendicularOffset({ x: 0, y: 0 }, tailControlPointSide, tailSize);
+    const offsetEnd = getPerpendicularOffset(tailControlPointSide, tailEndPosSide, tailSize);
+    const offsetMid = {
+        x: (offsetStart.x + offsetEnd.x) / 2,
+        y: (offsetStart.y + offsetEnd.y) / 2,
+    }
+    ctx.moveTo(tailPos.x + offsetStart.x, tailPos.y + offsetStart.y);
+    ctx.quadraticCurveTo(
+        tailPos.x + tailControlPointSide.x + offsetMid.x,
+        tailPos.y + tailControlPointSide.y + offsetMid.y,
+        tailPos.x + tailEndPosSide.x + offsetEnd.x,
+        tailPos.y + tailEndPosSide.y + offsetEnd.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x + tailEndPosSide.x + offsetEnd.y,
+        tailPos.y + tailEndPosSide.y - offsetEnd.x,
+        tailPos.x + tailEndPosSide.x - offsetEnd.x,
+        tailPos.y + tailEndPosSide.y - offsetEnd.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x + tailControlPointSide.x - offsetMid.x,
+        tailPos.y + tailControlPointSide.y - offsetMid.y,
+        tailPos.x - offsetStart.x,
+        tailPos.y - offsetStart.y
+    );
+    ctx.quadraticCurveTo(
+        tailPos.x - offsetStart.y,
+        tailPos.y + offsetStart.x,
+        tailPos.x + offsetStart.x,
+        tailPos.y + offsetStart.y
+    );
+
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.stroke();
+
+}
+
 function paintTailSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
     const paintData = citizen.paintData;
     const tailPos = {
@@ -569,7 +657,7 @@ function paintPart(ctx: CanvasRenderingContext2D, part: CitizenPaintPart, paintP
         }
         if (tempPart.partsOffset) {
             ctx.save();
-            ctx.translate(-tempPart.partsOffset.x, -tempPart.partsOffset.y)
+            ctx.translate(tempPart.partsOffset.x, tempPart.partsOffset.y)
         };
         for (let tempPartPart of tempPart.parts) {
             paintPart(ctx, tempPartPart, paintPos, citizen, state);
