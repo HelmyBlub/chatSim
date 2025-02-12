@@ -335,7 +335,7 @@ function paintTail(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
 function paintTailSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
     const paintData = citizen.paintData;
     const tailPos = {
-        x: paintPos.x + 6.5,
+        x: paintPos.x + 3 + citizen.foodPerCent * 4,
         y: paintPos.y + 7,
     };
     const tailSize = 1;
