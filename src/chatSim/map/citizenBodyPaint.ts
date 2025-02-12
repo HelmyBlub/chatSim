@@ -16,7 +16,8 @@ type CitizenPaintPart = {
 type CitizenPaintPartContainer = CitizenPaintPart & {
     type: "paintPartsContainer",
     parts: CitizenPaintPart[],
-    rotate: number,
+    partsOffset?: Position,
+    rotate?: number,
     rotationOffset?: Position,
 }
 
@@ -106,13 +107,23 @@ function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CitizenPain
 }
 
 function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    let headHappinessOffset: Position = { x: 0, y: 0 };
+    if (citizen.happinessData.happiness < -0.5) {
+        headHappinessOffset = { x: 0, y: (citizen.happinessData.happiness + 0.5) * 20 };
+    }
     const paintParts: CitizenPaintPart[] = [
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 30, 20, -0.25, 0, 200, 100, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, -30, 20, -0.25, 0, 200, 0, citizen, state),
+        {
+            type: "paintPartsContainer",
+            parts: [
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_BACK, 0, -50),
+                createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
+                createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
+            ],
+            partsOffset: headHappinessOffset,
+        } as CitizenPaintPartContainer,
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_BACK, 0, -50),
-        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
-        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
         { type: "function", func: paintTail } as CitizenPaintPartFunction,
@@ -122,17 +133,28 @@ function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CitizenPain
 
 
 function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    let headHappinessOffset: Position = { x: 0, y: 0 };
+    if (citizen.happinessData.happiness < -0.5) {
+        headHappinessOffset = { x: 0, y: (citizen.happinessData.happiness + 0.5) * 20 };
+    }
     const paintParts: CitizenPaintPart[] = [
         { type: "function", func: paintTail } as CitizenPaintPartFunction,
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
         createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
-        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
-        createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD, 0, -50),
-        { type: "function", func: paintMouth } as CitizenPaintPartFunction,
-        { type: "function", func: paintEyes } as CitizenPaintPartFunction,
-        ...createPawFrontPart(citizen, state),
+        {
+            type: "paintPartsContainer",
+            parts: [
+                createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_LEFT, -45, -45, "bounce", 100, citizen, state),
+                createFlipBookPaintPart(IMAGE_PATH_CITIZEN_PART_EAR_RIGHT, 45, -45, "bounce", 100, citizen, state),
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD, 0, -50),
+                { type: "function", func: paintMouth } as CitizenPaintPartFunction,
+                { type: "function", func: paintEyes } as CitizenPaintPartFunction,
+                ...createPawFrontPart(citizen, state),
+            ],
+            partsOffset: headHappinessOffset,
+        } as CitizenPaintPartContainer,
+
     ];
     return paintParts;
 }
@@ -545,10 +567,17 @@ function paintPart(ctx: CanvasRenderingContext2D, part: CitizenPaintPart, paintP
             ctx.rotate(tempPart.rotate);
             ctx.translate(-paintPos.x, -paintPos.y);
         }
+        if (tempPart.partsOffset) {
+            ctx.save();
+            ctx.translate(-tempPart.partsOffset.x, -tempPart.partsOffset.y)
+        };
         for (let tempPartPart of tempPart.parts) {
             paintPart(ctx, tempPartPart, paintPos, citizen, state);
         }
         if (tempPart.rotate) {
+            ctx.restore();
+        }
+        if (tempPart.partsOffset) {
             ctx.restore();
         }
     } else {

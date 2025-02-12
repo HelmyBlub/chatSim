@@ -1,7 +1,5 @@
 Tasks:
 - citizen visualization for starving/happiness/energy
-    - eating citizen
-        -
     - head down for front/back paint. just some y offset
     - remember 
         - sleeping citizen
