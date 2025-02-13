@@ -58,7 +58,9 @@ export function paintCitizenBody(ctx: CanvasRenderingContext2D, citizen: Citizen
     if (!paintInThisLayer) return;
     let paintParts: CitizenPaintPart[];
     let mirror = false;
-    if (citizenIsSleeping(citizen)) {
+    if (citizen.isDead) {
+        paintParts = setupPaintPartsDead(citizen, state);
+    } else if (citizenIsSleeping(citizen)) {
         paintParts = setupPaintPartsSleeping(citizen, state);
     } else {
         if (Math.PI * 0.25 < citizen.direction || citizen.direction < -Math.PI * 1.25) {
@@ -114,6 +116,26 @@ function setupPaintPartsSleeping(citizen: Citizen, state: ChatSimState): Citizen
             partsOffset: { x: -7, y: 11 },
         } as CitizenPaintPartContainer,
     ];
+    return paintParts;
+}
+
+function setupPaintPartsDead(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
+    const paintParts: CitizenPaintPart[] = [{
+        type: "paintPartsContainer",
+        parts: [
+            { type: "function", func: paintTailSide } as CitizenPaintPartFunction,
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58),
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58),
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20),
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, -25, -50),
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_EAR_SIDE, 20, -45),
+            { type: "function", func: paintMouthSide } as CitizenPaintPartFunction,
+            { type: "function", func: paintEyeSide } as CitizenPaintPartFunction,
+        ],
+        rotate: Math.PI / 2,
+    } as CitizenPaintPartContainer];
+
     return paintParts;
 }
 
@@ -260,7 +282,9 @@ function paintEyeSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos:
     }
 
     let sleepy = false;
-    if (citizenIsSleeping(citizen)) {
+    if (citizen.isDead) {
+        blinkingFactor = 0;
+    } else if (citizenIsSleeping(citizen)) {
         blinkingFactor = 0;
     } else if (citizen.energyPerCent < 0.5) {
         blinkingFactor *= citizen.energyPerCent * 2;
@@ -268,7 +292,19 @@ function paintEyeSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos:
     }
     const sad = citizen.happinessData.happiness < -0.5;
 
-    paintSingleEye(ctx, { x: eyesX + eyeXOffset + EYE_WIDTH / 2, y: eyesY }, blinkingFactor, sleepy, sad, false);
+    const eyePos = { x: eyesX + eyeXOffset + EYE_WIDTH / 2, y: eyesY };
+    paintSingleEye(ctx, eyePos, blinkingFactor, sleepy, sad, false);
+    if (citizen.isDead) {
+        const xSize = 2;
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(eyePos.x - xSize, eyePos.y - xSize);
+        ctx.lineTo(eyePos.x + xSize, eyePos.y + xSize);
+        ctx.moveTo(eyePos.x + xSize, eyePos.y - xSize);
+        ctx.lineTo(eyePos.x - xSize, eyePos.y + xSize);
+        ctx.stroke();
+    }
 
     if (citizen.paintData.blinkStartedTime === undefined) {
         if (Math.random() < 0.005) {
@@ -356,6 +392,7 @@ function paintMouthSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPo
 }
 
 export function citizenTailTick(citizen: Citizen) {
+    if (citizen.isDead) return;
     const paintData = citizen.paintData;
     if (paintData.tailMoveTo === undefined) {
         paintData.tailMoveTo = {

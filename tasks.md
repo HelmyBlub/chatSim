@@ -1,8 +1,7 @@
 Tasks:
-- set citizen direction when doing market job
 - citizen visualization for starving/happiness/energy
-    - remember 
-        - dead citizien
+    - dead citizien
+    
 - feature: fattness
 
 what next ideas:
