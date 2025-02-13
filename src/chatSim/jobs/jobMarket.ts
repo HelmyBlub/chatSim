@@ -314,7 +314,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
         if (isCitizenAtPosition(citizen, job.marketBuilding.position)) {
             const market = job.marketBuilding as BuildingMarket;
             setupReserved(market, jobMarket);
-            if (market.displayedItem === undefined && jobMarket.sellItemNames.length > 0) {
+            if (jobMarket.sellItemNames.length > 0) {
                 market.displayedItem = jobMarket.sellItemNames[0];
             }
             if (market.deterioration > buildingGetFirstBrokenStateDeterioration("Market")) {

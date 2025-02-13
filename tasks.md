@@ -1,7 +1,7 @@
 Tasks:
+- market display item not changing?
 - citizen visualization for starving/happiness/energy
     - remember 
-        - sleeping citizen
         - dead citizien
 - feature: fattness
 
@@ -12,7 +12,6 @@ what next ideas:
         - unhappy dog => mouth down, head down, eyelash down, tear
         - low energy dog => sleep deprived, eyes, eyes closed alot
         - fat dog => full on food, 
-        - in combination
 - change starving
     - citizen get fattness stat
         - if citizen is full and eats he gets fat
