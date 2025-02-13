@@ -42,7 +42,10 @@ function tickCitizenStateEat(citizen: Citizen, state: ChatSimState) {
     if (data.tempStartTime + eatDuration < state.time) {
         let newFoodPerCent = citizen.foodPerCent + MUSHROOM_FOOD_VALUE;
         if (newFoodPerCent > 1) {
-            const fatGain = newFoodPerCent % 1;
+            let fatGain = newFoodPerCent % 1;
+            if (citizen.fatness > 1) {
+                fatGain /= 1 + (citizen.fatness - 1) / 3;
+            }
             citizen.fatness += fatGain;
             newFoodPerCent = 1;
         }

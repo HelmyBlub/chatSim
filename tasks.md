@@ -3,9 +3,6 @@ Tasks:
 - feature: fatness
     - code steps:
         - add property fatness to citizen
-            - min 0
-            - default 1
-            - max ?
         - when foodlevel in starving area, use up fatness for less foodlevel decrease
         - when foodlevel full and fatness low, decrease foodlevel faster to regain fatness
         - change eating to work above maximum

@@ -25,9 +25,10 @@ type CitizenInformationData = {
     citizenListStartY: number,
 }
 
-const WINDOW_TAB_TYPE_DECEASED_2 = "Deceased 2"
-const WINDOW_TAB_TYPE_DECEASED = "Deceased"
-const WINDOW_TAB_TYPE_LIVING = "Living"
+const WINDOW_TAB_TYPE_TEMP_SORT = "Temp Fatness";
+const WINDOW_TAB_TYPE_DECEASED_2 = "Deceased 2";
+const WINDOW_TAB_TYPE_DECEASED = "Deceased";
+const WINDOW_TAB_TYPE_LIVING = "Living";
 
 export function createButtonCitizenInformationWindow(): UiButton {
     return {
@@ -64,6 +65,8 @@ function setupData(state: ChatSimState, citizens: Citizen[], type: string, sortT
     let sortedCitizens: Citizen[];
     if (sortType === "deathtime") {
         sortedCitizens = citizens.toSorted((a, b) => b.isDead!.time - a.isDead!.time);
+    } else if (sortType === "fatness") {
+        sortedCitizens = citizens.toSorted((a, b) => b.fatness - a.fatness);
     } else {
         sortedCitizens = citizens.toSorted((a, b) => a.name.localeCompare(b.name));
     }
@@ -106,6 +109,12 @@ function clickedButton(state: ChatSimState) {
                 paint: paintCitizenInformation,
                 click: clickedDeceasedCititizenWindow,
                 onSelect: (tabName, state2) => onSelectSetupData(state2, state2.deceasedCitizens, tabName, "deathtime"),
+            },
+            {
+                name: WINDOW_TAB_TYPE_TEMP_SORT,
+                paint: paintCitizenInformation,
+                click: clickedDeceasedCititizenWindow,
+                onSelect: (tabName, state2) => onSelectSetupData(state2, state2.map.citizens, tabName, "fatness"),
             },
         ],
         heading: "Citizen Information:",
@@ -245,6 +254,8 @@ function paintCitizenInformation(ctx: CanvasRenderingContext2D, rect: Rectangle,
         if ((data.type === WINDOW_TAB_TYPE_DECEASED || data.type === WINDOW_TAB_TYPE_DECEASED_2) && citizen.isDead) {
             text += ` ${citizen.isDead.reason}`;
             text += ` on day ${getDayForTime(citizen.isDead.time, state)}`;
+        } else if (data.type === WINDOW_TAB_TYPE_TEMP_SORT) {
+            text += ` ${citizen.fatness.toFixed(1)}`;
         }
         ctx.fillText(text, offsetX, offsetY + lineSpacing * lineCounter);
         if (i === hoverIndex) {

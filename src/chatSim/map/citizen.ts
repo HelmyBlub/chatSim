@@ -717,6 +717,17 @@ function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
     if (citizen.isDead) return;
+    citizenFoodTick(citizen, state);
+    citizen.energyPerCent -= state.tickInterval / state.timPerDay;
+    checkCitizenNeeds(citizen, state);
+    tickCitizenState(citizen, state);
+    citizenMoveToTick(citizen);
+    citizenHappinessTick(citizen);
+    citizenCheckMapChunk(citizen, state);
+    citizenTailTick(citizen);
+}
+
+function citizenFoodTick(citizen: Citizen, state: ChatSimState) {
     const tickFoodAmount = state.tickInterval / state.timPerDay * 0.75;
     const tickAmountHalved = tickFoodAmount / 2;
     if (citizen.foodPerCent <= CITIZEN_STARVING_FOOD_PER_CENT) {
@@ -733,13 +744,16 @@ function tickCitizen(citizen: Citizen, state: ChatSimState) {
     } else {
         citizen.foodPerCent -= tickFoodAmount;
     }
-    citizen.energyPerCent -= state.tickInterval / state.timPerDay;
-    checkCitizenNeeds(citizen, state);
-    tickCitizenState(citizen, state);
-    citizenMoveToTick(citizen);
-    citizenHappinessTick(citizen);
-    citizenCheckMapChunk(citizen, state);
-    citizenTailTick(citizen);
+    if (citizen.fatness > 1) {
+        let isPhysicallActive = citizen.stateInfo.tags.has(TAG_PHYSICALLY_ACTIVE);
+        if (!isPhysicallActive && citizen.stateInfo.stack.length > 0) {
+            const citizenState = citizen.stateInfo.stack[0];
+            isPhysicallActive = citizenState.tags.has(TAG_PHYSICALLY_ACTIVE);
+        }
+        if (isPhysicallActive) {
+            citizen.fatness -= tickFoodAmount;
+        }
+    }
 }
 
 function citizenHappinessTick(citizen: Citizen) {
@@ -755,7 +769,7 @@ function citizenHappinessTick(citizen: Citizen) {
             const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, true);
             citizen.happinessData.happiness += changeBy;
         }
-        if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
+        if (unhappinessFactor.has(tag)) {
             const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, false);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
@@ -769,7 +783,7 @@ function citizenHappinessTick(citizen: Citizen) {
             const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, true);
             citizen.happinessData.happiness += changeBy;
         }
-        if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
+        if (unhappinessFactor.has(tag)) {
             const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, false);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
