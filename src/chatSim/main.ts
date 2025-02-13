@@ -214,13 +214,14 @@ export function handleChatMessage(user: string, message: string, state: ChatSimS
         }
     } else if (message.startsWith("trait")) {
         const splits = message.split(" ");
-        let trait = splits[1];
         if (splits.length > 1) {
-            if (splits.length > 2) trait += " " + splits[2];
-            const maxLength = 30;
+            let trait = splits[1];
+            for (let i = 2; i < Math.min(splits.length, 5); i++) {
+                trait += " " + splits[i];
+            }
+            const maxLength = 40;
             if (trait.length > maxLength) trait = trait.substring(0, maxLength);
             handleChatterAddTraitMessage(chatter, citizen, trait, state);
-            addChatterChangeLog(`${citizen.name} added trait ${trait}`, state);
             saveLocalStorageChatter(state.chatterData);
         }
     }
@@ -249,7 +250,6 @@ function setChatterToBot(chatter: ChatterData, citizen: Citizen, state: ChatSimS
     addChatterChangeLog(`${citizen.name} added trait ${CITIZEN_TRAIT_ROBOT}`, state);
     saveLocalStorageChatter(state.chatterData);
 }
-console.log(checkIsChatterMessageABot("B͐est vie̵we͖rs"));
 
 function checkIsChatterMessageABot(message: string) {
     const stringsToCheck = [
@@ -259,35 +259,44 @@ function checkIsChatterMessageABot(message: string) {
         "best viewers",
     ];
     for (let toCheck of stringsToCheck) {
-        if (message.indexOf(toCheck) > -1) {
-            return true;
+        const compare = checkIsTextCloseTo(message, toCheck);
+        if (compare) return true;
+    }
+    return false;
+}
+
+/**
+ * retruns true if text and compare text match with less than 3 errors
+ */
+export function checkIsTextCloseTo(text: string, compareTo: string): boolean {
+    if (text.indexOf(compareTo) > -1) {
+        return true;
+    }
+    let toCheckIndex = 0;
+    let missMatchCount = 0;
+    let matchCount = 0;
+    for (let i = 0; i < text.length; i++) {
+        if (text[i].toLowerCase() === compareTo[toCheckIndex].toLowerCase()) {
+            matchCount++;
+            toCheckIndex++;
+            if (toCheckIndex >= compareTo.length) return true;
+            continue;
         }
-        let toCheckIndex = 0;
-        let missMatchCount = 0;
-        let matchCount = 0;
-        for (let i = 0; i < message.length; i++) {
-            if (message[i].toLowerCase() === toCheck[toCheckIndex].toLowerCase()) {
-                matchCount++;
-                toCheckIndex++;
-                if (toCheckIndex >= toCheck.length) return true;
+        if (toCheckIndex + 1 < compareTo.length && text[i].toLowerCase() === compareTo[toCheckIndex + 1].toLowerCase()) {
+            matchCount++;
+            toCheckIndex += 2;
+            if (toCheckIndex >= compareTo.length) return true;
+            continue;
+        }
+        if (matchCount > 0) {
+            missMatchCount++;
+            if (missMatchCount > 3) {
+                matchCount = 0;
+                missMatchCount = 0;
+                toCheckIndex = 0;
                 continue;
             }
-            if (toCheckIndex + 1 < toCheck.length && message[i].toLowerCase() === toCheck[toCheckIndex + 1].toLowerCase()) {
-                matchCount++;
-                toCheckIndex += 2;
-                if (toCheckIndex >= toCheck.length) return true;
-                continue;
-            }
-            if (matchCount > 0) {
-                missMatchCount++;
-                if (missMatchCount > 3) {
-                    matchCount = 0;
-                    missMatchCount = 0;
-                    toCheckIndex = 0;
-                    continue;
-                }
-                if (toCheckIndex >= toCheck.length) return true;
-            }
+            if (toCheckIndex >= compareTo.length) return true;
         }
     }
     return false;

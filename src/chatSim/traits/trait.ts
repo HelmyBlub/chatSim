@@ -1,6 +1,6 @@
 import { ChatSimState, ChatterData, RandomSeed } from "../chatSimModels.js";
 import { Citizen, CITIZEN_DEFAULT_NAMES_REMEMBER } from "../map/citizen.js";
-import { nextRandom } from "../main.js";
+import { addChatterChangeLog, checkIsTextCloseTo, nextRandom } from "../main.js";
 
 export type CitizenTraits = {
     traits: string[],
@@ -40,8 +40,19 @@ export function loadTraits() {
 }
 
 export function handleChatterAddTraitMessage(chatter: ChatterData, citizen: Citizen, trait: string, state: ChatSimState) {
-    saveTraitInChatter(chatter, trait);
-    citizenAddTrait(citizen, trait, state);
+    let checkedTrait = trait;
+    const traitList = Object.keys(CITIZEN_TRAIT_FUNCTIONS);
+    for (let entry of traitList) {
+        if (checkIsTextCloseTo(trait, entry)) {
+            if (checkedTrait !== entry) {
+                checkedTrait = entry;
+            }
+            break;
+        }
+    }
+    addChatterChangeLog(`${citizen.name} added trait ${checkedTrait}`, state);
+    saveTraitInChatter(chatter, checkedTrait);
+    citizenAddTrait(citizen, checkedTrait, state);
 }
 
 function saveTraitInChatter(chatter: ChatterData, trait: string) {

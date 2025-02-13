@@ -40,7 +40,7 @@ function paintChatterChangeLog(ctx: CanvasRenderingContext2D, state: ChatSimStat
     for (let i = 0; i < logData.log.length; i++) {
         const job = logData.log[i];
         if (job.time + 10000 < performance.now()) continue;
-        drawTextWithOutline(ctx, job.message, 10, 30 + i * fontSize);
+        drawTextWithOutline(ctx, job.message, 10, 50 + i * fontSize);
     }
 }
 
