@@ -79,6 +79,7 @@ export function areaGraphAddPointSet(pointSet: Position[], areaGraph: AreaGraph)
             }
             nextPointsSet.pointsAveragedCounter = (nextPointsSet.pointsAveragedCounter! + 1) % POINT_LIMIT;
             currentPointSet = nextPointsSet;
+            currentPointSetIndex++;
         } else {
             break;
         }

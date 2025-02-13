@@ -247,8 +247,12 @@ function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
 
     let blinkingFactor = 1;
     if (citizen.paintData.blinkStartedTime !== undefined) {
-        const timePassedSinceBlinkStart = state.time - citizen.paintData.blinkStartedTime;
-        blinkingFactor = Math.max(Math.abs(timePassedSinceBlinkStart - blinkDuration / 2) / (blinkDuration / 2), 0);
+        if (citizen.paintData.blinkStartedTime + blinkDuration < state.time) {
+            citizen.paintData.blinkStartedTime = undefined;
+        } else {
+            const timePassedSinceBlinkStart = state.time - citizen.paintData.blinkStartedTime;
+            blinkingFactor = Math.max(Math.abs(timePassedSinceBlinkStart - blinkDuration / 2) / (blinkDuration / 2), 0);
+        }
     }
 
     let sleepy = false;
@@ -267,8 +271,6 @@ function paintEyes(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Po
         if (Math.random() < 0.005) {
             citizen.paintData.blinkStartedTime = state.time;
         }
-    } else if (citizen.paintData.blinkStartedTime + blinkDuration < state.time) {
-        citizen.paintData.blinkStartedTime = undefined;
     }
 }
 
@@ -280,8 +282,12 @@ function paintEyeSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos:
 
     let blinkingFactor = 1;
     if (citizen.paintData.blinkStartedTime !== undefined) {
-        const timePassedSinceBlinkStart = state.time - citizen.paintData.blinkStartedTime;
-        blinkingFactor = Math.max(Math.abs(timePassedSinceBlinkStart - blinkDuration / 2) / (blinkDuration / 2), 0);
+        if (citizen.paintData.blinkStartedTime + blinkDuration < state.time) {
+            citizen.paintData.blinkStartedTime = undefined;
+        } else {
+            const timePassedSinceBlinkStart = state.time - citizen.paintData.blinkStartedTime;
+            blinkingFactor = Math.max(Math.abs(timePassedSinceBlinkStart - blinkDuration / 2) / (blinkDuration / 2), 0);
+        }
     }
 
     let sleepy = false;
@@ -313,8 +319,6 @@ function paintEyeSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos:
         if (Math.random() < 0.005) {
             citizen.paintData.blinkStartedTime = state.time;
         }
-    } else if (citizen.paintData.blinkStartedTime + blinkDuration < state.time) {
-        citizen.paintData.blinkStartedTime = undefined;
     }
 }
 

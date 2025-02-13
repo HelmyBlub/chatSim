@@ -64,7 +64,7 @@ function tickCitizenStateTrade(citizen: Citizen, state: ChatSimState) {
     } else if (data.receiver === citizen) {
         if (citizenState.subState === undefined) {
             if (data.timer === undefined) data.timer = state.time;
-            if (data.giver.tradePaw && data.giver.tradePaw.startTime + data.giver.tradePaw.duration < state.time) {
+            if (data.giver.tradePaw && data.giver.tradePaw.startTime + data.giver.tradePaw.duration < state.time && data.giver.tradePaw.item) {
                 citizen.tradePaw = {
                     item: data.giver.tradePaw.item,
                     money: 0,

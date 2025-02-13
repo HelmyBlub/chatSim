@@ -72,6 +72,7 @@ export function lineChartAddPoint(point: Position, lineChart: LineChart) {
             }
             nextPointsSet.pointsAveragedCounter = (nextPointsSet.pointsAveragedCounter! + 1) % POINT_LIMIT;
             currentPointSet = nextPointsSet;
+            currentPointSetIndex++;
         } else {
             break;
         }
