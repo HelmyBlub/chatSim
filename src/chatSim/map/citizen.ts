@@ -1,26 +1,23 @@
-import { drawTextWithOutline, IMAGE_PATH_CITIZEN, IMAGE_PATH_CITIZEN_DEAD, IMAGE_PATH_CITIZEN_EAT, IMAGE_PATH_CITIZEN_SLEEPING, IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
+import { drawTextWithOutline } from "../../drawHelper.js";
 import { Chat, paintChatBubbles } from "../chatBubble.js";
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { UiRectangle } from "../rectangle.js";
-import { Rectangle } from "../rectangle.js";
 import { MapChunk, mapChunkKeyToPosition, mapGetChunkForPosition, mapIsPositionOutOfBounds, PaintDataMap } from "./map.js";
 import { Building, BuildingMarket } from "./mapObjectBuilding.js";
 import { checkCitizenNeeds } from "../citizenNeeds/citizenNeed.js";
 import { CITIZEN_NEED_SLEEP, CITIZEN_NEED_STATE_SLEEPING } from "../citizenNeeds/citizenNeedSleep.js";
-import { IMAGES } from "../images.js";
 import { inventoryGetUsedCapacity, Inventory, paintInventoryMoney, InventoryItem, paintInventoryItem } from "../inventory.js";
 import { CITIZEN_STATE_TYPE_CHANGE_JOB, citizenChangeJob, CitizenJob, createJob, tickCitizenJob } from "../jobs/job.js";
 import { CITIZEN_JOB_FOOD_GATHERER } from "../jobs/jobFoodGatherer.js";
-import { calculateDirection, calculateDistance, getTimeAndDayString, nextRandom } from "../main.js";
+import { calculateDirection, calculateDistance, nextRandom } from "../main.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
 import { mapPositionToPaintPosition, PAINT_LAYER_CITIZEN_AFTER_HOUSES, PAINT_LAYER_CITIZEN_BEFORE_HOUSES } from "../paint.js";
 import { CitizenEquipmentData, paintCitizenEquipments } from "../paintCitizenEquipment.js";
-import { CITIZEN_STATE_EAT } from "../citizenState/citizenStateEat.js";
 import { CitizenTraits } from "../traits/trait.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { MAP_OBJECTS_FUNCTIONS, MapObject } from "./mapObject.js";
 import { citizenCreateSelectionData } from "./citizenSelectionData.js";
 import { citizenTailTick, paintCitizenBody } from "./citizenBodyPaint.js";
+import { CITIZEN_STARVING_FOOD_PER_CENT } from "../citizenNeeds/citizenNeedStarving.js";
 
 export type CitizenStateInfo = {
     type: string,
@@ -133,6 +130,8 @@ export type Citizen = MapObject & {
     moveTo?: Position,
     direction: number,
     foodPerCent: number,
+    /** 1 = normal, 0 = min, greater 1 => fat */
+    fatness: number,
     energyPerCent: number,
     inventory: Inventory,
     home?: Building,
@@ -181,6 +180,8 @@ export const TAG_SOCIAL_INTERACTION = "social interaction";
 CITIZEN_TAGS_AND_FACTORS.set(TAG_SOCIAL_INTERACTION, 1.0);
 export const TAG_QUEUING = "queuing";
 CITIZEN_TAGS_AND_FACTORS.set(TAG_QUEUING, 1.0);
+export const TAG_EATING = "eating";
+CITIZEN_TAGS_AND_FACTORS.set(TAG_EATING, 100.0);
 
 export const CITIZEN_STATE_TYPE_WORKING_JOB = "workingJob";
 export const CITIZEN_STATE_THINKING = "thinking";
@@ -289,6 +290,7 @@ export function citizenCreateDefault(citizenName: string, state: ChatSimState): 
         speed: 2,
         direction: 0,
         foodPerCent: 1,
+        fatness: 1,
         energyPerCent: 1,
         position: { x: 0, y: 0 },
         displayedEquipments: [],
@@ -541,6 +543,14 @@ export function paintCitizenComplete(ctx: CanvasRenderingContext2D, citizen: Cit
     paintChatBubbles(ctx, citizen, citizen.lastChat, { x: paintPos.x, y: paintPos.y - CITIZEN_PAINT_SIZE / 2 - 4 }, state);
 }
 
+export function citizenGetHappinessByTagChangeAmount(citizen: Citizen, tag: string, isHappiness: boolean): number {
+    let factor = isHappiness ? citizen.happinessData.happinessTagFactors : citizen.happinessData.unhappinessTagFactors;
+    if (!factor.has(tag)) return 0;
+    let sign = isHappiness ? -1 : 1;
+    const changeBy = Math.max((1 + sign * citizen.happinessData.happiness) / 1000 * factor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
+    return changeBy;
+}
+
 function citizenCheckMapChunk(citizen: Citizen, state: ChatSimState) {
     if (state.time % (state.tickInterval * 10) !== 0) return;
     const chunk = mapGetChunkForPosition(citizen.position, state.map);
@@ -707,7 +717,22 @@ function paintSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos
 
 function tickCitizen(citizen: Citizen, state: ChatSimState) {
     if (citizen.isDead) return;
-    citizen.foodPerCent -= state.tickInterval / state.timPerDay * 0.75;
+    const tickFoodAmount = state.tickInterval / state.timPerDay * 0.75;
+    const tickAmountHalved = tickFoodAmount / 2;
+    if (citizen.foodPerCent <= CITIZEN_STARVING_FOOD_PER_CENT) {
+        citizen.foodPerCent -= tickAmountHalved;
+        if (citizen.fatness > 0) {
+            citizen.fatness -= tickAmountHalved;
+        } else {
+            citizen.fatness = 0;
+            citizen.foodPerCent -= tickAmountHalved;
+        }
+    } else if (citizen.foodPerCent >= 0.8 && citizen.fatness < 1) {
+        citizen.foodPerCent -= tickFoodAmount + tickAmountHalved;
+        citizen.fatness += tickAmountHalved;
+    } else {
+        citizen.foodPerCent -= tickFoodAmount;
+    }
     citizen.energyPerCent -= state.tickInterval / state.timPerDay;
     checkCitizenNeeds(citizen, state);
     tickCitizenState(citizen, state);
@@ -727,11 +752,11 @@ function citizenHappinessTick(citizen: Citizen) {
     let isSocialInteraction = false;
     for (let tag of citizenState.tags) {
         if (happinessFactor.has(tag)) {
-            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000 * happinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
+            const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, true);
             citizen.happinessData.happiness += changeBy;
         }
         if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000 * unhappinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
+            const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, false);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }
@@ -741,11 +766,11 @@ function citizenHappinessTick(citizen: Citizen) {
     }
     for (let tag of citizen.stateInfo.tags) {
         if (citizen.happinessData.happinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 - citizen.happinessData.happiness) / 1000 * happinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
+            const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, true);
             citizen.happinessData.happiness += changeBy;
         }
         if (citizen.happinessData.unhappinessTagFactors.has(tag)) {
-            const changeBy = Math.max((1 + citizen.happinessData.happiness) / 1000 * unhappinessFactor.get(tag)! * CITIZEN_TAGS_AND_FACTORS.get(tag)!, 0.0000000001);
+            const changeBy = citizenGetHappinessByTagChangeAmount(citizen, tag, false);
             citizen.happinessData.happiness -= changeBy;
             if (citizen.happinessData.happiness < -1) citizen.happinessData.happiness = -1;
         }

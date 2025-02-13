@@ -97,7 +97,7 @@ function setupPaintPartsSleeping(citizen: Citizen, state: ChatSimState): Citizen
             parts: [
                 createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58),
                 createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58),
-                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+                createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizenGetPaintScaleForFattness(citizen)),
                 { type: "function", func: paintTailSleeping } as CitizenPaintPartFunction,
                 createRotatedPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20, Math.PI * 0.75),
             ],
@@ -126,7 +126,7 @@ function setupPaintPartsDead(citizen: Citizen, state: ChatSimState): CitizenPain
             { type: "function", func: paintTailSide } as CitizenPaintPartFunction,
             createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58),
             createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58),
-            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+            createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizenGetPaintScaleForFattness(citizen)),
             createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20),
             createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_HEAD_SIDE, -25, -50),
             createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_EAR_SIDE, 20, -45),
@@ -145,7 +145,7 @@ function setupPaintPartsSide(citizen: Citizen, state: ChatSimState): CitizenPain
         { type: "function", func: paintTailSide } as CitizenPaintPartFunction,
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -15, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 0, citizen, state),
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT_SIDE, -5, 58, Math.PI * 0.20, { x: 0, y: 0 }, 500, 250, citizen, state),
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizenGetPaintScaleForFattness(citizen)),
         createRotateAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_PAW, 0, 20, Math.PI * 0.5, { x: 0, y: 0 }, 500, 0, citizen, state),
         {
             type: "paintPartsContainer",
@@ -178,14 +178,13 @@ function setupPaintPartsBack(citizen: Citizen, state: ChatSimState): CitizenPain
             ],
             partsOffset: headHappinessOffset,
         } as CitizenPaintPartContainer,
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizenGetPaintScaleForFattness(citizen)),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
         { type: "function", func: paintTail } as CitizenPaintPartFunction,
     ];
     return paintParts;
 }
-
 
 function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
     let headHappinessOffset: Position = { x: 0, y: 0 };
@@ -196,7 +195,7 @@ function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPai
         { type: "function", func: paintTail } as CitizenPaintPartFunction,
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, -15, 60, 0.5, 0, 200, 0, citizen, state),
         createScaleAnimationPaintPart(IMAGE_PATH_CITIZEN_PART_FOOT, 15, 60, 0.5, 0, 200, 100, citizen, state),
-        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizen.foodPerCent + 0.5),
+        createDefaultPaintPartImage(IMAGE_PATH_CITIZEN_PART_BODY, 0, 15, citizenGetPaintScaleForFattness(citizen)),
         {
             type: "paintPartsContainer",
             parts: [
@@ -211,6 +210,10 @@ function setupPaintPartsFront(citizen: Citizen, state: ChatSimState): CitizenPai
         } as CitizenPaintPartContainer,
     ];
     return paintParts;
+}
+
+function citizenGetPaintScaleForFattness(citizen: Citizen): number {
+    return (citizen.fatness / 2) + 0.5 + citizen.foodPerCent / 4;
 }
 
 function createPawFrontPart(citizen: Citizen, state: ChatSimState): CitizenPaintPart[] {
@@ -517,8 +520,9 @@ function paintTailSleeping(ctx: CanvasRenderingContext2D, citizen: Citizen, pain
 
 function paintTailSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos: Position, state: ChatSimState) {
     const paintData = citizen.paintData;
+    const fatnessScale = citizenGetPaintScaleForFattness(citizen);
     const tailPos = {
-        x: paintPos.x + 3 + citizen.foodPerCent * 4,
+        x: paintPos.x + 3 + fatnessScale * 4,
         y: paintPos.y + 7,
     };
     const tailSize = 1;

@@ -56,6 +56,7 @@ function paintCitizenSelectionDataGenerell(ctx: CanvasRenderingContext2D, rect: 
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = "black";
     ctx.fillText(`Money: $${(citizen.money).toFixed()}`, offsetX, offsetY + fontSize + lineSpacing * lineCounter++);
+    ctx.fillText(`Fatness: ${(citizen.fatness).toFixed(2)}`, offsetX, offsetY + fontSize + lineSpacing * lineCounter++);
     rect.height = lineSpacing * lineCounter + padding * 2;
 }
 

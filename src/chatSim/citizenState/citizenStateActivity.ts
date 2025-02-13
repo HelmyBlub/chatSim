@@ -5,6 +5,9 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateStartCitizenChat } from "./citizenStateChat.js";
 import { INTENTION_GREETING } from "./citizenChatMessageOptions.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
+import { setCitizenStateEat } from "./citizenStateEat.js";
+import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 
 type RandomMoveData = {
     lastSearchDirection?: number,
@@ -20,11 +23,13 @@ type TalkToSomebodyData = {
 export const CITIZEN_STATE_DO_NOTHING_AT_HOME = "do nothing at home";
 export const CITIZEN_STATE_WALKING_AROUND_RANDOMLY = "walking around randomly";
 export const CITIZEN_STATE_TALK_TO_SOMEBODY = "talk to somebody";
+export const CITIZEN_STATE_FIND_FOOD_AND_EAT = "find food and eat";
 
 export function onLoadCitizenStateDefaultTickActivityFuntions() {
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_DO_NOTHING_AT_HOME] = tickCitizenStateDoNothingAtHome;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_WALKING_AROUND_RANDOMLY] = tickCitizenStateWalkingAroundRandomly;
     CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_TALK_TO_SOMEBODY] = tickCitizenStateTalkToSomebody;
+    CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS[CITIZEN_STATE_FIND_FOOD_AND_EAT] = tickCitizenStateFindFoodAndEat;
 }
 
 export function setCitizenStateDoNothingAtHome(citizen: Citizen, state: ChatSimState) {
@@ -34,6 +39,10 @@ export function setCitizenStateDoNothingAtHome(citizen: Citizen, state: ChatSimS
 export function setCitizenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSimState) {
     const data: RandomMoveData = { startTime: state.time };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_WALKING_AROUND_RANDOMLY, data: data, tags: new Set() });
+}
+
+export function setCitizenStateFindFoodAndEat(citizen: Citizen, state: ChatSimState) {
+    citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_FIND_FOOD_AND_EAT, tags: new Set() });
 }
 
 export function setCitizenStateTalkToSomebody(citizen: Citizen) {
@@ -76,6 +85,24 @@ function tickCitizenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSimS
         }
 
         data.lastSearchDirection = citizenMoveToRandom(citizen, state, data.lastSearchDirection);
+    }
+}
+
+function tickCitizenStateFindFoodAndEat(citizen: Citizen, state: ChatSimState) {
+    const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+    const stackData = citizen.stateInfo.stack[0];
+    if (stackData.subState === "eating") {
+        citizenStateStackTaskSuccess(citizen);
+        return;
+    }
+
+    if (inventoryMushrooms && inventoryMushrooms.counter > 0) {
+        stackData.subState = "eating";
+        setCitizenStateEat(citizen, inventoryMushrooms, "", 3);
+        return;
+    } else {
+        setCitizenStateGetItem(citizen, INVENTORY_MUSHROOM, 3);
+        return;
     }
 }
 

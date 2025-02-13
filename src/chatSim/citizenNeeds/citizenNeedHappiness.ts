@@ -1,6 +1,6 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { Citizen, CITIZEN_STATE_TYPE_TICK_FUNCTIONS, citizenAddThought, citizenAddTodo, citizenSetThought, citizenStateStackTaskSuccess, TAG_AT_HOME, TAG_DOING_NOTHING, TAG_OUTSIDE, TAG_PHYSICALLY_ACTIVE, TAG_SOCIAL_INTERACTION, TAG_WALKING_AROUND } from "../map/citizen.js";
-import { setCitizenStateDoNothingAtHome, setCitizenStateTalkToSomebody, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
+import { setCitizenStateDoNothingAtHome, setCitizenStateFindFoodAndEat, setCitizenStateTalkToSomebody, setCitizenStateWalkingAroundRandomly } from "../citizenState/citizenStateActivity.js";
 import { nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { CITIZEN_NEEDS_FUNCTIONS, citizenNeedOnNeedFulfilled } from "./citizenNeed.js";
@@ -16,10 +16,12 @@ export const CITIZEN_NEED_HAPPINESS = "need happiness";
 const CITIZEN_LEISURE_DO_NOTHING = "do nothing at home";
 const CITIZEN_LEISURE_WALK_AROUND_RANDOMLY = "walk around randomly";
 const CITIZEN_LEISURE_TALK_TO_SOMEBODY = "talk to somebody";
+const CITIZEN_LEISURE_EAT = "eating something";
 const CITIZEN_LEISURE_FUNCTIONS: { [key: string]: CitizenLeisureFunction } = {};
 CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_DO_NOTHING] = setCitizenStateDoNothingAtHome;
 CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_WALK_AROUND_RANDOMLY] = setCitizenStateWalkingAroundRandomly;
 CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_TALK_TO_SOMEBODY] = setCitizenStateTalkToSomebody;
+CITIZEN_LEISURE_FUNCTIONS[CITIZEN_LEISURE_EAT] = setCitizenStateFindFoodAndEat;
 
 
 export const CITIZEN_DO_LEISURE_AT_HAPPINESS_PER_CENT = -0.5;
