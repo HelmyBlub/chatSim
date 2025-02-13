@@ -522,7 +522,7 @@ function paintTailSide(ctx: CanvasRenderingContext2D, citizen: Citizen, paintPos
     const paintData = citizen.paintData;
     const fatnessScale = citizenGetPaintScaleForFattness(citizen);
     const tailPos = {
-        x: paintPos.x + 3 + fatnessScale * 4,
+        x: paintPos.x + 1 + fatnessScale * 4,
         y: paintPos.y + 7,
     };
     const tailSize = 1;

@@ -2,29 +2,10 @@ Tasks:
 - check: 3 part chat command cut off? longer traits dont work?
 - feature: fatness
     - code steps:
-        - add property fatness to citizen
-        - when foodlevel in starving area, use up fatness for less foodlevel decrease
-        - when foodlevel full and fatness low, decrease foodlevel faster to regain fatness
-        - change eating to work above maximum
-            - when eating and full get fater
-        - add leisure eating
-        - add happiness tags: eating
-            - add different scalings for negative and positive (as eating is required, it should not be to negative) 
         - change bodyPaint
             - fix tail distance
-        - when fatness high and physically active reduce fatness by tiny amount
         - change move speed based on fatness
 
-    - if citizen is full and eats he gets fat
-    - if citizen is starving his fat will be used up to slow down how fast he starves
-    - moving slower with high fatness
-    - happines tag "eating"
-        - citizen will get happy if eats
-    - leisure: eating
-        - gets fat if already full
-    - fatness reduces to normal amount when "physically active"
-    - when fatness low and foodLevel hight, citizen will become hungry faster for regenerating fatness to normal amount
-    - citizenBodyPaint: change body based on fatness
 - check endless loop when every citizen dead?
     - don't know how to reproduce
 
