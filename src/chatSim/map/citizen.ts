@@ -894,15 +894,19 @@ function deleteCitizens(state: ChatSimState) {
 function citizenMoveToTick(citizen: Citizen) {
     if (citizen.moveTo) {
         citizen.direction = calculateDirection(citizen.position, citizen.moveTo);
+        let speed = citizen.speed;
+        if (citizen.fatness > 1.5) {
+            speed *= 1 - (citizen.fatness - 1.5) / 5;
+        }
         const diffX = citizen.moveTo.x - citizen.position.x;
         const diffY = citizen.moveTo.y - citizen.position.y;
         const distance = Math.sqrt(diffX * diffX + diffY * diffY);
-        if (citizen.speed - distance > 0) {
+        if (speed - distance > 0) {
             citizen.position.x = citizen.moveTo.x;
             citizen.position.y = citizen.moveTo.y;
             citizenStopMoving(citizen);
         } else {
-            const factor = citizen.speed / distance;
+            const factor = speed / distance;
             citizen.position.x += diffX * factor;
             citizen.position.y += diffY * factor;
         }

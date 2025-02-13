@@ -1,13 +1,12 @@
 Tasks:
 - check: 3 part chat command cut off? longer traits dont work?
-- feature: fatness
-    - code steps:
-        - change bodyPaint
-            - fix tail distance
-        - change move speed based on fatness
 
 - check endless loop when every citizen dead?
     - don't know how to reproduce
+
+- check something painted incorrecly. somes Lines all over the screen for maybe just one frame
+- check: leisure activity put from helpfull to unhelpful if just failed once? should reduce counter instead?
+
 
 what next ideas:
 - change starving
@@ -28,7 +27,6 @@ what next ideas:
         - if someone steals and is found out
 
 
-- check: leisure activity put from hekpfull to unhelpful if just failed once? should reduce counter instead?
 --------------------------------------------------
 Big Idea:
 - do some game for chatters.
