@@ -148,15 +148,20 @@ export function citizenNeedTickHappiness(citizen: Citizen, state: ChatSimState) 
                 } else {
                     let didNotHelpData = citizen.memory.leisure.didNotHelp[data.leisure];
                     if (!didNotHelpData) {
-                        didNotHelpData = {
-                            counter: 1,
-                            lastExecuted: state.time,
-                            leisure: data.leisure
-                        };
-                        citizen.memory.leisure.didNotHelp[data.leisure] = didNotHelpData;
-                        let didHelpData = citizen.memory.leisure.didHelp[data.leisure];
-                        if (didHelpData) {
-                            delete citizen.memory.leisure.didHelp[data.leisure];
+                        const didHelp = citizen.memory.leisure.didHelp[data.leisure];
+                        if (didHelp && didHelp.counter > 1) {
+                            didHelp.counter /= 2;
+                        } else {
+                            didNotHelpData = {
+                                counter: 1,
+                                lastExecuted: state.time,
+                                leisure: data.leisure
+                            };
+                            citizen.memory.leisure.didNotHelp[data.leisure] = didNotHelpData;
+                            let didHelpData = citizen.memory.leisure.didHelp[data.leisure];
+                            if (didHelpData) {
+                                delete citizen.memory.leisure.didHelp[data.leisure];
+                            }
                         }
                     } else {
                         didNotHelpData.counter++;

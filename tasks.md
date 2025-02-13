@@ -1,6 +1,4 @@
 Tasks:
-
-- check something painted incorrecly. somes Lines all over the screen for maybe just one frame
 - check: leisure activity put from helpfull to unhelpful if just failed once? should reduce counter instead?
 - check endless loop when every citizen dead?
     - don't know how to reproduce
