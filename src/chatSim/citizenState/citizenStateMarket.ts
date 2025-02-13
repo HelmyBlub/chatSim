@@ -8,6 +8,7 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { isCitizenInInteractionDistance } from "../map/citizen.js";
 import { JobMarketState, marketCanServeCustomer, marketServeCustomer, TRADE_DATA, TradeData } from "../jobs/jobMarket.js";
 import { Inventory, InventoryItem, inventoryPutItemInto } from "../inventory.js";
+import { DIRECTION_LEFT } from "../main.js";
 
 export type CitizenStateMarketQueue = {
     market: BuildingMarket;
@@ -268,6 +269,7 @@ function tickCitizenStateEnterMarketQueue(citizen: Citizen, state: ChatSimState)
                 if (!isCitizenAtPosition(citizen, mapPosition)) {
                     citizenMoveTo(citizen, mapPosition);
                 } else {
+                    citizen.direction = DIRECTION_LEFT;
                     const customerAhead = data.market.queue![queuePosition - 1];
                     const shouldBePosition = marketGetQueueMapPosition(customerAhead, data.market);
                     if (!isCitizenInInteractionDistance(customerAhead, shouldBePosition)) {

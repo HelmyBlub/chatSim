@@ -1,5 +1,5 @@
 Tasks:
-- market display item not changing?
+- set citizen direction when doing market job
 - citizen visualization for starving/happiness/energy
     - remember 
         - dead citizien

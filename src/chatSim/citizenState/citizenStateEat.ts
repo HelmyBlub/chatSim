@@ -4,6 +4,7 @@ import { MUSHROOM_FOOD_VALUE } from "../citizenNeeds/citizenNeedFood.js";
 import { InventoryItem } from "../inventory.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
+import { DIRECTION_DOWN } from "../main.js";
 
 export type CitizenStateEatData = {
     inventoryFood: InventoryItem,
@@ -34,7 +35,7 @@ function tickCitizenStateEat(citizen: Citizen, state: ChatSimState) {
         return;
     }
     if (data.tempStartTime === undefined) data.tempStartTime = state.time;
-    citizen.direction = Math.PI / 2;
+    citizen.direction = DIRECTION_DOWN;
     if (citizen.moveTo) citizenStopMoving(citizen);
     const eatDuration = 1000;
     if (data.tempStartTime + eatDuration < state.time) {

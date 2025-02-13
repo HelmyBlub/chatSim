@@ -3,7 +3,7 @@ import { TAG_DOING_NOTHING, TAG_SOCIAL_INTERACTION } from "../map/citizen.js";
 import { buildingGetFirstBrokenStateDeterioration, BuildingMarket } from "../map/mapObjectBuilding.js";
 import { citizenAddThought, Citizen, citizenCheckTodoList, CitizenState, citizenStateStackTaskSuccess, citizenStateStackTaskSuccessWithData, CitizenStateSuccessData, citizenIsThinking, citizenSetThought, citizenMoveTo } from "../map/citizen.js"
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD, inventoryGetMissingReserved, inventoryGetPossibleTakeOutAmount, inventoryMoveItemBetween } from "../inventory.js";
-import { getDay, nextRandom } from "../main.js";
+import { DIRECTION_DOWN, getDay, nextRandom } from "../main.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { citizenChangeJob, CitizenJob, findMarketBuilding, isCitizenAtPosition } from "./job.js"
 import { isCitizenInInteractionDistance } from "../map/citizen.js";
@@ -13,6 +13,7 @@ import { addChatMessage, CHAT_MESSAGE_INTENTION_MARKET_TRADE, ChatMessage, ChatM
 import { setCitizenStateGetBuilding, setCitizenStateRepairBuilding } from "../citizenState/citizenStateGetBuilding.js";
 import { setCitizenStateGetItemFromBuilding, setCitizenStateSearchItem } from "../citizenState/citizenStateGetItem.js";
 import { setCitizenStateMarketItemExchange } from "../citizenState/citizenStateMarket.js";
+import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 
 export type CitizenJobMarket = CitizenJob & {
     currentCustomer?: Citizen,
@@ -91,7 +92,12 @@ export function tickMarket(citizen: Citizen, job: CitizenJobMarket, state: ChatS
                         const totalCustomerCount = job.customerCounter.reduce((p, c) => p += c);
                         if (totalCustomerCount === 0) {
                             const reason = [`I had no customers for ${job.maxCounterDays} days.`, `I change job.`];
-                            const newJob: string = nextRandom(state.randomSeed) > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
+                            let newJob: string;
+                            if (citizen.dreamJob !== undefined) {
+                                newJob = citizen.dreamJob;
+                            } else {
+                                newJob = nextRandom(state.randomSeed) > 0.5 ? CITIZEN_JOB_LUMBERJACK : CITIZEN_JOB_BUILDING_CONSTRUCTION;
+                            }
                             citizenChangeJob(citizen, newJob, state, reason);
                             return;
                         }
@@ -352,6 +358,7 @@ function stateCheckInventory(citizen: Citizen, job: CitizenJob, state: ChatSimSt
                 }
             }
             stateInfo.state = "waitingForCustomers";
+            citizen.direction = DIRECTION_DOWN;
             stateInfo.tags.clear();
             stateInfo.tags.add(TAG_DOING_NOTHING);
             citizen.displayedEquipments = [];

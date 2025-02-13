@@ -18,6 +18,8 @@ import { createButtonWindowStatistics, statisticsCreateGraphs } from "./window/w
 import { onloadGraphsFunctions } from "./graph/graph.js";
 
 export const SKILL_GATHERING = "Gathering";
+export const DIRECTION_DOWN = Math.PI / 2;
+export const DIRECTION_LEFT = -Math.PI;
 const LOCAL_STORAGE_CHATTER_KEY = "chatSimChatters";
 
 export type Position3D = Position & { z: number };
