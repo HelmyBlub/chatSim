@@ -6,6 +6,7 @@ import { Building, loadMapObjectBuilding } from "./mapObjectBuilding.js";
 import { loadMapObjectMushroom, Mushroom } from "./mapObjectMushroom.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { Citizen, CITIZEN_PAINT_SIZE } from "./citizen.js";
+import { loadMapObjectFarmTile } from "./mapObjectFarmTile.js";
 
 export type MapObject = {
     type: string,
@@ -30,6 +31,7 @@ export function loadMapObjectsFunctions() {
     loadMapObjectTree();
     loadMapObjectBuilding();
     loadMapObjectMushroom();
+    loadMapObjectFarmTile();
 }
 
 export function mapAddObjectRandomPosition(objectType: string, state: ChatSimState): MapObject | undefined {

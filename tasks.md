@@ -1,14 +1,54 @@
 Tasks:
-- check: leisure activity put from helpfull to unhelpful if just failed once? should reduce counter instead?
+- farmer job
+    - new farmer job file
+        - does not need to do anything yet
+    - how do farm tile work?
+        - job property farmtiles[]
+        - type farmtile
+            - has growSlots
+                - can plant seeds into
+                - empty or growing of mature
+                - need to tick
+            - make other map mushrooms work in the same way
+    - farmer job:
+        - citizen searches to takes tiles to make to farm tiles
+            - near home or adjacent to other tiles
+            - up to some amount of max tiles
+            - farm tiles should be connected
+        - each time a tile is taken, fill with seeds
+        - how does citizen get seeds?
+            - start easy with just instant create
+            - improve with featrure "crafting" :
+                - requiremets: like crafting table
+                - time to craft
+                - end product
+                - required materials
+                - mushrooms seeds
+                    - materials required: 1xmushroom
+                    - end product: 2x seeds
+                    - time: 1sec
+                    - requirements: undefined
+            - new citizenStateCraft
+        - based on citizen vision distance see what fields are ready to harvest
+    - make citizen be able to choose job
 - check endless loop when every citizen dead?
     - don't know how to reproduce
 
 
 what next ideas:
-- change starving
-    - citizen get fatness stat
 - farmer job
-    - when done. mushrooms do not instant regrow
+    - secure "farmland"
+        - take over some map tiles near home rectangle area 
+        - check farm field 
+            - plant mushrooms 
+                - take x-amount of time (12h) to grow, food value increases over time until fully grown
+                - 4 mushrooms per tile
+                - have some mushroom seed
+                    - gained from mushrooms, 1 mushromm > 2 seeds
+            - harvest mushrooms 
+            - try to sell
+            - waiting if nothing to sell
+    - when done mushrooms do not instant regrow
 - city builder route
     - assign building areas for houses(housing discrict) and markets(comercial district), farmland
 - use chatting system for markets

@@ -10,6 +10,7 @@ import { loadCitizenJobWoodMarket } from "./jobWoodMarket.js";
 import { calculateDistance } from "../main.js";
 import { Inventory, inventoryGetAvailableCapacity } from "../inventory.js";
 import { findBuilding } from "../citizenState/citizenStateGetBuilding.js";
+import { loadCitizenJobFarmer } from "./jobFarmer.js";
 
 export type CitizenJob = {
     name: string,
@@ -30,6 +31,7 @@ export function loadCitizenJobsFunctions(state: ChatSimState) {
     loadCitizenJobHouseConstruction(state);
     loadCitizenJobFoodMarket(state);
     loadCitizenJobWoodMarket(state);
+    loadCitizenJobFarmer(state);
     //loadCitizenJobHouseMarket(state);
 }
 
