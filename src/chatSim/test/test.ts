@@ -140,7 +140,9 @@ function testMarketQueue(): Test {
                 if (i % 3 === 0) citizen.energyPerCent = 0.94;
                 citizen.foodPerCent = 0.87;
                 citizen.job = createJob(CITIZEN_JOB_LUMBERJACK, state)!;
-                citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_IN_INVENTORY });
+                const citizenMushrooms: InventoryItemMushroom = { name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_IN_INVENTORY, data: [] };
+                for (let i = 0; i < citizenMushrooms.counter; i++)citizenMushrooms.data!.push(0.15);
+                citizen.inventory.items.push();
                 state.map.citizens.push(citizen);
             }
             for (let i = 0; i < 2; i++) {
