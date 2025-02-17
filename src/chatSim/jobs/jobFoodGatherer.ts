@@ -25,6 +25,7 @@ export function loadCitizenJobFoodGatherer(state: ChatSimState) {
 export function jobCitizenGathererSell(citizen: Citizen, itemName: string, state: ChatSimState) {
     let returnedData = citizen.stateInfo.stack.length > 0 ? citizen.stateInfo.stack[0].returnedData : citizen.stateInfo.returnedData;
     if (returnedData && returnedData.type === CITIZEN_STATE_SEARCH) {
+        if (citizen.stateInfo.returnedData) citizen.stateInfo.returnedData = undefined;
         const successData = returnedData as CitizenStateSearchSuccessData;
         const market = successData.found as BuildingMarket;
         citizen.memory.lastMarket = market;
