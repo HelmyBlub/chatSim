@@ -1,35 +1,39 @@
 Tasks:
+- fix camera follow on selecting citizens
 - farmer job
-    - new farmer job file
-        - does not need to do anything yet
-    - how do farm tile work?
-        - job property farmtiles[]
-        - type farmtile
-            - has growSlots
-                - can plant seeds into
-                - empty or growing of mature
-                - need to tick
-            - make other map mushrooms work in the same way
-    - farmer job:
-        - citizen searches to takes tiles to make to farm tiles
-            - near home or adjacent to other tiles
-            - up to some amount of max tiles
-            - farm tiles should be connected
-        - each time a tile is taken, fill with seeds
-        - how does citizen get seeds?
-            - start easy with just instant create
-            - improve with featrure "crafting" :
-                - requiremets: like crafting table
-                - time to craft
-                - end product
-                - required materials
-                - mushrooms seeds
-                    - materials required: 1xmushroom
-                    - end product: 2x seeds
-                    - time: 1sec
-                    - requirements: undefined
-            - new citizenStateCraft
-        - based on citizen vision distance see what fields are ready to harvest
+    - priority order:
+        - if full inventory 
+            - if home inventory full => sell
+            - else store at home
+        - if any full gorwn mushromms
+            - harvest mushroom
+        - if any not fully planted tiles
+            - plant seeds
+        - find another tile for farm
+    - take tiles:
+        - find a tile
+        - go near and take it
+    - plant mushroom (not seeds required yet)
+        - go onto tile and plant
+        - planting takes time
+    - harvest mushrooms
+        - go onto tile and harvest
+    - handle full inventory
+    - how does citizen get seeds?
+        - start easy with just instant create
+        - think about inventory management
+        - improve with featrure "crafting" :
+            - requiremets: like crafting table
+            - time to craft
+            - end product
+            - required materials
+            - mushrooms seeds
+                - materials required: 1xmushroom
+                - end product: 2x seeds
+                - time: 1sec
+                - requirements: undefined
+        - new citizenStateCraft
+    - based on citizen vision distance see what fields are ready to harvest
     - make citizen be able to choose job
 - check endless loop when every citizen dead?
     - don't know how to reproduce

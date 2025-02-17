@@ -11,6 +11,7 @@ import { MAP_OBJECT_BUILDING } from "./map/mapObjectBuilding.js";
 import { MAP_OBJECT_MUSHROOM } from "./map/mapObjectMushroom.js";
 import { MapObject } from "./map/mapObject.js";
 import { rectangleClickedInside } from "./rectangle.js";
+import { MAP_OBJECT_FARM_TILE } from "./map/mapObjectFarmTile.js";
 
 const INPUT_CONSIDERED_CLICK_MAX_TIME = 200;
 const INPUT_CONSIDERED_MIN_MOVING_DISTANCE = 20;
@@ -120,7 +121,9 @@ function selectObject(relativeMouseToCanvas: Position, state: ChatSimState) {
             { objects: chunk.tileObjects.get(MAP_OBJECT_BUILDING), size: 60 },
             { objects: chunk.tileObjects.get(MAP_OBJECT_TREE), size: 60 },
             { objects: chunk.tileObjects.get(MAP_OBJECT_MUSHROOM), size: 30 },
+            { objects: chunk.tileObjects.get(MAP_OBJECT_FARM_TILE), size: 60 },
         ];
+
         for (let toCheck of toCheckObjects) {
             const closestObject = getClosestObject(toCheck.objects, toCheck.size, relativeMouseToCanvas, state);
             if (closestObject) {

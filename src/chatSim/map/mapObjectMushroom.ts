@@ -21,6 +21,7 @@ export function loadMapObjectMushroom() {
         create: create,
         createSelectionData: createSelectionData,
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
+        getVisionDistanceFactor: getVisionDistanceFactor,
         onDeleteOnTile: onDelete,
         paint: paint,
         tickGlobal: tickMushroomSpawn,
@@ -63,12 +64,18 @@ function paintSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, stat
     rect.height = lineSpacing * lineCounter + padding * 2;
 }
 
+function getVisionDistanceFactor(mushroom: Mushroom): number {
+    return getMaxVisionDistanceFactor() * mushroom.foodValue / MUSHROOM_FOOD_VALUE;
+}
+
 function getMaxVisionDistanceFactor() {
     return 0.5;
 }
 
 function paint(ctx: CanvasRenderingContext2D, mushroom: Mushroom, paintDataMap: PaintDataMap, state: ChatSimState) {
-    const mushroomPaintSize = 30;
+    const sizeFactor = mushroom.foodValue / MUSHROOM_FOOD_VALUE;
+    if (sizeFactor === 0) return;
+    const mushroomPaintSize = 30 * sizeFactor;
     const mushroomImage = IMAGES[IMAGE_PATH_MUSHROOM];
     const paintPos = mapPositionToPaintPosition(mushroom.position, paintDataMap);
     ctx.drawImage(mushroomImage, 0, 0, 200, 200,

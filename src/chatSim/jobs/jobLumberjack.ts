@@ -1,14 +1,12 @@
 import { ChatSimState } from "../chatSimModels.js";
-import { Citizen, citizenAddThought, citizenSetThought } from "../map/citizen.js";
-import { citizenChangeJob, CitizenJob, isCitizenAtPosition } from "./job.js";
+import { Citizen, citizenSetThought } from "../map/citizen.js";
+import { citizenChangeJob, CitizenJob } from "./job.js";
 import { CITIZEN_JOB_WOOD_MARKET } from "./jobWoodMarket.js";
 import { INVENTORY_WOOD } from "../inventory.js";
 import { Tree } from "../map/mapObjectTree.js";
 import { inventoryGetAvailableCapacity } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
-import { CitizenStateSearchData, setCitizenStateSearch, setCitizenStateSearchItem, setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
-import { setCitizenStateSellItem } from "../citizenState/citizenStateSellItem.js";
-import { Building, MAP_OBJECT_BUILDING } from "../map/mapObjectBuilding.js";
+import { setCitizenStateSearchItem, setCitizenStateTransportItemToBuilding } from "../citizenState/citizenStateGetItem.js";
 import { jobCitizenGathererSell } from "./jobFoodGatherer.js";
 
 export type CitizenJobLuberjack = CitizenJob & {

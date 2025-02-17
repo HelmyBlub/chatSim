@@ -5,6 +5,7 @@ import { UiButton, UiRectangle } from "./rectangle.js"
 import { TestData } from "./test/test.js"
 import { LineChart } from "./graph/lineChart.js"
 import { Graph } from "./graph/graph.js"
+import { MapObject } from "./map/mapObject.js"
 
 export type Position = {
     x: number,
@@ -27,7 +28,7 @@ export type App = {
 
 export type SelectedObject = {
     type: string,
-    object: any,
+    object: MapObject,
 }
 
 export type ChatterData = {

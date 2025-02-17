@@ -140,27 +140,13 @@ export function mapDeleteTileObject(object: MapObject, map: ChatSimMap) {
 
 export function paintSelectionBox(ctx: CanvasRenderingContext2D, state: ChatSimState) {
     if (state.inputData.selected) {
-        let position: Position | undefined;
-        let size = 0;
+        let size = 60;
+        const position = state.inputData.selected.object.position;
         switch (state.inputData.selected.type) {
             case "citizen":
-                const citizen: Citizen = state.inputData.selected.object;
-                position = citizen.position;
                 size = CITIZEN_PAINT_SIZE;
                 break;
-            case "building":
-                const building: Building = state.inputData.selected.object;
-                position = building.position;
-                size = 60;
-                break;
-            case "tree":
-                const tree: Tree = state.inputData.selected.object;
-                position = tree.position;
-                size = 60;
-                break;
             case "mushroom":
-                const mushroom: Mushroom = state.inputData.selected.object;
-                position = mushroom.position;
                 size = 20;
                 break;
         }

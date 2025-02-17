@@ -1,5 +1,5 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../map/citizen.js";
+import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo, isCitizenInInteractionDistance } from "../map/citizen.js";
 import { nextRandom, SKILL_GATHERING } from "../main.js";
 import { INVENTORY_MUSHROOM, InventoryItemMushroom } from "../inventory.js";
 import { mapGetChunkForPosition } from "../map/map.js";
@@ -8,6 +8,7 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { playChatSimSound, SOUND_PATH_PICKUP } from "../sounds.js";
 import { MAP_OBJECT_MUSHROOM, Mushroom } from "../map/mapObjectMushroom.js";
 import { mapDeleteTileObject } from "../map/mapObject.js";
+import { FarmTile, farmTileDeleteGrowSlot, MAP_OBJECT_FARM_TILE } from "../map/mapObjectFarmTile.js";
 
 type GatherData = {
     mushroomPosition: Position,
@@ -31,7 +32,7 @@ function tickCitizenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
         if (isCitizenAtPosition(citizen, data.mushroomPosition)) {
             const mushroom = isCloseToMushroom(citizen, state);
             if (mushroom !== undefined) {
-                pickUpMushroom(citizen, state, mushroom);
+                pickUpMushroom(citizen, state, mushroom.mushroom, mushroom.isFarmMushroom);
             }
             citizenStateStackTaskSuccess(citizen);
             return;
@@ -41,8 +42,12 @@ function tickCitizenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
     }
 }
 
-function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroom) {
-    mapDeleteTileObject(mushroom, state.map);
+function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroom, farmMushroom: boolean) {
+    if (!farmMushroom) {
+        mapDeleteTileObject(mushroom, state.map);
+    } else {
+        farmTileDeleteGrowSlot(mushroom, state);
+    }
     let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM) as InventoryItemMushroom;
     if (inventoryMushroom === undefined) {
         inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0, data: [] };
@@ -61,13 +66,24 @@ function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroo
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
 }
 
-function isCloseToMushroom(citizen: Citizen, state: ChatSimState): Mushroom | undefined {
+function isCloseToMushroom(citizen: Citizen, state: ChatSimState): { mushroom: Mushroom, isFarmMushroom: boolean } | undefined {
     const chunk = mapGetChunkForPosition(citizen.position, state.map);
     if (!chunk) return undefined;
     const mushrooms = chunk.tileObjects.get(MAP_OBJECT_MUSHROOM) as Mushroom[];
     if (!mushrooms) return undefined;
     for (let mushroom of mushrooms) {
-        if (isCitizenAtPosition(citizen, mushroom.position)) return mushroom;
+        if (isCitizenAtPosition(citizen, mushroom.position)) return { mushroom, isFarmMushroom: false };
+    }
+    const farmTiles = chunk.tileObjects.get(MAP_OBJECT_FARM_TILE) as FarmTile[];
+    if (!farmTiles) return undefined;
+    for (let farmTile of farmTiles) {
+        if (isCitizenInInteractionDistance(citizen, farmTile.position)) {
+            for (let mushroom of farmTile.growSlots as Mushroom[]) {
+                if (mushroom === undefined) continue;
+                if (isCitizenAtPosition(citizen, mushroom.position)) return { mushroom, isFarmMushroom: true };
+            }
+            break;
+        }
     }
     return undefined;
 }
