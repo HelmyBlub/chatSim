@@ -5,7 +5,7 @@ import { isCitizenAtPosition } from "../jobs/job.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { setCitizenStateStartCitizenChat } from "./citizenStateChat.js";
 import { INTENTION_GREETING } from "./citizenChatMessageOptions.js";
-import { INVENTORY_MUSHROOM } from "../inventory.js";
+import { INVENTORY_MUSHROOM, InventoryItemMushroom } from "../inventory.js";
 import { setCitizenStateEat } from "./citizenStateEat.js";
 import { setCitizenStateGetItem } from "./citizenStateGetItem.js";
 
@@ -89,7 +89,7 @@ function tickCitizenStateWalkingAroundRandomly(citizen: Citizen, state: ChatSimS
 }
 
 function tickCitizenStateFindFoodAndEat(citizen: Citizen, state: ChatSimState) {
-    const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+    const inventoryMushrooms = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM) as InventoryItemMushroom;
     const stackData = citizen.stateInfo.stack[0];
     if (stackData.subState === "eating") {
         citizenStateStackTaskSuccess(citizen);

@@ -2,7 +2,7 @@ import { ChatSimState } from "../chatSimModels.js";
 import { Citizen } from "../map/citizen.js";
 import { citizenHappinessToString } from "../citizenNeeds/citizenNeedHappiness.js";
 import { citizenIsSleeping } from "../citizenNeeds/citizenNeedSleep.js";
-import { INVENTORY_MUSHROOM, inventoryMoveItemBetween, inventoryPutItemInto } from "../inventory.js";
+import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { nextRandom } from "../main.js";
 import { ChatMessageChatIntention, citizenMemoryKnowByName, citizenRememberName, CitizenStateChatData } from "./citizenStateChat.js";
 import { setCitizenStateTrade } from "./citizenStateTradeItem.js";

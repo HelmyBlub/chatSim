@@ -8,7 +8,7 @@ import { Inventory, InventoryItem, paintInventoryItem, paintInventoryMoney } fro
 import { isCitizenInInteractionDistance } from "./citizen.js";
 import { BUILDING_DATA } from "../jobs/jobBuildingContruction.js";
 import { INVENTORY_MUSHROOM, INVENTORY_WOOD } from "../inventory.js";
-import { ChatSimMap, mapGetRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap } from "./map.js";
+import { ChatSimMap, mapGetRandomEmptyTileInfoInDistance, MapChunk, mapChunkKeyAndTileToPosition, PaintDataMap, mapAddTickQueueEntry } from "./map.js";
 import { mapPositionToPaintPosition } from "../paint.js";
 import { MAP_OBJECTS_FUNCTIONS, mapAddObject, MapObject, mapDeleteTileObject } from "./mapObject.js";
 
@@ -21,7 +21,6 @@ export type Building = MapObject & {
     deterioration: number
     inventory: Inventory
     brokeDownTime?: number,
-    deletedFromMap?: boolean,
 }
 
 export type BuildingMarket = Building & {
@@ -34,13 +33,14 @@ export type BuildingMarket = Building & {
 }
 
 export const MAP_OBJECT_BUILDING = "building";
+const BUILDING_TICK_INTERVAL = 5500;
 
 export function loadMapObjectBuilding() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_BUILDING] = {
         createSelectionData: createSelectionData,
         getMaxVisionDistanceFactor: getMaxVisionDistanceFactor,
-        onDeleteOnTile: onDelete,
         paint: paint,
+        tickQueue: mapObjectTickQueue,
     }
 }
 
@@ -54,7 +54,7 @@ export function createBuildingOnRandomTile(owner: Citizen, state: ChatSimState, 
     const building = createBuilding(owner, mapPosition, buildingType);
     const success = mapAddObject(building, state);
     if (success) {
-        state.map.buildings.push(building);
+        mapAddTickQueueEntry({ mapObject: building, time: state.time + BUILDING_TICK_INTERVAL }, state);
         return building;
     }
     debugger;
@@ -114,24 +114,6 @@ export function marketGetQueueMapPosition(citizen: Citizen, market: BuildingMark
     return {
         x: market.position.x + (queueNumber + 1) * 25 + 20,
         y: market.position.y + 17 - queueNumber,
-    }
-}
-
-export function tickBuildings(state: ChatSimState) {
-    for (let i = 0; i < state.map.buildings.length; i++) {
-        const building = state.map.buildings[i];
-        if (building.deterioration < 1) {
-            building.deterioration += 0.00003;
-            if (building.deterioration >= 1) {
-                building.inventory.items = [];
-                building.brokeDownTime = state.time;
-            }
-        } else if (building.brokeDownTime !== undefined) {
-            const breakDownTime = BUILDING_DATA[building.buildingType].woodAmount * 60000;
-            if (building.brokeDownTime + breakDownTime < state.time) {
-                mapDeleteTileObject(building, state.map);
-            }
-        }
     }
 }
 
@@ -197,6 +179,25 @@ function createSelectionData(state: ChatSimState): UiRectangle {
     return citizenUiRectangle;
 }
 
+function mapObjectTickQueue(mapObject: MapObject, state: ChatSimState) {
+    const building = mapObject as Building;
+    if (building.deterioration < 1) {
+        building.deterioration += 0.01;
+        if (building.deterioration >= 1) {
+            building.inventory.items = [];
+            building.brokeDownTime = state.time;
+        }
+    } else if (building.brokeDownTime !== undefined) {
+        const deleteDelay = BUILDING_DATA[building.buildingType].woodAmount * 60000;
+        if (building.brokeDownTime + deleteDelay < state.time) {
+            mapDeleteTileObject(building, state.map);
+        }
+    }
+    if (!building.deletedFromMap) {
+        mapAddTickQueueEntry({ mapObject, time: state.time + BUILDING_TICK_INTERVAL }, state);
+    }
+}
+
 function paintSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, state: ChatSimState) {
     const building = state.inputData.selected?.object as Building;
     if (!building) return;
@@ -231,12 +232,6 @@ function paintSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, stat
 
 function getMaxVisionDistanceFactor() {
     return 2;
-}
-
-function onDelete(building: Building, map: ChatSimMap) {
-    const buildingMapIndex = map.buildings.findIndex(b => b === building);
-    if (buildingMapIndex > -1) map.buildings.splice(buildingMapIndex, 1);
-    building.deletedFromMap = true;
 }
 
 function paint(ctx: CanvasRenderingContext2D, building: Building, paintDataMap: PaintDataMap, state: ChatSimState) {

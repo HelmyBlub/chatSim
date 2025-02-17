@@ -145,8 +145,12 @@ function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimStat
             if (sellerInventoryItem && sellerInventoryItem.counter > 0) {
                 const amount = Math.min(sellerInventoryItem.counter, sellerData.itemAmount);
                 sellerInventoryItem.counter -= amount;
+                let data = undefined;
+                if (sellerInventoryItem.data) {
+                    data = sellerInventoryItem.data.splice(0, amount);
+                }
                 sellerData.expectedMoney = sellerData.expectedMoney / sellerData.itemAmount * amount;
-                item = { name: sellerData.itemName, counter: amount };
+                item = { name: sellerData.itemName, counter: amount, data };
             } else {
                 citizenStateStackTaskSuccess(citizen);
             }
@@ -225,7 +229,7 @@ function tickCitizenStateMarketItemExchange(citizen: Citizen, state: ChatSimStat
                 citizen.tradePaw.money = 0;
             }
             if (citizen.tradePaw.item) {
-                inventoryPutItemInto(citizen.tradePaw.item.name, data.inventory, citizen.tradePaw.item.counter);
+                inventoryPutItemInto(citizen.tradePaw.item.name, data.inventory, citizen.tradePaw.item.counter, citizen.tradePaw.item.data);
                 citizen.tradePaw.item = undefined;
             }
             citizen.tradePaw = undefined;

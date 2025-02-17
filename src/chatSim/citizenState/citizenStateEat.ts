@@ -1,13 +1,12 @@
 import { ChatSimState } from "../chatSimModels.js";
 import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenStopMoving, citizenMemorizeHomeInventory, TAG_EATING, citizenGetHappinessByTagChangeAmount } from "../map/citizen.js";
-import { MUSHROOM_FOOD_VALUE } from "../citizenNeeds/citizenNeedFood.js";
-import { InventoryItem } from "../inventory.js";
+import { InventoryItem, InventoryItemMushroom } from "../inventory.js";
 import { INVENTORY_MUSHROOM } from "../inventory.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { DIRECTION_DOWN } from "../main.js";
 
 export type CitizenStateEatData = {
-    inventoryFood: InventoryItem,
+    inventoryFood: InventoryItemMushroom,
     inventoryName: string,
     eatAmountLeft?: number,
     tempStartTime?: number,
@@ -22,7 +21,7 @@ export function citizenIsEating(citizen: Citizen): boolean {
     return citizen.stateInfo.stack.length > 0 && citizen.stateInfo.stack[0].state === CITIZEN_STATE_EAT;
 }
 
-export function setCitizenStateEat(citizen: Citizen, inventoryFood: InventoryItem, inventoryName: string, eatAmount?: number) {
+export function setCitizenStateEat(citizen: Citizen, inventoryFood: InventoryItemMushroom, inventoryName: string, eatAmount?: number) {
     const data: CitizenStateEatData = { inventoryFood: inventoryFood, inventoryName: inventoryName, eatAmountLeft: eatAmount };
     citizen.stateInfo.stack.unshift({ state: CITIZEN_STATE_EAT, data: data, tags: new Set() });
 }
@@ -31,7 +30,7 @@ function tickCitizenStateEat(citizen: Citizen, state: ChatSimState) {
     const citizenState = citizen.stateInfo.stack[0];
     const data = citizenState.data as CitizenStateEatData;
 
-    if (data.inventoryFood.counter <= 0 || (!data.eatAmountLeft && citizen.foodPerCent > 1 - MUSHROOM_FOOD_VALUE)) {
+    if (data.inventoryFood.counter <= 0 || (!data.eatAmountLeft && citizen.foodPerCent > 0.85)) {
         citizenStateStackTaskSuccess(citizen);
         return;
     }
@@ -40,7 +39,8 @@ function tickCitizenStateEat(citizen: Citizen, state: ChatSimState) {
     if (citizen.moveTo) citizenStopMoving(citizen);
     const eatDuration = 1000;
     if (data.tempStartTime + eatDuration < state.time) {
-        let newFoodPerCent = citizen.foodPerCent + MUSHROOM_FOOD_VALUE;
+        const foodValue = data.inventoryFood.data.shift()!;
+        let newFoodPerCent = citizen.foodPerCent + foodValue;
         if (newFoodPerCent > 1) {
             let fatGain = newFoodPerCent % 1;
             if (citizen.fatness > 1) {

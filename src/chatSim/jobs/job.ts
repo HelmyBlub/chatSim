@@ -69,44 +69,6 @@ export function isCitizenAtPosition(citizen: Citizen, target: Position) {
     return distance <= citizen.speed;
 }
 
-export function buyItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: Inventory, buyerInventory: Inventory, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
-    return sellItemWithInventories(seller, buyer, itemName, itemPrice, sellerInventory, buyerInventory, state, requestedAmount);
-}
-
-export function sellItemWithInventories(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, sellerInventory: Inventory, buyerInventory: Inventory, state: ChatSimState, requestedAmount: number | undefined = undefined): number | undefined {
-    const sellerItem = sellerInventory.items.find(i => i.name === itemName);
-    if (!sellerItem) return;
-    const sellerAmount = sellerItem.counter;
-    let buyerInventoryCapacity = inventoryGetAvailableCapacity(buyerInventory, itemName);
-    const buyerInventoryMoneyAmount = Math.min(buyerInventoryCapacity, Math.floor(buyer.money / itemPrice));
-    const buyerAmount = requestedAmount !== undefined ? Math.min(buyerInventoryMoneyAmount, requestedAmount) : buyerInventoryMoneyAmount;
-    const tradeAmount = Math.min(sellerAmount, buyerAmount);
-    if (tradeAmount === 0) {
-        return;
-    }
-    let buyerItem = buyerInventory.items.find(i => i.name === itemName);
-    if (!buyerItem) {
-        buyerItem = { name: itemName, counter: 0 };
-        buyerInventory.items.push(buyerItem);
-    }
-    sellerItem.counter -= tradeAmount;
-    buyerItem.counter += tradeAmount;
-    const totalPrice = itemPrice * tradeAmount;
-    seller.money += totalPrice;
-    buyer.money -= totalPrice;
-    citizenAddLogEntry(seller, `sold ${tradeAmount} ${itemName} to ${buyer.name} for $${totalPrice}`, state);
-    citizenAddLogEntry(buyer, `bought ${tradeAmount} ${itemName} from ${seller.name} for $${totalPrice}`, state);
-    return tradeAmount;
-}
-
-export function buyItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    return sellItem(seller, buyer, itemName, itemPrice, state, requestedAmount);
-}
-
-export function sellItem(seller: Citizen, buyer: Citizen, itemName: string, itemPrice: number, state: ChatSimState, requestedAmount: number | undefined = undefined) {
-    return sellItemWithInventories(seller, buyer, itemName, itemPrice, seller.inventory, buyer.inventory, state, requestedAmount);
-}
-
 export function findMarketBuilding(citizen: Citizen, state: ChatSimState): BuildingMarket | undefined {
     const building = findBuilding(citizen, "Market", state);
     if (building) return building as BuildingMarket;

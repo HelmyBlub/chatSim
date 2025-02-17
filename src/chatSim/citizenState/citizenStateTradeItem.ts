@@ -39,6 +39,7 @@ function tickCitizenStateTrade(citizen: Citizen, state: ChatSimState) {
                 name: data.itemName,
             }
             inventoryItem.counter -= data.itemAmount;
+            if (inventoryItem.data) tradeItem.data = inventoryItem.data.splice(0, data.itemAmount);
             citizen.tradePaw = {
                 item: tradeItem,
                 money: 0,
@@ -55,7 +56,8 @@ function tickCitizenStateTrade(citizen: Citizen, state: ChatSimState) {
                 citizenStateStackTaskSuccess(citizen);
                 return;
             } else if (citizen.tradePaw.startTime + citizen.tradePaw.duration + 2000 < state.time) {
-                inventoryPutItemInto(citizen.tradePaw.item!.name, citizen.inventory, citizen.tradePaw.item!.counter);
+                const item = citizen.tradePaw.item!;
+                inventoryPutItemInto(item.name, citizen.inventory, item.counter, item.data);
                 citizen.tradePaw = undefined;
                 citizenStateStackTaskSuccess(citizen);
                 return;
@@ -80,7 +82,8 @@ function tickCitizenStateTrade(citizen: Citizen, state: ChatSimState) {
             }
         } else if (citizenState.subState === "took item") {
             if (citizen.tradePaw && citizen.tradePaw.startTime + citizen.tradePaw.duration < state.time) {
-                inventoryPutItemInto(citizen.tradePaw.item!.name, citizen.inventory, citizen.tradePaw.item!.counter);
+                const item = citizen.tradePaw.item!;
+                inventoryPutItemInto(item.name, citizen.inventory, item.counter, item.data);
                 citizen.tradePaw = undefined;
                 citizenStateStackTaskSuccess(citizen);
                 return;

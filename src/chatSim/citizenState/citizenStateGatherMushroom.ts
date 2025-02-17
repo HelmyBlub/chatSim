@@ -1,7 +1,7 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { citizenAddLogEntry, Citizen, citizenStateStackTaskSuccess, citizenMoveTo } from "../map/citizen.js";
 import { nextRandom, SKILL_GATHERING } from "../main.js";
-import { INVENTORY_MUSHROOM } from "../inventory.js";
+import { INVENTORY_MUSHROOM, InventoryItemMushroom } from "../inventory.js";
 import { mapGetChunkForPosition } from "../map/map.js";
 import { CITIZEN_STATE_DEFAULT_TICK_FUNCTIONS } from "../tick.js";
 import { isCitizenAtPosition } from "../jobs/job.js";
@@ -43,18 +43,20 @@ function tickCitizenStateGatherMushroom(citizen: Citizen, state: ChatSimState) {
 
 function pickUpMushroom(citizen: Citizen, state: ChatSimState, mushroom: Mushroom) {
     mapDeleteTileObject(mushroom, state.map);
-    let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
+    let inventoryMushroom = citizen.inventory.items.find(i => i.name === INVENTORY_MUSHROOM) as InventoryItemMushroom;
     if (inventoryMushroom === undefined) {
-        inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0 };
+        inventoryMushroom = { name: INVENTORY_MUSHROOM, counter: 0, data: [] };
         citizen.inventory.items.push(inventoryMushroom);
     }
     inventoryMushroom.counter++;
+    inventoryMushroom.data.push(mushroom.foodValue);
     citizenAddLogEntry(citizen, `picked up ${INVENTORY_MUSHROOM}. ${inventoryMushroom.counter} in inventory.`, state);
     playChatSimSound(SOUND_PATH_PICKUP, citizen.position, state);
     if (citizen.skills[SKILL_GATHERING] === undefined) citizen.skills[SKILL_GATHERING] = 0;
     const skillGathering = citizen.skills[SKILL_GATHERING];
     if (nextRandom(state.randomSeed) < skillGathering / 100) {
         inventoryMushroom.counter++;
+        inventoryMushroom.data.push(mushroom.foodValue);
     }
     if (skillGathering < 100) citizen.skills[SKILL_GATHERING] += 1;
 }

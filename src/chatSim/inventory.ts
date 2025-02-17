@@ -1,12 +1,15 @@
 import { IMAGE_PATH_MONEY, IMAGE_PATH_MUSHROOM, IMAGE_PATH_WOOD_PLANK } from "../drawHelper.js";
-import { ChatSimState, Position } from "./chatSimModels.js";
-import { citizenAddLogEntry, Citizen } from "./map/citizen.js";
+import { Position } from "./chatSimModels.js";
 import { IMAGES } from "./images.js";
-import { isCitizenAtPosition } from "./jobs/job.js";
 
 export type InventoryItem = {
     name: string,
     counter: number,
+    data?: any[],
+}
+
+export type InventoryItemMushroom = InventoryItem & {
+    data: number[],
 }
 
 export type Inventory = {
@@ -110,15 +113,16 @@ export function inventoryMoveItemBetween(itemName: string, fromInventory: Invent
     if (item.counter < maxFromInventoryAmount) {
         maxFromInventoryAmount = item.counter;
     }
-    const toAmount = inventoryPutItemInto(itemName, toInventory, maxFromInventoryAmount);
+    const toAmount = inventoryPutItemInto(itemName, toInventory, maxFromInventoryAmount, item.data);
     item.counter -= toAmount;
+    if (item.data) item.data.splice(0, toAmount);
     return toAmount;
 }
 
 /**
  * @returns actual amount put into inventory. As inventory has a max capacity it might not fit all in
  */
-export function inventoryPutItemInto(itemName: string, inventory: Inventory, amount: number): number {
+export function inventoryPutItemInto(itemName: string, inventory: Inventory, amount: number, data?: any[]): number {
     let item = inventory.items.find(i => i.name === itemName);
     let actualAmount = amount;
     if (!item) {
@@ -126,6 +130,7 @@ export function inventoryPutItemInto(itemName: string, inventory: Inventory, amo
             name: itemName,
             counter: 0,
         }
+        if (data) item.data = [];
         inventory.items.push(item);
     }
     const availableCapacity = inventoryGetAvailableCapacity(inventory, itemName);
@@ -134,6 +139,14 @@ export function inventoryPutItemInto(itemName: string, inventory: Inventory, amo
         throw "negativ trade not allowed";
     }
     item.counter += actualAmount;
+    if (data && item.data) {
+        let tempData = data;
+        if (tempData.length > actualAmount) {
+            tempData = tempData.toSpliced(actualAmount, tempData.length - actualAmount);
+        }
+        item.data.push(...tempData);
+    }
+
     return actualAmount;
 }
 

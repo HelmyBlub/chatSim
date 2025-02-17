@@ -11,6 +11,7 @@ import { loadMapObjectFarmTile } from "./mapObjectFarmTile.js";
 export type MapObject = {
     type: string,
     position: Position,
+    deletedFromMap?: boolean,
 }
 
 export type FunctionsMapObject = {
@@ -21,6 +22,7 @@ export type FunctionsMapObject = {
     onDeleteOnTile?(object: MapObject, map: ChatSimMap): void,
     paint?(ctx: CanvasRenderingContext2D, object: MapObject, paintDataMap: PaintDataMap, state: ChatSimState): void,
     tickGlobal?(state: ChatSimState): void,
+    tickQueue?(mapObject: MapObject, state: ChatSimState): void,
 }
 
 export type FunctionsMapObjects = { [key: string]: FunctionsMapObject };
@@ -126,6 +128,7 @@ export function mapDeleteTileObject(object: MapObject, map: ChatSimMap) {
     const objectIndex = mapObjects.findIndex(h => h === object);
     if (objectIndex === -1) return;
     mapObjects.splice(objectIndex, 1);
+    object.deletedFromMap = true;
     const usedTile = chunk.usedTiles.splice(usedTileIndex, 1)[0];
     const objectFunctions = MAP_OBJECTS_FUNCTIONS[object.type];
     if (objectFunctions && objectFunctions.onDeleteOnTile) objectFunctions.onDeleteOnTile(object, map);

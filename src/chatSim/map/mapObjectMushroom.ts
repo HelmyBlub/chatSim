@@ -2,17 +2,19 @@ import { IMAGE_PATH_MUSHROOM } from "../../drawHelper.js";
 import { ChatSimState, Position } from "../chatSimModels.js";
 import { UiRectangle } from "../rectangle.js";
 import { Rectangle } from "../rectangle.js";
-import { MUSHROOM_FOOD_VALUE } from "../citizenNeeds/citizenNeedFood.js";
 import { IMAGES } from "../images.js";
 import { mapPositionToPaintPosition } from "../paint.js";
-import { ChatSimMap, PaintDataMap } from "./map.js";
+import { ChatSimMap, mapAddTickQueueEntry, PaintDataMap } from "./map.js";
 import { MAP_OBJECTS_FUNCTIONS, mapAddObjectRandomPosition, MapObject } from "./mapObject.js";
 
 export type Mushroom = MapObject & {
     position: Position,
+    foodValue: number,
 }
 
 export const MAP_OBJECT_MUSHROOM = "mushroom";
+const MUSHROOM_FOOD_VALUE = 0.15;
+const MUSHROOM_TICK_INTERVAL = 5000;
 
 export function loadMapObjectMushroom() {
     MAP_OBJECTS_FUNCTIONS[MAP_OBJECT_MUSHROOM] = {
@@ -22,6 +24,7 @@ export function loadMapObjectMushroom() {
         onDeleteOnTile: onDelete,
         paint: paint,
         tickGlobal: tickMushroomSpawn,
+        tickQueue: tickQueue,
     }
 }
 
@@ -55,7 +58,7 @@ function paintSelectionData(ctx: CanvasRenderingContext2D, rect: Rectangle, stat
     let offsetY = rect.topLeft.y + fontSize + padding;
     const lineSpacing = fontSize + 5;
     let lineCounter = 0;
-    ctx.fillText(`foodValue: ${MUSHROOM_FOOD_VALUE}`, offsetX, offsetY + lineSpacing * lineCounter++);
+    ctx.fillText(`foodValue: ${mushroom.foodValue}`, offsetX, offsetY + lineSpacing * lineCounter++);
 
     rect.height = lineSpacing * lineCounter + padding * 2;
 }
@@ -83,6 +86,14 @@ function tickMushroomSpawn(state: ChatSimState) {
     }
 }
 
+function tickQueue(mapObject: MapObject, state: ChatSimState) {
+    const mushroom = mapObject as Mushroom;
+    mushroom.foodValue += 0.01;
+    if (mushroom.foodValue < MUSHROOM_FOOD_VALUE) {
+        mapAddTickQueueEntry({ mapObject, time: state.time + MUSHROOM_TICK_INTERVAL }, state);
+    }
+}
+
 function onDelete(object: MapObject, map: ChatSimMap) {
     map.mushroomCounter--;
 }
@@ -93,7 +104,8 @@ function create(position: Position) {
         position: {
             x: position.x,
             y: position.y,
-        }
+        },
+        foodValue: MUSHROOM_FOOD_VALUE,
     }
     return newMushroom;
 }

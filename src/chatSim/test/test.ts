@@ -7,7 +7,7 @@ import { CITIZEN_JOB_FOOD_MARKET } from "../jobs/jobFoodMarket.js";
 import { CITIZEN_JOB_LUMBERJACK } from "../jobs/jobLumberjack.js";
 import { createJobMarket } from "../jobs/jobMarket.js";
 import { createDefaultChatSimState, getDay } from "../main.js";
-import { INVENTORY_MUSHROOM } from "../inventory.js";
+import { INVENTORY_MUSHROOM, InventoryItemMushroom } from "../inventory.js";
 import { ChatSimMap, createMap } from "../map/map.js";
 import { chatSimTick } from "../tick.js";
 import { createBuildingOnRandomTile } from "../map/mapObjectBuilding.js";
@@ -132,7 +132,9 @@ function testMarketQueue(): Test {
             const marketBuilding = createBuildingOnRandomTile(marketOwner, state, "Market", marketOwner.position)!;
             marketBuilding.buildProgress = undefined;
             marketBuilding.inhabitedBy = marketOwner;
-            marketBuilding.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 30 });
+            const marketMushrooms: InventoryItemMushroom = { name: INVENTORY_MUSHROOM, counter: 30, data: [] };
+            for (let i = 0; i < marketMushrooms.counter; i++)marketMushrooms.data!.push(0.15);
+            marketBuilding.inventory.items.push(marketMushrooms);
             for (let i = 0; i < 5; i++) {
                 const citizen = citizenCreateDefault("testBuyingCustomer" + i, state);
                 if (i % 3 === 0) citizen.energyPerCent = 0.94;
@@ -143,10 +145,11 @@ function testMarketQueue(): Test {
             }
             for (let i = 0; i < 2; i++) {
                 const citizen = createCitizenWithFullfiledNeeds("testSellingCustomer", state);
-                const homeMushrooms = citizen.home!.inventory.items.find(i => i.name === INVENTORY_MUSHROOM);
-                homeMushrooms!.counter = 50;
+                const homeMushrooms = citizen.home!.inventory.items.find(i => i.name === INVENTORY_MUSHROOM)!;
+                homeMushrooms.counter = 50;
+                for (let i = 0; i < homeMushrooms.counter; i++)homeMushrooms.data!.push(0.15);
                 citizen.foodPerCent = 0.887
-                citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 8 });
+                citizen.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: 8, data: [0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15] });
                 state.map.citizens.push(citizen);
             }
             return state;
@@ -294,7 +297,7 @@ function createCitizenWithFullfiledNeeds(citizenName: string, testState: ChatSim
     home.buildProgress = undefined;
     home.inhabitedBy = citizen;
     citizen.home = home;
-    home.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_AT_HOME });
+    home.inventory.items.push({ name: INVENTORY_MUSHROOM, counter: CITIZEN_NEED_FOOD_AT_HOME, data: [] });
     return citizen;
 }
 

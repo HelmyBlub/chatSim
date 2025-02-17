@@ -1,8 +1,7 @@
 import { ChatSimState, Position } from "../chatSimModels.js";
-import { Building, tickBuildings } from "./mapObjectBuilding.js";
 import { Citizen } from "./citizen.js";
 import { calculateDistance, getTimeOfDay, nextRandom } from "../main.js";
-import { MapObject, mapObjectsTickGlobal } from "./mapObject.js";
+import { MAP_OBJECTS_FUNCTIONS, MapObject, mapObjectsTickGlobal } from "./mapObject.js";
 
 export type TilePosition = {
     tileX: number,
@@ -40,8 +39,13 @@ export type ChatSimMap = {
     maxTrees: number,
     treeCounter: number,
     mapChunks: Map<string, MapChunk>,
-    buildings: Building[],
+    objectTickQueue: MapObjectTickQueueEntry[],
     lightPerCent: number,
+}
+
+export type MapObjectTickQueueEntry = {
+    mapObject: MapObject,
+    time: number,
 }
 
 export type MapChunk = {
@@ -80,7 +84,7 @@ export function createMap(tilesHorizontal: number, tilesVertical: number, maxMus
         treeCounter: 0,
         zeroChunkTopLeft: { x: 100, y: 50 },
         mapChunks: new Map(),
-        buildings: [],
+        objectTickQueue: [],
         lightPerCent: 1,
     }
     fillAllChunksAtStart(map);
@@ -179,7 +183,26 @@ export function mapGetVisionBorderPositionClosestToPoint(position: Position, map
 export function tickChatSimMap(state: ChatSimState) {
     tickSetLightPerCent(state);
     mapObjectsTickGlobal(state);
-    tickBuildings(state);
+    mapObjectTickQueue(state);
+}
+
+export function mapAddTickQueueEntry(entry: MapObjectTickQueueEntry, state: ChatSimState) {
+    for (let i = 0; i < state.map.objectTickQueue.length; i++) {
+        if (state.map.objectTickQueue[i].time > entry.time) {
+            state.map.objectTickQueue.splice(i, 0, entry);
+            return;
+        }
+    }
+    state.map.objectTickQueue.push(entry);
+}
+
+function mapObjectTickQueue(state: ChatSimState) {
+    while (state.map.objectTickQueue.length > 0 && state.map.objectTickQueue[0].time <= state.time) {
+        const entry = state.map.objectTickQueue.shift()!;
+        if (entry.mapObject.deletedFromMap) continue;
+        const functions = MAP_OBJECTS_FUNCTIONS[entry.mapObject.type];
+        if (functions.tickQueue) functions.tickQueue(entry.mapObject, state);
+    }
 }
 
 function tickSetLightPerCent(state: ChatSimState) {
