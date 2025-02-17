@@ -323,6 +323,7 @@ function switchThroughVisibleCitizens(state: ChatSimState) {
                 type: "citizen",
             };
             rectangleCreateSelectedUi(state);
+            state.paintData.map.lockCameraToSelected = true;
             return;
         }
     }

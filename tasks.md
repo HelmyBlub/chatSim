@@ -1,6 +1,8 @@
 Tasks:
 - fix camera follow on selecting citizens
+- citizens walking backwards? why? certain angles buggy?
 - farmer job
+    - farmer does not store mushrooms at home
     - priority order:
         - if full inventory 
             - if home inventory full => sell
