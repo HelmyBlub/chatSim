@@ -53,7 +53,7 @@ function doChatterDogAutoChat(state: State) {
             const randomWait = Math.random() * 500 + (500 * (1 + state.chatters.length / 5));
             if (chatter.lastMessageTime + randomWait >= currentTime) continue;
             let text = "";
-            const wordList = ["hi", "test", "random", "clap", "sleep", "NotLikeThis", "Kappa", "HeyGuys"];
+            const wordList = ["hi", "test", "random", "clap", "sleep", "NotLikeThis", "Kappa", "HeyGuys", "PewPewPew"];
             const iterationCount = Math.floor(Math.random() * 3 + 1);
             for (let i = 0; i < iterationCount; i++) {
                 let randomWordIndex = Math.floor(Math.random() * wordList.length);

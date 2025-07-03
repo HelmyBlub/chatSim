@@ -16,6 +16,7 @@ import { citizenAddTrait, CITIZEN_TRAIT_ROBOT, handleChatterAddTraitMessage, loa
 import { createButtonWindowChatCommands } from "./window/windowChatCommands.js";
 import { createButtonWindowStatistics, statisticsCreateGraphs } from "./window/windowStatistics.js";
 import { onloadGraphsFunctions } from "./graph/graph.js";
+import { checkIsTextCloseTo } from "../obsOverlayApp/commands/commands.js";
 
 export const SKILL_GATHERING = "Gathering";
 export const DIRECTION_DOWN = Math.PI / 2;
@@ -261,43 +262,6 @@ function checkIsChatterMessageABot(message: string) {
     for (let toCheck of stringsToCheck) {
         const compare = checkIsTextCloseTo(message, toCheck);
         if (compare) return true;
-    }
-    return false;
-}
-
-/**
- * retruns true if text and compare text match with less than 3 errors
- */
-export function checkIsTextCloseTo(text: string, compareTo: string): boolean {
-    if (text.indexOf(compareTo) > -1) {
-        return true;
-    }
-    let toCheckIndex = 0;
-    let missMatchCount = 0;
-    let matchCount = 0;
-    for (let i = 0; i < text.length; i++) {
-        if (text[i].toLowerCase() === compareTo[toCheckIndex].toLowerCase()) {
-            matchCount++;
-            toCheckIndex++;
-            if (toCheckIndex >= compareTo.length) return true;
-            continue;
-        }
-        if (toCheckIndex + 1 < compareTo.length && text[i].toLowerCase() === compareTo[toCheckIndex + 1].toLowerCase()) {
-            matchCount++;
-            toCheckIndex += 2;
-            if (toCheckIndex >= compareTo.length) return true;
-            continue;
-        }
-        if (matchCount > 0) {
-            missMatchCount++;
-            if (missMatchCount > 3) {
-                matchCount = 0;
-                missMatchCount = 0;
-                toCheckIndex = 0;
-                continue;
-            }
-            if (toCheckIndex >= compareTo.length) return true;
-        }
     }
     return false;
 }

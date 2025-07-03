@@ -1,11 +1,7 @@
 Tasks:
 - obs chat overlay
-    - change how messages are checked
-        - lowercase
-        - find words in whole message
-        - allow spelling errors
-        - similar to how i checked for bots
     - viewer request: emote "pewpewpew"
+        - change sturcture to have dog emotes in own file?
 
 - citizens walking backwards? why? certain angles buggy?
     - don't know how to reproduce

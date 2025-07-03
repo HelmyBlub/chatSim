@@ -6,6 +6,7 @@ import { State, stateInit } from "./mainModels.js";
 import { tick } from "./tick.js"
 
 export const AUDIO_HEYGUYS = "sounds/HeyGuys.mp3";
+
 const AUDIO_CLAP_1 = "sounds/clap1.mp3";
 const AUDIO_CLAP_2 = "sounds/clap2.mp3";
 const AUDIO_CLAP_3 = "sounds/clap3.mp3";

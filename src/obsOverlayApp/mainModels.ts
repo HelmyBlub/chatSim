@@ -1,3 +1,4 @@
+import { Commands, initCommands } from "./commands/commands.js"
 import { loadImages } from "./draw.js"
 import { loadSounds } from "./main.js"
 
@@ -25,7 +26,7 @@ export type Chatter = {
         glasses?: number,
     }
     draw: {
-        pawAnimation: "sit" | "wave" | "clap" | "slowClap" | "notLikeThis" | "eatCookie" | "bake cookies",
+        pawAnimation: string,
         pawAnimationStart?: number,
         pawAnimationSoundPlayed?: boolean,
         nextPupilMoveTime: number,
@@ -55,6 +56,7 @@ export type State = {
     sounds: { [key: string]: HTMLAudioElement },
     frameRateCounter?: number[];
     config: Configuration,
+    commands: Commands,
     gamesData: {
         gameIdCounter: number,
         games: Game[],
@@ -117,9 +119,11 @@ export function stateInit(): State {
             inactiveToSleepTimeMs: 30000,
             deleteMessageTimeMs: 10000,
             fontSize: 36
-        }
+        },
+        commands: {},
     }
     loadImages(state);
     loadSounds(state);
+    initCommands(state);
     return state;
 }

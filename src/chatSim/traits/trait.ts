@@ -1,6 +1,7 @@
 import { ChatSimState, ChatterData, RandomSeed } from "../chatSimModels.js";
 import { Citizen, CITIZEN_DEFAULT_NAMES_REMEMBER } from "../map/citizen.js";
-import { addChatterChangeLog, checkIsTextCloseTo, nextRandom } from "../main.js";
+import { addChatterChangeLog, nextRandom } from "../main.js";
+import { checkIsTextCloseTo } from "../../obsOverlayApp/commands/commands.js";
 
 export type CitizenTraits = {
     traits: string[],

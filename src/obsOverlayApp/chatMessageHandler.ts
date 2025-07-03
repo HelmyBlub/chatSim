@@ -4,6 +4,7 @@ import { State, Chatter } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { handleOutfitMessage } from "./outfits.js";
+import { checkForCommandAndReturnIfChatBubble } from "./commands/commands.js";
 
 export function addChatMessage(userName: string, message: string, state: State) {
     if (state.streamerName === userName) {
@@ -65,38 +66,11 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
         chatter.state = "leaving";
         chatter.moveToX = -CHATTER_IMAGE_WIDTH;
         return false;
-    } else if (modifierMessage === "HeyGuys" || checkIsTextCloseTo(modifierMessage, "HeyGuys")) {
-        chatter.draw.pawAnimation = "wave";
-        chatter.draw.pawAnimationStart = undefined;
-        return modifierMessage !== "HeyGuys";
-    } else if (modifierMessage === "clap" || checkIsTextCloseTo(modifierMessage, "clap")) {
-        chatter.draw.pawAnimation = "clap";
-        chatter.draw.pawAnimationStart = undefined;
-        return modifierMessage !== "clap";
-    } else if (modifierMessage === "Kappa" || checkIsTextCloseTo(modifierMessage, "Kappa")
-        || modifierMessage === "slow clap" || checkIsTextCloseTo(modifierMessage, "slow clap")) {
-        chatter.draw.pawAnimation = "clap";
-        chatter.draw.pawAnimationStart = undefined;
-        return modifierMessage !== "Kappa";
-    } else if (modifierMessage === "NotLikeThis" || checkIsTextCloseTo(modifierMessage, "NotLikeThis")) {
-        chatter.draw.pawAnimation = "notLikeThis";
-        chatter.draw.pawAnimationStart = undefined;
-        return modifierMessage !== "NotLikeThis";
-    } else if (modifierMessage === "eatCookie" || checkIsTextCloseTo(modifierMessage, "eatCookie")) {
-        if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
-            chatter.draw.pawAnimation = "eatCookie";
-            chatter.draw.pawAnimationStart = undefined;
-            state.gamesData.cookieGame.cookieCounter--;
-        }
-        return false;
-    } else if (modifierMessage === "bake cookie" || checkIsTextCloseTo(modifierMessage, "bake cookie")) {
-        if (chatter.draw.pawAnimation !== "bake cookies") chatter.draw.pawAnimationStart = undefined;
-        chatter.draw.pawAnimation = "bake cookies";
-        return false;
     } else if (modifierMessage === GAME_TIC_TAC_TOE || checkIsTextCloseTo(modifierMessage, GAME_TIC_TAC_TOE)) {
         GAME_FUNCTIONS[GAME_TIC_TAC_TOE].handleStartMessage(chatter, state);
         return true;
     }
+    return checkForCommandAndReturnIfChatBubble(chatter, message, state);
 
     return true;
 }

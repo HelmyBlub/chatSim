@@ -95,7 +95,8 @@ function drawCommandInfo(ctx: CanvasRenderingContext2D) {
         GAME_TIC_TAC_TOE,
         "eatCookie",
         "bake cookies",
-        "sunglasses"
+        "sunglasses",
+        "PewPewPew",
     ];
 
     const maxWidth = 500;
