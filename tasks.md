@@ -1,6 +1,14 @@
 Tasks:
-- fix camera follow on selecting citizens
+- obs chat overlay
+    - change how messages are checked
+        - lowercase
+        - find words in whole message
+        - allow spelling errors
+        - similar to how i checked for bots
+    - viewer request: emote "pewpewpew"
+
 - citizens walking backwards? why? certain angles buggy?
+    - don't know how to reproduce
 - farmer job
     - farmer does not store mushrooms at home
     - priority order:

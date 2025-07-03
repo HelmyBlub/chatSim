@@ -109,7 +109,7 @@ export function stateInit(): State {
         streamerName: "HelmiBlub",
         frameRateCounter: [],
         config: {
-            maxChatters: 3,
+            maxChatters: 5,
             maxChattersPerRow: 8,
             maxChatMessagesPerChatter: 5,
             maxMessageLength: 20,

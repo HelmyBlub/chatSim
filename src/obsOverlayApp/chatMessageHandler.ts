@@ -56,48 +56,85 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
     let modifierMessage = message;
     const match = modifierMessage.match(/^[^a-zA-Z]*/);
     if (match) modifierMessage = modifierMessage.substring(match[0].length, modifierMessage.length);
-    switch (modifierMessage) {
-        case "sleep":
-            if (chatter.state === "sitting") {
-                chatter.state = "sleeping";
-            }
-            return false;
-        case "leave":
-            chatter.state = "leaving";
-            chatter.moveToX = -CHATTER_IMAGE_WIDTH;
-            return false;
-        case "HeyGuys":
-            chatter.draw.pawAnimation = "wave";
+    if (modifierMessage === "sleep" || checkIsTextCloseTo(modifierMessage, "sleep")) {
+        if (chatter.state === "sitting") {
+            chatter.state = "sleeping";
+        }
+        return modifierMessage !== "sleep";
+    } else if (modifierMessage === "leave") {
+        chatter.state = "leaving";
+        chatter.moveToX = -CHATTER_IMAGE_WIDTH;
+        return false;
+    } else if (modifierMessage === "HeyGuys" || checkIsTextCloseTo(modifierMessage, "HeyGuys")) {
+        chatter.draw.pawAnimation = "wave";
+        chatter.draw.pawAnimationStart = undefined;
+        return modifierMessage !== "HeyGuys";
+    } else if (modifierMessage === "clap" || checkIsTextCloseTo(modifierMessage, "clap")) {
+        chatter.draw.pawAnimation = "clap";
+        chatter.draw.pawAnimationStart = undefined;
+        return modifierMessage !== "clap";
+    } else if (modifierMessage === "Kappa" || checkIsTextCloseTo(modifierMessage, "Kappa")
+        || modifierMessage === "slow clap" || checkIsTextCloseTo(modifierMessage, "slow clap")) {
+        chatter.draw.pawAnimation = "clap";
+        chatter.draw.pawAnimationStart = undefined;
+        return modifierMessage !== "Kappa";
+    } else if (modifierMessage === "NotLikeThis" || checkIsTextCloseTo(modifierMessage, "NotLikeThis")) {
+        chatter.draw.pawAnimation = "notLikeThis";
+        chatter.draw.pawAnimationStart = undefined;
+        return modifierMessage !== "NotLikeThis";
+    } else if (modifierMessage === "eatCookie" || checkIsTextCloseTo(modifierMessage, "eatCookie")) {
+        if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
+            chatter.draw.pawAnimation = "eatCookie";
             chatter.draw.pawAnimationStart = undefined;
-            return false;
-        case "clap":
-            chatter.draw.pawAnimation = "clap";
-            chatter.draw.pawAnimationStart = undefined;
-            return false;
-        case "Kappa": case "slow clap":
-            chatter.draw.pawAnimation = "slowClap";
-            chatter.draw.pawAnimationStart = undefined;
-            return false;
-        case "NotLikeThis":
-            chatter.draw.pawAnimation = "notLikeThis";
-            chatter.draw.pawAnimationStart = undefined;
-            return false;
-        case "eat cookie": case "eatCookie": case "eatCookies": case "eat cookies": case "eatcookie": case "eatcookies":
-            if (chatter.draw.pawAnimation !== "eatCookie" && state.gamesData.cookieGame.cookieCounter > 0) {
-                chatter.draw.pawAnimation = "eatCookie";
-                chatter.draw.pawAnimationStart = undefined;
-                state.gamesData.cookieGame.cookieCounter--;
-            }
-            return false;
-        case "bake cookie": case "bake cookies":
-            if (chatter.draw.pawAnimation !== "bake cookies") chatter.draw.pawAnimationStart = undefined;
-            chatter.draw.pawAnimation = "bake cookies";
-            return false;
-        case GAME_TIC_TAC_TOE:
-            GAME_FUNCTIONS[GAME_TIC_TAC_TOE].handleStartMessage(chatter, state);
-            return false;
+            state.gamesData.cookieGame.cookieCounter--;
+        }
+        return false;
+    } else if (modifierMessage === "bake cookie" || checkIsTextCloseTo(modifierMessage, "bake cookie")) {
+        if (chatter.draw.pawAnimation !== "bake cookies") chatter.draw.pawAnimationStart = undefined;
+        chatter.draw.pawAnimation = "bake cookies";
+        return false;
+    } else if (modifierMessage === GAME_TIC_TAC_TOE || checkIsTextCloseTo(modifierMessage, GAME_TIC_TAC_TOE)) {
+        GAME_FUNCTIONS[GAME_TIC_TAC_TOE].handleStartMessage(chatter, state);
+        return true;
     }
+
     return true;
+}
+
+function checkIsTextCloseTo(text: string, compareTo: string): boolean {
+    if (text.indexOf(compareTo) > -1) {
+        return true;
+    }
+    const maxErrors = Math.max(1, Math.floor(compareTo.length / 4));
+
+    let toCheckIndex = 0;
+    let missMatchCount = 0;
+    let matchCount = 0;
+    for (let i = 0; i < text.length; i++) {
+        if (text[i].toLowerCase() === compareTo[toCheckIndex].toLowerCase()) {
+            matchCount++;
+            toCheckIndex++;
+            if (toCheckIndex >= compareTo.length) return true;
+            continue;
+        }
+        if (toCheckIndex + 1 < compareTo.length && text[i].toLowerCase() === compareTo[toCheckIndex + 1].toLowerCase()) {
+            matchCount++;
+            toCheckIndex += 2;
+            if (toCheckIndex >= compareTo.length) return true;
+            continue;
+        }
+        if (matchCount > 0) {
+            missMatchCount++;
+            if (missMatchCount > maxErrors) {
+                matchCount = 0;
+                missMatchCount = 0;
+                toCheckIndex = 0;
+                continue;
+            }
+            if (toCheckIndex >= compareTo.length) return true;
+        }
+    }
+    return false;
 }
 
 function streamerCommands(message: string, state: State): boolean {
