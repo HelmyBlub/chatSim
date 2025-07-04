@@ -5,6 +5,7 @@ import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { handleOutfitMessage } from "./outfits.js";
 import { checkForCommandAndReturnIfChatBubble } from "./commands/commands.js";
+import { prisonPutChatter } from "./commands/prison.js";
 
 export function addChatMessage(userName: string, message: string, state: State) {
     if (state.streamerName === userName) {
@@ -57,6 +58,9 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
     let modifierMessage = message;
     const match = modifierMessage.match(/^[^a-zA-Z]*/);
     if (match) modifierMessage = modifierMessage.substring(match[0].length, modifierMessage.length);
+    if (checkIsChatterMessageABot(modifierMessage, state)) {
+        prisonPutChatter(chatter.name, "Auto Bot Detection Triggered!", state);
+    }
     if (modifierMessage === "sleep" || checkIsTextCloseTo(modifierMessage, "sleep")) {
         if (chatter.state === "sitting") {
             chatter.state = "sleeping";
@@ -205,3 +209,16 @@ function addChatterAndRemoveMostInactive(userName: string, state: State) {
     return chatter;
 }
 
+function checkIsChatterMessageABot(message: string, state: State) {
+    const stringsToCheck = [
+        "add me on discord",
+        "connect on discord",
+        "cheap viewers",
+        "best viewers",
+    ];
+    for (let toCheck of stringsToCheck) {
+        const compare = checkIsTextCloseTo(message, toCheck);
+        if (compare) return true;
+    }
+    return false;
+}

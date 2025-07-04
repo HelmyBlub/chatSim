@@ -5,6 +5,7 @@ import { checkIsTextCloseTo, checkIsTextCloseToEndIndex } from "./commands.js";
 
 export const COMMAND_PRISON = "prison";
 export type Prison = {
+    reason?: string;
     chatterName?: string,
     voteEndTime?: number,
     guiltyVotes?: number,
@@ -84,15 +85,18 @@ export function drawPrison(ctx: CanvasRenderingContext2D, state: State) {
     if (chatter) {
         ctx.drawImage(state.images[IMAGE_PRISON], 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_WIDTH,
             chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY + 20, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_WIDTH);
-        const fontSize = 20;
+        const fontSize = 40;
         ctx.font = `${fontSize}px Arial`;
-        drawTextWithOutline(ctx, `Vote Guilty | Not Guilty: ${state.prison.guiltyVotes} | ${state.prison.notGuilyVotes}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY);
+        drawTextWithOutline(ctx, `Reason: ${state.prison.reason}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize * 4);
+        drawTextWithOutline(ctx, `Vote`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize * 2);
+        drawTextWithOutline(ctx, `Guilty: ${state.prison.guiltyVotes}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize);
+        drawTextWithOutline(ctx, `Not Guilty: ${state.prison.notGuilyVotes}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY);
         if (state.prison.guiltyTime !== undefined) {
             const fontSize = 75;
             ctx.font = `${fontSize}px bold Arial`;
             drawTextWithOutline(ctx, `Guilty`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH / 2 + chatter.posY);
         } else {
-            drawTextWithOutline(ctx, `Timer: ${((state.prison.voteEndTime! - performance.now()) / 1000).toFixed()}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize);
+            drawTextWithOutline(ctx, `Timer: ${((state.prison.voteEndTime! - performance.now()) / 1000).toFixed()}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize * 3);
         }
     } else {
         state.prison.chatterName = undefined;
@@ -113,7 +117,9 @@ function isCommand(message: string, chatter: Chatter, state: State): boolean {
         const match = rest.match(/^[^a-zA-Z]*/);
         if (match) rest = rest.substring(match[0].length, rest.length);
         console.log("substring: ", rest);
-        const parameterName = rest.split(" ")[0];
+        const split = rest.split(" ")
+        const parameterName = split[0];
+        const parameterReason = split[1];
         if (parameterName.length <= 0) return true;
         console.log("parameter1: ", parameterName);
         let chatterForPrison: Chatter | undefined = undefined;
@@ -128,15 +134,22 @@ function isCommand(message: string, chatter: Chatter, state: State): boolean {
             }
         }
         if (chatterForPrison) {
-            state.prison.chatterName = chatterForPrison.name;
-            state.prison.voteEndTime = performance.now() + 60_000;
-            state.prison.guiltyVotes = 0;
-            state.prison.notGuilyVotes = 0;
-            state.prison.votedChatters = [];
+            prisonPutChatter(chatterForPrison.name, parameterReason, state);
         }
 
         return true;
     }
     return false;
+}
+
+export function prisonPutChatter(chatterName: string, reason: string, state: State) {
+    if (state.prison.chatterName === undefined) {
+        state.prison.chatterName = chatterName;
+        state.prison.voteEndTime = performance.now() + 60_000;
+        state.prison.guiltyVotes = 0;
+        state.prison.notGuilyVotes = 0;
+        state.prison.votedChatters = [];
+        state.prison.reason = reason;
+    }
 }
 

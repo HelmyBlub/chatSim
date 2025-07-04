@@ -4,7 +4,14 @@ import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { loadOutfitImages } from "./outfits.js";
 import { drawTextWithOutline, drawTextWithBackgroundAndOutline, loadImage } from "../drawHelper.js";
-import { drawPrison } from "./commands/prison.js";
+import { COMMAND_PRISON, drawPrison } from "./commands/prison.js";
+import { COMMAND_HEY_GUYS } from "./commands/heyGuys.js";
+import { COMMAND_KAPPA } from "./commands/kappa.js";
+import { COMMAND_NOT_LIKE_THIS } from "./commands/notLikeThis.js";
+import { COMMAND_CLAP } from "./commands/clap.js";
+import { COMMAND_EAT_COOKIE } from "./commands/eatCookie.js";
+import { COMMAND_BAKE_COOKIES } from "./commands/bakeCookies.js";
+import { COMMAND_PEW_PEW_PEW } from "./commands/pewpewpew.js";
 
 export const IMAGE_PATH_COOKIE = "images/cookie.png";
 export const IMAGE_PATH_OVEN = "images/oven.png";
@@ -88,17 +95,18 @@ function drawCommandInfo(ctx: CanvasRenderingContext2D) {
     const fontSize = 26;
     const headingText = "Chat Chatter Commands:";
     const textList: string[] = [
-        "clap",
+        COMMAND_CLAP,
         "leave",
         "sleep",
-        "NotLikeThis",
-        "Kappa",
-        "HeyGuys",
+        COMMAND_NOT_LIKE_THIS,
+        COMMAND_KAPPA,
+        COMMAND_HEY_GUYS,
         GAME_TIC_TAC_TOE,
-        "eatCookie",
-        "bake cookies",
+        COMMAND_EAT_COOKIE,
+        COMMAND_BAKE_COOKIES,
         "sunglasses",
-        "PewPewPew",
+        COMMAND_PEW_PEW_PEW,
+        `${COMMAND_PRISON} <name> <reason>`,
     ];
 
     const maxWidth = 500;
@@ -108,7 +116,7 @@ function drawCommandInfo(ctx: CanvasRenderingContext2D) {
     ctx.font = `${fontSize}px Arial`;
     const left = ctx.canvas.width - maxWidth - cornerOffset;
     const top = cornerOffset + 5;
-    const maxRows = 3;
+    const maxRows = 4;
     ctx.globalAlpha = 0.7;
     ctx.fillStyle = "white";
     ctx.fillRect(left - 5, top, maxWidth + 10, maxRows * fontSize + 5);
