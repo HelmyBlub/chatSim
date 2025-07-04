@@ -4,6 +4,7 @@ import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { loadOutfitImages } from "./outfits.js";
 import { drawTextWithOutline, drawTextWithBackgroundAndOutline, loadImage } from "../drawHelper.js";
+import { drawPrison } from "./commands/prison.js";
 
 export const IMAGE_PATH_COOKIE = "images/cookie.png";
 export const IMAGE_PATH_OVEN = "images/oven.png";
@@ -29,6 +30,7 @@ export function draw(state: State) {
     for (let chatter of state.chatters) {
         drawChatterDogAndMessages(ctx, chatter, state);
     }
+    drawPrison(ctx, state);
     drawGames(ctx, state);
     drawCookieJar(ctx, state);
     //drawFrameRate(ctx, state);

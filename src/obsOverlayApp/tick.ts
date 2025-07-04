@@ -1,4 +1,5 @@
 import { addChatMessageToChatter } from "./chatMessageHandler.js";
+import { tickPrison } from "./commands/prison.js";
 import { localStorageStoreChatters } from "./main.js";
 import { State, Chatter, Game } from "./mainModels.js";
 
@@ -19,6 +20,7 @@ export function tick(state: State) {
     doFrameRateCounterTick(state.frameRateCounter);
     doChatterDogAutoChat(state);
     tickGames(state);
+    tickPrison(state);
     for (let chatter of state.chatters) {
         deleteOldChatMessages(chatter, state);
         switch (chatter.state) {
@@ -134,6 +136,7 @@ function deleteInactiveAvatars(state: State) {
         }
         if (chatter.state === "leaving" && chatter.posX < -200 + chatter.speed) {
             const inactiveChatter = state.chatters.splice(i, 1);
+            inactiveChatter[0].posY = 0;
             state.inactiveChatters.push(inactiveChatter[0]);
             localStorageStoreChatters(state);
         }

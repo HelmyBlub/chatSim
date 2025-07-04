@@ -1,7 +1,24 @@
 Tasks:
 - obs chat overlay
-    - viewer request: emote "pewpewpew"
-        - change sturcture to have dog emotes in own file?
+    - steps:
+        - command "prison <name> <reason>" to put cage over dog
+        - guilty/not guilty process
+            - as soon as chatter in prison
+                - start vote for chatters and display timer and count above head
+                    - timer 1min
+                - steamer guilty or not guilty is instantly
+        - guilty -> cage moves down with dog
+            - save names somewhere so i could visit the prison sometime
+            - chatter name filtered, no longer appears
+            - can give prison time, so chatter will be released automatically sometime
+        - not guilty, remove cage
+        - command for streamer to release chatter
+    - chatter requests?
+    - prison (for bots, can be done by chatter)
+        - idea: chatter can put other chatter to prison. 
+            - i as the streamer am the judge and have to deny or approve
+                - or start a vote
+
 
 - citizens walking backwards? why? certain angles buggy?
     - don't know how to reproduce

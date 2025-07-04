@@ -1,4 +1,5 @@
 import { Commands, initCommands } from "./commands/commands.js"
+import { createPrison, Prison } from "./commands/prison.js"
 import { loadImages } from "./draw.js"
 import { loadSounds } from "./main.js"
 
@@ -57,6 +58,7 @@ export type State = {
     frameRateCounter?: number[];
     config: Configuration,
     commands: Commands,
+    prison: Prison,
     gamesData: {
         gameIdCounter: number,
         games: Game[],
@@ -121,6 +123,7 @@ export function stateInit(): State {
             fontSize: 36
         },
         commands: {},
+        prison: createPrison(),
     }
     loadImages(state);
     loadSounds(state);

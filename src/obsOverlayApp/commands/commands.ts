@@ -7,6 +7,7 @@ import { commandAddHeyGuys } from "./heyGuys.js";
 import { commandAddKappa } from "./kappa.js";
 import { commandAddNotLikeThis } from "./notLikeThis.js";
 import { commandAddPewPewPew } from "./pewpewpew.js";
+import { commandAddPrison } from "./prison.js";
 
 export type Command = {
     isCommand(message: string, chatter: Chatter, state: State): boolean,
@@ -25,6 +26,7 @@ export function initCommands(state: State) {
     commandAddHeyGuys(state);
     commandAddClap(state);
     commandAddKappa(state);
+    commandAddPrison(state);
 }
 
 export function commandDrawPaw(ctx: CanvasRenderingContext2D, chatter: Chatter, state: State, paintValues: ChatterDogPaintValues, timePassed: number) {
@@ -51,8 +53,12 @@ export function checkForCommandAndReturnIfChatBubble(chatter: Chatter, message: 
  * retruns true if text and compare text match with allows few errors
  */
 export function checkIsTextCloseTo(text: string, compareTo: string): boolean {
+    return checkIsTextCloseToEndIndex(text, compareTo) > 0;
+}
+
+export function checkIsTextCloseToEndIndex(text: string, compareTo: string): number {
     if (text.indexOf(compareTo) > -1) {
-        return true;
+        return text.indexOf(compareTo) + compareTo.length;
     }
     let toCheckIndex = 0;
     let missMatchCount = 0;
@@ -61,13 +67,13 @@ export function checkIsTextCloseTo(text: string, compareTo: string): boolean {
         if (text[i].toLowerCase() === compareTo[toCheckIndex].toLowerCase()) {
             matchCount++;
             toCheckIndex++;
-            if (toCheckIndex >= compareTo.length) return true;
+            if (toCheckIndex >= compareTo.length) return toCheckIndex;
             continue;
         }
         if (toCheckIndex + 1 < compareTo.length && text[i].toLowerCase() === compareTo[toCheckIndex + 1].toLowerCase()) {
             matchCount++;
             toCheckIndex += 2;
-            if (toCheckIndex >= compareTo.length) return true;
+            if (toCheckIndex >= compareTo.length) return toCheckIndex;
             continue;
         }
         if (matchCount > 0) {
@@ -78,8 +84,8 @@ export function checkIsTextCloseTo(text: string, compareTo: string): boolean {
                 toCheckIndex = 0;
                 continue;
             }
-            if (toCheckIndex >= compareTo.length) return true;
+            if (toCheckIndex >= compareTo.length) return toCheckIndex;
         }
     }
-    return false;
+    return -1;
 }
