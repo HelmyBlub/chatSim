@@ -4,7 +4,7 @@ import { State, Chatter } from "./mainModels.js";
 import { GAME_FUNCTIONS } from "./tick.js";
 import { GAME_TIC_TAC_TOE } from "./gameTicTacToe.js";
 import { handleOutfitMessage } from "./outfits.js";
-import { checkForCommandAndReturnIfChatBubble } from "./commands/commands.js";
+import { checkForCommandAndReturnIfChatBubble, checkIsTextCloseTo } from "./commands/commands.js";
 import { prisonPutChatter } from "./commands/prison.js";
 
 export function addChatMessage(userName: string, message: string, state: State) {
@@ -77,42 +77,6 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
     return checkForCommandAndReturnIfChatBubble(chatter, message, state);
 
     return true;
-}
-
-function checkIsTextCloseTo(text: string, compareTo: string): boolean {
-    if (text.indexOf(compareTo) > -1) {
-        return true;
-    }
-    const maxErrors = Math.max(1, Math.floor(compareTo.length / 4));
-
-    let toCheckIndex = 0;
-    let missMatchCount = 0;
-    let matchCount = 0;
-    for (let i = 0; i < text.length; i++) {
-        if (text[i].toLowerCase() === compareTo[toCheckIndex].toLowerCase()) {
-            matchCount++;
-            toCheckIndex++;
-            if (toCheckIndex >= compareTo.length) return true;
-            continue;
-        }
-        if (toCheckIndex + 1 < compareTo.length && text[i].toLowerCase() === compareTo[toCheckIndex + 1].toLowerCase()) {
-            matchCount++;
-            toCheckIndex += 2;
-            if (toCheckIndex >= compareTo.length) return true;
-            continue;
-        }
-        if (matchCount > 0) {
-            missMatchCount++;
-            if (missMatchCount > maxErrors) {
-                matchCount = 0;
-                missMatchCount = 0;
-                toCheckIndex = 0;
-                continue;
-            }
-            if (toCheckIndex >= compareTo.length) return true;
-        }
-    }
-    return false;
 }
 
 function streamerCommands(message: string, state: State): boolean {

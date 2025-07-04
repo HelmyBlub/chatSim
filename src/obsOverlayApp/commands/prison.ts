@@ -86,7 +86,7 @@ export function drawPrison(ctx: CanvasRenderingContext2D, state: State) {
         ctx.drawImage(state.images[IMAGE_PRISON], 0, 0, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_WIDTH,
             chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY + 20, CHATTER_IMAGE_WIDTH, CHATTER_IMAGE_WIDTH);
         const fontSize = 40;
-        ctx.font = `${fontSize}px Arial`;
+        ctx.font = `${fontSize}px bold Arial`;
         drawTextWithOutline(ctx, `Reason: ${state.prison.reason}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize * 4);
         drawTextWithOutline(ctx, `Vote`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize * 2);
         drawTextWithOutline(ctx, `Guilty: ${state.prison.guiltyVotes}`, chatter.posX, ctx.canvas.height - CHATTER_IMAGE_WIDTH + chatter.posY - fontSize);

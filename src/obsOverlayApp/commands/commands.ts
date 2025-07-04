@@ -56,10 +56,16 @@ export function checkIsTextCloseTo(text: string, compareTo: string): boolean {
     return checkIsTextCloseToEndIndex(text, compareTo) > 0;
 }
 
+
+/**
+ * @returns return -1 when no match
+ */
 export function checkIsTextCloseToEndIndex(text: string, compareTo: string): number {
     if (text.indexOf(compareTo) > -1) {
         return text.indexOf(compareTo) + compareTo.length;
     }
+
+    const maxErrors = Math.max(1, Math.floor(compareTo.length / 4));
     let toCheckIndex = 0;
     let missMatchCount = 0;
     let matchCount = 0;
@@ -72,13 +78,17 @@ export function checkIsTextCloseToEndIndex(text: string, compareTo: string): num
         }
         if (toCheckIndex + 1 < compareTo.length && text[i].toLowerCase() === compareTo[toCheckIndex + 1].toLowerCase()) {
             matchCount++;
+            missMatchCount++;
             toCheckIndex += 2;
-            if (toCheckIndex >= compareTo.length) return toCheckIndex;
+            if (toCheckIndex >= compareTo.length) {
+                if (missMatchCount > maxErrors) return -1;
+                return toCheckIndex;
+            }
             continue;
         }
         if (matchCount > 0) {
             missMatchCount++;
-            if (missMatchCount > 3) {
+            if (missMatchCount > maxErrors) {
                 matchCount = 0;
                 missMatchCount = 0;
                 toCheckIndex = 0;
