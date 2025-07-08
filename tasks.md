@@ -2,6 +2,9 @@ Tasks:
 - obs chat overlay
     - steps:
         - auto flag bot messages for prison
+            - auto vote one guilty
+            - second bot 
+                - timer not running
 
     - chatter requests?
 

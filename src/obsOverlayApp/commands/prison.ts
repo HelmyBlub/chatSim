@@ -149,6 +149,7 @@ export function prisonPutChatter(chatterName: string, reason: string, state: Sta
         state.prison.guiltyVotes = 0;
         state.prison.notGuilyVotes = 0;
         state.prison.votedChatters = [];
+        state.prison.guiltyTime = undefined;
         state.prison.reason = reason;
     }
 }

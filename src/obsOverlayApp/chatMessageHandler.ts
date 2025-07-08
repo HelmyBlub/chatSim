@@ -60,6 +60,7 @@ function chatterCommands(chatter: Chatter, message: string, state: State): boole
     if (match) modifierMessage = modifierMessage.substring(match[0].length, modifierMessage.length);
     if (checkIsChatterMessageABot(modifierMessage, state)) {
         prisonPutChatter(chatter.name, "Auto Bot Detection Triggered!", state);
+        state.prison.guiltyVotes = 1;
     }
     if (modifierMessage === "sleep" || checkIsTextCloseTo(modifierMessage, "sleep")) {
         if (chatter.state === "sitting") {
