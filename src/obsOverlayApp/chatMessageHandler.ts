@@ -178,6 +178,7 @@ function checkIsChatterMessageABot(message: string, state: State) {
     const stringsToCheck = [
         "add me on discord",
         "connect on discord",
+        "up on discord",
         "cheap viewers",
         "best viewers",
     ];
